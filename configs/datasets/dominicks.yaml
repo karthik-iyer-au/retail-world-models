@@ -1,0 +1,6 @@
+name: dominicks
+source: Dominick's Finer Foods database, Kilts Center, Chicago Booth
+grain: UPC x store x week
+levers: [price, promo, cost]
+not_recorded: [display, feature, space]
+role_in_paper: price, promotion and cost effects; comparison with the chain's pricing experiments

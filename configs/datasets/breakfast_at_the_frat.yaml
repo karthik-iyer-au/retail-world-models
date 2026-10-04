@@ -1,0 +1,6 @@
+name: breakfast_at_the_frat
+source: dunnhumby source files, "Breakfast at the Frat"
+grain: product x store x week
+levers: [price, promo, display, feature]
+not_recorded: [cost, space]
+role_in_paper: display and feature (brochure) effects

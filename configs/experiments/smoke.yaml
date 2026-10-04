@@ -1,0 +1,14 @@
+# Pipeline check on generated data. Not a result.
+name: smoke
+seed: 0
+dataset:
+  name: synthetic
+  params: {n_stores: 2, n_items: 5, n_periods: 200, seed: 0}
+model:
+  name: seasonal_naive
+  params: {season: 7}
+evaluation:
+  horizon: 28
+  n_origins: 3
+  scale_lag: 1
+  weight_window: 28

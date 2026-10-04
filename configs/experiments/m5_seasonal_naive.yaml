@@ -1,0 +1,14 @@
+# First real run: the simplest benchmark on full M5.
+# Needs data/raw/m5/ and a registered manifest. Run with: make run CONFIG=<this file>
+name: m5_seasonal_naive
+seed: 0
+dataset:
+  name: m5
+model:
+  name: seasonal_naive
+  params: {season: 7}
+evaluation:
+  horizon: 28
+  n_origins: 5
+  scale_lag: 1
+  weight_window: 28

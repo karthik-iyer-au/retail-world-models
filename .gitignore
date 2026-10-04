@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+build/
+dist/
+
+# Raw and processed data never enter git. Checksums in data/manifests/ do.
+data/raw/
+data/processed/
+
+# Run outputs stay local unless a run is promoted (see docs/REPRODUCE.md).
+results/*
+!results/README.md
+!results/promoted/
