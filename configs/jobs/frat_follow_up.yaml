@@ -1,0 +1,15 @@
+# Two follow-ups to the item-to-item comparison on Breakfast at the Frat, and
+# the benchmarks on Dominick's analgesics.
+datasets:
+  - name: breakfast_at_the_frat
+    from: /content/drive/MyDrive/retail-world-model/data
+  - name: dominicks
+    codes: [ana]
+runs:
+  - config: configs/experiments/frat_dev_state_model_both_within_category.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/frat_dev_state_model_longer.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/dominicks_ana_dev_seasonal_naive.yaml
+  - config: configs/experiments/dominicks_ana_dev_recent_average.yaml
+  - config: configs/experiments/dominicks_ana_dev_lightgbm.yaml

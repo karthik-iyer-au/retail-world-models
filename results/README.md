@@ -66,3 +66,29 @@ planned in advance.
 | Average of last 8 weeks | `20261004T070720_frat_recent_average_d9fdc7b6` |
 | LightGBM, price only | `20261004T070804_frat_lightgbm_price_only_78aebb07` |
 | LightGBM, all recorded levers | `20261004T070912_frat_lightgbm_0dbcdc4c` |
+
+## Development runs over several seeds
+
+These runs are saved in the Drive results folder; their manifests have not
+yet been copied into `results/promoted/`. Scores are averages over five
+seeds, lower is better.
+
+M5, 25 April to 22 May 2016: our model (item encoder and readout, mixed
+precision, A100) scores 0.699 on average, range 0.669 to 0.725, against
+LightGBM at 0.715. Four of the five runs beat LightGBM.
+
+Breakfast at the Frat, the two 8-week windows before the held-out final 8
+weeks:
+
+| Method | Overall | Range | On display | In circular | Tag-only price cut | No promotion |
+|---|---|---|---|---|---|---|
+| LightGBM, all recorded levers | 0.421 | 0.416 to 0.427 | 0.817 | 0.822 | 0.508 | 0.405 |
+| Our model, items drawn at random | 0.424 | 0.407 to 0.438 | 0.819 | 0.862 | 0.554 | 0.413 |
+| Our model, whole stores drawn | 0.430 | 0.407 to 0.453 | 0.818 | 0.851 | 0.563 | 0.415 |
+| + item-to-item, conditional similarity | 0.476 | 0.430 to 0.508 | 0.861 | 0.909 | 0.580 | 0.419 |
+| + item-to-item, attention | 0.465 | 0.416 to 0.505 | 0.871 | 0.907 | 0.568 | 0.419 |
+| + item-to-item, both | 0.453 | 0.419 to 0.498 | 0.840 | 0.901 | 0.562 | 0.420 |
+
+Reading: with all 55 products in a store able to affect each other, the
+item-to-item part makes the forecast worse in every version, and makes it
+vary more from seed to seed. It is not kept in this form.
