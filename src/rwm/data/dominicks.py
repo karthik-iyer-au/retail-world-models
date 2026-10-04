@@ -13,7 +13,10 @@ and, if present, demo_stata.zip for each store's price tier.
 What the data records, following the Kilts data manual:
 - units: MOVE, the number of single items sold.
 - price: PRICE divided by QTY, the price of one item (PRICE is for a bundle
-  of QTY items). Empty when the file has no price for the week.
+  of QTY items). The file only holds a price in weeks with sales. A week
+  with no price takes the item's last recorded price in that store, so that
+  "no price" cannot give away "no sales". price_recorded marks the weeks
+  where the price came from the file. cost is carried forward the same way.
 - promo: 1 when a deal code is set. The manual warns the code is not set
   consistently, so 0 does not prove there was no promotion. The code itself
   is kept in promo_type (B bonus buy, C coupon, S simple price reduction; G
@@ -113,6 +116,9 @@ def load_dominicks(categories: list[str], root: str | None = None) -> Dataset:
             "com_code": d["com_code"].to_numpy(),
         }
     ).iloc[order].reset_index(drop=True)
+
+    panel["price_recorded"] = panel[PRICE].notna().astype(np.int8)
+    panel[[PRICE, "cost"]] = panel.groupby(SERIES, observed=True)[[PRICE, "cost"]].ffill()
 
     demo = root_path / "demo_stata.zip"
     if demo.exists():

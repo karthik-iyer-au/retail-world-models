@@ -23,7 +23,7 @@ import yaml
 from rwm.data import load_dataset
 from rwm.data import manifest as data_manifest
 from rwm.data.schema import DATE, PRICE, SERIES, UNITS
-from rwm.evaluation.hierarchy import to_matrix, wrmsse
+from rwm.evaluation.hierarchy import rmsse_where, to_matrix, wrmsse
 from rwm.evaluation.splits import rolling_origins
 from rwm.forecaster import build_model
 from rwm.utils.hashing import sha256_file
@@ -93,6 +93,19 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
             levels,
             ev.get("scale_lag", 1),
         )
+        # Accuracy split by whether each named lever was on, at item-by-store level.
+        by_condition = {}
+        if ev.get("conditions"):
+            cols = dates[t0:t1]
+            recorded = to_matrix(test.assign(_row=1.0), SERIES, DATE, "_row", cols, names) > 0
+            forecast = to_matrix(out, SERIES, DATE, "forecast", cols, names)
+            for c in ev["conditions"]:
+                on = recorded & (to_matrix(test, SERIES, DATE, c, cols, names) > 0)
+                args = (units[:, :t0], units[:, t0:t1], forecast)
+                by_condition[c] = {
+                    "on": rmsse_where(*args, on, revenue, ev.get("scale_lag", 1)),
+                    "off": rmsse_where(*args, recorded & ~on, revenue, ev.get("scale_lag", 1)),
+                }
         per_split.append(
             {
                 "origin": sp.origin,
@@ -100,6 +113,7 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
                 "test_start": str(pd.Timestamp(sp.test_dates[0]).date()),
                 "test_end": str(pd.Timestamp(sp.test_dates[-1]).date()),
                 **score,
+                **({"by_condition": by_condition} if by_condition else {}),
             }
         )
 

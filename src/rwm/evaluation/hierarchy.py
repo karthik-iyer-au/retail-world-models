@@ -69,6 +69,29 @@ def wrmsse(
     }
 
 
+def rmsse_where(
+    history: np.ndarray,
+    actual: np.ndarray,
+    forecast: np.ndarray,
+    where: np.ndarray,
+    revenue: np.ndarray,
+    lag: int = 1,
+) -> dict:
+    """Item-by-store accuracy over a chosen set of periods, for example the
+    weeks an item was on display. Each series is scored on its chosen periods
+    only, scaled as in RMSSE, and weighted by its share of revenue among the
+    series that have any chosen period."""
+    n = where.sum(axis=1)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        mse = (((actual - forecast) ** 2) * where).sum(axis=1) / n
+        score = np.sqrt(mse / series_scale(history.astype(np.float64), lag))
+    ok = np.isfinite(score) & (n > 0) & (revenue > 0)
+    if not ok.any():
+        return {"periods": int(where.sum()), "series": 0, "wrmsse": float("nan")}
+    w = revenue[ok] / revenue[ok].sum()
+    return {"periods": int(where.sum()), "series": int(ok.sum()), "wrmsse": float((score[ok] * w).sum())}
+
+
 def to_matrix(
     panel: pd.DataFrame, series: str, date: str, value: str, dates, names: pd.Index | None = None
 ) -> np.ndarray:

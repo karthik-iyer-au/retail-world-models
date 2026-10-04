@@ -1,4 +1,6 @@
-# Seasonal naive on Breakfast at the Frat, three 8-week windows at the end of the data.
+# Seasonal naive on Breakfast at the Frat: three 8-week windows at the end of the data.
+# Price, display, circular and price-cut flags for the forecast weeks are taken
+# as planned in advance, which is how a merchant would use the forecast.
 name: frat_seasonal_naive
 seed: 0
 dataset:
@@ -11,3 +13,4 @@ evaluation:
   n_origins: 3
   scale_lag: 1
   weight_window: 13
+  conditions: [promo, display, feature, tpr_only]

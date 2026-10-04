@@ -6,7 +6,7 @@ import pytest
 
 from rwm.data import load_dataset
 from rwm.data.schema import DATE, SERIES, UNITS, validate
-from rwm.evaluation.hierarchy import to_matrix, wrmsse
+from rwm.evaluation.hierarchy import rmsse_where, to_matrix, wrmsse
 from rwm.evaluation.metrics import rmsse
 from rwm.evaluation.splits import rolling_origins
 from rwm.experiments.run import run
@@ -163,3 +163,23 @@ def test_run_scores_series_that_are_absent_from_a_test_window(tmp_path):
     gap = {**base, "dataset": {"name": "synthetic_with_gap", "params": CONFIG["dataset"]["params"]}}
     m = json.loads((run(gap, out_root=tmp_path) / "metrics.json").read_text())
     assert np.isfinite(m["wrmsse"])
+
+
+def test_rmsse_where_scores_only_the_chosen_periods():
+    hist = np.array([[1.0, 2, 3, 4], [2.0, 2, 4, 4]])  # one-step scale: 1 and 4/3
+    act = np.array([[5.0, 5], [5.0, 5]])
+    fc = np.array([[3.0, 5], [5.0, 1]])
+    where = np.array([[True, False], [False, True]])
+    got = rmsse_where(hist, act, fc, where, np.array([1.0, 3.0]))
+    want = 0.25 * rmsse([1, 2, 3, 4], [5], [3]) + 0.75 * rmsse([2, 2, 4, 4], [5], [1])
+    assert got["periods"] == 2 and got["series"] == 2 and got["wrmsse"] == pytest.approx(want)
+    none = rmsse_where(hist, act, fc, np.zeros_like(where), np.array([1.0, 3.0]))
+    assert none["series"] == 0 and np.isnan(none["wrmsse"])
+
+
+def test_run_reports_accuracy_with_a_lever_on_and_off(tmp_path):
+    config = {**CONFIG, "evaluation": {"horizon": 14, "n_origins": 1, "conditions": ["promo"]}}
+    m = json.loads((run(config, out_root=tmp_path) / "metrics.json").read_text())
+    c = m["splits"][0]["by_condition"]["promo"]
+    assert c["on"]["periods"] + c["off"]["periods"] == 2 * 3 * 14
+    assert c["on"]["periods"] > 0 and np.isfinite(c["off"]["wrmsse"])

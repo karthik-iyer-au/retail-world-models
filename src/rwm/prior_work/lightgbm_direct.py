@@ -9,10 +9,12 @@ settings, not the winning entry's ensemble of 220 models.
 
 Code: written here, on the `lightgbm` package (MIT licence).
 
-Inputs per row: sales 28 to 56 days earlier on the same weekday, averages
-and spread of sales ending 28 days earlier, price and how it compares with
-the item's highest price in the last 12 weeks and its price a week earlier, calendar position, and any extra columns named in
-the config.
+Inputs per row: sales at set lags no shorter than the horizon, averages and
+spread of sales ending one horizon earlier, price and how it compares with
+the item's highest recent price and its price a little earlier, calendar
+position, and any extra columns named in the config. Lags and window lengths
+count periods and are set in the config; the defaults suit daily data with a
+28-day horizon.
 """
 import numpy as np
 import pandas as pd
@@ -20,11 +22,6 @@ import pandas as pd
 from rwm.data.schema import DATE, PRICE, SERIES, UNITS
 from rwm.forecaster import Forecaster, register_model
 from rwm.utils.frames import frame_to_matrix
-
-LAGS = (0, 7, 14, 21, 28)  # added to the horizon: 28, 35, ... days back
-WINDOWS = (7, 14, 28, 56)
-PRICE_WINDOW = 84  # days looked back for the item's highest recent price
-
 
 def _shift(x: np.ndarray, k: int) -> np.ndarray:
     out = np.full(x.shape, np.nan, dtype=np.float32)
@@ -68,6 +65,11 @@ class LightGBMDirect(Forecaster):
         group_by: str | None = None,
         categorical: list[str] | None = None,
         extra: list[str] | None = None,
+        lags: tuple = (0, 7, 14, 21, 28),
+        windows: tuple = (7, 14, 28, 56),
+        spread_window: int = 28,
+        price_window: int = 84,
+        price_lag: int = 7,
         rounds: int = 800,
         seed: int = 0,
         threads: int = 2,
@@ -78,9 +80,15 @@ class LightGBMDirect(Forecaster):
         self.group_by = group_by
         self.categorical = categorical or []
         self.extra = extra or []
+        # All of these count periods (days for daily data, weeks for weekly data).
+        self.lags = tuple(lags)  # added to the horizon: sales this many periods before the earliest usable one
+        self.windows = tuple(windows)  # lengths of the trailing sales averages
+        self.spread_window = spread_window  # length of the trailing window for the spread of sales
+        self.price_window = price_window  # look-back for the item's highest recent price
+        self.price_lag = price_lag  # price is compared with the price this many periods earlier
         self.rounds = rounds
-        # days of history needed to build the inputs for a forecast
-        self.history = max(horizon + max(LAGS) + max(WINDOWS), PRICE_WINDOW + 7)
+        # periods of history needed to build the inputs for a forecast
+        self.history = max(horizon + max(self.lags) + max(self.windows), price_window + price_lag)
         self.params = {
             "objective": "tweedie",
             "tweedie_variance_power": 1.1,
@@ -103,18 +111,18 @@ class LightGBMDirect(Forecaster):
     def _features(self, units, price, extra, dates, cats) -> dict[str, np.ndarray]:
         h = self.horizon
         f = {}
-        for lag in LAGS:
-            f[f"sales_{h + lag}_days_ago"] = _shift(units, h + lag)
+        for lag in self.lags:
+            f[f"sales_{h + lag}_periods_ago"] = _shift(units, h + lag)
         base = _shift(units, h)
-        for w in WINDOWS:
+        for w in self.windows:
             mean, std = _rolling(base, w)
-            f[f"mean_sales_{w}_days"] = mean
-            if w == 28:
-                f["spread_sales_28_days"] = std
+            f[f"mean_sales_{w}_periods"] = mean
+            if w == self.spread_window:
+                f[f"spread_sales_{w}_periods"] = std
         with np.errstate(invalid="ignore", divide="ignore"):
             f["price"] = price
-            f[f"price_vs_highest_in_{PRICE_WINDOW}_days"] = price / _rolling_max(price, PRICE_WINDOW)
-            f["price_vs_last_week"] = price / _shift(price, 7)
+            f[f"price_vs_highest_in_{self.price_window}_periods"] = price / _rolling_max(price, self.price_window)
+            f[f"price_vs_{self.price_lag}_periods_ago"] = price / _shift(price, self.price_lag)
         d = pd.DatetimeIndex(dates)
         shape = units.shape
         for name, values in {

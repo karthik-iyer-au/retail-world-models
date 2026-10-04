@@ -1,0 +1,16 @@
+# Average of the last 8 weeks on Breakfast at the Frat: three 8-week windows at the end of the data.
+# Price, display, circular and price-cut flags for the forecast weeks are taken
+# as planned in advance, which is how a merchant would use the forecast.
+name: frat_recent_average
+seed: 0
+dataset:
+  name: breakfast_at_the_frat
+model:
+  name: recent_average
+  params: {window: 8}
+evaluation:
+  horizon: 8
+  n_origins: 3
+  scale_lag: 1
+  weight_window: 13
+  conditions: [promo, display, feature, tpr_only]

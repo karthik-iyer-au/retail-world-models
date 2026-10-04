@@ -198,6 +198,8 @@ class StateModel(Forecaster):
             sched.step()
             if step % 50 == 0 or step == self.steps - 1:
                 self.loss_log.append((step, loss.item()))
+            if (step + 1) % max(1, self.steps // 20) == 0:
+                print(f"training step {step + 1} of {self.steps}, loss {loss.item():.4f}", flush=True)
 
         tail = slice(t - L, t)
         self._past = {

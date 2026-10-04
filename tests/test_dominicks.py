@@ -40,9 +40,10 @@ def test_loader_follows_the_manual(small):
     assert s[DATE].dt.strftime("%Y-%m-%d").tolist() == ["1989-09-14", "1989-09-21", "1989-09-28"]
     assert s[UNITS].tolist() == [4, 0, 9]
     assert s["promo"].tolist() == [0, 0, 1] and s["promo_type"].tolist() == ["none", "none", "B"]
-    # week 2 has no price on file; week 3 is a bundle of 3 for 5.00 at 10% margin
-    np.testing.assert_allclose(s[PRICE], [2.0, np.nan, 5 / 3], rtol=1e-6)
-    np.testing.assert_allclose(s["cost"], [1.5, np.nan, 1.5], rtol=1e-6)
+    # week 2 has no price on file, so it carries week 1's; week 3 is a bundle of 3 for 5.00 at 10% margin
+    np.testing.assert_allclose(s[PRICE], [2.0, 2.0, 5 / 3], rtol=1e-6)
+    np.testing.assert_allclose(s["cost"], [1.5, 1.5, 1.5], rtol=1e-6)
+    assert s["price_recorded"].tolist() == [1, 0, 1]
     assert p["cat_id"].eq("xyz").all() and set(p["com_code"]) == {953, 954}
     assert p[STORE].astype(str).unique().tolist() == ["005", "076"]
     assert p[ITEM].astype(str).nunique() == 2
@@ -55,5 +56,5 @@ def test_real_category_matches_the_raw_file():
     raw = raw[raw["OK"] == 1]
     assert len(p) == len(raw)
     assert p[UNITS].astype("float64").sum() == raw["MOVE"].sum()
-    revenue = (p[PRICE].fillna(0).astype("float64") * p[UNITS]).sum()
+    revenue = (p[PRICE].astype("float64") * p[UNITS])[p["price_recorded"] == 1].sum()
     assert revenue == pytest.approx((raw["PRICE"] * raw["MOVE"] / raw["QTY"]).sum(), rel=1e-6)
