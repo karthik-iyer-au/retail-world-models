@@ -6,7 +6,8 @@ import pytest
 
 from rwm.data import load_dataset
 from rwm.data.schema import DATE, SERIES, UNITS, validate
-from rwm.evaluation.metrics import rmsse, rmsse_by_series, weighted_rmsse
+from rwm.evaluation.hierarchy import to_matrix, wrmsse
+from rwm.evaluation.metrics import rmsse
 from rwm.evaluation.splits import rolling_origins
 from rwm.experiments.run import run
 from rwm.forecaster import build_model
@@ -47,7 +48,6 @@ def test_rmsse_known_value():
     # naive one-step error on [1,2,3,4] is 1, forecast error is 2 -> rmsse 2
     assert rmsse([1, 2, 3, 4], [5, 5], [3, 7]) == pytest.approx(2.0)
     assert np.isnan(rmsse([0, 0, 0], [1], [1]))
-    assert weighted_rmsse([1.0, 3.0, np.nan], [1.0, 3.0, 5.0]) == pytest.approx(2.5)
 
 
 def test_seasonal_naive_repeats_last_week_in_row_order():
@@ -69,7 +69,7 @@ def test_run_is_repeatable_and_recorded(tmp_path):
     man = json.loads((a / "manifest.json").read_text())
     assert man["config_sha256"] == sha256_obj(CONFIG)
     assert {"git", "seed", "packages", "data_files", "python"} <= set(man)
-    assert np.isfinite(ma["weighted_rmsse"])
+    assert np.isfinite(ma["wrmsse"])
 
 
 def test_m5_loader_on_files_in_m5_layout(tmp_path):
@@ -107,18 +107,33 @@ def test_m5_loader_on_files_in_m5_layout(tmp_path):
     assert tx["price"].isna().all() and tx["snap"].eq(0).all()
 
 
-def test_rmsse_by_series_matches_per_series_definition():
-    p = load_dataset("synthetic", n_periods=90, seed=3).panel
+def test_wrmsse_matches_series_by_series_calculation():
+    p = load_dataset("synthetic", n_stores=2, n_items=3, n_periods=90, seed=3).panel
     p.loc[p[SERIES] == "S0_I0", UNITS] = 0.0  # a series that never sells
-    first = p[SERIES] == "S1_I1"
-    p.loc[first & (p[DATE] < p[DATE].min() + pd.Timedelta(days=20)), UNITS] = 0.0  # late start
-    cut = sorted(p[DATE].unique())[75]
-    train, test = p[p[DATE] <= cut], p[p[DATE] > cut].copy()
-    test["forecast"] = 3.0
-    got = rmsse_by_series(train, test, SERIES, UNITS)
-    for k, g in test.groupby(SERIES):
-        want = rmsse(train.loc[train[SERIES] == k, UNITS].to_numpy(), g[UNITS].to_numpy(), g["forecast"].to_numpy())
-        assert (np.isnan(want) and np.isnan(got[k])) or got[k] == pytest.approx(want)
+    late = (p[SERIES] == "S1_I1") & (p[DATE] < p[DATE].min() + pd.Timedelta(days=20))
+    p.loc[late, UNITS] = 0.0  # a series that starts late
+    dates = np.sort(p[DATE].unique())
+    y = to_matrix(p, SERIES, DATE, UNITS, dates)
+    hist, act = y[:, :76], y[:, 76:]
+    fc = np.full(act.shape, 3.0)
+    attrs = p.drop_duplicates(SERIES).sort_values(SERIES).reset_index(drop=True)
+    rev = np.arange(1.0, len(attrs) + 1)
+    levels = [[], ["store_id"], ["item_id"], [SERIES]]
+    got = wrmsse(hist, act, fc, rev, attrs, levels)
+
+    def by_hand(cols):
+        keys = attrs[cols].astype(str).agg("|".join, axis=1) if cols else pd.Series("all", index=attrs.index)
+        total = 0.0
+        for k in keys.unique():
+            m = (keys == k).to_numpy()
+            r = rmsse(hist[m].sum(0), act[m].sum(0), fc[m].sum(0))
+            if np.isfinite(r):
+                total += r * rev[m].sum() / rev.sum()
+        return total
+
+    for lv, cols in zip(got["by_level"], levels):
+        assert lv["wrmsse"] == pytest.approx(by_hand(cols))
+    assert got["wrmsse"] == pytest.approx(np.mean([by_hand(c) for c in levels]))
 
 
 def test_last_k_rows_takes_the_end_of_each_series():

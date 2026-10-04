@@ -17,7 +17,7 @@ reported as best.
 | `src/rwm/data/` | One loader per dataset, all producing the same table shape | No modelling here |
 | `src/rwm/prior_work/` | Methods published by others | Each one cites its paper and source code |
 | `src/rwm/model/` | Our model | Nothing from prior work is copied in; it is imported |
-| `src/rwm/evaluation/` | Splits and accuracy measures | Shared by every model, so all are scored the same way |
+| `src/rwm/evaluation/` | Splits and accuracy measures | Shared by every model. The M5 score is checked against the organisers' published numbers |
 | `src/rwm/experiments/` | The runner | One config in, one recorded result out |
 | `configs/` | One file per dataset and per experiment | A result is defined by its config |
 | `results/` | Run outputs | Each run has a manifest that lets it be repeated |

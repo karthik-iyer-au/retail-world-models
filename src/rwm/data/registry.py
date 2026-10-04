@@ -14,6 +14,9 @@ class Dataset:
     panel: pd.DataFrame
     levers: list[str]
     files: list[Path] = field(default_factory=list)  # raw files read, for checksums
+    # Columns defining each scoring level. [] is the grand total. If not
+    # given, only the bottom level (each series on its own) is scored.
+    hierarchy: list[list[str]] | None = None
 
 
 _LOADERS: dict[str, Callable[..., Dataset]] = {}

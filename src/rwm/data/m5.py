@@ -3,6 +3,10 @@
 Reads the three files from the Kaggle competition, unchanged:
   calendar.csv, sell_prices.csv, sales_train_evaluation.csv
 
+With `include_test`, the 28 days of the competition's final test period are
+added from sales_test_evaluation.csv. That file is published by the
+organisers (github.com/Mcompetitions/M5-methods), not in the Kaggle download.
+
 M5 records price and calendar information only. It has no promotion,
 display, feature or cost columns, so the only lever it provides is price.
 """
@@ -16,6 +20,23 @@ from rwm.data.schema import DATE, ITEM, PRICE, SERIES, STORE, UNITS
 from rwm.utils.paths import DATA_RAW
 
 FILES = ["calendar.csv", "sell_prices.csv", "sales_train_evaluation.csv"]
+TEST_FILE = "sales_test_evaluation.csv"
+
+# The 12 levels of the M5 hierarchy, in the organisers' order.
+HIERARCHY = [
+    [],
+    ["state_id"],
+    ["store_id"],
+    ["cat_id"],
+    ["dept_id"],
+    ["state_id", "cat_id"],
+    ["state_id", "dept_id"],
+    ["store_id", "cat_id"],
+    ["store_id", "dept_id"],
+    ["item_id"],
+    ["item_id", "state_id"],
+    ["item_id", "store_id"],
+]
 
 
 @register_dataset("m5")
@@ -23,11 +44,12 @@ def load_m5(
     root: str | None = None,
     stores: list[str] | None = None,
     max_items: int | None = None,
+    include_test: bool = False,
 ) -> Dataset:
     """`stores` and `max_items` cut the data down for development runs.
     Reported runs leave both unset. Both are recorded in the run config."""
     root_path = Path(root) if root else DATA_RAW / "m5"
-    paths = [root_path / f for f in FILES]
+    paths = [root_path / f for f in FILES + ([TEST_FILE] if include_test else [])]
     for p in paths:
         if not p.exists():
             raise FileNotFoundError(f"{p} not found. See data/README.md.")
@@ -35,6 +57,12 @@ def load_m5(
     calendar = pd.read_csv(paths[0])
     prices = pd.read_csv(paths[1], dtype={"store_id": "category", "item_id": "category"})
     sales = pd.read_csv(paths[2])
+    if include_test:
+        keys = ["item_id", "store_id"]
+        test = pd.read_csv(paths[3]).drop(columns=["dept_id", "cat_id", "state_id"])
+        sales = sales.merge(test, on=keys, how="left", validate="one_to_one")
+        if sales.isna().any().any():
+            raise ValueError("test file does not cover every series")
 
     if stores:
         sales = sales[sales["store_id"].isin(stores)]
@@ -98,4 +126,4 @@ def load_m5(
         },
         copy=False,
     )
-    return Dataset("m5", panel, ["price"], files=paths)
+    return Dataset("m5", panel, ["price"], files=paths, hierarchy=HIERARCHY)

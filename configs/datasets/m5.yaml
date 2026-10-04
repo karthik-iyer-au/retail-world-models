@@ -1,6 +1,7 @@
 name: m5
 source: Kaggle competition "M5 Forecasting - Accuracy"
 files: [calendar.csv, sell_prices.csv, sales_train_evaluation.csv]
+optional_files: [sales_test_evaluation.csv]  # final test period, from the organisers' folder
 grain: item x store x day
 levers: [price]
 not_recorded: [promo, display, feature, cost, space, range]

@@ -1,0 +1,60 @@
+{
+  "dataset": "m5_reference",
+  "files": [
+    {
+      "file": "Accuracy_benchmarks_overall.csv",
+      "bytes": 5763,
+      "sha256": "fa31625b16501cc700849fdd1e4d59fdf892937efe8aeef7cb91ba6dd2b3efeb"
+    },
+    {
+      "file": "Accuracy_benchmarks_results.csv",
+      "bytes": 22370236,
+      "sha256": "e37cefef626c32a4cc196f616b72c9538930ab0d4d66317e4f1cff25810a7fbf"
+    },
+    {
+      "file": "Accuracy_readme.txt",
+      "bytes": 1212,
+      "sha256": "50bc3b235b35a806c5263d16fb2e89fd09ccf287ecfb4e0386709eb163e06dcf"
+    },
+    {
+      "file": "Accuracy_top50_overall.csv",
+      "bytes": 12231,
+      "sha256": "3c7111f2bd59529c7c6401aceca22c43291c38c88551c83359404511245e7219"
+    },
+    {
+      "file": "Accuracy_top50_results.csv",
+      "bytes": 45192311,
+      "sha256": "9783ed1f9408b25186d92b707ecc10ddac5eea687b52b0027b7bf0cb712d87e6"
+    },
+    {
+      "file": "Dataset_ReadMe.txt",
+      "bytes": 1310,
+      "sha256": "894b9cd8624b5dd6eaab7b5083151bef7f33b9d3ae9baf76434d63751e19bc96"
+    },
+    {
+      "file": "Estimate WRMSSE.R",
+      "bytes": 10785,
+      "sha256": "b44d7894ffa525fcc527779ceff9847b388ead418a4c0902a3a06d9d2f307781"
+    },
+    {
+      "file": "benchmark_ES_bu.csv",
+      "bytes": 31574303,
+      "sha256": "b7db32c7572665bcea2a231678e14294db5158e06c50512dc90f58c60f125b64"
+    },
+    {
+      "file": "benchmark_sNaive.csv",
+      "bytes": 5450693,
+      "sha256": "d8e7f7068837a2bf7fcade4eee32da54e6e70028bd763d4116f922fb5182f020"
+    },
+    {
+      "file": "submission_0001_YJ_STU.csv",
+      "bytes": 22174818,
+      "sha256": "678195194c9e8dec50efc1bfbeb7d4a2247a55c3897127731323c2935caf26a7"
+    },
+    {
+      "file": "weights_evaluation.csv",
+      "bytes": 2257736,
+      "sha256": "b430c288d92a0e55e08b76c20aafb4c538469c7ba95e47ab768e37e385299497"
+    }
+  ]
+}

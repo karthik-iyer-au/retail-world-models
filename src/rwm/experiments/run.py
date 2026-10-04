@@ -22,10 +22,9 @@ import yaml
 from rwm.data import load_dataset
 from rwm.data import manifest as data_manifest
 from rwm.data.schema import DATE, PRICE, SERIES, UNITS
-from rwm.evaluation.metrics import rmsse_by_series, weighted_rmsse
+from rwm.evaluation.hierarchy import to_matrix, wrmsse
 from rwm.evaluation.splits import rolling_origins
 from rwm.forecaster import build_model
-from rwm.utils.panel import last_k_rows
 from rwm.utils.paths import DATA_RAW, RESULTS
 from rwm.utils.run_manifest import build_manifest
 from rwm.utils.seed import set_seed
@@ -48,13 +47,25 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
 
     ev = config["evaluation"]
     panel = ds.panel
-    splits = rolling_origins(panel[DATE], ev["horizon"], ev["n_origins"], ev.get("step"))
+    dates = np.sort(panel[DATE].unique())
+    levels = ds.hierarchy or [[SERIES]]
+    cols = sorted({c for lv in levels for c in lv} | {SERIES})
+    attrs = panel[cols].drop_duplicates(SERIES).sort_values(SERIES).reset_index(drop=True)
+    units = to_matrix(panel, SERIES, DATE, UNITS, dates)
+    if PRICE in panel:
+        price = to_matrix(panel, SERIES, DATE, PRICE, dates)
+    else:
+        price = np.ones_like(units)
+
+    splits = rolling_origins(dates, ev["horizon"], ev["n_origins"], ev.get("step"))
+    window = ev.get("weight_window", 28)
     forecasts, per_split = [], []
     for sp in splits:
         train = panel[panel[DATE] <= sp.train_end]
         test = panel[panel[DATE].isin(sp.test_dates)].reset_index(drop=True)
         model = build_model(config["model"]["name"], **config["model"].get("params", {}))
         model.fit(train)
+        del train
         pred = np.asarray(model.predict(test.drop(columns=[UNITS])), dtype=float)
         if len(pred) != len(test):
             raise RuntimeError("model returned the wrong number of forecasts")
@@ -63,20 +74,25 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
         out["origin"] = sp.origin
         forecasts.append(out)
 
-        recent = train.iloc[last_k_rows(train[SERIES], ev.get("weight_window", 28))]
-        value = recent[UNITS].astype("float64") * (recent[PRICE] if PRICE in recent else 1.0)
-        weight = value.groupby(recent[SERIES].astype(str).to_numpy()).sum()
-        s = rmsse_by_series(train, out, SERIES, UNITS, ev.get("scale_lag", 1))
-        del train, test, recent
+        t0 = int(np.searchsorted(dates, np.datetime64(sp.train_end))) + 1  # training columns
+        t1 = t0 + len(sp.test_dates)
+        revenue = (units[:, t0 - window : t0] * price[:, t0 - window : t0]).sum(axis=1, dtype=np.float64)
+        score = wrmsse(
+            units[:, :t0],
+            units[:, t0:t1],
+            to_matrix(out, SERIES, DATE, "forecast", dates[t0:t1]),
+            revenue,
+            attrs,
+            levels,
+            ev.get("scale_lag", 1),
+        )
         per_split.append(
             {
                 "origin": sp.origin,
                 "train_end": str(pd.Timestamp(sp.train_end).date()),
                 "test_start": str(pd.Timestamp(sp.test_dates[0]).date()),
                 "test_end": str(pd.Timestamp(sp.test_dates[-1]).date()),
-                "series_scored": int(s.notna().sum()),
-                "mean_rmsse": float(s.mean()),
-                "weighted_rmsse": weighted_rmsse(s.to_numpy(), weight.reindex(s.index).to_numpy()),
+                **score,
             }
         )
 
@@ -84,9 +100,9 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
         "model": config["model"]["name"],
         "dataset": ds.name,
         "levers_available": ds.levers,
+        "levels_scored": len(levels),
+        "wrmsse": float(np.mean([p["wrmsse"] for p in per_split])),
         "splits": per_split,
-        "mean_rmsse": float(np.mean([p["mean_rmsse"] for p in per_split])),
-        "weighted_rmsse": float(np.mean([p["weighted_rmsse"] for p in per_split])),
     }
 
     stamp = manifest["created_utc"].replace(":", "").replace("-", "")[:15]
