@@ -39,6 +39,12 @@ CSV movement file and the UPC file for each category, the data manual, and
 the Stata store demographics file. Academic research use only, and the
 Kilts Center must be acknowledged in any paper.
 
+## Breakfast at the Frat
+
+`dunnhumby_Breakfast-at-the-Frat.zip`, as downloaded from dunnhumby's source
+files page after registering, goes in `data/raw/breakfast_at_the_frat/`. It
+is not redistributed here and has no download command.
+
 ## M5 files and where they come from
 
 From the Kaggle competition "M5 Forecasting - Accuracy": `calendar.csv`,

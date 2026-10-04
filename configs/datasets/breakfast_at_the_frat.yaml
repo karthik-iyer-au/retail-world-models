@@ -1,6 +1,8 @@
 name: breakfast_at_the_frat
-source: dunnhumby source files, "Breakfast at the Frat"
-grain: product x store x week
+source: dunnhumby source files, "Breakfast at the Frat" (registration required)
+files: [dunnhumby_Breakfast-at-the-Frat.zip]
+grain: product x store x week, 156 weeks from January 2009; 77 stores, 55 products, 4 categories
 levers: [price, promo, display, feature]
+also_recorded: [base_price, tpr_only]
 not_recorded: [cost, space]
 role_in_paper: display and feature (brochure) effects

@@ -1,0 +1,10 @@
+{
+  "dataset": "breakfast_at_the_frat",
+  "files": [
+    {
+      "file": "dunnhumby_Breakfast-at-the-Frat.zip",
+      "bytes": 30714553,
+      "sha256": "74cb41cb8b19dc61bb8a5731c3774b802e9a8da3b64cdd1872640890d0b54216"
+    }
+  ]
+}
