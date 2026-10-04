@@ -1,7 +1,7 @@
 .PHONY: install test smoke run data-register data-verify
 
 install:
-	pip install -e ".[dev]"
+	pip install -e ".[dev,trees]"
 
 test:
 	pytest -q
@@ -11,7 +11,7 @@ smoke:
 	python -m rwm.experiments.run --config configs/experiments/smoke.yaml
 
 # Reportable run. Refuses to start on uncommitted code or unregistered data.
-# Usage: make run CONFIG=configs/experiments/m5_seasonal_naive.yaml
+# Usage: make run CONFIG=configs/experiments/m5_test_seasonal_naive.yaml
 run:
 	python -m rwm.experiments.run --config $(CONFIG) --strict
 

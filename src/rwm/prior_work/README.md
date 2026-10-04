@@ -16,3 +16,4 @@ Rules for adding one:
 | Method | Reference | Module |
 |---|---|---|
 | Seasonal naive, recent average | Standard benchmarks, as used in M5 | `naive.py` |
+| LightGBM, one model per store, direct | Ke et al. (2017); design of the top M5 entries, Makridakis, Spiliotis, Assimakopoulos (2022) | `lightgbm_direct.py` |

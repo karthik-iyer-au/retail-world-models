@@ -25,6 +25,7 @@ One row per method.
 | Method | Paper | Code source | Licence | Version or commit | Changes made |
 |---|---|---|---|---|---|
 | Seasonal naive, recent average | Standard benchmarks | Written here | n/a | n/a | n/a |
+| LightGBM, one model per store, direct | Ke et al. (2017); Makridakis, Spiliotis, Assimakopoulos (2022) | `lightgbm` package; model code written here | MIT | 4.7.0 | n/a |
 
 ## Author's own prior published work
 

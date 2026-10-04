@@ -1,0 +1,13 @@
+# Seasonal naive over five 28-day windows before the M5 test period.
+name: m5_rolling_seasonal_naive
+seed: 0
+dataset:
+  name: m5
+model:
+  name: seasonal_naive
+  params: {season: 7}
+evaluation:
+  horizon: 28
+  n_origins: 5
+  scale_lag: 1
+  weight_window: 28

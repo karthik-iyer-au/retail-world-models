@@ -1,0 +1,23 @@
+# LightGBM, one model per store, on the official M5 test period (29 May to 19 June 2016).
+# Settings are fixed here before the run and are not tuned on this window.
+name: m5_test_lightgbm
+seed: 0
+dataset:
+  name: m5
+  params: {include_test: true}
+model:
+  name: lightgbm_direct
+  params:
+    horizon: 28
+    train_periods: 730
+    group_by: store_id
+    categorical: [item_id, dept_id, cat_id]
+    extra: [event, snap]
+    rounds: 800
+    seed: 0
+    threads: 2
+evaluation:
+  horizon: 28
+  n_origins: 1
+  scale_lag: 1
+  weight_window: 28
