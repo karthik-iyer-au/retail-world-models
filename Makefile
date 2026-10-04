@@ -1,7 +1,7 @@
 .PHONY: install test smoke run data-register data-verify
 
 install:
-	pip install -e ".[dev,trees]"
+	pip install -e ".[dev,trees,deep,fetch]"
 
 test:
 	pytest -q

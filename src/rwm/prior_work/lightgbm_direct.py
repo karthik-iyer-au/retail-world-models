@@ -19,6 +19,7 @@ import pandas as pd
 
 from rwm.data.schema import DATE, PRICE, SERIES, UNITS
 from rwm.forecaster import Forecaster, register_model
+from rwm.utils.frames import frame_to_matrix
 
 LAGS = (0, 7, 14, 21, 28)  # added to the horizon: 28, 35, ... days back
 WINDOWS = (7, 14, 28, 56)
@@ -56,15 +57,6 @@ def _rolling_max(x: np.ndarray, w: int) -> np.ndarray:
     padded = np.c_[np.full((len(x), w - 1), np.nan, dtype=np.float32), x]
     windows = np.lib.stride_tricks.sliding_window_view(padded, w, axis=1)
     return np.fmax.reduce(windows, axis=2)
-
-
-def _matrix(frame: pd.DataFrame, names: pd.Index, dates: np.ndarray, col: str) -> np.ndarray:
-    out = np.full((len(names), len(dates)), np.nan, dtype=np.float32)
-    r = names.get_indexer(frame[SERIES])
-    c = pd.Index(dates).get_indexer(frame[DATE])
-    ok = (r >= 0) & (c >= 0)
-    out[r[ok], c[ok]] = frame[col].to_numpy(dtype=np.float32)[ok]
-    return out
 
 
 @register_model("lightgbm_direct")
@@ -140,9 +132,9 @@ class LightGBMDirect(Forecaster):
         return f
 
     def _prepare(self, frame: pd.DataFrame, names: pd.Index, dates: np.ndarray):
-        units = _matrix(frame, names, dates, UNITS) if UNITS in frame else None
-        price = _matrix(frame, names, dates, PRICE)
-        extra = {c: _matrix(frame, names, dates, c) for c in self.extra}
+        units = frame_to_matrix(frame, names, dates, UNITS) if UNITS in frame else None
+        price = frame_to_matrix(frame, names, dates, PRICE)
+        extra = {c: frame_to_matrix(frame, names, dates, c) for c in self.extra}
         return units, price, extra
 
     def _fit_table(self, part: pd.DataFrame, names: pd.Index, dates: np.ndarray):

@@ -1,0 +1,26 @@
+# Our model (item encoder and sales readout) on the 28 days before the M5
+# test period (25 April to 22 May 2016). LightGBM scores 0.715 on this window.
+name: m5_validation_state_model
+seed: 0
+dataset:
+  name: m5
+model:
+  name: state_model
+  params:
+    horizon: 28
+    history: 112
+    train_periods: 730
+    categorical: [item_id, dept_id, cat_id, store_id, state_id]
+    extra: [event, snap]
+    d_model: 128
+    layers: 3
+    heads: 4
+    steps: 30000
+    batch: 1024
+    lr: 0.001
+    seed: 0
+evaluation:
+  horizon: 28
+  n_origins: 1
+  scale_lag: 1
+  weight_window: 28

@@ -13,6 +13,13 @@ are committed in `data/manifests/<dataset>.json`.
 After that, `make data-verify DATASET=<dataset>` confirms on any machine that
 the files are byte-identical to the ones used here.
 
+## Getting the registered datasets
+
+`python -m rwm.data.fetch m5`, `m5_reference` or `dominicks` downloads the
+files from their sources and checks them against the registered checksums.
+M5 needs a Kaggle account that has accepted the competition rules, and a
+Kaggle API token in the `KAGGLE_API_TOKEN` environment variable.
+
 ## Datasets
 
 | Dataset | Folder | Levers recorded |

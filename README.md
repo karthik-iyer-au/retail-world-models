@@ -21,6 +21,7 @@ reported as best.
 | `src/rwm/experiments/` | The runner | One config in, one recorded result out |
 | `configs/` | One file per dataset and per experiment | A result is defined by its config |
 | `results/` | Run outputs | Each run has a manifest that lets it be repeated |
+| `notebooks/` | A launcher for running a config on Colab | Calls the repository's commands only; holds no model or data code |
 | `docs/` | Decision log, provenance, protocol, how to reproduce | Updated in the same commit as the change |
 | `tests/` | Checks on every piece above | Must pass before any commit |
 
@@ -30,6 +31,7 @@ reported as best.
 make install
 make test
 make smoke
+python -m rwm.data.fetch m5        # public data, checked against registered checksums
 ```
 
 `make smoke` runs the whole pipeline on generated data and needs no downloads.

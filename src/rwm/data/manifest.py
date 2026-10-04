@@ -39,20 +39,24 @@ def register(dataset: str) -> Path:
     return out
 
 
-def verify(dataset: str) -> list[dict]:
-    """Returns the manifest entries. Raises if any file differs or is missing."""
+def verify(dataset: str, only_present: bool = False) -> list[dict]:
+    """Returns the entries checked. Raises if any file differs or is missing.
+    With `only_present`, registered files that are absent are skipped."""
     path = manifest_path(dataset)
     if not path.exists():
         raise FileNotFoundError(f"{path} not found. Run: make data-register DATASET={dataset}")
     root = DATA_RAW / dataset
-    entries = json.loads(path.read_text())["files"]
-    for e in entries:
+    checked = []
+    for e in json.loads(path.read_text())["files"]:
         p = root / e["file"]
         if not p.exists():
+            if only_present:
+                continue
             raise FileNotFoundError(f"{p} is listed in the manifest but missing")
         if sha256_file(p) != e["sha256"]:
             raise ValueError(f"{p} does not match the registered checksum")
-    return entries
+        checked.append(e)
+    return checked
 
 
 if __name__ == "__main__":

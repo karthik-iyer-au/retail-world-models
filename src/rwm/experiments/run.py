@@ -125,9 +125,10 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", required=True)
     ap.add_argument("--strict", action="store_true")
+    ap.add_argument("--out", default=None, help="folder for run outputs (default: results/)")
     args = ap.parse_args()
     config = yaml.safe_load(Path(args.config).read_text())
-    run_dir = run(config, strict=args.strict)
+    run_dir = run(config, strict=args.strict, out_root=Path(args.out) if args.out else RESULTS)
     print(f"wrote {run_dir}")
     print((run_dir / "metrics.json").read_text())
 

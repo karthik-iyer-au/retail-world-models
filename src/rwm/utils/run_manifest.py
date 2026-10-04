@@ -38,6 +38,18 @@ def installed_packages() -> list[str]:
     )
 
 
+def compute_device() -> str:
+    """The processor or GPU that deep models will run on."""
+    try:
+        import torch
+
+        if torch.cuda.is_available():
+            return f"cuda: {torch.cuda.get_device_name(0)}"
+    except ImportError:
+        pass
+    return "cpu"
+
+
 def build_manifest(config: dict, data_files: list[dict]) -> dict:
     return {
         "created_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -48,5 +60,6 @@ def build_manifest(config: dict, data_files: list[dict]) -> dict:
         "data_files": data_files,
         "python": sys.version.split()[0],
         "platform": platform.platform(),
+        "device": compute_device(),
         "packages": installed_packages(),
     }
