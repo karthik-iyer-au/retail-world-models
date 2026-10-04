@@ -60,9 +60,12 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
     splits = rolling_origins(dates, ev["horizon"], ev["n_origins"], ev.get("step"))
     window = ev.get("weight_window", 28)
     forecasts, per_split = [], []
-    for sp in splits:
-        train = panel[panel[DATE] <= sp.train_end]
+    # Latest window first. After each window the table is cut back to that
+    # window's training rows, so only one copy of the data is held at a time.
+    ds.panel = None
+    for sp in reversed(splits):
         test = panel[panel[DATE].isin(sp.test_dates)].reset_index(drop=True)
+        panel = train = panel[panel[DATE] <= sp.train_end]
         model = build_model(config["model"]["name"], **config["model"].get("params", {}))
         model.fit(train)
         del train
@@ -95,6 +98,9 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
                 **score,
             }
         )
+
+    per_split.sort(key=lambda p: p["origin"])
+    forecasts.sort(key=lambda f: f["origin"].iloc[0])
 
     metrics = {
         "model": config["model"]["name"],

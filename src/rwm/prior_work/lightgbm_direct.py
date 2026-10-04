@@ -141,13 +141,21 @@ class LightGBMDirect(Forecaster):
 
         all_dates = np.sort(train[DATE].unique())
         dates = all_dates[-(self.train_periods + self.history) :]
-        train = train[train[DATE] >= dates[0]]
-        self._cat_levels = {c: pd.Index(train[c].astype(str).unique()).sort_values() for c in self.categorical}
+        recent = (train[DATE] >= dates[0]).to_numpy()
+        # distinct values first, then text: converting every row to text would not fit in memory
+        self._cat_levels = {
+            c: pd.Index(train[c].unique().astype(str)).sort_values() for c in self.categorical
+        }
         self._groups = {}
-        groups = train.groupby(self.group_by, observed=True) if self.group_by else [("all", train)]
-        for key, part in groups:
-            names = pd.Index(part[SERIES].astype(str).unique()).sort_values()
+        if self.group_by:
+            group_codes, group_keys = pd.factorize(train[self.group_by], sort=True)
+            group_codes = group_codes.astype(np.int32)
+        else:
+            group_codes, group_keys = np.zeros(len(train), dtype=np.int8), ["all"]
+        for code, key in enumerate(group_keys):
+            part = train[recent & (group_codes == code)]  # one store at a time
             part = part.assign(**{SERIES: part[SERIES].astype(str)})
+            names = pd.Index(part[SERIES].unique()).sort_values()
             units, price, extra = self._prepare(part, names, dates)
             units = np.nan_to_num(units)  # a missing row means nothing sold
             first = part.drop_duplicates(SERIES).set_index(SERIES).loc[names]
@@ -164,6 +172,8 @@ class LightGBMDirect(Forecaster):
                 free_raw_data=True,
             )
             booster = lgb.train(self.params, data, num_boost_round=self.rounds)
+            self.feature_names = list(f)
+            del x, data, f, part
             tail = slice(len(dates) - self.history, len(dates))
             self._groups[key] = {
                 "booster": booster,
@@ -174,7 +184,6 @@ class LightGBMDirect(Forecaster):
                 "price": price[:, tail],
                 "extra": {c: m[:, tail] for c, m in extra.items()},
             }
-            self.feature_names = list(f)
         return self
 
     def predict(self, future: pd.DataFrame) -> np.ndarray:

@@ -72,7 +72,13 @@ def wrmsse(
 def to_matrix(panel: pd.DataFrame, series: str, date: str, value: str, dates) -> np.ndarray:
     """Series-by-date array of `value`. Missing rows and missing values are 0.
     Rows follow sorted series order, columns follow `dates`."""
-    rows = pd.factorize(panel[series], sort=True)[0]
+    s = panel[series]
+    if isinstance(s.dtype, pd.CategoricalDtype) and s.cat.categories.is_monotonic_increasing:
+        used = np.zeros(len(s.cat.categories), dtype=bool)
+        used[np.unique(s.cat.codes)] = True
+        rows = (np.cumsum(used) - 1)[s.cat.codes.to_numpy()]  # position among series present
+    else:
+        rows = pd.factorize(s, sort=True)[0]
     cols = pd.Index(dates).get_indexer(panel[date])
     out = np.zeros((int(rows.max()) + 1, len(dates)), dtype=np.float32)
     keep = cols >= 0
