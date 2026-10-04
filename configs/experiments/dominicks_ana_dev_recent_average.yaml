@@ -1,0 +1,18 @@
+# Recent average on Dominick's analgesics. The final 8 weeks are held out for the
+# final test; this run scores the two 8-week windows before them, overall and
+# split by weeks with and without a promotion code.
+name: dominicks_ana_dev_recent_average
+seed: 0
+dataset:
+  name: dominicks
+  params: {categories: [ana]}
+model:
+  name: recent_average
+  params: {window: 8}
+evaluation:
+  horizon: 8
+  n_origins: 2
+  holdout_periods: 8
+  scale_lag: 1
+  weight_window: 13
+  conditions: [promo]
