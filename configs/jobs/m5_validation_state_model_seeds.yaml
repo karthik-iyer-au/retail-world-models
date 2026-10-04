@@ -1,0 +1,8 @@
+# Our model on the 28 days before the M5 test period, four more seeds, to
+# measure how much the score moves from run to run. Seed 0 is the run in
+# configs/jobs/m5_validation_state_model.yaml.
+datasets:
+  - name: m5
+runs:
+  - config: configs/experiments/m5_validation_state_model_mixed_precision.yaml
+    seeds: [1, 2, 3, 4]
