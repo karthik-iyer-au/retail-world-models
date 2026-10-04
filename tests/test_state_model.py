@@ -80,3 +80,29 @@ def test_missing_lever_is_passed_as_not_known(split):
     model = build_model("state_model", **quick).fit(train.drop(columns=["price"]))
     pred = model.predict(test.drop(columns=[UNITS, "price"]))
     assert np.isfinite(pred).all() and (pred >= 0).all()
+
+
+def test_saved_model_gives_the_same_forecast_when_loaded(split, fitted, tmp_path):
+    from rwm.model.state_model import StateModel
+
+    future = split[1].drop(columns=[UNITS])
+    fitted.save(tmp_path / "model.pt")
+    loaded = StateModel.load(tmp_path / "model.pt", device="cpu")
+    np.testing.assert_array_equal(fitted.predict(future), loaded.predict(future))
+
+
+def test_run_saves_a_checkpoint_with_its_checksum(tmp_path):
+    import json
+
+    from rwm.experiments.run import run
+    from rwm.utils.hashing import sha256_file
+
+    config = {
+        "name": "t", "seed": 0,
+        "dataset": {"name": "synthetic", "params": {"n_stores": 2, "n_items": 3, "n_periods": 200}},
+        "model": {"name": "state_model", "params": {**SETTINGS, "train_periods": 100, "steps": 5}},
+        "evaluation": {"horizon": 28, "n_origins": 1},
+    }
+    out = run(config, out_root=tmp_path)
+    saved = json.loads((out / "metrics.json").read_text())["checkpoints"]
+    assert len(saved) == 1 and sha256_file(out / saved[0]["file"]) == saved[0]["sha256"]

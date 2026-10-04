@@ -6,6 +6,7 @@ Writes results/<run_id>/ with:
   manifest.json   what was run: code commit, config, data checksums, seed, packages
   metrics.json    the scores, per split and overall
   forecasts.csv   every forecast next to its actual
+  checkpoint_origin<k>.pt   the fitted model for each window, for models that can be saved
 
 With --strict the run refuses to start unless the code is committed and the
 raw data matches its registered checksums. Reported numbers come from strict
@@ -25,6 +26,7 @@ from rwm.data.schema import DATE, PRICE, SERIES, UNITS
 from rwm.evaluation.hierarchy import to_matrix, wrmsse
 from rwm.evaluation.splits import rolling_origins
 from rwm.forecaster import build_model
+from rwm.utils.hashing import sha256_file
 from rwm.utils.paths import DATA_RAW, RESULTS
 from rwm.utils.run_manifest import build_manifest
 from rwm.utils.seed import set_seed
@@ -60,7 +62,7 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
 
     splits = rolling_origins(dates, ev["horizon"], ev["n_origins"], ev.get("step"))
     window = ev.get("weight_window", 28)
-    forecasts, per_split = [], []
+    forecasts, per_split, fitted = [], [], []
     # Latest window first. After each window the table is cut back to that
     # window's training rows, so only one copy of the data is held at a time.
     ds.panel = None
@@ -70,6 +72,7 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
         model = build_model(config["model"]["name"], **config["model"].get("params", {}))
         model.fit(train)
         del train
+        fitted.append((sp.origin, model))
         pred = np.asarray(model.predict(test.drop(columns=[UNITS])), dtype=float)
         if len(pred) != len(test):
             raise RuntimeError("model returned the wrong number of forecasts")
@@ -115,6 +118,14 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
     stamp = manifest["created_utc"].replace(":", "").replace("-", "")[:15]
     run_dir = out_root / f"{stamp}_{config['name']}_{manifest['config_sha256'][:8]}"
     run_dir.mkdir(parents=True, exist_ok=False)
+    # Models that can be saved are saved, one file per window, with their checksums.
+    checkpoints = []
+    for origin, model in sorted(fitted, key=lambda f: f[0]):
+        if hasattr(model, "save"):
+            path = run_dir / f"checkpoint_origin{origin}.pt"
+            model.save(path)
+            checkpoints.append({"file": path.name, "bytes": path.stat().st_size, "sha256": sha256_file(path)})
+    metrics["checkpoints"] = checkpoints
     (run_dir / "manifest.json").write_text(json.dumps(manifest, indent=2, default=str) + "\n")
     (run_dir / "metrics.json").write_text(json.dumps(metrics, indent=2) + "\n")
     pd.concat(forecasts).to_csv(run_dir / "forecasts.csv", index=False)

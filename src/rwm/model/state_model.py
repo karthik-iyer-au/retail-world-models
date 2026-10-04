@@ -91,6 +91,7 @@ class StateModel(Forecaster):
         seed: int = 0,
         device: str | None = None,
     ):
+        self._settings = {k: v for k, v in locals().items() if k not in ("self", "__class__")}
         self.horizon, self.history, self.train_periods = horizon, history, train_periods
         self.categorical, self.extra = categorical or [], extra or []
         self.net_args = dict(d_model=d_model, layers=layers, heads=heads, dropout=dropout)
@@ -230,3 +231,48 @@ class StateModel(Forecaster):
         c = pd.Index(fut_dates).get_indexer(future[DATE])
         pred = np.where(r >= 0, out[np.clip(r, 0, None), c], 0.0)
         return np.clip(pred, 0, None)
+
+    def save(self, path) -> None:
+        """Write the fitted model to one file: settings, weights, and the
+        recent history it needs to forecast."""
+        import torch
+
+        cpu = lambda t: t.detach().cpu()
+        torch.save(
+            {
+                "settings": self._settings,
+                "weights": {k: cpu(v) for k, v in self._net.state_dict().items()},
+                "names": list(self._names),
+                "levels": {c: list(v) for c, v in self._levels.items()},
+                "cats": cpu(self._cats),
+                "has_price": self._has_price,
+                "past": {
+                    k: [cpu(e) for e in v] if isinstance(v, list) else cpu(v)
+                    for k, v in self._past.items()
+                },
+            },
+            path,
+        )
+
+    @classmethod
+    def load(cls, path, device: str | None = None) -> "StateModel":
+        import torch
+
+        saved = torch.load(path, map_location="cpu", weights_only=True)
+        model = cls(**{**saved["settings"], "device": device})
+        model._dev = torch.device(device or ("cuda" if torch.cuda.is_available() else "cpu"))
+        model._names = pd.Index(saved["names"])
+        model._levels = {c: pd.Index(v) for c, v in saved["levels"].items()}
+        model._cats = saved["cats"].to(model._dev)
+        model._has_price = saved["has_price"]
+        model._past = {
+            k: [e.to(model._dev) for e in v] if isinstance(v, list) else v.to(model._dev)
+            for k, v in saved["past"].items()
+        }
+        n_lever = 2 + 2 * len(model.extra) + 4
+        model._net = _build_net(
+            2 + n_lever, n_lever, [len(v) for v in model._levels.values()],
+            model.history, model.horizon, **model.net_args,
+        ).to(model._dev)
+        model._net.load_state_dict(saved["weights"])
+        return model
