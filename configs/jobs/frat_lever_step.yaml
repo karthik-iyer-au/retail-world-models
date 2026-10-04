@@ -1,0 +1,14 @@
+# The parts of the lever step, one at a time and together, on the Breakfast at
+# the Frat development windows, five seeds each.
+datasets:
+  - name: breakfast_at_the_frat
+    from: /content/drive/MyDrive/retail-world-model/data
+runs:
+  - config: configs/experiments/frat_dev_state_model_regular_price.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/frat_dev_state_model_lift.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/frat_dev_state_model_lift_latent.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/frat_dev_state_model_latent.yaml
+    seeds: [1, 2, 3, 4, 5]

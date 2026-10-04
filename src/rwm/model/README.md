@@ -27,3 +27,10 @@ that is the like-for-like comparison. `neighbour_weights(future)` returns the
 weight each item gave each neighbour for each forecast date. The versions are
 described at the top of `state_model.py` and tested in
 `tests/test_item_to_item.py`.
+
+## Lever step
+
+`regular_price`, `lift_readout` and `latent_weight` switch on its three parts;
+`levers` names the columns that count as levers (by default every column in
+`extra`). `breakdown(future)` splits each forecast into baseline and lift.
+Described at the top of `state_model.py`, tested in `tests/test_lever_step.py`.

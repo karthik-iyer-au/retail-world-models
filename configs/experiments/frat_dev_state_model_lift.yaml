@@ -1,0 +1,30 @@
+# Our model on the Breakfast at the Frat development windows, lever step:
+# regular price, and the forecast built as baseline times lift.
+name: frat_dev_state_model_lift
+seed: 0
+dataset:
+  name: breakfast_at_the_frat
+model:
+  name: state_model
+  params:
+    horizon: 8
+    history: 26
+    train_periods: 90
+    categorical: [item_id, store_id, cat_id, manufacturer, store_segment]
+    extra: [promo, display, feature, tpr_only]
+    d_model: 64
+    layers: 2
+    heads: 4
+    steps: 3000
+    batch: 256
+    lr: 0.001
+    regular_price: true
+    lift_readout: true
+    seed: 0
+evaluation:
+  horizon: 8
+  n_origins: 2
+  holdout_periods: 8
+  scale_lag: 1
+  weight_window: 13
+  conditions: [promo, display, feature, tpr_only]

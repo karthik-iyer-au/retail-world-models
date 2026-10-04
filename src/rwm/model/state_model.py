@@ -28,6 +28,20 @@ The weights come from one of:
 An item can always give weight to "no neighbour", so weights sum to at most 1.
 `neighbour_weights` returns the weights behind a forecast.
 
+Lever step (optional). "Levers off" means the item at its regular price (its
+highest price in the last `regular_window` periods) with every column named
+in `levers` set to zero.
+- `regular_price`: the model also sees each price as a share of the regular
+  price, so it can tell a deep cut from a shallow one.
+- `lift_readout`: the forecast is built as baseline times lift. The baseline
+  sees only the levers-off plan. The lift is a second readout evaluated on
+  the real plan minus the same readout on the levers-off plan, so it is
+  exactly zero when nothing is planned. `breakdown` returns both parts.
+- `latent_weight`: a supporting loss. From the state now and the plan for
+  the horizon, the model predicts the state the encoder will give once those
+  periods are history. The target comes from a slowly updated copy of the
+  encoder. The forecast loss stays on throughout.
+
 Training and forecasting build their inputs with the same function
 (`_window`), so they cannot drift apart.
 """
@@ -49,7 +63,8 @@ def _calendar(dates: np.ndarray) -> np.ndarray:
 
 def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, horizon: int,
                d_model: int, layers: int, heads: int, dropout: float,
-               neighbours: str | None = None, n_products: int = 0, conditions: int = 4):
+               neighbours: str | None = None, n_products: int = 0, conditions: int = 4,
+               lift_readout: bool = False, latent: bool = False):
     import torch
     from torch import nn
 
@@ -80,13 +95,18 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
                     if neighbours == "both":  # start as similarity alone
                         nn.init.zeros_(self.query.weight)
                         nn.init.zeros_(self.query.bias)
-            self.head = nn.Sequential(
+            readout = lambda: nn.Sequential(
                 nn.Linear(d_model * (2 if neighbours else 1) + 16 * len(cat_sizes) + 16 + n_fut, 2 * d_model),
                 nn.GELU(),
                 nn.Linear(2 * d_model, d_model),
                 nn.GELU(),
                 nn.Linear(d_model, 1),
             )
+            self.head = readout()
+            self.lift = readout() if lift_readout else None
+            self.next = nn.Sequential(
+                nn.Linear(d_model + horizon * n_fut, 2 * d_model), nn.GELU(), nn.Linear(2 * d_model, d_model)
+            ) if latent else None
 
         def state(self, hist):
             """The item's state: one vector summarising its recent history."""
@@ -121,18 +141,25 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
             got = (w.to(msg.dtype) @ msg).permute(0, 3, 1, 2, 4).reshape(G * M, H, -1)
             return got, w
 
-        def forward(self, hist, fut, cats, group=None, with_weights=False):
+        def forward(self, hist, fut, cats, group=None, fut_off=None, full=False):
+            """Log of expected sales relative to the item's scale. With `full`,
+            also the baseline part, the state and the item-to-item weights."""
             h = fut.shape[1]
             state = self.state(hist)
             parts = [state] + [e(cats[:, i]) for i, e in enumerate(self.emb)]
             fixed = torch.cat(parts, dim=1)[:, None, :].expand(-1, h, -1)
             steps = self.step(torch.arange(h, device=fut.device))[None].expand(len(fut), -1, -1)
-            inputs, w = [fixed, steps, fut], None
+            shared, w = [fixed, steps], None
             if self.neighbours:
                 got, w = self.context(fixed, fut, group)
-                inputs.append(got)
-            out = self.head(torch.cat(inputs, dim=2)).squeeze(-1).clamp(-10, 10)
-            return (out, w) if with_weights else out
+                shared.append(got)
+            run = lambda net, plan: net(torch.cat(shared + [plan], dim=2)).squeeze(-1)
+            if self.lift is None:
+                base = out = run(self.head, fut).clamp(-10, 10)
+            else:
+                base = run(self.head, fut_off).clamp(-10, 10)
+                out = (base + run(self.lift, fut) - run(self.lift, fut_off)).clamp(-10, 10)
+            return {"log_mu": out, "base": base, "state": state, "weights": w} if full else out
 
     return Net()
 
@@ -160,6 +187,11 @@ class StateModel(Forecaster):
         group_by: list[str] | None = None,
         neighbours: str | None = None,
         conditions: int = 4,
+        regular_price: bool = False,
+        regular_window: int = 12,
+        levers: list[str] | None = None,
+        lift_readout: bool = False,
+        latent_weight: float = 0.0,
     ):
         self._settings = {k: v for k, v in locals().items() if k not in ("self", "__class__")}
         self.horizon, self.history, self.train_periods = horizon, history, train_periods
@@ -170,9 +202,17 @@ class StateModel(Forecaster):
             raise ValueError("neighbours needs group_by: which items can affect each other")
         if neighbours and d_model % conditions:
             raise ValueError("d_model must divide evenly by conditions")
+        if lift_readout and neighbours:
+            raise ValueError("lift_readout with neighbours is not supported yet")
         self.group_by = group_by or []
+        self.regular_price, self.regular_window = regular_price, regular_window
+        self.levers = list(self.extra) if levers is None else levers
+        if set(self.levers) - set(self.extra):
+            raise ValueError("every lever must also be listed in extra")
+        self.latent_weight = latent_weight
         self.net_args = dict(d_model=d_model, layers=layers, heads=heads, dropout=dropout,
-                             neighbours=neighbours, conditions=conditions)
+                             neighbours=neighbours, conditions=conditions,
+                             lift_readout=lift_readout, latent=latent_weight > 0)
         self.steps, self.batch, self.lr = steps, batch, lr
         self.power, self.seed, self.device = tweedie_power, seed, device
         self.mixed_precision = mixed_precision  # faster on a GPU; has no effect on a CPU
@@ -196,7 +236,8 @@ class StateModel(Forecaster):
         """Model inputs for the items in `rows`: the `history` columns of `past`
         ending just before column `start`, and `horizon` columns of `future`
         beginning at `future["start"]`. Also returns each item's scale, which
-        future periods the item is on sale in, and the future column positions."""
+        future periods the item is on sale in, and the future column positions and the
+        levers-off version of the future inputs."""
         import torch
 
         L = self.history
@@ -211,13 +252,24 @@ class StateModel(Forecaster):
         level = torch.nan_to_num(price).sum(1, keepdim=True) / n_known
         level = torch.where(level > 0, level, torch.ones_like(level))
 
-        def lever_inputs(src, cols):
+        # regular price: the highest price in the last `regular_window` periods
+        recent = torch.nan_to_num(price[:, -self.regular_window :], nan=float("-inf")).amax(1, keepdim=True)
+        regular = torch.where(torch.isfinite(recent) & (recent > 0), recent, level)
+
+        def lever_inputs(src, cols, off=False):
             p = src["price"][r, cols]
             k = ~torch.isnan(p)
+            if off:
+                p = torch.where(k, regular.expand_as(p), p)
             feats = [torch.nan_to_num(p) / level, k.float()]
-            for e in src["extra"]:
+            for name, e in zip(self.extra, src["extra"]):
                 v = e[r, cols]
-                feats += [torch.nan_to_num(v), (~torch.isnan(v)).float()]
+                known = ~torch.isnan(v)
+                if off and name in self.levers:
+                    v = torch.zeros_like(v)
+                feats += [torch.nan_to_num(v), known.float()]
+            if self.regular_price:
+                feats.append(torch.nan_to_num(p) / regular)
             cal = src["calendar"][cols]
             return torch.cat([torch.stack(feats, dim=2), cal], dim=2), k
 
@@ -225,26 +277,29 @@ class StateModel(Forecaster):
         hist = torch.cat([(units / scale)[..., None], torch.log1p(units)[..., None], hist_levers], dim=2)
         ahead = future["start"][:, None] + torch.arange(self.horizon, device=self._dev)[None]
         fut, on_sale = lever_inputs(future, ahead)
-        return hist, fut, scale, on_sale, ahead
+        fut_off, _ = lever_inputs(future, ahead, off=True)
+        return hist, fut, scale, on_sale, ahead, fut_off
 
     def _new_net(self):
-        n_lever = 2 + 2 * len(self.extra) + 4
+        n_lever = 2 + 2 * len(self.extra) + int(self.regular_price) + 4
         return _build_net(
             2 + n_lever, n_lever, [len(v) for v in self._levels.values()], self.history, self.horizon,
             n_products=len(self._products), **self.net_args,
         ).to(self._dev)
 
-    def _forward(self, past, future, rows, start, picked=None, with_weights=False):
+    def _forward(self, past, future, rows, start, picked=None, full=False):
         """Run the network for `rows`. `picked` is the group layout (groups by
         slots, -1 for an empty slot) when rows were drawn as whole groups.
         Returns log expected sales (relative to scale), scale, which periods
         count, and the future column positions."""
-        hist, fut, scale, on_sale, ahead = self._window(past, future, rows, start)
+        hist, fut, scale, on_sale, ahead, fut_off = self._window(past, future, rows, start)
         group = None
         if picked is not None:
             on_sale = on_sale & (picked.reshape(-1) >= 0)[:, None]
             group = {"shape": tuple(picked.shape), "product": self._product[rows], "open": on_sale}
-        out = self._net(hist, fut, self._cats[rows], group if self._net.neighbours else None, with_weights)
+        out = self._net(hist, fut, self._cats[rows], group if self._net.neighbours else None, fut_off, full)
+        if full:
+            out["plan"] = fut
         return out, scale, on_sale, ahead
 
     def fit(self, train: pd.DataFrame) -> "StateModel":
@@ -289,6 +344,11 @@ class StateModel(Forecaster):
         amp = self.mixed_precision and self._dev.type == "cuda"
         scaler = torch.amp.GradScaler("cuda", enabled=amp)
         n, t, p = len(self._names), len(dates), self.power
+        slow = None
+        if self.latent_weight > 0:  # slowly updated copy of the network, used only for target states
+            import copy
+
+            slow = copy.deepcopy(self._net).requires_grad_(False)
         self._net.train()
         self.loss_log = []
         for step in range(self.steps):
@@ -303,12 +363,25 @@ class StateModel(Forecaster):
                 start = torch.randint(L, t - H + 1, (g,), generator=gen).to(self._dev).repeat_interleave(slots)
                 rows = picked.reshape(-1).clamp(min=0)
             with torch.autocast("cuda", dtype=torch.float16, enabled=amp):
-                log_mu, scale, on_sale, ahead = self._forward(data, {**data, "start": start}, rows, start, picked)
+                out, scale, on_sale, ahead = self._forward(
+                    data, {**data, "start": start}, rows, start, picked, full=slow is not None
+                )
+                latent = 0.0
+                if slow is not None:
+                    # the state once the horizon has become history, from the slow copy
+                    later = start + H
+                    with torch.no_grad():
+                        hist_later = self._window(data, {**data, "start": start}, rows, later)[0]
+                        want = slow.state(hist_later)
+                    guess = self._net.next(torch.cat([out["state"], out["plan"].flatten(1)], dim=1))
+                    latent = (1 - torch.nn.functional.cosine_similarity(guess.float(), want.float(), dim=1)).mean()
+                    out = out["log_mu"]
+            log_mu = out
             target = data["units"][rows[:, None], ahead] / scale
             log_mu = log_mu.float()
             # Tweedie loss on sales relative to the item's own level
             loss = -target * torch.exp((1 - p) * log_mu) / (1 - p) + torch.exp((2 - p) * log_mu) / (2 - p)
-            loss = (loss * on_sale).sum() / on_sale.sum().clamp(min=1)
+            loss = (loss * on_sale).sum() / on_sale.sum().clamp(min=1) + self.latent_weight * latent
             opt.zero_grad(set_to_none=True)
             scaler.scale(loss).backward()
             scaler.unscale_(opt)
@@ -316,6 +389,10 @@ class StateModel(Forecaster):
             scaler.step(opt)
             scaler.update()
             sched.step()
+            if slow is not None:
+                with torch.no_grad():
+                    for a, b in zip(slow.parameters(), self._net.parameters()):
+                        a.lerp_(b, 0.01)
             if step % 50 == 0 or step == self.steps - 1:
                 self.loss_log.append((step, loss.item()))
             if (step + 1) % max(1, self.steps // 20) == 0:
@@ -352,7 +429,7 @@ class StateModel(Forecaster):
                 picked = self._members[lo : lo + per]
                 yield picked.reshape(-1).clamp(min=0), picked
 
-    def predict(self, future: pd.DataFrame) -> np.ndarray:
+    def _predict(self, future: pd.DataFrame, key: str) -> np.ndarray:
         import torch
 
         fut_dates, fut = self._future(future)
@@ -361,13 +438,27 @@ class StateModel(Forecaster):
         with torch.no_grad():
             for rows, picked in self._batches():
                 start = torch.full_like(rows, self.history)
-                log_mu, scale, _, _ = self._forward(self._past, {**fut, "start": torch.zeros_like(rows)}, rows, start, picked)
+                got, scale, _, _ = self._forward(
+                    self._past, {**fut, "start": torch.zeros_like(rows)}, rows, start, picked, full=True
+                )
                 real = torch.ones_like(rows, dtype=torch.bool) if picked is None else picked.reshape(-1) >= 0
-                out[rows[real].cpu().numpy()] = (torch.exp(log_mu) * scale)[real].cpu().numpy()
+                out[rows[real].cpu().numpy()] = (torch.exp(got[key]) * scale)[real].cpu().numpy()
         r = series_rows(future[SERIES], self._names)
         c = pd.Index(fut_dates).get_indexer(future[DATE])
         pred = np.where(r >= 0, out[np.clip(r, 0, None), c], 0.0)
         return np.clip(pred, 0, None)
+
+    def predict(self, future: pd.DataFrame) -> np.ndarray:
+        return self._predict(future, "log_mu")
+
+    def breakdown(self, future: pd.DataFrame) -> pd.DataFrame:
+        """Each forecast split in two: `baseline`, what the item would sell at
+        its regular price with no levers, and `lift`, what the plan adds or
+        takes away. The two sum to the forecast."""
+        if self._net.lift is None:
+            raise ValueError("this model was not built with lift_readout")
+        forecast, baseline = self.predict(future), self._predict(future, "base")
+        return pd.DataFrame({"forecast": forecast, "baseline": baseline, "lift": forecast - baseline}, index=future.index)
 
     def neighbour_weights(self, future: pd.DataFrame) -> pd.DataFrame:
         """The weights behind a forecast: one row per receiving series, sending
@@ -382,10 +473,10 @@ class StateModel(Forecaster):
         with torch.no_grad():
             for rows, picked in self._batches():
                 start = torch.full_like(rows, self.history)
-                (_, w), _, _, _ = self._forward(
-                    self._past, {**fut, "start": torch.zeros_like(rows)}, rows, start, picked, with_weights=True
+                got, _, _, _ = self._forward(
+                    self._past, {**fut, "start": torch.zeros_like(rows)}, rows, start, picked, full=True
                 )
-                w = w[:, : len(fut_dates)].cpu().numpy()  # groups, dates, conditions, receiver, sender
+                w = got["weights"][:, : len(fut_dates)].cpu().numpy()  # groups, dates, conditions, receiver, sender
                 g, d, k, i, j = np.nonzero(w > 0)
                 p = picked.cpu().numpy()
                 out.append(pd.DataFrame({
