@@ -88,7 +88,20 @@ weeks:
 | + item-to-item, conditional similarity | 0.476 | 0.430 to 0.508 | 0.861 | 0.909 | 0.580 | 0.419 |
 | + item-to-item, attention | 0.465 | 0.416 to 0.505 | 0.871 | 0.907 | 0.568 | 0.419 |
 | + item-to-item, both | 0.453 | 0.419 to 0.498 | 0.840 | 0.901 | 0.562 | 0.420 |
+| + item-to-item, both, same category only | 0.443 | 0.412 to 0.470 | 0.849 | 0.890 | 0.552 | 0.420 |
+| Our model, items drawn at random, 10,000 steps | 0.432 | 0.411 to 0.450 | 0.829 | 0.871 | 0.567 | 0.420 |
 
 Reading: with all 55 products in a store able to affect each other, the
 item-to-item part makes the forecast worse in every version, and makes it
-vary more from seed to seed. It is not kept in this form.
+vary more from seed to seed. Limiting it to products in the same category
+narrows the gap but does not close it. It is not kept in this form. Training
+for longer does not help either, so the first version was not stopped early.
+
+Dominick's analgesics, the two 8-week windows before the held-out final 8
+weeks, one run each:
+
+| Method | Overall | Weeks with a promotion code | Other weeks |
+|---|---|---|---|
+| Seasonal naive | 1.274 | 1.798 | 1.002 |
+| Average of last 8 weeks | 0.723 | 1.492 | 0.684 |
+| LightGBM with price, promotion and cost | 0.715 | 1.259 | 0.587 |
