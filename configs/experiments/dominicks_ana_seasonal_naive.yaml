@@ -1,0 +1,14 @@
+# Seasonal naive on Dominick's analgesics, three 8-week windows at the end of the data.
+name: dominicks_ana_seasonal_naive
+seed: 0
+dataset:
+  name: dominicks
+  params: {categories: [ana]}
+model:
+  name: seasonal_naive
+  params: {season: 52}
+evaluation:
+  horizon: 8
+  n_origins: 3
+  scale_lag: 1
+  weight_window: 13

@@ -51,9 +51,10 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
     levels = ds.hierarchy or [[SERIES]]
     cols = sorted({c for lv in levels for c in lv} | {SERIES})
     attrs = panel[cols].drop_duplicates(SERIES).sort_values(SERIES).reset_index(drop=True)
-    units = to_matrix(panel, SERIES, DATE, UNITS, dates)
+    names = pd.Index(attrs[SERIES].astype(str))
+    units = to_matrix(panel, SERIES, DATE, UNITS, dates, names)
     if PRICE in panel:
-        price = to_matrix(panel, SERIES, DATE, PRICE, dates)
+        price = to_matrix(panel, SERIES, DATE, PRICE, dates, names)
     else:
         price = np.ones_like(units)
 
@@ -83,7 +84,7 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
         score = wrmsse(
             units[:, :t0],
             units[:, t0:t1],
-            to_matrix(out, SERIES, DATE, "forecast", dates[t0:t1]),
+            to_matrix(out, SERIES, DATE, "forecast", dates[t0:t1], names),
             revenue,
             attrs,
             levels,

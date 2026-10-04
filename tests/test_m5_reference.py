@@ -31,6 +31,7 @@ def m5():
     names = attrs[SERIES].astype(str).to_numpy()
     history, actual = y[:, :-28], y[:, -28:]
     revenue = (history[:, -28:] * price[:, -56:-28]).sum(axis=1, dtype=np.float64)
+    ds.panel = None  # the tests below only need the arrays
     return ds, names, history, actual, revenue, attrs
 
 

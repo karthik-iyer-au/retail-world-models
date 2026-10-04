@@ -69,18 +69,20 @@ def wrmsse(
     }
 
 
-def to_matrix(panel: pd.DataFrame, series: str, date: str, value: str, dates) -> np.ndarray:
+def to_matrix(
+    panel: pd.DataFrame, series: str, date: str, value: str, dates, names: pd.Index | None = None
+) -> np.ndarray:
     """Series-by-date array of `value`. Missing rows and missing values are 0.
-    Rows follow sorted series order, columns follow `dates`."""
+    Rows follow `names` (default: the series present, sorted); columns follow `dates`."""
     s = panel[series]
-    if isinstance(s.dtype, pd.CategoricalDtype) and s.cat.categories.is_monotonic_increasing:
-        used = np.zeros(len(s.cat.categories), dtype=bool)
-        used[np.unique(s.cat.codes)] = True
-        rows = (np.cumsum(used) - 1)[s.cat.codes.to_numpy()]  # position among series present
+    if names is None:
+        names = pd.Index(s.astype(str).unique()).sort_values()
+    if isinstance(s.dtype, pd.CategoricalDtype) and s.cat.categories.astype(str).equals(names):
+        rows = s.cat.codes.to_numpy()
     else:
-        rows = pd.factorize(s, sort=True)[0]
+        rows = names.get_indexer(s.astype(str))
     cols = pd.Index(dates).get_indexer(panel[date])
-    out = np.zeros((int(rows.max()) + 1, len(dates)), dtype=np.float32)
-    keep = cols >= 0
+    out = np.zeros((len(names), len(dates)), dtype=np.float32)
+    keep = (cols >= 0) & (rows >= 0)
     out[rows[keep], cols[keep]] = np.nan_to_num(panel[value].to_numpy(dtype=np.float32)[keep])
     return out

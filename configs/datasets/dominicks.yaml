@@ -1,6 +1,13 @@
 name: dominicks
-source: Dominick's Finer Foods database, Kilts Center, Chicago Booth
-grain: UPC x store x week
+source: Dominick's Finer Foods database, Kilts Center for Marketing, University of Chicago Booth School of Business
+terms: academic research only; acknowledge the Kilts Center in any paper
+files_per_category: [w<code>.zip or w<code>_csv.zip, upc<code>.csv]
+optional_files: [demo_stata.zip]  # price tier of each store
+grain: UPC x store x week, September 1989 to May 1997
+categories: 28 with CSV files (refrigerated juices has none)
 levers: [price, promo, cost]
 not_recorded: [display, feature, space]
-role_in_paper: price, promotion and cost effects; comparison with the chain's pricing experiments
+caveats:
+  - the promotion code is not set consistently; no code does not prove no promotion
+  - cost comes from average acquisition cost, which lags replacement cost
+role_in_paper: price, promotion and cost effects

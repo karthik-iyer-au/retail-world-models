@@ -24,6 +24,14 @@ the files are byte-identical to the ones used here.
 
 The files each loader expects are listed in `configs/datasets/`.
 
+## Dominick's files and where they come from
+
+All from the Kilts Center page for the Dominick's dataset
+(chicagobooth.edu/research/kilts/research-data/dominicks), unchanged: the
+CSV movement file and the UPC file for each category, the data manual, and
+the Stata store demographics file. Academic research use only, and the
+Kilts Center must be acknowledged in any paper.
+
 ## M5 files and where they come from
 
 From the Kaggle competition "M5 Forecasting - Accuracy": `calendar.csv`,

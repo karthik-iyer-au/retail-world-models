@@ -13,7 +13,7 @@ original source under that source's terms.
 |---|---|---|
 | M5 | Kaggle, "M5 Forecasting - Accuracy" | Free with a Kaggle account |
 | M5 test-period actuals, weights, published scores and forecasts | Organisers' folder linked from github.com/Mcompetitions/M5-methods | Public |
-| Dominick's Finer Foods | Kilts Center for Marketing, Chicago Booth | Free for academic research |
+| Dominick's Finer Foods | Kilts Center for Marketing, University of Chicago Booth School of Business | Academic research only; the Kilts Center must be acknowledged in any paper |
 | Breakfast at the Frat | dunnhumby source files | Free with registration |
 
 Checksums of the exact files used are in `data/manifests/`.

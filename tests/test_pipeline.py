@@ -136,8 +136,30 @@ def test_wrmsse_matches_series_by_series_calculation():
     assert got["wrmsse"] == pytest.approx(np.mean([by_hand(c) for c in levels]))
 
 
-def test_last_k_rows_takes_the_end_of_each_series():
-    from rwm.utils.panel import last_k_rows
+def test_naive_forecasts_follow_dates_when_a_series_has_gaps():
+    days = pd.date_range("2021-01-01", periods=21)
+    full = pd.DataFrame({SERIES: "a", "store_id": "s", "item_id": "i", DATE: days, UNITS: np.arange(21.0)})
+    gappy = full.drop(index=[16, 18])  # two days missing in the last week
+    future = pd.DataFrame({SERIES: "a", DATE: pd.date_range("2021-01-22", periods=10)})
+    got = build_model("seasonal_naive", season=7).fit(gappy).predict(future)
+    assert got.tolist() == [14, 15, 0, 17, 0, 19, 20, 14, 15, 0]
+    flat = build_model("recent_average", window=7).fit(gappy).predict(future)
+    assert flat.tolist() == [(14 + 15 + 17 + 19 + 20) / 7] * 10
 
-    s = pd.Series(["a"] * 5 + ["b"] * 2 + ["c"] * 4)
-    assert last_k_rows(s, 3).tolist() == [2, 3, 4, 5, 6, 8, 9, 10]
+
+def test_run_scores_series_that_are_absent_from_a_test_window(tmp_path):
+    """A series with no rows in the forecast window must not shift the others."""
+    from rwm.data.registry import register_dataset
+    from rwm.data.synthetic import load_synthetic
+
+    @register_dataset("synthetic_with_gap")
+    def _load(**kw):
+        ds = load_synthetic(**kw)
+        last = ds.panel[DATE] > ds.panel[DATE].max() - pd.Timedelta(days=14)
+        ds.panel = ds.panel[~(last & (ds.panel[SERIES] == "S0_I1"))].reset_index(drop=True)
+        return ds
+
+    base = {**CONFIG, "evaluation": {"horizon": 14, "n_origins": 1}}
+    gap = {**base, "dataset": {"name": "synthetic_with_gap", "params": CONFIG["dataset"]["params"]}}
+    m = json.loads((run(gap, out_root=tmp_path) / "metrics.json").read_text())
+    assert np.isfinite(m["wrmsse"])
