@@ -172,6 +172,7 @@ class LightGBMDirect(Forecaster):
                 free_raw_data=True,
             )
             booster = lgb.train(self.params, data, num_boost_round=self.rounds)
+            booster.free_dataset()  # the fitted model does not need its training table
             self.feature_names = list(f)
             del x, data, f, part
             tail = slice(len(dates) - self.history, len(dates))
