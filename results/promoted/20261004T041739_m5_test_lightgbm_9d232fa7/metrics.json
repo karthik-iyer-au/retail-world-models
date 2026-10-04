@@ -1,0 +1,92 @@
+{
+  "model": "lightgbm_direct",
+  "dataset": "m5",
+  "levers_available": [
+    "price"
+  ],
+  "levels_scored": 12,
+  "wrmsse": 0.5520661801753806,
+  "splits": [
+    {
+      "origin": 0,
+      "train_end": "2016-05-22",
+      "test_start": "2016-05-23",
+      "test_end": "2016-06-19",
+      "wrmsse": 0.5520661801753806,
+      "by_level": [
+        {
+          "level": "total",
+          "series": 1,
+          "wrmsse": 0.25799376362098125,
+          "mean_rmsse": 0.25799376362098125
+        },
+        {
+          "level": "state_id",
+          "series": 3,
+          "wrmsse": 0.3418757060932375,
+          "mean_rmsse": 0.35791768131231755
+        },
+        {
+          "level": "store_id",
+          "series": 10,
+          "wrmsse": 0.4278800834361853,
+          "mean_rmsse": 0.4351483538127792
+        },
+        {
+          "level": "cat_id",
+          "series": 3,
+          "wrmsse": 0.30686253803637004,
+          "mean_rmsse": 0.33719762040175655
+        },
+        {
+          "level": "dept_id",
+          "series": 7,
+          "wrmsse": 0.412413829675917,
+          "mean_rmsse": 0.4909679762023243
+        },
+        {
+          "level": "state_idxcat_id",
+          "series": 9,
+          "wrmsse": 0.4084932938741183,
+          "mean_rmsse": 0.4670214502249182
+        },
+        {
+          "level": "state_idxdept_id",
+          "series": 21,
+          "wrmsse": 0.5061608468087841,
+          "mean_rmsse": 0.5984452124366579
+        },
+        {
+          "level": "store_idxcat_id",
+          "series": 30,
+          "wrmsse": 0.4967251790554512,
+          "mean_rmsse": 0.5436673055320895
+        },
+        {
+          "level": "store_idxdept_id",
+          "series": 70,
+          "wrmsse": 0.5969351778141028,
+          "mean_rmsse": 0.6785804114065075
+        },
+        {
+          "level": "item_id",
+          "series": 3049,
+          "wrmsse": 1.0062572884229404,
+          "mean_rmsse": 0.8483411399972927
+        },
+        {
+          "level": "item_idxstate_id",
+          "series": 9147,
+          "wrmsse": 0.956676934769701,
+          "mean_rmsse": 0.8101767122363879
+        },
+        {
+          "level": "item_idxstore_id",
+          "series": 30490,
+          "wrmsse": 0.9065195204967778,
+          "mean_rmsse": 0.7719277091895257
+        }
+      ]
+    }
+  ]
+}

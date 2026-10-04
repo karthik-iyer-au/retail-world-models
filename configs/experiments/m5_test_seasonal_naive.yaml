@@ -1,4 +1,4 @@
-# Seasonal naive on the official M5 test period (29 May to 19 June 2016),
+# Seasonal naive on the official M5 test period (23 May to 19 June 2016),
 # scored with the 12-level WRMSSE. The organisers publish 0.847 for this method.
 name: m5_test_seasonal_naive
 seed: 0
