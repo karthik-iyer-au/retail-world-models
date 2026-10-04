@@ -183,3 +183,12 @@ def test_run_reports_accuracy_with_a_lever_on_and_off(tmp_path):
     c = m["splits"][0]["by_condition"]["promo"]
     assert c["on"]["periods"] + c["off"]["periods"] == 2 * 3 * 14
     assert c["on"]["periods"] > 0 and np.isfinite(c["off"]["wrmsse"])
+
+
+def test_holdout_periods_are_never_scored(tmp_path):
+    held = {**CONFIG, "evaluation": {"horizon": 14, "n_origins": 2, "holdout_periods": 14}}
+    full = {**CONFIG, "evaluation": {"horizon": 14, "n_origins": 3}}
+    a = json.loads((run(held, out_root=tmp_path / "a") / "metrics.json").read_text())["splits"]
+    b = json.loads((run(full, out_root=tmp_path / "b") / "metrics.json").read_text())["splits"]
+    assert [s["test_end"] for s in a] == [s["test_end"] for s in b[:2]]
+    assert [s["wrmsse"] for s in a] == pytest.approx([s["wrmsse"] for s in b[:2]])

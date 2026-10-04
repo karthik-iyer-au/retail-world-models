@@ -90,6 +90,7 @@ class StateModel(Forecaster):
         tweedie_power: float = 1.5,
         seed: int = 0,
         device: str | None = None,
+        mixed_precision: bool = False,
     ):
         self._settings = {k: v for k, v in locals().items() if k not in ("self", "__class__")}
         self.horizon, self.history, self.train_periods = horizon, history, train_periods
@@ -97,6 +98,7 @@ class StateModel(Forecaster):
         self.net_args = dict(d_model=d_model, layers=layers, heads=heads, dropout=dropout)
         self.steps, self.batch, self.lr = steps, batch, lr
         self.power, self.seed, self.device = tweedie_power, seed, device
+        self.mixed_precision = mixed_precision  # faster on a GPU; has no effect on a CPU
 
     def _tensors(self, frame: pd.DataFrame, dates: np.ndarray, with_units: bool):
         """Series-by-date arrays for one stretch of dates."""
@@ -179,6 +181,8 @@ class StateModel(Forecaster):
         shape = lambda k: (k + 1) / warm if k < warm else 0.5 * (1 + np.cos(np.pi * (k - warm) / max(1, self.steps - warm)))
         sched = torch.optim.lr_scheduler.LambdaLR(opt, shape)
         gen = torch.Generator(device="cpu").manual_seed(self.seed)
+        amp = self.mixed_precision and self._dev.type == "cuda"
+        scaler = torch.amp.GradScaler("cuda", enabled=amp)
         n, t, p = len(self._names), len(dates), self.power
         self._net.train()
         self.loss_log = []
@@ -187,14 +191,18 @@ class StateModel(Forecaster):
             start = torch.randint(L, t - H + 1, (self.batch,), generator=gen).to(self._dev)
             hist, fut, scale, on_sale, ahead = self._window(data, {**data, "start": start}, rows, start)
             target = data["units"][rows[:, None], ahead] / scale
-            log_mu = self._net(hist, fut, self._cats[rows])
+            with torch.autocast("cuda", dtype=torch.float16, enabled=amp):
+                log_mu = self._net(hist, fut, self._cats[rows])
+            log_mu = log_mu.float()
             # Tweedie loss on sales relative to the item's own level
             loss = -target * torch.exp((1 - p) * log_mu) / (1 - p) + torch.exp((2 - p) * log_mu) / (2 - p)
             loss = (loss * on_sale).sum() / on_sale.sum().clamp(min=1)
             opt.zero_grad(set_to_none=True)
-            loss.backward()
+            scaler.scale(loss).backward()
+            scaler.unscale_(opt)
             torch.nn.utils.clip_grad_norm_(self._net.parameters(), 1.0)
-            opt.step()
+            scaler.step(opt)
+            scaler.update()
             sched.step()
             if step % 50 == 0 or step == self.steps - 1:
                 self.loss_log.append((step, loss.item()))

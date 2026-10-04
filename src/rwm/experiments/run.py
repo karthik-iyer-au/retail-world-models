@@ -50,6 +50,10 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
     ev = config["evaluation"]
     panel = ds.panel
     dates = np.sort(panel[DATE].unique())
+    if ev.get("holdout_periods"):
+        # The last periods are set aside for the final test and are not loaded into this run.
+        dates = dates[: -ev["holdout_periods"]]
+        panel = panel[panel[DATE] <= dates[-1]].reset_index(drop=True)
     levels = ds.hierarchy or [[SERIES]]
     cols = sorted({c for lv in levels for c in lv} | {SERIES})
     attrs = panel[cols].drop_duplicates(SERIES).sort_values(SERIES).reset_index(drop=True)
