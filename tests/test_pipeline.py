@@ -6,7 +6,7 @@ import pytest
 
 from rwm.data import load_dataset
 from rwm.data.schema import DATE, SERIES, UNITS, validate
-from rwm.evaluation.metrics import rmsse, weighted_rmsse
+from rwm.evaluation.metrics import rmsse, rmsse_by_series, weighted_rmsse
 from rwm.evaluation.splits import rolling_origins
 from rwm.experiments.run import run
 from rwm.forecaster import build_model
@@ -105,3 +105,24 @@ def test_m5_loader_on_files_in_m5_layout(tmp_path):
     assert ca["snap"].eq(1).all() and ca["event"].sum() == 1
     tx = p[p[SERIES] == "A_1_TX_1"]
     assert tx["price"].isna().all() and tx["snap"].eq(0).all()
+
+
+def test_rmsse_by_series_matches_per_series_definition():
+    p = load_dataset("synthetic", n_periods=90, seed=3).panel
+    p.loc[p[SERIES] == "S0_I0", UNITS] = 0.0  # a series that never sells
+    first = p[SERIES] == "S1_I1"
+    p.loc[first & (p[DATE] < p[DATE].min() + pd.Timedelta(days=20)), UNITS] = 0.0  # late start
+    cut = sorted(p[DATE].unique())[75]
+    train, test = p[p[DATE] <= cut], p[p[DATE] > cut].copy()
+    test["forecast"] = 3.0
+    got = rmsse_by_series(train, test, SERIES, UNITS)
+    for k, g in test.groupby(SERIES):
+        want = rmsse(train.loc[train[SERIES] == k, UNITS].to_numpy(), g[UNITS].to_numpy(), g["forecast"].to_numpy())
+        assert (np.isnan(want) and np.isnan(got[k])) or got[k] == pytest.approx(want)
+
+
+def test_last_k_rows_takes_the_end_of_each_series():
+    from rwm.utils.panel import last_k_rows
+
+    s = pd.Series(["a"] * 5 + ["b"] * 2 + ["c"] * 4)
+    assert last_k_rows(s, 3).tolist() == [2, 3, 4, 5, 6, 8, 9, 10]

@@ -27,8 +27,18 @@ def validate(panel: pd.DataFrame, levers: list[str]) -> pd.DataFrame:
     unknown = [c for c in levers if c not in LEVERS]
     if unknown:
         raise ValueError(f"unknown lever names: {unknown}")
-    if panel.duplicated([SERIES, DATE]).any():
-        raise ValueError("panel has more than one row for a series and date")
     if (panel[UNITS] < 0).any():
         raise ValueError("panel has negative units")
-    return panel.sort_values([SERIES, DATE]).reset_index(drop=True)
+    if not _ordered_and_unique(panel):
+        panel = panel.sort_values([SERIES, DATE], kind="stable").reset_index(drop=True)
+        if not _ordered_and_unique(panel):
+            raise ValueError("panel has more than one row for a series and date")
+    return panel
+
+
+def _ordered_and_unique(panel: pd.DataFrame) -> bool:
+    """True if rows run series by series, dates strictly increasing in each."""
+    codes = pd.factorize(panel[SERIES], sort=True)[0]
+    dates = panel[DATE].to_numpy()
+    same = codes[1:] == codes[:-1]
+    return bool(((codes[1:] > codes[:-1]) | (same & (dates[1:] > dates[:-1]))).all())

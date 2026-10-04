@@ -1,6 +1,6 @@
 """The interface every model implements, prior work and ours alike.
 
-`fit` sees history, including units. `predict` sees the future rows with the
+`fit` sees history, including units, ordered by series then date. `predict` sees the future rows with the
 decisions planned for them (price, promotion and so on) and no units. That is
 the question the paper asks: given these decisions, what will sell.
 """

@@ -22,9 +22,10 @@ import yaml
 from rwm.data import load_dataset
 from rwm.data import manifest as data_manifest
 from rwm.data.schema import DATE, PRICE, SERIES, UNITS
-from rwm.evaluation.metrics import rmsse, weighted_rmsse
+from rwm.evaluation.metrics import rmsse_by_series, weighted_rmsse
 from rwm.evaluation.splits import rolling_origins
 from rwm.forecaster import build_model
+from rwm.utils.panel import last_k_rows
 from rwm.utils.paths import DATA_RAW, RESULTS
 from rwm.utils.run_manifest import build_manifest
 from rwm.utils.seed import set_seed
@@ -62,18 +63,11 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
         out["origin"] = sp.origin
         forecasts.append(out)
 
-        last_dates = sorted(train[DATE].unique())[-ev.get("weight_window", 28):]
-        recent = train[train[DATE].isin(last_dates)]
-        value = recent[UNITS] * (recent[PRICE] if PRICE in recent else 1.0)
-        weight = value.groupby(recent[SERIES]).sum()
-
-        hist = {k: g[UNITS].to_numpy() for k, g in train.groupby(SERIES)}
-        scores = {
-            k: rmsse(hist[k], g[UNITS].to_numpy(), g["forecast"].to_numpy(), ev.get("scale_lag", 1))
-            for k, g in out.sort_values(DATE).groupby(SERIES)
-            if k in hist
-        }
-        s = pd.Series(scores)
+        recent = train.iloc[last_k_rows(train[SERIES], ev.get("weight_window", 28))]
+        value = recent[UNITS].astype("float64") * (recent[PRICE] if PRICE in recent else 1.0)
+        weight = value.groupby(recent[SERIES].astype(str).to_numpy()).sum()
+        s = rmsse_by_series(train, out, SERIES, UNITS, ev.get("scale_lag", 1))
+        del train, test, recent
         per_split.append(
             {
                 "origin": sp.origin,

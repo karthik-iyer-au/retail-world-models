@@ -8,6 +8,7 @@ import pandas as pd
 
 from rwm.data.schema import DATE, SERIES, UNITS
 from rwm.forecaster import Forecaster, register_model
+from rwm.utils.panel import last_k_rows
 
 
 @register_model("seasonal_naive")
@@ -18,9 +19,8 @@ class SeasonalNaive(Forecaster):
         self.season = season
 
     def fit(self, train: pd.DataFrame) -> "SeasonalNaive":
-        tail = train.sort_values(DATE).groupby(SERIES).tail(self.season)
-        tail = tail[[SERIES, UNITS]].copy()
-        tail["pos"] = tail.groupby(SERIES).cumcount()
+        tail = train.iloc[last_k_rows(train[SERIES], self.season)][[SERIES, UNITS]].copy()
+        tail["pos"] = tail.groupby(SERIES, observed=True).cumcount()
         self._tail = tail
         return self
 
@@ -28,7 +28,7 @@ class SeasonalNaive(Forecaster):
         fut = future[[SERIES, DATE]].copy()
         fut["row"] = np.arange(len(fut))
         fut = fut.sort_values([SERIES, DATE])
-        fut["pos"] = fut.groupby(SERIES).cumcount() % self.season
+        fut["pos"] = fut.groupby(SERIES, observed=True).cumcount() % self.season
         out = fut.merge(self._tail, on=[SERIES, "pos"], how="left").sort_values("row")
         return out[UNITS].fillna(0.0).to_numpy()
 
@@ -41,8 +41,8 @@ class RecentAverage(Forecaster):
         self.window = window
 
     def fit(self, train: pd.DataFrame) -> "RecentAverage":
-        tail = train.sort_values(DATE).groupby(SERIES).tail(self.window)
-        self._mean = tail.groupby(SERIES)[UNITS].mean()
+        tail = train.iloc[last_k_rows(train[SERIES], self.window)]
+        self._mean = tail.groupby(SERIES, observed=True)[UNITS].mean()
         return self
 
     def predict(self, future: pd.DataFrame) -> np.ndarray:

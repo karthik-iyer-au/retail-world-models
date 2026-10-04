@@ -8,6 +8,7 @@ display, feature or cost columns, so the only lever it provides is price.
 """
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from rwm.data.registry import Dataset, register_dataset
@@ -32,7 +33,7 @@ def load_m5(
             raise FileNotFoundError(f"{p} not found. See data/README.md.")
 
     calendar = pd.read_csv(paths[0])
-    prices = pd.read_csv(paths[1])
+    prices = pd.read_csv(paths[1], dtype={"store_id": "category", "item_id": "category"})
     sales = pd.read_csv(paths[2])
 
     if stores:
@@ -41,36 +42,60 @@ def load_m5(
         keep = sorted(sales["item_id"].unique())[:max_items]
         sales = sales[sales["item_id"].isin(keep)]
 
+    # One row per series, sorted, so row order is fixed whatever the file order.
     day_cols = [c for c in sales.columns if c.startswith("d_")]
-    long = sales.melt(
-        id_vars=["item_id", "dept_id", "cat_id", "store_id", "state_id"],
-        value_vars=day_cols,
-        var_name="d",
-        value_name=UNITS,
-    )
-    cal = calendar[["d", "date", "wm_yr_wk", "event_name_1", "snap_CA", "snap_TX", "snap_WI"]]
-    long = long.merge(cal, on="d", how="left", validate="many_to_one")
-    long = long.merge(
-        prices, on=["store_id", "item_id", "wm_yr_wk"], how="left", validate="many_to_one"
-    )
+    order = (sales["item_id"] + "_" + sales["store_id"]).sort_values().index
+    units = sales.loc[order, day_cols].to_numpy(dtype=np.float32)
+    sales = sales.loc[order, ["item_id", "dept_id", "cat_id", "store_id", "state_id"]]
+    sales = sales.reset_index(drop=True)
+    sales["series"] = sales["item_id"] + "_" + sales["store_id"]
+    n, d = units.shape
 
-    snap = long["snap_CA"].where(long["state_id"] == "CA", 0)
-    snap = snap.where(long["state_id"] != "TX", long["snap_TX"])
-    snap = snap.where(long["state_id"] != "WI", long["snap_WI"])
+    cal = calendar.set_index("d").loc[day_cols]
+    dates = pd.to_datetime(cal["date"]).to_numpy()
+    weeks = cal["wm_yr_wk"].to_numpy()
+
+    # The full table has about 59 million rows, so it is built from arrays
+    # (series x day) and compact column types, not by joining text columns.
+    week_ids = np.unique(weeks)
+    price_by_week = np.full((n, len(week_ids)), np.nan, dtype=np.float32)
+    keys = pd.DataFrame(
+        {
+            k: pd.Categorical.from_codes(
+                prices[k].cat.categories.get_indexer(sales[k]), dtype=prices[k].dtype
+            )
+            for k in ("store_id", "item_id")
+        }
+    ).assign(row=np.arange(n))
+    pr = prices.merge(keys, on=["store_id", "item_id"], how="inner")
+    pr = pr[pr["wm_yr_wk"].isin(week_ids)]
+    price_by_week[pr["row"].to_numpy(), np.searchsorted(week_ids, pr["wm_yr_wk"].to_numpy())] = (
+        pr["sell_price"].to_numpy(dtype=np.float32)
+    )
+    price = price_by_week[:, np.searchsorted(week_ids, weeks)]
+    del prices, pr, price_by_week, keys
+
+    snap_by_state = {st: cal[f"snap_{st}"].to_numpy(dtype=np.int8) for st in ("CA", "TX", "WI")}
+    snap = np.stack([snap_by_state[st] for st in sales["state_id"]])
+
+    def repeat(col: str) -> pd.Categorical:
+        c = pd.Categorical(sales[col])
+        return pd.Categorical.from_codes(np.repeat(c.codes, d), categories=c.categories)
 
     panel = pd.DataFrame(
         {
-            SERIES: long["item_id"] + "_" + long["store_id"],
-            STORE: long["store_id"],
-            ITEM: long["item_id"],
-            DATE: pd.to_datetime(long["date"]),
-            UNITS: long[UNITS].astype(float),
-            PRICE: long["sell_price"],  # empty before the item is first sold
-            "dept_id": long["dept_id"],
-            "cat_id": long["cat_id"],
-            "state_id": long["state_id"],
-            "event": long["event_name_1"].notna().astype(int),
-            "snap": snap.astype(int),
-        }
+            SERIES: repeat("series"),
+            STORE: repeat("store_id"),
+            ITEM: repeat("item_id"),
+            DATE: np.tile(dates, n),
+            UNITS: units.ravel(),
+            PRICE: price.ravel(),  # empty before the item is first sold
+            "dept_id": repeat("dept_id"),
+            "cat_id": repeat("cat_id"),
+            "state_id": repeat("state_id"),
+            "event": np.tile(cal["event_name_1"].notna().to_numpy(dtype=np.int8), n),
+            "snap": snap.ravel(),
+        },
+        copy=False,
     )
     return Dataset("m5", panel, ["price"], files=paths)
