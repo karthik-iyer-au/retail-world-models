@@ -36,7 +36,7 @@ def _data_files(ds, strict: bool) -> list[dict]:
     if not ds.files:
         return []  # generated data, nothing on disk
     if strict or data_manifest.manifest_path(ds.name).exists():
-        return data_manifest.verify(ds.name)
+        return data_manifest.verify(ds.name, files=ds.files)
     return data_manifest.describe(ds.files, DATA_RAW / ds.name)
 
 

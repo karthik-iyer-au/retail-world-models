@@ -39,15 +39,24 @@ def register(dataset: str) -> Path:
     return out
 
 
-def verify(dataset: str, only_present: bool = False) -> list[dict]:
+def verify(dataset: str, only_present: bool = False, files: list[Path] | None = None) -> list[dict]:
     """Returns the entries checked. Raises if any file differs or is missing.
-    With `only_present`, registered files that are absent are skipped."""
+    With `only_present`, registered files that are absent are skipped.
+    With `files`, exactly those files are checked (the ones a run reads), and
+    each must be registered."""
     path = manifest_path(dataset)
     if not path.exists():
         raise FileNotFoundError(f"{path} not found. Run: make data-register DATASET={dataset}")
     root = DATA_RAW / dataset
+    entries = json.loads(path.read_text())["files"]
+    if files is not None:
+        wanted = {str(Path(f).resolve().relative_to(root.resolve())) for f in files}
+        unknown = wanted - {e["file"] for e in entries}
+        if unknown:
+            raise ValueError(f"not registered in {path}: {sorted(unknown)}")
+        entries = [e for e in entries if e["file"] in wanted]
     checked = []
-    for e in json.loads(path.read_text())["files"]:
+    for e in entries:
         p = root / e["file"]
         if not p.exists():
             if only_present:

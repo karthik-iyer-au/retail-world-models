@@ -222,3 +222,24 @@ def test_fetch_copies_registered_files_from_a_folder_and_checks_them(tmp_path, m
     (raw / "toy" / "a.zip").write_bytes(b"changed")
     with pytest.raises(ValueError):
         fetch.main(["toy", "--from", str(source)])
+
+
+def test_verify_checks_only_the_files_a_run_reads(tmp_path, monkeypatch):
+    import pytest
+
+    from rwm.data import manifest
+
+    monkeypatch.setattr(manifest, "DATA_RAW", tmp_path / "raw")
+    monkeypatch.setattr(manifest, "DATA_MANIFESTS", tmp_path)
+    root = tmp_path / "raw" / "d"
+    root.mkdir(parents=True)
+    (root / "a.csv").write_text("a")
+    (root / "b.csv").write_text("b")
+    manifest.register("d")
+    (root / "b.csv").unlink()
+    assert [e["file"] for e in manifest.verify("d", files=[root / "a.csv"])] == ["a.csv"]
+    with pytest.raises(FileNotFoundError):
+        manifest.verify("d")
+    (root / "c.csv").write_text("c")
+    with pytest.raises(ValueError):
+        manifest.verify("d", files=[root / "c.csv"])
