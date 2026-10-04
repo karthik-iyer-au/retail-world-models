@@ -1,0 +1,31 @@
+# Our model on the Breakfast at the Frat development windows:
+# item-to-item weights from conditional similarity plus attention.
+# Items in the same store can affect each other.
+name: frat_dev_state_model_both
+seed: 0
+dataset:
+  name: breakfast_at_the_frat
+model:
+  name: state_model
+  params:
+    horizon: 8
+    history: 26
+    train_periods: 90
+    categorical: [item_id, store_id, cat_id, manufacturer, store_segment]
+    extra: [promo, display, feature, tpr_only]
+    d_model: 64
+    layers: 2
+    heads: 4
+    steps: 3000
+    batch: 1024
+    lr: 0.001
+    group_by: [store_id]
+    neighbours: both
+    seed: 0
+evaluation:
+  horizon: 8
+  n_origins: 2
+  holdout_periods: 8
+  scale_lag: 1
+  weight_window: 13
+  conditions: [promo, display, feature, tpr_only]

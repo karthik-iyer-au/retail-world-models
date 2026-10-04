@@ -17,3 +17,13 @@ Rules for code in this folder:
    worse. Each such test is an experiment config and a recorded run.
 4. The model implements the same `Forecaster` interface as prior work and is
    scored by the same code.
+
+## Item-to-item part
+
+Set `group_by` (which items can affect each other, for example `[store_id]`)
+and `neighbours` to `similarity`, `attention` or `both`. With `group_by` alone
+the model is trained on whole groups at a time but has no item-to-item part;
+that is the like-for-like comparison. `neighbour_weights(future)` returns the
+weight each item gave each neighbour for each forecast date. The versions are
+described at the top of `state_model.py` and tested in
+`tests/test_item_to_item.py`.

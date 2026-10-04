@@ -1,0 +1,14 @@
+# The three versions of the item-to-item part against the same model without
+# it, on the Breakfast at the Frat development windows, five seeds each.
+datasets:
+  - name: breakfast_at_the_frat
+    from: /content/drive/MyDrive/retail-world-model/data
+runs:
+  - config: configs/experiments/frat_dev_state_model_grouped.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/frat_dev_state_model_similarity.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/frat_dev_state_model_attention.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/frat_dev_state_model_both.yaml
+    seeds: [1, 2, 3, 4, 5]
