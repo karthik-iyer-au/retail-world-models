@@ -90,12 +90,22 @@ weeks:
 | + item-to-item, both | 0.453 | 0.419 to 0.498 | 0.840 | 0.901 | 0.562 | 0.420 |
 | + item-to-item, both, same category only | 0.443 | 0.412 to 0.470 | 0.849 | 0.890 | 0.552 | 0.420 |
 | Our model, items drawn at random, 10,000 steps | 0.432 | 0.411 to 0.450 | 0.829 | 0.871 | 0.567 | 0.420 |
+| Lever step: regular price | 0.429 | 0.419 to 0.442 | 0.845 | 0.890 | 0.550 | 0.413 |
+| Lever step: regular price, baseline times lift | 0.406 | 0.401 to 0.414 | 0.840 | 0.863 | 0.537 | 0.406 |
+| Lever step: regular price, baseline times lift, latent loss | 0.411 | 0.401 to 0.422 | 0.829 | 0.868 | 0.548 | 0.407 |
+| Lever step: latent loss alone | 0.428 | 0.414 to 0.440 | 0.825 | 0.867 | 0.556 | 0.412 |
 
 Reading: with all 55 products in a store able to affect each other, the
 item-to-item part makes the forecast worse in every version, and makes it
 vary more from seed to seed. Limiting it to products in the same category
 narrows the gap but does not close it. It is not kept in this form. Training
 for longer does not help either, so the first version was not stopped early.
+
+Lever step: building the forecast as baseline times lift is the part that
+helps. It beats LightGBM overall in all five runs and halves the spread
+between seeds. The overall score covers every level from item-store up to
+the total; the lever columns are item-store weeks only, and there LightGBM
+is still ahead. Regular price alone and the latent loss do not help here.
 
 Dominick's analgesics, the two 8-week windows before the held-out final 8
 weeks, one run each:
