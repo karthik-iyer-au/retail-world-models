@@ -13,6 +13,9 @@ A job file lists the datasets to fetch and the runs to make:
       seeds: [1, 2, 3]
 
 Every run is strict: committed code and data that matches its checksums.
+A run already saved in the output folder for exactly the same config is kept
+and not repeated, so a job that was cut short can be started again. The job
+ends by printing one summary line per run.
 """
 import argparse
 import json
@@ -22,24 +25,56 @@ import yaml
 
 from rwm.data import fetch
 from rwm.experiments.run import run, with_seed
+from rwm.utils.hashing import sha256_obj
 from rwm.utils.paths import REPO_ROOT, RESULTS
+
+
+def finished_run(out: Path, config: dict) -> Path | None:
+    """The folder of an earlier strict run of exactly this config in `out`, if any."""
+    tag = f"_{config['name']}_{sha256_obj(config)[:8]}"
+    for folder in sorted(out.glob(f"*{tag}")):
+        if (folder / "metrics.json").exists() and (folder / "manifest.json").exists():
+            return folder
+    return None
+
+
+def summary_row(folder: Path) -> str:
+    m = json.loads((folder / "metrics.json").read_text())
+    row = f"{folder.name.split('_', 1)[1]:<48} overall {m['wrmsse']:.4f}"
+    conditions = m["splits"][0].get("by_condition", {})
+    for c in conditions:
+        on = [s["by_condition"][c]["on"]["wrmsse"] for s in m["splits"]]
+        off = [s["by_condition"][c]["off"]["wrmsse"] for s in m["splits"]]
+        row += f" | {c} on {sum(on) / len(on):.4f} off {sum(off) / len(off):.4f}"
+    return row
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--job", required=True)
+    ap.add_argument("--job", required=True, nargs="+", help="one or more job files, run in order")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
-    job = yaml.safe_load(Path(args.job).read_text())
-    for d in job.get("datasets", []):
-        fetch.main([d["name"], *d.get("codes", []), *(["--from", d["from"]] if d.get("from") else [])])
     out = Path(args.out) if args.out else RESULTS
-    for r in job["runs"]:
-        config = yaml.safe_load((REPO_ROOT / r["config"]).read_text())
-        for seed in r.get("seeds", [None]):
-            folder = run(with_seed(config, seed), strict=True, out_root=out)
-            score = json.loads((folder / "metrics.json").read_text())["wrmsse"]
-            print(f"finished {folder.name}: WRMSSE {score:.4f}", flush=True)
+    for job_file in args.job:
+        job = yaml.safe_load(Path(job_file).read_text())
+        for d in job.get("datasets", []):
+            fetch.main([d["name"], *d.get("codes", []), *(["--from", d["from"]] if d.get("from") else [])])
+        folders = []
+        for r in job["runs"]:
+            base = yaml.safe_load((REPO_ROOT / r["config"]).read_text())
+            for seed in r.get("seeds", [None]):
+                config = with_seed(base, seed)
+                # A run already saved for this exact config is kept, not repeated.
+                folder = finished_run(out, config)
+                if folder is None:
+                    folder = run(config, strict=True, out_root=out)
+                    print(f"finished {folder.name}", flush=True)
+                else:
+                    print(f"already saved {folder.name}", flush=True)
+                folders.append(folder)
+        print(f"\nSummary of {job_file} (average over each run's windows; lower is better)")
+        for folder in folders:
+            print(summary_row(folder), flush=True)
 
 
 if __name__ == "__main__":
