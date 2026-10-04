@@ -1,0 +1,14 @@
+# Seasonal naive on the 28 days before the M5 test period (25 April to 22 May 2016),
+# scored with the 12-level WRMSSE.
+name: m5_validation_seasonal_naive
+seed: 0
+dataset:
+  name: m5
+model:
+  name: seasonal_naive
+  params: {season: 7}
+evaluation:
+  horizon: 28
+  n_origins: 1
+  scale_lag: 1
+  weight_window: 28
