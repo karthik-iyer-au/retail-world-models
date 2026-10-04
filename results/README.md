@@ -19,6 +19,7 @@ links to a folder in `results/promoted/` holding its manifest and scores.
 |---|---|---|
 | Seasonal naive | 0.870 | 0.847 |
 | LightGBM, one model per store | 0.715 | 0.552 |
+| Our model, item encoder and readout only, one run | 0.708 | not run |
 
 Published scores on the official test period, from the organisers' files
 (`data/raw/m5_reference/`): seasonal naive 0.847, best statistical benchmark
@@ -31,6 +32,9 @@ Notes:
   tuned on either window.
 - In the April to May window the LightGBM forecasts are 7.7% below actual
   sales in total. In the test period they are 2.1% below.
+- Our model's row is a single training run on a GPU, which does not repeat
+  exactly. The difference from LightGBM is smaller than can be claimed from
+  one run. The test period is left unseen until the model design is final.
 
 | Run | Folder |
 |---|---|
@@ -38,6 +42,7 @@ Notes:
 | LightGBM, April to May | `20261004T034345_m5_validation_lightgbm_11b5432b` |
 | Seasonal naive, test period | `20261004T045417_m5_test_seasonal_naive_54f6d687` |
 | LightGBM, test period | `20261004T041739_m5_test_lightgbm_9d232fa7` |
+| Our model, April to May | `20261004T063152_m5_validation_state_model_ec8ad17b` |
 
 ## Breakfast at the Frat benchmarks
 

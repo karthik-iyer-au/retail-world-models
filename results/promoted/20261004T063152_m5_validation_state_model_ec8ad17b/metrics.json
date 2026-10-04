@@ -1,0 +1,99 @@
+{
+  "model": "state_model",
+  "dataset": "m5",
+  "levers_available": [
+    "price"
+  ],
+  "levels_scored": 12,
+  "wrmsse": 0.7077808044240045,
+  "splits": [
+    {
+      "origin": 0,
+      "train_end": "2016-04-24",
+      "test_start": "2016-04-25",
+      "test_end": "2016-05-22",
+      "wrmsse": 0.7077808044240045,
+      "by_level": [
+        {
+          "level": "total",
+          "series": 1,
+          "wrmsse": 0.6245062622590573,
+          "mean_rmsse": 0.6245062622590573
+        },
+        {
+          "level": "state_id",
+          "series": 3,
+          "wrmsse": 0.6200876143078904,
+          "mean_rmsse": 0.6457270426163745
+        },
+        {
+          "level": "store_id",
+          "series": 10,
+          "wrmsse": 0.6607580795371639,
+          "mean_rmsse": 0.6779902812110536
+        },
+        {
+          "level": "cat_id",
+          "series": 3,
+          "wrmsse": 0.6361531405031366,
+          "mean_rmsse": 0.6237172079640265
+        },
+        {
+          "level": "dept_id",
+          "series": 7,
+          "wrmsse": 0.6729585142920618,
+          "mean_rmsse": 0.9062156147925322
+        },
+        {
+          "level": "state_idxcat_id",
+          "series": 9,
+          "wrmsse": 0.6458382696598698,
+          "mean_rmsse": 0.6702676304399816
+        },
+        {
+          "level": "state_idxdept_id",
+          "series": 21,
+          "wrmsse": 0.6820595223898728,
+          "mean_rmsse": 0.8722539898438205
+        },
+        {
+          "level": "store_idxcat_id",
+          "series": 30,
+          "wrmsse": 0.6893592296443355,
+          "mean_rmsse": 0.707677467514603
+        },
+        {
+          "level": "store_idxdept_id",
+          "series": 70,
+          "wrmsse": 0.73559184284649,
+          "mean_rmsse": 0.8454661935719198
+        },
+        {
+          "level": "item_id",
+          "series": 3049,
+          "wrmsse": 0.8501317391216767,
+          "mean_rmsse": 0.8095744555211177
+        },
+        {
+          "level": "item_idxstate_id",
+          "series": 9147,
+          "wrmsse": 0.8414375012786067,
+          "mean_rmsse": 0.7826410411368093
+        },
+        {
+          "level": "item_idxstore_id",
+          "series": 30490,
+          "wrmsse": 0.8344879372478912,
+          "mean_rmsse": 0.7511575348668996
+        }
+      ]
+    }
+  ],
+  "checkpoints": [
+    {
+      "file": "checkpoint_origin0.pt",
+      "bytes": 59810365,
+      "sha256": "61832d35149db8b9db0f9b050546d9219202fae4492e5742d77ba7193d0ef1ea"
+    }
+  ]
+}

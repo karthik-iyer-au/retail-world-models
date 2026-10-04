@@ -1,0 +1,75 @@
+{
+  "created_utc": "2026-10-04T06:31:52+00:00",
+  "git": {
+    "commit": "a0f8637e6d9b04dee8e9a6b8a7de0408e581dc14",
+    "dirty": false
+  },
+  "config": {
+    "name": "m5_validation_state_model",
+    "seed": 0,
+    "dataset": {
+      "name": "m5"
+    },
+    "model": {
+      "name": "state_model",
+      "params": {
+        "horizon": 28,
+        "history": 112,
+        "train_periods": 730,
+        "categorical": [
+          "item_id",
+          "dept_id",
+          "cat_id",
+          "store_id",
+          "state_id"
+        ],
+        "extra": [
+          "event",
+          "snap"
+        ],
+        "d_model": 128,
+        "layers": 3,
+        "heads": 4,
+        "steps": 30000,
+        "batch": 1024,
+        "lr": 0.001,
+        "seed": 0
+      }
+    },
+    "evaluation": {
+      "horizon": 28,
+      "n_origins": 1,
+      "scale_lag": 1,
+      "weight_window": 28
+    }
+  },
+  "config_sha256": "ec8ad17bacdd5407ca9699fad172aa3a65a616d603120d3dd2245c28bc2e8dda",
+  "seed": 0,
+  "data_files": [
+    {
+      "file": "calendar.csv",
+      "bytes": 103469,
+      "sha256": "d12b5914ef03e66649adf5dd9e996e6602251c22b7a6af8f1f7e3aa12f8860f5"
+    },
+    {
+      "file": "sales_test_evaluation.csv",
+      "bytes": 3260569,
+      "sha256": "73773250dd7f7464f7a1bf3a54874dc7fc8cbb49885cd0bf1efe09bf48fd930d"
+    },
+    {
+      "file": "sales_train_evaluation.csv",
+      "bytes": 121736518,
+      "sha256": "4b4a47c44c38380d2a9168216fea8c9ff2f31b1ddb772f8a0995952a038b8aa0"
+    },
+    {
+      "file": "sell_prices.csv",
+      "bytes": 203395785,
+      "sha256": "9da3ad1f8b8ccacdbdc70612191dd375ec24a4ac6625c24b75b3bc60b0bed2ef"
+    }
+  ],
+  "python": "3.13.15",
+  "platform": "Linux-6.6.122+-x86_64-with-glibc2.39",
+  "device": "cuda: Tesla T4",
+  "packages": "Not copied here. The full manifest, with the installed package list, is saved with the run.",
+  "stored_at": "Google Drive: retail-world-models/results/20261004T063152_m5_validation_state_model_ec8ad17b (manifest.json, metrics.json, forecasts.csv, checkpoint_origin0.pt)"
+}
