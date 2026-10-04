@@ -11,7 +11,7 @@ Code: written here, on the `lightgbm` package (MIT licence).
 
 Inputs per row: sales 28 to 56 days earlier on the same weekday, averages
 and spread of sales ending 28 days earlier, price and how it compares with
-the item's past prices, calendar position, and any extra columns named in
+the item's highest price in the last 12 weeks and its price a week earlier, calendar position, and any extra columns named in
 the config.
 """
 import numpy as np
@@ -22,6 +22,7 @@ from rwm.forecaster import Forecaster, register_model
 
 LAGS = (0, 7, 14, 21, 28)  # added to the horizon: 28, 35, ... days back
 WINDOWS = (7, 14, 28, 56)
+PRICE_WINDOW = 84  # days looked back for the item's highest recent price
 
 
 def _shift(x: np.ndarray, k: int) -> np.ndarray:
@@ -48,6 +49,13 @@ def _rolling(x: np.ndarray, w: int) -> tuple[np.ndarray, np.ndarray]:
         np.where(full, mean, np.nan).astype(np.float32),
         np.where(full, std, np.nan).astype(np.float32),
     )
+
+
+def _rolling_max(x: np.ndarray, w: int) -> np.ndarray:
+    """Highest known value in the `w` columns ending at each column."""
+    padded = np.c_[np.full((len(x), w - 1), np.nan, dtype=np.float32), x]
+    windows = np.lib.stride_tricks.sliding_window_view(padded, w, axis=1)
+    return np.fmax.reduce(windows, axis=2)
 
 
 def _matrix(frame: pd.DataFrame, names: pd.Index, dates: np.ndarray, col: str) -> np.ndarray:
@@ -79,7 +87,8 @@ class LightGBMDirect(Forecaster):
         self.categorical = categorical or []
         self.extra = extra or []
         self.rounds = rounds
-        self.history = horizon + max(LAGS) + max(WINDOWS)  # days of sales needed to forecast
+        # days of history needed to build the inputs for a forecast
+        self.history = max(horizon + max(LAGS) + max(WINDOWS), PRICE_WINDOW + 7)
         self.params = {
             "objective": "tweedie",
             "tweedie_variance_power": 1.1,
@@ -112,7 +121,7 @@ class LightGBMDirect(Forecaster):
                 f["spread_sales_28_days"] = std
         with np.errstate(invalid="ignore", divide="ignore"):
             f["price"] = price
-            f["price_vs_highest_so_far"] = price / np.fmax.accumulate(price, axis=1)
+            f[f"price_vs_highest_in_{PRICE_WINDOW}_days"] = price / _rolling_max(price, PRICE_WINDOW)
             f["price_vs_last_week"] = price / _shift(price, 7)
         d = pd.DatetimeIndex(dates)
         shape = units.shape
@@ -136,6 +145,37 @@ class LightGBMDirect(Forecaster):
         extra = {c: _matrix(frame, names, dates, c) for c in self.extra}
         return units, price, extra
 
+    def _fit_table(self, part: pd.DataFrame, names: pd.Index, dates: np.ndarray):
+        """Inputs and targets for one group, plus the history kept for forecasting."""
+        units, price, extra = self._prepare(part, names, dates)
+        units = np.nan_to_num(units)  # a missing row means nothing sold
+        first = part.drop_duplicates(SERIES).set_index(SERIES).loc[names]
+        cats = {c: self._cat_levels[c].get_indexer(first[c].astype(str)) for c in self.categorical}
+        f = self._features(units, price, extra, dates, cats)
+        cols = slice(len(dates) - min(self.train_periods, len(dates)), len(dates))
+        keep = ~np.isnan(price[:, cols]).ravel()  # only days the item was on sale
+        x = np.column_stack([v[:, cols].ravel()[keep] for v in f.values()])
+        tail = slice(len(dates) - self.history, len(dates))
+        state = {
+            "cats": cats,
+            "dates": dates[tail],
+            "units": units[:, tail],
+            "price": price[:, tail],
+            "extra": {c: m[:, tail] for c, m in extra.items()},
+        }
+        return x, units[:, cols].ravel()[keep], list(f), state
+
+    def _predict_table(self, g: dict, part: pd.DataFrame, fut_dates: np.ndarray) -> np.ndarray:
+        """Inputs for the future days of one group, built by the same code as training."""
+        _, price, extra = self._prepare(part, g["names"], fut_dates)
+        n, h = len(g["names"]), len(fut_dates)
+        dates = np.r_[g["dates"], fut_dates]
+        units = np.c_[g["units"], np.full((n, h), np.nan, dtype=np.float32)]
+        price = np.c_[g["price"], price]
+        extra = {c: np.c_[g["extra"][c], m] for c, m in extra.items()}
+        f = self._features(units, price, extra, dates, g["cats"])
+        return np.column_stack([v[:, -h:].ravel() for v in f.values()])
+
     def fit(self, train: pd.DataFrame) -> "LightGBMDirect":
         import lightgbm as lgb
 
@@ -156,35 +196,19 @@ class LightGBMDirect(Forecaster):
             part = train[recent & (group_codes == code)]  # one store at a time
             part = part.assign(**{SERIES: part[SERIES].astype(str)})
             names = pd.Index(part[SERIES].unique()).sort_values()
-            units, price, extra = self._prepare(part, names, dates)
-            units = np.nan_to_num(units)  # a missing row means nothing sold
-            first = part.drop_duplicates(SERIES).set_index(SERIES).loc[names]
-            cats = {c: self._cat_levels[c].get_indexer(first[c].astype(str)) for c in self.categorical}
-            f = self._features(units, price, extra, dates, cats)
-            cols = slice(len(dates) - min(self.train_periods, len(dates)), len(dates))
-            keep = ~np.isnan(price[:, cols]).ravel()  # only days the item was on sale
-            x = np.column_stack([v[:, cols].ravel()[keep] for v in f.values()])
+            x, y, names_f, state = self._fit_table(part, names, dates)
             data = lgb.Dataset(
                 x,
-                label=units[:, cols].ravel()[keep],
-                feature_name=list(f),
+                label=y,
+                feature_name=names_f,
                 categorical_feature=list(self.categorical),
                 free_raw_data=True,
             )
             booster = lgb.train(self.params, data, num_boost_round=self.rounds)
             booster.free_dataset()  # the fitted model does not need its training table
-            self.feature_names = list(f)
-            del x, data, f, part
-            tail = slice(len(dates) - self.history, len(dates))
-            self._groups[key] = {
-                "booster": booster,
-                "names": names,
-                "cats": cats,
-                "dates": dates[tail],
-                "units": units[:, tail],
-                "price": price[:, tail],
-                "extra": {c: m[:, tail] for c, m in extra.items()},
-            }
+            self.feature_names = names_f
+            del x, y, data, part
+            self._groups[key] = {"booster": booster, "names": names, **state}
         return self
 
     def predict(self, future: pd.DataFrame) -> np.ndarray:
@@ -200,14 +224,8 @@ class LightGBMDirect(Forecaster):
             if len(rows) == 0:
                 continue
             part = future.iloc[rows].assign(**{SERIES: series[rows]})
-            _, price, extra = self._prepare(part, g["names"], fut_dates)
             n, h = len(g["names"]), len(fut_dates)
-            dates = np.r_[g["dates"], fut_dates]
-            units = np.c_[g["units"], np.full((n, h), np.nan, dtype=np.float32)]
-            price = np.c_[g["price"], price]
-            extra = {c: np.c_[g["extra"][c], m] for c, m in extra.items()}
-            f = self._features(units, price, extra, dates, g["cats"])
-            x = np.column_stack([v[:, -h:].ravel() for v in f.values()])
+            x = self._predict_table(g, part, fut_dates)
             pred = g["booster"].predict(x).reshape(n, h)
             r = g["names"].get_indexer(series[rows])
             ok = r >= 0

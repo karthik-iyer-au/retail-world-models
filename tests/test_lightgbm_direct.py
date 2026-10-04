@@ -7,7 +7,8 @@ pytest.importorskip("lightgbm")
 from rwm.data import load_dataset
 from rwm.data.schema import DATE, UNITS
 from rwm.forecaster import build_model
-from rwm.prior_work.lightgbm_direct import _rolling, _shift
+from rwm.data.schema import DATE, SERIES, UNITS  # noqa: F811
+from rwm.prior_work.lightgbm_direct import _rolling, _rolling_max, _shift
 
 SETTINGS = dict(
     horizon=28, train_periods=250, group_by="store_id", categorical=["item_id"],
@@ -61,3 +62,28 @@ def test_refuses_to_forecast_beyond_its_horizon(split):
     longer = pd.concat([test, test.assign(**{DATE: test[DATE] + pd.Timedelta(days=28)})])
     with pytest.raises(ValueError):
         model.predict(longer.drop(columns=[UNITS]))
+
+
+def test_rolling_max_ignores_gaps():
+    x = np.array([[np.nan, 2.0, 5.0, 1.0, np.nan, 3.0]], dtype=np.float32)
+    got = _rolling_max(x, 3)[0]
+    assert np.isnan(got[0]) and got[1:].tolist() == [2.0, 5.0, 5.0, 5.0, 3.0]
+
+
+def test_forecast_inputs_equal_training_inputs_for_the_same_days(split):
+    """The inputs built when forecasting 28 future days must be the same
+    numbers the training code builds for those days once they are history."""
+    train, test = split
+    full = pd.concat([train, test]).sort_values([SERIES, DATE]).reset_index(drop=True)
+    model = build_model("lightgbm_direct", **SETTINGS).fit(train)
+    later = build_model("lightgbm_direct", **{**SETTINGS, "train_periods": 28})
+    later._cat_levels = model._cat_levels
+    dates = np.sort(full[DATE].unique())[-(28 + later.history):]
+    fut_dates = dates[-28:]
+    for key, g in model._groups.items():
+        part = full[(full["store_id"] == key) & (full[DATE] >= dates[0])]
+        want, _, names, _ = later._fit_table(part, g["names"], dates)
+        future = test[test["store_id"] == key].drop(columns=[UNITS])
+        got = model._predict_table(g, future, fut_dates)
+        assert names == model.feature_names and got.shape == want.shape
+        np.testing.assert_allclose(got, want, rtol=1e-6, equal_nan=True)
