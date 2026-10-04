@@ -150,13 +150,26 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
     return run_dir
 
 
+def with_seed(config: dict, seed: int | None) -> dict:
+    """The same experiment with another seed. The run is renamed so its
+    folder and manifest show which seed it used."""
+    if seed is None:
+        return config
+    config = {**config, "seed": seed, "name": f"{config['name']}_seed{seed}"}
+    params = config["model"].get("params", {})
+    if "seed" in params:
+        config["model"] = {**config["model"], "params": {**params, "seed": seed}}
+    return config
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", required=True)
     ap.add_argument("--strict", action="store_true")
     ap.add_argument("--out", default=None, help="folder for run outputs (default: results/)")
+    ap.add_argument("--seed", type=int, default=None, help="repeat the config with a different seed")
     args = ap.parse_args()
-    config = yaml.safe_load(Path(args.config).read_text())
+    config = with_seed(yaml.safe_load(Path(args.config).read_text()), args.seed)
     run_dir = run(config, strict=args.strict, out_root=Path(args.out) if args.out else RESULTS)
     print(f"wrote {run_dir}")
     print((run_dir / "metrics.json").read_text())

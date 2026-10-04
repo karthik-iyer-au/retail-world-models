@@ -192,3 +192,12 @@ def test_holdout_periods_are_never_scored(tmp_path):
     b = json.loads((run(full, out_root=tmp_path / "b") / "metrics.json").read_text())["splits"]
     assert [s["test_end"] for s in a] == [s["test_end"] for s in b[:2]]
     assert [s["wrmsse"] for s in a] == pytest.approx([s["wrmsse"] for s in b[:2]])
+
+
+def test_with_seed_renames_the_run_and_sets_every_seed():
+    from rwm.experiments.run import with_seed
+
+    base = {"name": "x", "seed": 0, "model": {"name": "m", "params": {"seed": 0, "k": 1}}}
+    got = with_seed(base, 3)
+    assert got["name"] == "x_seed3" and got["seed"] == 3 and got["model"]["params"] == {"seed": 3, "k": 1}
+    assert with_seed(base, None) is base and base["seed"] == 0
