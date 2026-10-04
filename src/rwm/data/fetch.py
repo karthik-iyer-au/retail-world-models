@@ -3,11 +3,17 @@
   python -m rwm.data.fetch m5              # needs a Kaggle API token, see data/README.md
   python -m rwm.data.fetch m5_reference
   python -m rwm.data.fetch dominicks ana cer   # category codes; none means all
+  python -m rwm.data.fetch breakfast_at_the_frat --from /path/to/folder
+
+`--from` copies a dataset's registered files from a folder you already hold
+them in. It is the only route for data that has no public download, such as
+the dunnhumby files, which each user obtains by registering with dunnhumby.
 
 Files already in place are left alone. Every run ends by verifying the
 files against data/manifests/, so a changed or damaged download is caught.
 """
 import json
+import shutil
 import subprocess
 import sys
 import urllib.request
@@ -90,18 +96,33 @@ def fetch_dominicks(folder: Path, codes: list[str]) -> None:
             _from_url(f"{KILTS}/{name}", folder / name)
 
 
+def copy_from(dataset: str, source: Path, folder: Path) -> None:
+    listed = json.loads(manifest.manifest_path(dataset).read_text())["files"]
+    for e in listed:
+        if (source / e["file"]).exists() and not (folder / e["file"]).exists():
+            shutil.copy(source / e["file"], folder / e["file"])
+
+
 def main(argv: list[str]) -> None:
-    if not argv or argv[0] not in ("m5", "m5_reference", "dominicks"):
+    source = None
+    if "--from" in argv:
+        i = argv.index("--from")
+        source, argv = Path(argv[i + 1]), argv[:i] + argv[i + 2 :]
+    if not argv or not manifest.manifest_path(argv[0]).exists():
         sys.exit(__doc__)
     dataset, extra = argv[0], argv[1:]
     folder = DATA_RAW / dataset
     folder.mkdir(parents=True, exist_ok=True)
-    if dataset == "m5":
+    if source is not None:
+        copy_from(dataset, source, folder)
+    elif dataset == "m5":
         fetch_m5(folder)
     elif dataset == "m5_reference":
         _from_drive(ORGANISERS["m5_reference"], folder)
-    else:
+    elif dataset == "dominicks":
         fetch_dominicks(folder, extra)
+    else:
+        sys.exit(f"{dataset} has no public download. Use --from with a folder that holds its files.")
     checked = manifest.verify(dataset, only_present=bool(extra))
     print(f"{dataset}: {len(checked)} files match the registered checksums")
 

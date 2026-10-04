@@ -19,7 +19,7 @@ reported as best.
 | `src/rwm/model/` | Our model | Nothing from prior work is copied in; it is imported |
 | `src/rwm/evaluation/` | Splits and accuracy measures | Shared by every model. The M5 score is checked against the organisers' published numbers |
 | `src/rwm/experiments/` | The runner | One config in, one recorded result out |
-| `configs/` | One file per dataset and per experiment | A result is defined by its config |
+| `configs/` | One file per dataset, per experiment, and per job (a list of runs) | A result is defined by its config |
 | `results/` | Run outputs | Each run has a manifest that lets it be repeated |
 | `notebooks/` | A launcher for running a config on Colab | Calls the repository's commands only; holds no model or data code |
 | `docs/` | Decision log, provenance, protocol, how to reproduce | Updated in the same commit as the change |

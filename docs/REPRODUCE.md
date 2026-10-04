@@ -25,4 +25,4 @@ of data files.
 
 ## Running on Colab
 
-Open `notebooks/colab_run.ipynb` in Colab, set the config and commit in its first cell, and run all cells. The notebook only calls the commands above and writes the run folder to Google Drive.
+Open `notebooks/colab_run.ipynb` in Colab, set the job file and commit in its first cell, and run all cells. A job file in `configs/jobs/` names the data to fetch and the runs to make. The notebook only calls the repository's commands and writes each run folder to Google Drive.

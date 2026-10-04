@@ -1,0 +1,11 @@
+# Our model against LightGBM on the Breakfast at the Frat development windows,
+# five seeds each. The data file is taken from a Drive folder because
+# dunnhumby files have no public download.
+datasets:
+  - name: breakfast_at_the_frat
+    from: /content/drive/MyDrive/retail-world-model/data
+runs:
+  - config: configs/experiments/frat_dev_lightgbm.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/frat_dev_state_model.yaml
+    seeds: [1, 2, 3, 4, 5]

@@ -201,3 +201,24 @@ def test_with_seed_renames_the_run_and_sets_every_seed():
     got = with_seed(base, 3)
     assert got["name"] == "x_seed3" and got["seed"] == 3 and got["model"]["params"] == {"seed": 3, "k": 1}
     assert with_seed(base, None) is base and base["seed"] == 0
+
+
+def test_fetch_copies_registered_files_from_a_folder_and_checks_them(tmp_path, monkeypatch):
+    from rwm.data import fetch, manifest
+    from rwm.utils.hashing import sha256_file
+
+    source, raw, manifests = tmp_path / "src", tmp_path / "raw", tmp_path / "manifests"
+    for d in (source, raw, manifests):
+        d.mkdir()
+    (source / "a.zip").write_bytes(b"data")
+    (manifests / "toy.json").write_text(json.dumps(
+        {"dataset": "toy", "files": [{"file": "a.zip", "bytes": 4, "sha256": sha256_file(source / "a.zip")}]}
+    ))
+    monkeypatch.setattr(manifest, "DATA_RAW", raw)
+    monkeypatch.setattr(manifest, "DATA_MANIFESTS", manifests)
+    monkeypatch.setattr(fetch, "DATA_RAW", raw)
+    fetch.main(["toy", "--from", str(source)])
+    assert (raw / "toy" / "a.zip").read_bytes() == b"data"
+    (raw / "toy" / "a.zip").write_bytes(b"changed")
+    with pytest.raises(ValueError):
+        fetch.main(["toy", "--from", str(source)])

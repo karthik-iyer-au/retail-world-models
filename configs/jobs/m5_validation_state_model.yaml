@@ -1,0 +1,5 @@
+# Our model on the 28 days before the M5 test period, in mixed precision.
+datasets:
+  - name: m5
+runs:
+  - config: configs/experiments/m5_validation_state_model_mixed_precision.yaml
