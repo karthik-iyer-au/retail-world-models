@@ -41,6 +41,13 @@ def finished_run(out: Path, config: dict) -> Path | None:
 def summary_row(folder: Path) -> str:
     m = json.loads((folder / "metrics.json").read_text())
     row = f"{folder.name.split('_', 1)[1]:<48} overall {m['wrmsse']:.4f}"
+    mean = lambda v: sum(v) / len(v)
+    levels = m["splits"][0].get("by_level", [])
+    if len(levels) > 1:  # the top and bottom of the hierarchy, to show where the error sits
+        for i in (0, -1):
+            row += f" | {levels[i]['level']} {mean([s['by_level'][i]['wrmsse'] for s in m['splits']]):.4f}"
+    if "forecast_to_actual" in m["splits"][0]:
+        row += " | forecast/actual " + " ".join(f"{s['forecast_to_actual']:.3f}" for s in m["splits"])
     conditions = m["splits"][0].get("by_condition", {})
     for c in conditions:
         on = [s["by_condition"][c]["on"]["wrmsse"] for s in m["splits"]]

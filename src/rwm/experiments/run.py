@@ -126,6 +126,8 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
                 "test_start": str(pd.Timestamp(sp.test_dates[0]).date()),
                 "test_end": str(pd.Timestamp(sp.test_dates[-1]).date()),
                 **score,
+                # all forecast units over all actual units: above 1 is over-forecasting
+                "forecast_to_actual": float(out["forecast"].sum() / max(float(out[UNITS].sum()), 1e-9)),
                 **({"by_condition": by_condition} if by_condition else {}),
             }
         )

@@ -138,6 +138,17 @@ weeks, one run each:
 
 | Our model with item-to-item (both) among analgesics in a store, three seeds | 0.697 (0.681 to 0.707) | 1.372 | 0.606 |
 
+| LightGBM + US seasonal calendar and promotion crowding, three seeds | 0.734 (0.732 to 0.735) | 1.276 | 0.588 |
+| Lift model, a price held four weeks becomes the regular price, three seeds | 0.674 (0.633 to 0.711) | 1.331 | 0.602 |
+| Lift model + held price, calendar and crowding, three seeds | 0.919 (0.858 to 0.980) | 1.386 | 0.610 |
+| Lift model trained for 24,000 steps instead of 6,000, three seeds | 1.473 (0.845 to 1.814) | 1.344 | 0.607 |
+
+The last two rows are much worse overall while their item-store columns
+barely move, so the damage is at the summed-up levels: a small bias in the
+same direction on every item adds up at category and chain level. Longer
+training and the calendar both cause it. The calendar also makes LightGBM
+worse here.
+
 All six runs of our model without the item-to-item part beat LightGBM
 overall. The item-to-item part does not help here either. On single item-store weeks
 LightGBM is still ahead, with or without a promotion code.
