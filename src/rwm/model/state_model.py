@@ -41,6 +41,12 @@ in `levers` set to zero.
   the horizon, the model predicts the state the encoder will give once those
   periods are history. The target comes from a slowly updated copy of the
   encoder. The forecast loss stays on throughout.
+- `plan_lags`: each forecast period also sees what was planned for the
+  periods just before it, so a promotion last week can lower this week
+  (pantry loading). With `lift_readout` that dip is part of the lift.
+- `year_ago`: each forecast period also sees the item's sales and levers the
+  same period a year ago (`year_ago: 52` for weekly data) and
+  `year_ago_window` periods either side.
 
 Training and forecasting build their inputs with the same function
 (`_window`), so they cannot drift apart.
@@ -192,6 +198,9 @@ class StateModel(Forecaster):
         levers: list[str] | None = None,
         lift_readout: bool = False,
         latent_weight: float = 0.0,
+        plan_lags: int = 0,
+        year_ago: int = 0,
+        year_ago_window: int = 1,
     ):
         self._settings = {k: v for k, v in locals().items() if k not in ("self", "__class__")}
         self.horizon, self.history, self.train_periods = horizon, history, train_periods
@@ -210,6 +219,15 @@ class StateModel(Forecaster):
         if set(self.levers) - set(self.extra):
             raise ValueError("every lever must also be listed in extra")
         self.latent_weight = latent_weight
+        self.plan_lags = plan_lags
+        # periods back to look for "this time last year", e.g. 51, 52, 53
+        self._year_offsets = (
+            [year_ago + d for d in range(-year_ago_window, year_ago_window + 1)] if year_ago else []
+        )
+        if self._year_offsets and min(self._year_offsets) < horizon:
+            raise ValueError("year_ago minus its window must be at least the horizon")
+        # how many past periods a forecast needs to keep
+        self._keep = max([history] + self._year_offsets)
         self.net_args = dict(d_model=d_model, layers=layers, heads=heads, dropout=dropout,
                              neighbours=neighbours, conditions=conditions,
                              lift_readout=lift_readout, latent=latent_weight > 0)
@@ -275,15 +293,48 @@ class StateModel(Forecaster):
 
         hist_levers, _ = lever_inputs(past, back)
         hist = torch.cat([(units / scale)[..., None], torch.log1p(units)[..., None], hist_levers], dim=2)
-        ahead = future["start"][:, None] + torch.arange(self.horizon, device=self._dev)[None]
+        steps = torch.arange(self.horizon, device=self._dev)[None]
+        ahead = future["start"][:, None] + steps
         fut, on_sale = lever_inputs(future, ahead)
         fut_off, _ = lever_inputs(future, ahead, off=True)
+
+        def earlier(offset, off=False, with_units=False):
+            """Inputs for the period `offset` before each forecast period.
+            That period is in the plan when it falls inside the horizon and
+            in history otherwise; before the start of the data it is "not
+            known". Calendar columns are left out."""
+            rel = steps - offset  # position relative to the first forecast period
+            in_plan = (rel >= 0).expand(len(rows), -1)
+            f_cols = (future["start"][:, None] + rel).clamp(min=0)
+            p_cols = start[:, None] + rel
+            seen = (p_cols >= 0) | in_plan
+            p_cols = p_cols.clamp(0, past["price"].shape[1] - 1)
+            from_plan = lever_inputs(future, f_cols, off)[0][..., :-4]
+            from_past = lever_inputs(past, p_cols)[0][..., :-4]
+            out = torch.where(in_plan[..., None], from_plan, from_past) * seen[..., None]
+            if with_units:  # only ever asked for periods that are history
+                u = past["units"][r, p_cols] * seen
+                out = torch.cat([out, (u / scale)[..., None], seen.float()[..., None]], dim=2)
+            return out
+
+        extra, extra_off = [], []
+        for i in range(1, self.plan_lags + 1):  # what was planned just before, for pantry loading
+            extra.append(earlier(i))
+            extra_off.append(earlier(i, off=True))
+        for lag in self._year_offsets:  # the same period a year ago, and its neighbours
+            both = earlier(lag, with_units=True)
+            extra.append(both)
+            extra_off.append(both)
+        if extra:
+            fut = torch.cat([fut] + extra, dim=2)
+            fut_off = torch.cat([fut_off] + extra_off, dim=2)
         return hist, fut, scale, on_sale, ahead, fut_off
 
     def _new_net(self):
-        n_lever = 2 + 2 * len(self.extra) + int(self.regular_price) + 4
+        q = 2 + 2 * len(self.extra) + int(self.regular_price)  # inputs describing one period's plan
+        n_fut = q + 4 + self.plan_lags * q + len(self._year_offsets) * (q + 2)
         return _build_net(
-            2 + n_lever, n_lever, [len(v) for v in self._levels.values()], self.history, self.horizon,
+            2 + q + 4, n_fut, [len(v) for v in self._levels.values()], self.history, self.horizon,
             n_products=len(self._products), **self.net_args,
         ).to(self._dev)
 
@@ -398,7 +449,7 @@ class StateModel(Forecaster):
             if (step + 1) % max(1, self.steps // 20) == 0:
                 print(f"training step {step + 1} of {self.steps}, loss {loss.item():.4f}", flush=True)
 
-        tail = slice(t - L, t)
+        tail = slice(max(0, t - self._keep), t)
         self._past = {
             "units": data["units"][:, tail],
             "price": data["price"][:, tail],
@@ -437,7 +488,7 @@ class StateModel(Forecaster):
         self._net.eval()
         with torch.no_grad():
             for rows, picked in self._batches():
-                start = torch.full_like(rows, self.history)
+                start = torch.full_like(rows, self._past["price"].shape[1])
                 got, scale, _, _ = self._forward(
                     self._past, {**fut, "start": torch.zeros_like(rows)}, rows, start, picked, full=True
                 )
@@ -472,7 +523,7 @@ class StateModel(Forecaster):
         self._net.eval()
         with torch.no_grad():
             for rows, picked in self._batches():
-                start = torch.full_like(rows, self.history)
+                start = torch.full_like(rows, self._past["price"].shape[1])
                 got, _, _, _ = self._forward(
                     self._past, {**fut, "start": torch.zeros_like(rows)}, rows, start, picked, full=True
                 )

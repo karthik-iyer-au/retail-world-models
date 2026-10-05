@@ -1,0 +1,12 @@
+# Does the lift model gain from seeing the weeks just before each forecast
+# week, the same week last year, or both? Five seeds each.
+datasets:
+  - name: breakfast_at_the_frat
+    from: /content/drive/MyDrive/retail-world-model/data
+runs:
+  - config: configs/experiments/frat_dev_state_model_lift_earlier_weeks.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/frat_dev_state_model_lift_year_ago.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/frat_dev_state_model_lift_earlier_weeks_year_ago.yaml
+    seeds: [1, 2, 3, 4, 5]

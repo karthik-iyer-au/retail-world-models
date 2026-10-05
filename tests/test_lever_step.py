@@ -99,3 +99,50 @@ def test_a_column_not_named_as_a_lever_is_left_alone(split):
     model.fit(extra(train))
     off, _ = _plans(extra(train), extra(test))
     np.testing.assert_allclose(model.breakdown(off)["lift"], 0, atol=1e-4)
+
+
+@pytest.fixture(scope="module")
+def dip_split():
+    # the period after its own promotion an item sells 50% less
+    p = load_dataset("synthetic", n_stores=3, n_items=6, n_periods=400, seed=4, dip=0.5).panel
+    cut = np.sort(p[DATE].unique())[-8]
+    return p[p[DATE] <= cut], p[p[DATE] > cut].reset_index(drop=True)
+
+
+def test_a_promotion_lowers_the_following_period(dip_split):
+    train, test = dip_split
+    model = build_model("state_model", **SETTINGS, plan_lags=1).fit(train)
+    off, _ = _plans(train, test)
+    first = off[DATE] == off[DATE].min()
+    on = off.assign(promo=first.astype(int), price=np.where(first, (off["price"] * 0.8).round(2), off["price"]))
+    second = (off[DATE] == np.sort(off[DATE].unique())[1]).to_numpy()
+    a, b = model.breakdown(off), model.breakdown(on)
+    assert b["forecast"][second].sum() / a["forecast"][second].sum() < 0.8
+    np.testing.assert_allclose(a["baseline"], b["baseline"], rtol=1e-5)
+    np.testing.assert_allclose(a["lift"], 0, atol=1e-4 * a["forecast"].max())
+
+
+@pytest.mark.parametrize("more", [dict(plan_lags=2), dict(year_ago=52), dict(plan_lags=1, year_ago=52, history=80)])
+def test_earlier_period_inputs_match_between_training_and_forecasting(split, more, tmp_path):
+    import pandas as pd
+
+    from rwm.data.schema import SERIES
+    from rwm.model.state_model import StateModel
+
+    train, test = split
+    model = build_model("state_model", **{**SETTINGS, "steps": 1, **more}).fit(train)
+    future = test.drop(columns=[UNITS])
+    fut_dates = np.sort(future[DATE].unique())
+    rows = torch.arange(len(model._names))
+    keep = model._past["price"].shape[1]
+    fut = model._tensors(future, fut_dates, with_units=False)
+    got = model._window(model._past, {**fut, "start": torch.zeros_like(rows)}, rows, torch.full_like(rows, keep))
+    full = pd.concat([train, test]).sort_values([SERIES, DATE]).reset_index(drop=True)
+    dates = np.sort(full[DATE].unique())[-(keep + 7):]
+    data = model._tensors(full[full[DATE] >= dates[0]], dates, with_units=True)
+    start = torch.full_like(rows, keep)
+    want = model._window(data, {**data, "start": start}, rows, start)
+    for i in (0, 1, 2, 3, 5):
+        np.testing.assert_allclose(got[i].numpy(), want[i].numpy(), rtol=1e-6)
+    model.save(tmp_path / "m.pt")
+    np.testing.assert_array_equal(model.predict(future), StateModel.load(tmp_path / "m.pt", device="cpu").predict(future))
