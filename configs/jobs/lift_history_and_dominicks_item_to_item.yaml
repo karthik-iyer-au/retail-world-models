@@ -1,0 +1,12 @@
+# Two checks: a longer history for the lift model on Breakfast at the Frat, and
+# the item-to-item part on Dominick's analgesics.
+datasets:
+  - name: breakfast_at_the_frat
+    from: /content/drive/MyDrive/retail-world-model/data
+  - name: dominicks
+    codes: [ana]
+runs:
+  - config: configs/experiments/frat_dev_state_model_lift_long_history.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/dominicks_ana_dev_state_model_item_to_item.yaml
+    seeds: [1, 2, 3]
