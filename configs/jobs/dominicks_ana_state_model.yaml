@@ -1,0 +1,9 @@
+# Our model with and without the lever step on Dominick's analgesics, three seeds each.
+datasets:
+  - name: dominicks
+    codes: [ana]
+runs:
+  - config: configs/experiments/dominicks_ana_dev_state_model.yaml
+    seeds: [1, 2, 3]
+  - config: configs/experiments/dominicks_ana_dev_state_model_lift.yaml
+    seeds: [1, 2, 3]
