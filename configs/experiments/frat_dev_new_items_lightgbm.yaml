@@ -1,0 +1,55 @@
+# New-item test: one product in ten is kept out of training. LightGBM.
+dataset:
+  name: breakfast_at_the_frat
+evaluation:
+  conditions:
+  - promo
+  - display
+  - feature
+  - tpr_only
+  holdout_periods: 8
+  horizon: 8
+  n_origins: 2
+  scale_lag: 1
+  weight_window: 13
+  new_items:
+    share: 0.1
+    seed: 0
+model:
+  name: lightgbm_direct
+  params:
+    categorical:
+    - item_id
+    - store_id
+    - cat_id
+    - manufacturer
+    - store_segment
+    extra:
+    - promo
+    - display
+    - feature
+    - tpr_only
+    - base_price
+    horizon: 8
+    lags:
+    - 0
+    - 1
+    - 2
+    - 4
+    params:
+      min_data_in_leaf: 50
+      num_leaves: 63
+    price_lag: 1
+    price_window: 12
+    rounds: 500
+    seed: 0
+    spread_window: 13
+    threads: 2
+    train_periods: 90
+    windows:
+    - 4
+    - 8
+    - 13
+    - 26
+name: frat_dev_new_items_lightgbm
+seed: 0

@@ -1,0 +1,25 @@
+# New-item test on Breakfast at the Frat: one product in ten never seen in training.
+datasets:
+- name: breakfast_at_the_frat
+  from: /content/drive/MyDrive/retail-world-model/data
+runs:
+- config: configs/experiments/frat_dev_new_items_lightgbm.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/frat_dev_new_items_lift_no_cold_start.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/frat_dev_new_items_lift_borrow.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/frat_dev_new_items_lift_borrow_hidden_label.yaml
+  seeds:
+  - 1
+  - 2
+  - 3

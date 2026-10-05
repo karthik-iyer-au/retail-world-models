@@ -24,7 +24,7 @@ from rwm.data import load_dataset
 from rwm.data import manifest as data_manifest
 from rwm.data.calendar import add_calendar
 from rwm.data.crowding import add_crowding
-from rwm.data.schema import DATE, PRICE, SERIES, UNITS
+from rwm.data.schema import ITEM, DATE, PRICE, SERIES, UNITS
 from rwm.evaluation.hierarchy import rmsse_where, to_matrix, wrmsse
 from rwm.evaluation.splits import rolling_origins
 from rwm.forecaster import build_model
@@ -79,11 +79,20 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
     # Latest window first. After each window the table is cut back to that
     # window's training rows, so only one copy of the data is held at a time.
     ds.panel = None
+    # New-item test: a random share of products is kept out of training
+    # altogether, in every window, and scored on its own.
+    held = None
+    if ev.get("new_items"):
+        products = np.sort(panel[ITEM].astype(str).unique())
+        rng = np.random.default_rng(ev["new_items"].get("seed", 0))
+        n_held = max(1, int(round(ev["new_items"]["share"] * len(products))))
+        held = set(rng.choice(products, n_held, replace=False))
+        is_new = panel.drop_duplicates(SERIES).set_index(SERIES)[ITEM].astype(str).isin(held).reindex(names).to_numpy()
     for sp in reversed(splits):
         test = panel[panel[DATE].isin(sp.test_dates)].reset_index(drop=True)
         panel = train = panel[panel[DATE] <= sp.train_end]
         model = build_model(config["model"]["name"], **config["model"].get("params", {}))
-        model.fit(train)
+        model.fit(train if held is None else train[~train[ITEM].astype(str).isin(held)])
         del train
         fitted.append((sp.origin, model))
         pred = np.asarray(model.predict(test.drop(columns=[UNITS])), dtype=float)
@@ -140,6 +149,14 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
                 "forecast_to_actual": float(out["forecast"].sum() / max(float(out[UNITS].sum()), 1e-9)),
                 **({"by_condition": by_condition} if by_condition else {}),
                 "by_horizon": by_horizon,
+                **(
+                    {
+                        "new_items": rmsse_where(units[:, :t0], units[:, t0:t1], made, there & is_new[:, None], revenue, ev.get("scale_lag", 1))["wrmsse"],
+                        "known_items": rmsse_where(units[:, :t0], units[:, t0:t1], made, there & ~is_new[:, None], revenue, ev.get("scale_lag", 1))["wrmsse"],
+                    }
+                    if held is not None
+                    else {}
+                ),
             }
         )
 

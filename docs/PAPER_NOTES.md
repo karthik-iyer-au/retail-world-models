@@ -117,3 +117,15 @@ explanations pass more of these checks also forecast better?
 - A combination of our model and LightGBM, reported separately from our
   model alone.
 - TimesFM and a graph model on product attributes as further comparisons.
+
+## New-item test (built, not yet run)
+
+- Split: a random one in ten products is kept out of training in every window
+  (`evaluation.new_items`), same products for every model and seed. Scored at
+  item-by-store level, apart from known items.
+- Our model: a new item borrows the state and scale of the ten known items in
+  the same store with the most labels in common, and is run with its own
+  labels and its own plan (`cold_start`). Similarity here is a count of shared
+  labels, not a learned similarity. A learned one is still to build.
+- Limit: the error scale for a new item uses its real history, which the model
+  never saw. This is for scoring only.

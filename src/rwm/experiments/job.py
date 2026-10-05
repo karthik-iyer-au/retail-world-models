@@ -51,6 +51,8 @@ def summary_row(folder: Path) -> str:
         first = mean([s["by_horizon"][0] for s in m["splits"]])
         final = mean([s["by_horizon"][-1] for s in m["splits"]])
         row += f" | ahead 1 {first:.4f} last {final:.4f}"
+    if "new_items" in m["splits"][0]:
+        row += f" | new items {mean([s['new_items'] for s in m['splits']]):.3f} known {mean([s['known_items'] for s in m['splits']]):.3f}"
     if "forecast_to_actual" in m["splits"][0]:
         row += " | forecast/actual " + " ".join(f"{s['forecast_to_actual']:.3f}" for s in m["splits"])
     conditions = m["splits"][0].get("by_condition", {})

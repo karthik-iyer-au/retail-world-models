@@ -61,6 +61,11 @@ in `levers` set to zero.
 - `regular_column`: a column holding the regular price the retailer recorded
   (for example `base_price`), used in place of the 12-period rule wherever
   it is filled in.
+- `cold_start`: a series with no history is forecast by borrowing the state
+  and scale of the `cold_neighbours` known series most like it in the same
+  store (most `categorical` labels in common), run with its own labels and
+  its own plan, and averaged. `unknown_label_rate` hides the item label in
+  that share of training examples so the model learns to do without it.
 - `likelihood`: `tweedie` (the default, on sales relative to the item's own
   level) or `negative_binomial` (on units, as a count with a learned spread).
 - `rollout`: the world-model form. A transition step takes the state and one
@@ -85,7 +90,7 @@ Training and forecasting build their inputs with the same function
 import numpy as np
 import pandas as pd
 
-from rwm.data.schema import DATE, ITEM, PRICE, SERIES, UNITS
+from rwm.data.schema import DATE, ITEM, PRICE, SERIES, STORE, UNITS
 from rwm.forecaster import Forecaster, register_model
 from rwm.utils.frames import frame_to_matrix, series_rows
 
@@ -272,6 +277,9 @@ class StateModel(Forecaster):
         weight_decay: float = 1e-4,
         rollout: bool = False,
         likelihood: str = "tweedie",
+        cold_start: bool = False,
+        cold_neighbours: int = 10,
+        unknown_label_rate: float = 0.0,
     ):
         self._settings = {k: v for k, v in locals().items() if k not in ("self", "__class__")}
         self.horizon, self.history, self.train_periods = horizon, history, train_periods
@@ -299,6 +307,10 @@ class StateModel(Forecaster):
         if likelihood not in ("tweedie", "negative_binomial"):
             raise ValueError("likelihood must be tweedie or negative_binomial")
         self.likelihood = likelihood
+        if cold_start and neighbours:
+            raise ValueError("cold_start with neighbours is not supported yet")
+        self.cold_start, self.cold_neighbours = cold_start, cold_neighbours
+        self.unknown_label_rate = unknown_label_rate
         self.weight_decay = weight_decay
         if finetune not in ("full", "low_lr", "frozen"):
             raise ValueError("finetune must be full, low_lr or frozen")
@@ -321,24 +333,25 @@ class StateModel(Forecaster):
         self.power, self.seed, self.device = tweedie_power, seed, device
         self.mixed_precision = mixed_precision  # faster on a GPU; has no effect on a CPU
 
-    def _tensors(self, frame: pd.DataFrame, dates: np.ndarray, with_units: bool):
+    def _tensors(self, frame: pd.DataFrame, dates: np.ndarray, with_units: bool, names=None):
         """Series-by-date arrays for one stretch of dates."""
         import torch
 
+        names = self._names if names is None else names
         to = lambda a: torch.as_tensor(a, device=self._dev)
         out = {"calendar": to(_calendar(dates))}
         if with_units:
-            out["units"] = to(np.nan_to_num(frame_to_matrix(frame, self._names, dates, UNITS)))
+            out["units"] = to(np.nan_to_num(frame_to_matrix(frame, names, dates, UNITS)))
         if self._has_price:
-            out["price"] = to(frame_to_matrix(frame, self._names, dates, PRICE))
+            out["price"] = to(frame_to_matrix(frame, names, dates, PRICE))
         else:
-            out["price"] = torch.full((len(self._names), len(dates)), float("nan"), device=self._dev)
-        out["extra"] = [to(frame_to_matrix(frame, self._names, dates, c)) for c in self.extra]
+            out["price"] = torch.full((len(names), len(dates)), float("nan"), device=self._dev)
+        out["extra"] = [to(frame_to_matrix(frame, names, dates, c)) for c in self.extra]
         if self.regular_column:
-            out["regular"] = to(frame_to_matrix(frame, self._names, dates, self.regular_column))
+            out["regular"] = to(frame_to_matrix(frame, names, dates, self.regular_column))
         return out
 
-    def _window(self, past: dict, future: dict, rows, start):
+    def _window(self, past: dict, future: dict, rows, start, fut_rows=None):
         """Model inputs for the items in `rows`: the `history` columns of `past`
         ending just before column `start`, and `horizon` columns of `future`
         beginning at `future["start"]`. Also returns each item's scale, which
@@ -349,6 +362,7 @@ class StateModel(Forecaster):
         L = self.history
         back = start[:, None] + torch.arange(-L, 0, device=self._dev)[None]
         r = rows[:, None]
+        fr = r if fut_rows is None else fut_rows[:, None]  # the plan may belong to other series (new items)
         units, price = past["units"][r, back], past["price"][r, back]
         known = ~torch.isnan(price)
         n_known = known.sum(1, keepdim=True).clamp(min=1)
@@ -373,7 +387,7 @@ class StateModel(Forecaster):
             last = (held * torch.arange(1, L + 1, device=self._dev)[None]).amax(1, keepdim=True)
             regular = torch.where(last > 0, torch.nan_to_num(price).gather(1, (last - 1).clamp(min=0)), regular)
 
-        def lever_inputs(src, cols, off=False):
+        def lever_inputs(src, cols, off=False, r=r):
             p = src["price"][r, cols]
             k = ~torch.isnan(p)
             reg = regular.expand_as(p)
@@ -398,8 +412,8 @@ class StateModel(Forecaster):
         hist = torch.cat([(units / scale)[..., None], torch.log1p(units)[..., None], hist_levers], dim=2)
         steps = torch.arange(self.horizon, device=self._dev)[None]
         ahead = future["start"][:, None] + steps
-        fut, on_sale = lever_inputs(future, ahead)
-        fut_off, _ = lever_inputs(future, ahead, off=True)
+        fut, on_sale = lever_inputs(future, ahead, r=fr)
+        fut_off, _ = lever_inputs(future, ahead, off=True, r=fr)
 
         def earlier(offset, off=False, with_units=False):
             """Inputs for the period `offset` before each forecast period.
@@ -412,7 +426,7 @@ class StateModel(Forecaster):
             p_cols = start[:, None] + rel
             seen = (p_cols >= 0) | in_plan
             p_cols = p_cols.clamp(0, past["price"].shape[1] - 1)
-            from_plan = lever_inputs(future, f_cols, off)[0][..., :-4]
+            from_plan = lever_inputs(future, f_cols, off, r=fr)[0][..., :-4]
             from_past = lever_inputs(past, p_cols)[0][..., :-4]
             out = torch.where(in_plan[..., None], from_plan, from_past) * seen[..., None]
             if with_units:  # only ever asked for periods that are history
@@ -441,17 +455,18 @@ class StateModel(Forecaster):
             n_products=len(self._products), **self.net_args,
         ).to(self._dev)
 
-    def _forward(self, past, future, rows, start, picked=None, full=False):
+    def _forward(self, past, future, rows, start, picked=None, full=False, fut_rows=None, cats=None):
         """Run the network for `rows`. `picked` is the group layout (groups by
         slots, -1 for an empty slot) when rows were drawn as whole groups.
         Returns log expected sales (relative to scale), scale, which periods
         count, and the future column positions."""
-        hist, fut, scale, on_sale, ahead, fut_off = self._window(past, future, rows, start)
+        hist, fut, scale, on_sale, ahead, fut_off = self._window(past, future, rows, start, fut_rows)
         group = None
         if picked is not None:
             on_sale = on_sale & (picked.reshape(-1) >= 0)[:, None]
             group = {"shape": tuple(picked.shape), "product": self._product[rows], "open": on_sale}
-        out = self._net(hist, fut, self._cats[rows], group if self._net.neighbours else None, fut_off, full)
+        cats = self._cats[rows] if cats is None else cats
+        out = self._net(hist, fut, cats, group if self._net.neighbours else None, fut_off, full)
         if full:
             out["plan"] = fut
         return out, scale, on_sale, ahead
@@ -478,6 +493,7 @@ class StateModel(Forecaster):
         ) if self.categorical else np.zeros((len(self._names), 0), dtype=np.int64)
         self._cats = torch.as_tensor(cats, device=self._dev, dtype=torch.long)
 
+        self._stores = first[STORE].astype(str).to_numpy()
         self._products = pd.Index(first[ITEM].astype(str).unique()).sort_values()
         self._product = torch.as_tensor(self._products.get_indexer(first[ITEM].astype(str)), device=self._dev)
         self._members = None
@@ -544,8 +560,15 @@ class StateModel(Forecaster):
                     start = torch.randint(L, last + 1, (g,), generator=gen).to(self._dev).repeat_interleave(slots)
                     rows = picked.reshape(-1).clamp(min=0)
                 with torch.autocast("cuda", dtype=torch.float16, enabled=amp):
+                    cats = None
+                    if self.unknown_label_rate > 0 and ITEM in self.categorical:
+                        # now and then hide which item it is, so the model learns to
+                        # forecast from the other labels alone (needed for new items)
+                        cats = self._cats[rows].clone()
+                        hide = torch.rand(len(rows), generator=gen).to(self._dev) < self.unknown_label_rate
+                        cats[hide, self.categorical.index(ITEM)] = 0
                     out, scale, on_sale, ahead = self._forward(
-                        data, {**data, "start": start}, rows, start, picked, full=True
+                        data, {**data, "start": start}, rows, start, picked, full=True, cats=cats
                     )
                     latent = 0.0
                     if with_latent:
@@ -698,7 +721,51 @@ class StateModel(Forecaster):
         r = series_rows(future[SERIES], self._names)
         c = pd.Index(fut_dates).get_indexer(future[DATE])
         pred = np.where(r >= 0, out[np.clip(r, 0, None), c], 0.0)
+        if self.cold_start and (r < 0).any():
+            new = future[r < 0]
+            pred[r < 0] = self._new_series(new, fut_dates, key)
         return np.clip(pred, 0, None)
+
+    def _new_series(self, new: pd.DataFrame, fut_dates: np.ndarray, key: str) -> np.ndarray:
+        """Forecasts for series the model has no history for. Each borrows the
+        state and scale of the known series most like it in the same store
+        (most labels in common), is run with its own labels and its own plan,
+        and the results are averaged."""
+        import torch
+
+        names = pd.Index(new[SERIES].astype(str).unique())
+        first = new.drop_duplicates(SERIES)
+        first = first.set_index(first[SERIES].astype(str)).loc[names]
+        cats = np.stack(
+            [self._levels[c].get_indexer(first[c].astype(str)) + 1 for c in self.categorical], axis=1
+        ) if self.categorical else np.zeros((len(names), 0), dtype=np.int64)
+        known, stores, K = self._cats.cpu().numpy(), first[STORE].astype(str).to_numpy(), self.cold_neighbours
+        picks = np.zeros((len(names), K), dtype=np.int64)
+        for i in range(len(names)):
+            pool = np.flatnonzero(self._stores == stores[i])
+            if len(pool) == 0:
+                pool = np.arange(len(self._names))
+            alike = ((known[pool] == cats[i]) & (cats[i] > 0)).sum(1)
+            best = pool[np.argsort(-alike, kind="stable")[:K]]
+            picks[i] = np.resize(best, K)
+        pad = fut_dates[-1] + (np.arange(1, self.horizon - len(fut_dates) + 1) * (fut_dates[-1] - fut_dates[-2] if len(fut_dates) > 1 else np.timedelta64(1, "D")))
+        plan = self._tensors(new, np.r_[fut_dates, pad], with_units=False, names=names)
+        out = np.zeros((len(names), self.horizon))
+        self._net.eval()
+        with torch.no_grad():
+            for lo in range(0, len(names), max(1, 4096 // K)):
+                hi = min(lo + max(1, 4096 // K), len(names))
+                rows = torch.as_tensor(picks[lo:hi].reshape(-1), device=self._dev)
+                own = torch.arange(lo, hi, device=self._dev).repeat_interleave(K)
+                labels = torch.as_tensor(cats[lo:hi], device=self._dev, dtype=torch.long).repeat_interleave(K, dim=0)
+                start = torch.full_like(rows, self._past["price"].shape[1])
+                got, scale, _, _ = self._forward(
+                    self._past, {**plan, "start": torch.zeros_like(rows)}, rows, start, None, full=True,
+                    fut_rows=own, cats=labels,
+                )
+                units = (torch.exp(got[key]) * scale).view(hi - lo, K, -1).mean(1)
+                out[lo:hi] = units.cpu().numpy()
+        return out[names.get_indexer(new[SERIES].astype(str)), pd.Index(fut_dates).get_indexer(new[DATE])]
 
     def predict(self, future: pd.DataFrame) -> np.ndarray:
         return self._predict(future, "log_mu")
@@ -752,6 +819,7 @@ class StateModel(Forecaster):
                 "cats": cpu(self._cats),
                 "has_price": self._has_price,
                 "products": list(self._products),
+                "stores": list(self._stores),
                 "product": cpu(self._product),
                 "members": None if self._members is None else cpu(self._members),
                 "past": {
@@ -778,6 +846,7 @@ class StateModel(Forecaster):
             for k, v in saved["past"].items()
         }
         model._products = pd.Index(saved["products"])
+        model._stores = np.array(saved.get("stores", []), dtype=object)
         model._product = saved["product"].to(model._dev)
         model._members = None if saved["members"] is None else saved["members"].to(model._dev)
         model._net = model._new_net()
