@@ -1,0 +1,10 @@
+# Our lift model and LightGBM, each as an average of five fits, on the
+# Breakfast at the Frat development windows. Three repeats each.
+datasets:
+  - name: breakfast_at_the_frat
+    from: /content/drive/MyDrive/retail-world-model/data
+runs:
+  - config: configs/experiments/frat_dev_lightgbm_seed_average.yaml
+    seeds: [1, 2, 3]
+  - config: configs/experiments/frat_dev_state_model_lift_seed_average.yaml
+    seeds: [1, 2, 3]

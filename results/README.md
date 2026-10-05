@@ -94,6 +94,7 @@ weeks:
 | Lever step: regular price, baseline times lift | 0.406 | 0.401 to 0.414 | 0.840 | 0.863 | 0.537 | 0.406 |
 | Lever step: regular price, baseline times lift, latent loss | 0.411 | 0.401 to 0.422 | 0.829 | 0.868 | 0.548 | 0.407 |
 | Lever step: latent loss alone | 0.428 | 0.414 to 0.440 | 0.825 | 0.867 | 0.556 | 0.412 |
+| Lever step: regular price, baseline times lift, 52 weeks of history | 0.413 | 0.408 to 0.418 | 0.836 | 0.875 | 0.542 | 0.407 |
 
 Reading: with all 55 products in a store able to affect each other, the
 item-to-item part makes the forecast worse in every version, and makes it
@@ -118,5 +119,8 @@ weeks, one run each:
 | Our model, item encoder and readout, three seeds | 0.692 (0.679 to 0.705) | 1.362 | 0.605 |
 | Our model with regular price and baseline times lift, three seeds | 0.676 (0.665 to 0.682) | 1.339 | 0.603 |
 
-All six runs of our model beat LightGBM overall. On single item-store weeks
+| Our model with item-to-item (both) among analgesics in a store, three seeds | 0.697 (0.681 to 0.707) | 1.372 | 0.606 |
+
+All six runs of our model without the item-to-item part beat LightGBM
+overall. The item-to-item part does not help here either. On single item-store weeks
 LightGBM is still ahead, with or without a promotion code.

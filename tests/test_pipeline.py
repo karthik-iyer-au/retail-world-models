@@ -243,3 +243,19 @@ def test_verify_checks_only_the_files_a_run_reads(tmp_path, monkeypatch):
     (root / "c.csv").write_text("c")
     with pytest.raises(ValueError):
         manifest.verify("d", files=[root / "c.csv"])
+
+
+def test_seed_average_is_the_mean_of_its_members():
+    import numpy as np
+
+    from rwm.data import load_dataset
+    from rwm.data.schema import DATE, UNITS
+    from rwm.forecaster import build_model
+
+    p = load_dataset("synthetic", n_periods=120).panel
+    cut = np.sort(p[DATE].unique())[-8]
+    train, future = p[p[DATE] <= cut], p[p[DATE] > cut].drop(columns=[UNITS])
+    both = build_model("seed_average", model="recent_average", params={"window": 7}, members=3).fit(train)
+    one = build_model("recent_average", window=7).fit(train)
+    np.testing.assert_allclose(both.predict(future), one.predict(future))
+    assert len(both.models) == 3
