@@ -110,6 +110,10 @@ weeks:
 | Lift model, pretraining, then encoder frozen | 0.428 | 0.416 to 0.441 | 0.836 | 0.901 | 0.547 | 0.417 |
 | Lift model, pretraining, encoder at a tenth, latent loss kept on | 0.415 | 0.402 to 0.425 | 0.835 | 0.874 | 0.546 | 0.405 |
 | Lift model, 10,000 steps pretraining, then encoder at a tenth | 0.408 | 0.400 to 0.422 | 0.826 | 0.849 | 0.543 | 0.408 |
+| Lift model, stopped at its best point on the last 8 training weeks | 0.425 | 0.414 to 0.437 | 0.863 | 0.894 | 0.554 | 0.423 |
+| Lift model + totals term in the loss | 0.414 | 0.395 to 0.433 | 0.856 | 0.892 | 0.553 | 0.418 |
+| Lift model + readout dropout and stronger weight decay | 0.409 | 0.405 to 0.412 | 0.831 | 0.867 | 0.528 | 0.407 |
+| Lift model + all three of the above | 0.445 | 0.438 to 0.453 | 0.943 | 0.990 | 0.570 | 0.446 |
 | LightGBM, average of five fits (three repeats) | 0.417 | 0.408 to 0.425 | 0.811 | 0.821 | 0.508 | 0.402 |
 | Lever step: regular price, baseline times lift, average of five fits (three repeats) | 0.400 | 0.397 to 0.404 | 0.813 | 0.839 | 0.535 | 0.402 |
 
@@ -131,6 +135,13 @@ model overall (0.406). Long pretraining followed by a slowed encoder is
 level overall and the best of the seven on display and circular weeks.
 With the encoder frozen after latent-only pretraining the model still
 reaches 0.428, so the pretrained state alone carries most of the signal.
+
+Training fixes on Breakfast at the Frat: total forecast over total sales is
+within 3% of 1 in every run, so there is no summed-up bias to fix on this
+dataset. The validation stop costs accuracy here, because it takes 8 of
+only 90 training weeks out of the targets. Dropout with weight decay is
+level overall, steadier across seeds, and a little better on every lever
+column.
 
 Lever step: building the forecast as baseline times lift is the part that
 helps. It beats LightGBM overall in all five runs and halves the spread
