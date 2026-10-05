@@ -164,3 +164,26 @@ def test_recorded_regular_price_replaces_the_rule(split):
     np.testing.assert_allclose(parts["lift"], 0, atol=1e-4 * parts["forecast"].max())
     ruled = build_model("state_model", **{**SETTINGS, "steps": 5}).fit(train)
     assert np.abs(ruled.breakdown(plan)["lift"]).max() > 1e-3
+
+
+@pytest.mark.parametrize("finetune", ["full", "low_lr", "frozen"])
+def test_pretraining_then_each_way_of_fine_tuning(split, finetune):
+    train, test = split
+    quick = {**SETTINGS, "steps": 120, "pretrain_steps": 60, "finetune": finetune}
+    model = build_model("state_model", **quick)
+    model.fit(train)
+    pred = model.predict(test.drop(columns=[UNITS]))
+    assert np.isfinite(pred).all() and pred.sum() > 0
+    stages = {label for label, _, _ in model.loss_log}
+    assert stages == {"pretraining", "training"}
+
+
+def test_a_frozen_encoder_is_left_as_pretraining_made_it(split):
+    train, _ = split
+    quick = {**SETTINGS, "steps": 0, "pretrain_steps": 40}
+    a = build_model("state_model", **quick).fit(train)
+    b = build_model("state_model", **{**quick, "steps": 40, "finetune": "frozen"}).fit(train)
+    c = build_model("state_model", **{**quick, "steps": 40, "finetune": "full"}).fit(train)
+    w = lambda m: m._net.inp.weight.detach().numpy()
+    np.testing.assert_array_equal(w(a), w(b))
+    assert np.abs(w(a) - w(c)).max() > 0

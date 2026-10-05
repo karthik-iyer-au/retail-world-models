@@ -41,6 +41,12 @@ in `levers` set to zero.
   the horizon, the model predicts the state the encoder will give once those
   periods are history. The target comes from a slowly updated copy of the
   encoder. The forecast loss stays on throughout.
+- `pretrain_steps`: train the encoder on the latent loss alone first, then
+  train for the forecast. `finetune` says what happens to the encoder in
+  that second stretch: `full` (trained as usual), `low_lr` (trained at
+  `encoder_lr_scale` of the usual rate) or `frozen` (left as pretraining
+  made it, so only the readout learns). `latent_ema` is how slowly the
+  target copy follows.
 - `regular_column`: a column holding the regular price the retailer recorded
   (for example `base_price`), used in place of the 12-period rule wherever
   it is filled in.
@@ -205,6 +211,10 @@ class StateModel(Forecaster):
         year_ago: int = 0,
         year_ago_window: int = 1,
         regular_column: str | None = None,
+        pretrain_steps: int = 0,
+        finetune: str = "full",
+        encoder_lr_scale: float = 0.1,
+        latent_ema: float = 0.99,
     ):
         self._settings = {k: v for k, v in locals().items() if k not in ("self", "__class__")}
         self.horizon, self.history, self.train_periods = horizon, history, train_periods
@@ -225,6 +235,10 @@ class StateModel(Forecaster):
         self.latent_weight = latent_weight
         self.plan_lags = plan_lags
         self.regular_column = regular_column
+        if finetune not in ("full", "low_lr", "frozen"):
+            raise ValueError("finetune must be full, low_lr or frozen")
+        self.pretrain_steps, self.finetune = pretrain_steps, finetune
+        self.encoder_lr_scale, self.latent_ema = encoder_lr_scale, latent_ema
         # periods back to look for "this time last year", e.g. 51, 52, 53
         self._year_offsets = (
             [year_ago + d for d in range(-year_ago_window, year_ago_window + 1)] if year_ago else []
@@ -235,7 +249,7 @@ class StateModel(Forecaster):
         self._keep = max([history] + self._year_offsets)
         self.net_args = dict(d_model=d_model, layers=layers, heads=heads, dropout=dropout,
                              neighbours=neighbours, conditions=conditions,
-                             lift_readout=lift_readout, latent=latent_weight > 0)
+                             lift_readout=lift_readout, latent=latent_weight > 0 or pretrain_steps > 0)
         self.steps, self.batch, self.lr = steps, batch, lr
         self.power, self.seed, self.device = tweedie_power, seed, device
         self.mixed_precision = mixed_precision  # faster on a GPU; has no effect on a CPU
@@ -398,67 +412,92 @@ class StateModel(Forecaster):
             self._members = torch.as_tensor(members, device=self._dev)
 
         self._net = self._new_net()
-        opt = torch.optim.AdamW(self._net.parameters(), lr=self.lr, weight_decay=1e-4)
-        warm = max(1, self.steps // 20)  # learning rate rises for the first 5% of steps, then falls away
-        shape = lambda k: (k + 1) / warm if k < warm else 0.5 * (1 + np.cos(np.pi * (k - warm) / max(1, self.steps - warm)))
-        sched = torch.optim.lr_scheduler.LambdaLR(opt, shape)
         gen = torch.Generator(device="cpu").manual_seed(self.seed)
         amp = self.mixed_precision and self._dev.type == "cuda"
-        scaler = torch.amp.GradScaler("cuda", enabled=amp)
         n, t, p = len(self._names), len(dates), self.power
+        uses_latent = self.latent_weight > 0 or self.pretrain_steps > 0
         slow = None
-        if self.latent_weight > 0:  # slowly updated copy of the network, used only for target states
+        if uses_latent:  # slowly updated copy of the network, used only for target states
             import copy
 
             slow = copy.deepcopy(self._net).requires_grad_(False)
-        self._net.train()
+        encoder = [q for part in (self._net.inp, self._net.encoder, self._net.norm) for q in part.parameters()]
+        encoder.append(self._net.pos)
         self.loss_log = []
-        for step in range(self.steps):
-            if self._members is None:
-                picked = None
-                rows = torch.randint(0, n, (self.batch,), generator=gen).to(self._dev)
-                start = torch.randint(L, t - H + 1, (self.batch,), generator=gen).to(self._dev)
-            else:  # whole groups, each at one point in time
-                n_groups, slots = self._members.shape
-                g = max(1, self.batch // slots)
-                picked = self._members[torch.randint(0, n_groups, (g,), generator=gen).to(self._dev)]
-                start = torch.randint(L, t - H + 1, (g,), generator=gen).to(self._dev).repeat_interleave(slots)
-                rows = picked.reshape(-1).clamp(min=0)
-            with torch.autocast("cuda", dtype=torch.float16, enabled=amp):
-                out, scale, on_sale, ahead = self._forward(
-                    data, {**data, "start": start}, rows, start, picked, full=slow is not None
-                )
-                latent = 0.0
+
+        def train(steps, forecast, latent_weight, encoder_lr, label):
+            """One stretch of training. `forecast` switches the forecast loss
+            on; `encoder_lr` is the encoder's learning rate as a share of
+            the rest (0 freezes it)."""
+            if steps == 0:
+                return
+            ids = {id(q) for q in encoder}
+            rest = [q for q in self._net.parameters() if id(q) not in ids]
+            for q in encoder:
+                q.requires_grad_(encoder_lr > 0)
+            groups = [{"params": rest, "lr": self.lr}]
+            if encoder_lr > 0:
+                groups.append({"params": encoder, "lr": self.lr * encoder_lr})
+            opt = torch.optim.AdamW(groups, weight_decay=1e-4)
+            warm = max(1, steps // 20)  # learning rate rises for the first 5% of steps, then falls away
+            shape = lambda k: (k + 1) / warm if k < warm else 0.5 * (1 + np.cos(np.pi * (k - warm) / max(1, steps - warm)))
+            sched = torch.optim.lr_scheduler.LambdaLR(opt, shape)
+            scaler = torch.amp.GradScaler("cuda", enabled=amp)
+            with_latent = latent_weight > 0
+            self._net.train()
+            for step in range(steps):
+                if self._members is None:
+                    picked = None
+                    rows = torch.randint(0, n, (self.batch,), generator=gen).to(self._dev)
+                    start = torch.randint(L, t - H + 1, (self.batch,), generator=gen).to(self._dev)
+                else:  # whole groups, each at one point in time
+                    n_groups, slots = self._members.shape
+                    g = max(1, self.batch // slots)
+                    picked = self._members[torch.randint(0, n_groups, (g,), generator=gen).to(self._dev)]
+                    start = torch.randint(L, t - H + 1, (g,), generator=gen).to(self._dev).repeat_interleave(slots)
+                    rows = picked.reshape(-1).clamp(min=0)
+                with torch.autocast("cuda", dtype=torch.float16, enabled=amp):
+                    out, scale, on_sale, ahead = self._forward(
+                        data, {**data, "start": start}, rows, start, picked, full=True
+                    )
+                    latent = 0.0
+                    if with_latent:
+                        # the state once the horizon has become history, from the slow copy
+                        later = start + H
+                        with torch.no_grad():
+                            hist_later = self._window(data, {**data, "start": start}, rows, later)[0]
+                            want = slow.state(hist_later)
+                        guess = self._net.next(torch.cat([out["state"], out["plan"].flatten(1)], dim=1))
+                        latent = (1 - torch.nn.functional.cosine_similarity(guess.float(), want.float(), dim=1)).mean()
+                loss = latent_weight * latent
+                if forecast:
+                    log_mu = out["log_mu"].float()
+                    target = data["units"][rows[:, None], ahead] / scale
+                    # Tweedie loss on sales relative to the item's own level
+                    each = -target * torch.exp((1 - p) * log_mu) / (1 - p) + torch.exp((2 - p) * log_mu) / (2 - p)
+                    loss = loss + (each * on_sale).sum() / on_sale.sum().clamp(min=1)
+                opt.zero_grad(set_to_none=True)
+                scaler.scale(loss).backward()
+                scaler.unscale_(opt)
+                torch.nn.utils.clip_grad_norm_(self._net.parameters(), 1.0)
+                scaler.step(opt)
+                scaler.update()
+                sched.step()
                 if slow is not None:
-                    # the state once the horizon has become history, from the slow copy
-                    later = start + H
                     with torch.no_grad():
-                        hist_later = self._window(data, {**data, "start": start}, rows, later)[0]
-                        want = slow.state(hist_later)
-                    guess = self._net.next(torch.cat([out["state"], out["plan"].flatten(1)], dim=1))
-                    latent = (1 - torch.nn.functional.cosine_similarity(guess.float(), want.float(), dim=1)).mean()
-                    out = out["log_mu"]
-            log_mu = out
-            target = data["units"][rows[:, None], ahead] / scale
-            log_mu = log_mu.float()
-            # Tweedie loss on sales relative to the item's own level
-            loss = -target * torch.exp((1 - p) * log_mu) / (1 - p) + torch.exp((2 - p) * log_mu) / (2 - p)
-            loss = (loss * on_sale).sum() / on_sale.sum().clamp(min=1) + self.latent_weight * latent
-            opt.zero_grad(set_to_none=True)
-            scaler.scale(loss).backward()
-            scaler.unscale_(opt)
-            torch.nn.utils.clip_grad_norm_(self._net.parameters(), 1.0)
-            scaler.step(opt)
-            scaler.update()
-            sched.step()
-            if slow is not None:
-                with torch.no_grad():
-                    for a, b in zip(slow.parameters(), self._net.parameters()):
-                        a.lerp_(b, 0.01)
-            if step % 50 == 0 or step == self.steps - 1:
-                self.loss_log.append((step, loss.item()))
-            if (step + 1) % max(1, self.steps // 20) == 0:
-                print(f"training step {step + 1} of {self.steps}, loss {loss.item():.4f}", flush=True)
+                        for a, b in zip(slow.parameters(), self._net.parameters()):
+                            a.lerp_(b, 1 - self.latent_ema)
+                if step % 50 == 0 or step == steps - 1:
+                    self.loss_log.append((label, step, loss.item()))
+                if (step + 1) % max(1, steps // 20) == 0:
+                    print(f"{label} step {step + 1} of {steps}, loss {loss.item():.4f}", flush=True)
+
+        # optional first stretch: learn the state from the latent loss alone
+        train(self.pretrain_steps, False, 1.0, 1.0, "pretraining")
+        encoder_lr = {"full": 1.0, "low_lr": self.encoder_lr_scale, "frozen": 0.0}[self.finetune]
+        train(self.steps, True, self.latent_weight, encoder_lr if self.pretrain_steps else 1.0, "training")
+        for q in encoder:
+            q.requires_grad_(True)
 
         tail = slice(max(0, t - self._keep), t)
         self._past = {

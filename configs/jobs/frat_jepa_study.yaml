@@ -1,0 +1,21 @@
+# How best to use the latent (JEPA-style) loss: alongside the forecast loss
+# at different weights, or as pretraining followed by three ways of
+# fine-tuning. Lift model, Breakfast at the Frat, five seeds each.
+datasets:
+  - name: breakfast_at_the_frat
+    from: /content/drive/MyDrive/retail-world-model/data
+runs:
+  - config: configs/experiments/frat_dev_state_model_lift_jepa_joint_light.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/frat_dev_state_model_lift_jepa_joint_heavy.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/frat_dev_state_model_lift_jepa_pretrain_full.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/frat_dev_state_model_lift_jepa_pretrain_low_lr.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/frat_dev_state_model_lift_jepa_pretrain_frozen.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/frat_dev_state_model_lift_jepa_pretrain_low_lr_joint.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/frat_dev_state_model_lift_jepa_pretrain_long_low_lr.yaml
+    seeds: [1, 2, 3, 4, 5]
