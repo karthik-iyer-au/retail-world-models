@@ -115,3 +115,8 @@ weeks, one run each:
 | Seasonal naive | 1.274 | 1.798 | 1.002 |
 | Average of last 8 weeks | 0.723 | 1.492 | 0.684 |
 | LightGBM with price, promotion and cost | 0.715 | 1.259 | 0.587 |
+| Our model, item encoder and readout, three seeds | 0.692 (0.679 to 0.705) | 1.362 | 0.605 |
+| Our model with regular price and baseline times lift, three seeds | 0.676 (0.665 to 0.682) | 1.339 | 0.603 |
+
+All six runs of our model beat LightGBM overall. On single item-store weeks
+LightGBM is still ahead, with or without a promotion code.
