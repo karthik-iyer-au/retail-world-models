@@ -280,3 +280,24 @@ def test_a_failed_run_does_not_stop_the_queue(tmp_path, monkeypatch, capsys):
     job.main()
     text = capsys.readouterr().out
     assert "FAILED broken" in text and "finished" in text and "FAILED, see the error above" in text
+
+
+def test_combination_weights_are_chosen_on_validation_and_favour_the_better_model():
+    import numpy as np
+
+    from rwm.data import load_dataset
+    from rwm.data.schema import DATE, UNITS
+    from rwm.forecaster import build_model
+
+    p = load_dataset("synthetic", n_periods=200).panel
+    cut = np.sort(p[DATE].unique())[-8]
+    train, test = p[p[DATE] <= cut], p[p[DATE] > cut]
+    future = test.drop(columns=[UNITS])
+    members = [{"name": "recent_average", "params": {"window": 28}}, {"name": "seasonal_naive", "params": {"season": 7}}]
+    both = build_model("combination", models=members, validation_periods=7).fit(train)
+    assert abs(sum(both.weights) - 1) < 1e-6 and min(both.weights) >= 0
+    assert both.validation_scores[-1] <= min(both.validation_scores[:-1]) + 1e-9
+    parts = [build_model(m["name"], **m["params"]).fit(train).predict(future) for m in members]
+    np.testing.assert_allclose(both.predict(future), sum(w * f for w, f in zip(both.weights, parts)))
+    lone = build_model("combination", models=[members[0], members[0]], validation_periods=7).fit(train)
+    np.testing.assert_allclose(lone.predict(future), parts[0])

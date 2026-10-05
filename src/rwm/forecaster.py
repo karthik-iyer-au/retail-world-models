@@ -34,6 +34,7 @@ def build_model(name: str, **params) -> Forecaster:
     import rwm.model  # noqa: F401  (registers our model)
     import rwm.prior_work  # noqa: F401  (registers prior-work models)
     import rwm.seed_average  # noqa: F401  (registers the seed-average wrapper)
+    import rwm.combination  # noqa: F401  (registers the forecast combination)
 
     if name not in _MODELS:
         raise KeyError(f"unknown model '{name}'. Known: {sorted(_MODELS)}")
