@@ -114,6 +114,10 @@ weeks:
 | Lift model + totals term in the loss | 0.414 | 0.395 to 0.433 | 0.856 | 0.892 | 0.553 | 0.418 |
 | Lift model + readout dropout and stronger weight decay | 0.409 | 0.405 to 0.412 | 0.831 | 0.867 | 0.528 | 0.407 |
 | Lift model + all three of the above | 0.445 | 0.438 to 0.453 | 0.943 | 0.990 | 0.570 | 0.446 |
+| World model (state rolled forward weekly), baseline and lift | 0.408 | 0.396 to 0.418 | 0.845 | 0.868 | 0.539 | 0.404 |
+| World model + latent check alongside the forecast loss | 0.417 | 0.401 to 0.426 | 0.870 | 0.910 | 0.538 | 0.404 |
+| World model, 10,000 steps latent-only pretraining, then encoder at a tenth | 0.411 | 0.392 to 0.423 | 0.813 | 0.872 | 0.543 | 0.402 |
+| World model, that recipe, + validation stop and totals term | 0.458 | 0.427 to 0.527 | 0.942 | 1.035 | 0.583 | 0.440 |
 | LightGBM, average of five fits (three repeats) | 0.417 | 0.408 to 0.425 | 0.811 | 0.821 | 0.508 | 0.402 |
 | Lever step: regular price, baseline times lift, average of five fits (three repeats) | 0.400 | 0.397 to 0.404 | 0.813 | 0.839 | 0.535 | 0.402 |
 
@@ -142,6 +146,13 @@ dataset. The validation stop costs accuracy here, because it takes 8 of
 only 90 training weeks out of the targets. Dropout with weight decay is
 level overall, steadier across seeds, and a little better on every lever
 column.
+
+World model on Breakfast at the Frat: level with the direct lift model
+(0.408 against 0.406), neither better nor worse, on the overall score and
+on every lever column. Trained with long latent-only pretraining it gives
+the best display-week score of any version (0.813, against 0.817 for
+LightGBM) with circular weeks unchanged. The validation stop and totals
+term hurt here, as they do for the direct model.
 
 Lever step: building the forecast as baseline times lift is the part that
 helps. It beats LightGBM overall in all five runs and halves the spread

@@ -91,6 +91,21 @@ explanations pass more of these checks also forecast better?
 - Training four times longer on Dominick's: far worse at summed-up levels,
   unchanged at item-store level.
 
+## Findings on the main hypotheses so far
+
+- World model against direct readout, Breakfast at the Frat: level
+  (0.408 against 0.406 overall, five seeds each). The world model is not
+  more accurate on this dataset. What it adds is the rollout itself: a
+  promotion reaching later weeks through the state, and two plans compared
+  from the same starting state.
+- Latent (JEPA-style) loss: on the direct model no recipe improves the
+  overall score; an encoder trained on the latent loss alone and then frozen
+  still reaches 0.428, so the signal is informative. On the world model,
+  long pretraining then a slowed encoder is level overall and best on
+  display weeks; the latent check trained alongside the forecast loss is
+  worse.
+- The recipe matters: the first one tried was among the weakest.
+
 ## Hypotheses still to test
 
 - A true world model: the state rolled forward week by week under the plan,
