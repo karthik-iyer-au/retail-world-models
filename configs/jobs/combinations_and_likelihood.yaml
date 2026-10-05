@@ -1,4 +1,5 @@
-# Our lift model combined with LightGBM, on both weekly datasets.
+# Our lift model combined with LightGBM, and the lift model with a negative
+# binomial likelihood, on both weekly datasets.
 datasets:
   - name: breakfast_at_the_frat
     from: /content/drive/MyDrive/retail-world-model/data
@@ -8,4 +9,8 @@ runs:
   - config: configs/experiments/frat_dev_combination_lift_lightgbm.yaml
     seeds: [1, 2, 3, 4, 5]
   - config: configs/experiments/dominicks_ana_dev_combination_lift_lightgbm.yaml
+    seeds: [1, 2, 3]
+  - config: configs/experiments/frat_dev_lift_negative_binomial.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/dominicks_ana_dev_lift_negative_binomial.yaml
     seeds: [1, 2, 3]

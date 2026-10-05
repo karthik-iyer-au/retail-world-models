@@ -61,6 +61,8 @@ in `levers` set to zero.
 - `regular_column`: a column holding the regular price the retailer recorded
   (for example `base_price`), used in place of the 12-period rule wherever
   it is filled in.
+- `likelihood`: `tweedie` (the default, on sales relative to the item's own
+  level) or `negative_binomial` (on units, as a count with a learned spread).
 - `rollout`: the world-model form. A transition step takes the state and one
   period's plan and gives the state one period later. It is applied period
   by period across the horizon, and each period's sales are read from the
@@ -103,7 +105,7 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
                d_model: int, layers: int, heads: int, dropout: float,
                neighbours: str | None = None, n_products: int = 0, conditions: int = 4,
                lift_readout: bool = False, latent: bool = False, readout_dropout: float = 0.0,
-               rollout: bool = False):
+               rollout: bool = False, spread: bool = False):
     import torch
     from torch import nn
 
@@ -144,6 +146,8 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
                 nn.Linear(d_model, 1),
             )
             self.rollout = rollout
+            # for the negative binomial: how much more spread out sales are than a Poisson count
+            self.spread = nn.Parameter(torch.zeros(())) if spread else None
             if rollout:  # the transition: this period's plan moves the state on by one period
                 self.cell = nn.GRUCell(n_fut, d_model)
             self.head = readout()
@@ -267,6 +271,7 @@ class StateModel(Forecaster):
         readout_dropout: float = 0.0,
         weight_decay: float = 1e-4,
         rollout: bool = False,
+        likelihood: str = "tweedie",
     ):
         self._settings = {k: v for k, v in locals().items() if k not in ("self", "__class__")}
         self.horizon, self.history, self.train_periods = horizon, history, train_periods
@@ -291,6 +296,9 @@ class StateModel(Forecaster):
         if validation_periods and validation_periods < horizon:
             raise ValueError("validation_periods must be at least the horizon")
         self.validation_periods, self.total_weight = validation_periods, total_weight
+        if likelihood not in ("tweedie", "negative_binomial"):
+            raise ValueError("likelihood must be tweedie or negative_binomial")
+        self.likelihood = likelihood
         self.weight_decay = weight_decay
         if finetune not in ("full", "low_lr", "frozen"):
             raise ValueError("finetune must be full, low_lr or frozen")
@@ -307,7 +315,8 @@ class StateModel(Forecaster):
         self.net_args = dict(d_model=d_model, layers=layers, heads=heads, dropout=dropout,
                              neighbours=neighbours, conditions=conditions,
                              lift_readout=lift_readout, latent=latent_weight > 0 or pretrain_steps > 0,
-                             readout_dropout=readout_dropout, rollout=rollout)
+                             readout_dropout=readout_dropout, rollout=rollout,
+                             spread=likelihood == "negative_binomial")
         self.steps, self.batch, self.lr = steps, batch, lr
         self.power, self.seed, self.device = tweedie_power, seed, device
         self.mixed_precision = mixed_precision  # faster on a GPU; has no effect on a CPU
@@ -562,8 +571,16 @@ class StateModel(Forecaster):
                 if forecast:
                     log_mu = out["log_mu"].float()
                     target = data["units"][rows[:, None], ahead] / scale
-                    # Tweedie loss on sales relative to the item's own level
-                    each = -target * torch.exp((1 - p) * log_mu) / (1 - p) + torch.exp((2 - p) * log_mu) / (2 - p)
+                    if self.likelihood == "tweedie":
+                        # Tweedie loss on sales relative to the item's own level
+                        each = -target * torch.exp((1 - p) * log_mu) / (1 - p) + torch.exp((2 - p) * log_mu) / (2 - p)
+                    else:
+                        # negative binomial on units: a count with mean m and a learned spread
+                        y = data["units"][rows[:, None], ahead].round()
+                        m = (torch.exp(log_mu) * scale).clamp(min=1e-6)
+                        r = 1 / torch.nn.functional.softplus(self._net.spread).clamp(min=1e-4)
+                        each = -(torch.lgamma(y + r) - torch.lgamma(r) - torch.lgamma(y + 1)
+                                 + r * torch.log(r / (r + m)) + y * torch.log(m / (r + m)))
                     loss = loss + (each * on_sale).sum() / on_sale.sum().clamp(min=1)
                     if self.total_weight > 0:
                         # the same forecast summed over the items drawn for each date, against

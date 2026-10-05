@@ -106,3 +106,15 @@ def test_run_saves_a_checkpoint_with_its_checksum(tmp_path):
     out = run(config, out_root=tmp_path)
     saved = json.loads((out / "metrics.json").read_text())["checkpoints"]
     assert len(saved) == 1 and sha256_file(out / saved[0]["file"]) == saved[0]["sha256"]
+
+
+def test_negative_binomial_likelihood_also_beats_the_simple_benchmarks(split):
+    train, test = split
+    future, y = test.drop(columns=[UNITS]), test[UNITS].to_numpy()
+    rmse = lambda f: float(np.sqrt(((f - y) ** 2).mean()))
+    model = build_model("state_model", **SETTINGS, likelihood="negative_binomial").fit(train)
+    ours = rmse(model.predict(future))
+    assert ours < rmse(build_model("seasonal_naive").fit(train).predict(future))
+    assert ours < rmse(build_model("recent_average").fit(train).predict(future))
+    with pytest.raises(ValueError):
+        build_model("state_model", **SETTINGS, likelihood="other")
