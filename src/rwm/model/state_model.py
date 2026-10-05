@@ -47,6 +47,14 @@ in `levers` set to zero.
   `encoder_lr_scale` of the usual rate) or `frozen` (left as pretraining
   made it, so only the readout learns). `latent_ema` is how slowly the
   target copy follows.
+- `validation_periods`: the last periods of the training data are kept out
+  of training targets, scored during training at three levels (single
+  series, each `categorical` grouping, the total), and the weights from the
+  best point are kept.
+- `total_weight`: adds to the loss the squared gap between summed forecasts
+  and summed sales over the items drawn for each date, so a small bias in
+  the same direction on many items is penalised.
+- `readout_dropout`, `weight_decay`: the usual two.
 - `regular_hold`: where no regular price is recorded, a price held for this
   many periods in a row becomes the regular price (the latest such price),
   in place of "highest in the last `regular_window` periods".
@@ -71,6 +79,9 @@ from rwm.forecaster import Forecaster, register_model
 from rwm.utils.frames import frame_to_matrix, series_rows
 
 
+TOTAL_DATES = 8  # dates per batch when the totals term is on
+
+
 def _calendar(dates: np.ndarray) -> np.ndarray:
     """Position in the week and in the year, as smooth cycles."""
     d = pd.DatetimeIndex(dates)
@@ -82,7 +93,7 @@ def _calendar(dates: np.ndarray) -> np.ndarray:
 def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, horizon: int,
                d_model: int, layers: int, heads: int, dropout: float,
                neighbours: str | None = None, n_products: int = 0, conditions: int = 4,
-               lift_readout: bool = False, latent: bool = False):
+               lift_readout: bool = False, latent: bool = False, readout_dropout: float = 0.0):
     import torch
     from torch import nn
 
@@ -116,8 +127,10 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
             readout = lambda: nn.Sequential(
                 nn.Linear(d_model * (2 if neighbours else 1) + 16 * len(cat_sizes) + 16 + n_fut, 2 * d_model),
                 nn.GELU(),
+                nn.Dropout(readout_dropout),
                 nn.Linear(2 * d_model, d_model),
                 nn.GELU(),
+                nn.Dropout(readout_dropout),
                 nn.Linear(d_model, 1),
             )
             self.head = readout()
@@ -219,6 +232,10 @@ class StateModel(Forecaster):
         encoder_lr_scale: float = 0.1,
         latent_ema: float = 0.99,
         regular_hold: int = 0,
+        validation_periods: int = 0,
+        total_weight: float = 0.0,
+        readout_dropout: float = 0.0,
+        weight_decay: float = 1e-4,
     ):
         self._settings = {k: v for k, v in locals().items() if k not in ("self", "__class__")}
         self.horizon, self.history, self.train_periods = horizon, history, train_periods
@@ -240,6 +257,10 @@ class StateModel(Forecaster):
         self.plan_lags = plan_lags
         self.regular_column = regular_column
         self.regular_hold = regular_hold
+        if validation_periods and validation_periods < horizon:
+            raise ValueError("validation_periods must be at least the horizon")
+        self.validation_periods, self.total_weight = validation_periods, total_weight
+        self.weight_decay = weight_decay
         if finetune not in ("full", "low_lr", "frozen"):
             raise ValueError("finetune must be full, low_lr or frozen")
         self.pretrain_steps, self.finetune = pretrain_steps, finetune
@@ -254,7 +275,8 @@ class StateModel(Forecaster):
         self._keep = max([history] + self._year_offsets)
         self.net_args = dict(d_model=d_model, layers=layers, heads=heads, dropout=dropout,
                              neighbours=neighbours, conditions=conditions,
-                             lift_readout=lift_readout, latent=latent_weight > 0 or pretrain_steps > 0)
+                             lift_readout=lift_readout, latent=latent_weight > 0 or pretrain_steps > 0,
+                             readout_dropout=readout_dropout)
         self.steps, self.batch, self.lr = steps, batch, lr
         self.power, self.seed, self.device = tweedie_power, seed, device
         self.mixed_precision = mixed_precision  # faster on a GPU; has no effect on a CPU
@@ -439,7 +461,12 @@ class StateModel(Forecaster):
             slow = copy.deepcopy(self._net).requires_grad_(False)
         encoder = [q for part in (self._net.inp, self._net.encoder, self._net.norm) for q in part.parameters()]
         encoder.append(self._net.pos)
-        self.loss_log = []
+        self.loss_log, self.validation_log = [], []
+        V = self.validation_periods
+        last = t - H - V  # latest start whose forecast periods are all open to training
+        if last < L:
+            raise ValueError("not enough history left to train on after the validation periods")
+        best = {"score": float("inf"), "step": 0, "weights": None}
 
         def train(steps, forecast, latent_weight, encoder_lr, label):
             """One stretch of training. `forecast` switches the forecast loss
@@ -454,7 +481,7 @@ class StateModel(Forecaster):
             groups = [{"params": rest, "lr": self.lr}]
             if encoder_lr > 0:
                 groups.append({"params": encoder, "lr": self.lr * encoder_lr})
-            opt = torch.optim.AdamW(groups, weight_decay=1e-4)
+            opt = torch.optim.AdamW(groups, weight_decay=self.weight_decay)
             warm = max(1, steps // 20)  # learning rate rises for the first 5% of steps, then falls away
             shape = lambda k: (k + 1) / warm if k < warm else 0.5 * (1 + np.cos(np.pi * (k - warm) / max(1, steps - warm)))
             sched = torch.optim.lr_scheduler.LambdaLR(opt, shape)
@@ -465,12 +492,16 @@ class StateModel(Forecaster):
                 if self._members is None:
                     picked = None
                     rows = torch.randint(0, n, (self.batch,), generator=gen).to(self._dev)
-                    start = torch.randint(L, t - H + 1, (self.batch,), generator=gen).to(self._dev)
+                    if self.total_weight > 0:  # a few shared dates, so totals within the batch mean something
+                        dates_in_batch = torch.randint(L, last + 1, (TOTAL_DATES,), generator=gen)
+                        start = dates_in_batch.repeat_interleave(-(-self.batch // TOTAL_DATES))[: self.batch].to(self._dev)
+                    else:
+                        start = torch.randint(L, last + 1, (self.batch,), generator=gen).to(self._dev)
                 else:  # whole groups, each at one point in time
                     n_groups, slots = self._members.shape
                     g = max(1, self.batch // slots)
                     picked = self._members[torch.randint(0, n_groups, (g,), generator=gen).to(self._dev)]
-                    start = torch.randint(L, t - H + 1, (g,), generator=gen).to(self._dev).repeat_interleave(slots)
+                    start = torch.randint(L, last + 1, (g,), generator=gen).to(self._dev).repeat_interleave(slots)
                     rows = picked.reshape(-1).clamp(min=0)
                 with torch.autocast("cuda", dtype=torch.float16, enabled=amp):
                     out, scale, on_sale, ahead = self._forward(
@@ -492,6 +523,14 @@ class StateModel(Forecaster):
                     # Tweedie loss on sales relative to the item's own level
                     each = -target * torch.exp((1 - p) * log_mu) / (1 - p) + torch.exp((2 - p) * log_mu) / (2 - p)
                     loss = loss + (each * on_sale).sum() / on_sale.sum().clamp(min=1)
+                    if self.total_weight > 0:
+                        # the same forecast summed over the items drawn for each date, against
+                        # their summed sales: a bias shared by many items shows up here
+                        units_f = torch.exp(log_mu) * scale * on_sale
+                        units_y = data["units"][rows[:, None], ahead] * on_sale
+                        same = (start[:, None] == start.unique()[None, :]).float()  # rows by dates
+                        gap = (same.T @ units_f - same.T @ units_y) / (same.T @ units_y).clamp(min=1.0)
+                        loss = loss + self.total_weight * (gap**2).mean()
                 opt.zero_grad(set_to_none=True)
                 scaler.scale(loss).backward()
                 scaler.unscale_(opt)
@@ -505,6 +544,14 @@ class StateModel(Forecaster):
                             a.lerp_(b, 1 - self.latent_ema)
                 if step % 50 == 0 or step == steps - 1:
                     self.loss_log.append((label, step, loss.item()))
+                if forecast and V and ((step + 1) % max(1, steps // 20) == 0 or step == steps - 1):
+                    score = self._validate(data, t - V)
+                    self.validation_log.append((step + 1, score))
+                    if score < best["score"]:
+                        best.update(score=score, step=step + 1,
+                                    weights={k: v.detach().clone() for k, v in self._net.state_dict().items()})
+                    print(f"validation after step {step + 1}: {score:.4f} (best {best['score']:.4f} at {best['step']})", flush=True)
+                    self._net.train()
                 if (step + 1) % max(1, steps // 20) == 0:
                     print(f"{label} step {step + 1} of {steps}, loss {loss.item():.4f}", flush=True)
 
@@ -514,6 +561,9 @@ class StateModel(Forecaster):
         train(self.steps, True, self.latent_weight, encoder_lr if self.pretrain_steps else 1.0, "training")
         for q in encoder:
             q.requires_grad_(True)
+        if best["weights"] is not None:  # go back to the point that did best on the validation periods
+            self._net.load_state_dict(best["weights"])
+        self.best_step = best["step"]
 
         tail = slice(max(0, t - self._keep), t)
         self._past = {
@@ -524,6 +574,31 @@ class StateModel(Forecaster):
             "calendar": data["calendar"][tail],
         }
         return self
+
+    def _validate(self, data, origin: int) -> float:
+        """Error on the `horizon` periods from column `origin`, which training
+        never used as targets. Averaged over three levels (single series,
+        each `categorical` grouping, and the total) so that a bias which adds
+        up counts as much as single-series error."""
+        import torch
+
+        n, H = len(self._names), self.horizon
+        f, y = torch.zeros(n, H, device=self._dev), torch.zeros(n, H, device=self._dev)
+        self._net.eval()
+        with torch.no_grad():
+            for rows, picked in self._batches():
+                start = torch.full_like(rows, origin)
+                log_mu, scale, on_sale, ahead = self._forward(data, {**data, "start": start}, rows, start, picked)
+                real = on_sale if picked is None else on_sale & (picked.reshape(-1) >= 0)[:, None]
+                f[rows] += torch.exp(log_mu.float()) * scale * real
+                y[rows] += data["units"][rows[:, None], ahead] * real
+        level = lambda a, b: (((a - b) ** 2).mean().sqrt() / b.abs().mean().clamp(min=1e-9)).item()
+        scores = [level(f, y), level(f.sum(0), y.sum(0))]
+        for i in range(self._cats.shape[1]):
+            g = self._cats[:, i]
+            sums = lambda a: torch.zeros(int(g.max()) + 1, H, device=self._dev).index_add_(0, g, a)
+            scores.append(level(sums(f), sums(y)))
+        return float(np.mean(scores))
 
     def _future(self, future: pd.DataFrame):
         fut_dates = np.sort(future[DATE].unique())

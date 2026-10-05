@@ -203,3 +203,30 @@ def test_a_price_held_for_several_periods_becomes_the_regular_price(split):
     np.testing.assert_allclose(parts["lift"], 0, atol=1e-4 * parts["forecast"].max())
     ruled = build_model("state_model", **{**SETTINGS, "steps": 5}).fit(train)
     assert np.abs(ruled.breakdown(plan)["lift"]).max() > 1e-3
+
+
+def test_validation_keeps_the_best_point_and_leaves_those_periods_out(split):
+    train, test = split
+    quick = {**SETTINGS, "steps": 200, "validation_periods": 7}
+    model = build_model("state_model", **quick).fit(train)
+    scores = dict(model.validation_log)
+    assert len(scores) >= 10 and model.best_step in scores
+    assert scores[model.best_step] == min(scores.values())
+    assert np.isfinite(model.predict(test.drop(columns=[UNITS]))).all()
+    with pytest.raises(ValueError):
+        build_model("state_model", **{**SETTINGS, "validation_periods": 3})
+
+
+def test_totals_term_pulls_the_summed_forecast_toward_summed_sales(split):
+    """Trained briefly, the model with the totals term is closer in total."""
+    train, test = split
+    future, actual = test.drop(columns=[UNITS]), test[UNITS].sum()
+    gap = lambda **kw: abs(build_model("state_model", **{**SETTINGS, "steps": 150, **kw}).fit(train).predict(future).sum() / actual - 1)
+    assert gap(total_weight=5.0) < gap() + 0.02
+
+
+def test_readout_dropout_and_weight_decay_are_accepted(split):
+    train, test = split
+    model = build_model("state_model", **{**SETTINGS, "steps": 20, "readout_dropout": 0.2, "weight_decay": 0.01}).fit(train)
+    a, b = model.predict(test.drop(columns=[UNITS])), model.predict(test.drop(columns=[UNITS]))
+    np.testing.assert_array_equal(a, b)  # dropout is off when forecasting

@@ -259,3 +259,24 @@ def test_seed_average_is_the_mean_of_its_members():
     one = build_model("recent_average", window=7).fit(train)
     np.testing.assert_allclose(both.predict(future), one.predict(future))
     assert len(both.models) == 3
+
+
+def test_a_failed_run_does_not_stop_the_queue(tmp_path, monkeypatch, capsys):
+    import sys
+
+    import yaml
+
+    from rwm.experiments import job
+
+    good = {"name": "ok", "seed": 0, "dataset": {"name": "synthetic", "params": {"n_periods": 120}},
+            "model": {"name": "recent_average", "params": {"window": 7}}, "evaluation": {"horizon": 7, "n_origins": 1}}
+    bad = {**good, "name": "broken", "model": {"name": "no_such_model"}}
+    for c in (bad, good):
+        (tmp_path / f"{c['name']}.yaml").write_text(yaml.safe_dump(c))
+    (tmp_path / "job.yaml").write_text(yaml.safe_dump({"runs": [{"config": "broken.yaml"}, {"config": "ok.yaml"}]}))
+    monkeypatch.setattr(job, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(job, "run", lambda config, strict, out_root: __import__("rwm.experiments.run", fromlist=["run"]).run(config, strict=False, out_root=out_root))
+    monkeypatch.setattr(sys, "argv", ["job", "--job", str(tmp_path / "job.yaml"), "--out", str(tmp_path / "out")])
+    job.main()
+    text = capsys.readouterr().out
+    assert "FAILED broken" in text and "finished" in text and "FAILED, see the error above" in text

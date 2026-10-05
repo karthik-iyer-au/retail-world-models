@@ -19,6 +19,7 @@ ends by printing one summary line per run.
 """
 import argparse
 import json
+import traceback
 from pathlib import Path
 
 import yaml
@@ -66,7 +67,7 @@ def main() -> None:
         job = yaml.safe_load(Path(job_file).read_text())
         for d in job.get("datasets", []):
             fetch.main([d["name"], *d.get("codes", []), *(["--from", d["from"]] if d.get("from") else [])])
-        folders = []
+        folders, failed = [], []
         for r in job["runs"]:
             base = yaml.safe_load((REPO_ROOT / r["config"]).read_text())
             for seed in r.get("seeds", [None]):
@@ -74,7 +75,13 @@ def main() -> None:
                 # A run already saved for this exact config is kept, not repeated.
                 folder = finished_run(out, config)
                 if folder is None:
-                    folder = run(config, strict=True, out_root=out)
+                    try:
+                        folder = run(config, strict=True, out_root=out)
+                    except Exception:  # one broken run must not stop the rest of the queue
+                        failed.append(config["name"])
+                        print(f"FAILED {config['name']}", flush=True)
+                        traceback.print_exc()
+                        continue
                     print(f"finished {folder.name}", flush=True)
                 else:
                     print(f"already saved {folder.name}", flush=True)
@@ -82,6 +89,8 @@ def main() -> None:
         print(f"\nSummary of {job_file} (average over each run's windows; lower is better)")
         for folder in folders:
             print(summary_row(folder), flush=True)
+        for name in failed:
+            print(f"{name:<48} FAILED, see the error above", flush=True)
 
 
 if __name__ == "__main__":
