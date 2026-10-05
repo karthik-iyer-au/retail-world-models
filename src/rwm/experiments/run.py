@@ -22,6 +22,8 @@ import yaml
 
 from rwm.data import load_dataset
 from rwm.data import manifest as data_manifest
+from rwm.data.calendar import add_calendar
+from rwm.data.crowding import add_crowding
 from rwm.data.schema import DATE, PRICE, SERIES, UNITS
 from rwm.evaluation.hierarchy import rmsse_where, to_matrix, wrmsse
 from rwm.evaluation.splits import rolling_origins
@@ -49,6 +51,13 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
 
     ev = config["evaluation"]
     panel = ds.panel
+    # optional columns worked out from the plan and the calendar; both are
+    # known for future periods
+    extras = config["dataset"]
+    if "calendar" in extras:
+        add_calendar(panel, **extras["calendar"])
+    if "crowding" in extras:
+        add_crowding(panel, **extras["crowding"])
     dates = np.sort(panel[DATE].unique())
     if ev.get("holdout_periods"):
         # The last periods are set aside for the final test and are not loaded into this run.

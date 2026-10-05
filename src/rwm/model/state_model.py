@@ -41,6 +41,9 @@ in `levers` set to zero.
   the horizon, the model predicts the state the encoder will give once those
   periods are history. The target comes from a slowly updated copy of the
   encoder. The forecast loss stays on throughout.
+- `regular_column`: a column holding the regular price the retailer recorded
+  (for example `base_price`), used in place of the 12-period rule wherever
+  it is filled in.
 - `plan_lags`: each forecast period also sees what was planned for the
   periods just before it, so a promotion last week can lower this week
   (pantry loading). With `lift_readout` that dip is part of the lift.
@@ -201,6 +204,7 @@ class StateModel(Forecaster):
         plan_lags: int = 0,
         year_ago: int = 0,
         year_ago_window: int = 1,
+        regular_column: str | None = None,
     ):
         self._settings = {k: v for k, v in locals().items() if k not in ("self", "__class__")}
         self.horizon, self.history, self.train_periods = horizon, history, train_periods
@@ -220,6 +224,7 @@ class StateModel(Forecaster):
             raise ValueError("every lever must also be listed in extra")
         self.latent_weight = latent_weight
         self.plan_lags = plan_lags
+        self.regular_column = regular_column
         # periods back to look for "this time last year", e.g. 51, 52, 53
         self._year_offsets = (
             [year_ago + d for d in range(-year_ago_window, year_ago_window + 1)] if year_ago else []
@@ -248,6 +253,8 @@ class StateModel(Forecaster):
         else:
             out["price"] = torch.full((len(self._names), len(dates)), float("nan"), device=self._dev)
         out["extra"] = [to(frame_to_matrix(frame, self._names, dates, c)) for c in self.extra]
+        if self.regular_column:
+            out["regular"] = to(frame_to_matrix(frame, self._names, dates, self.regular_column))
         return out
 
     def _window(self, past: dict, future: dict, rows, start):
@@ -277,8 +284,12 @@ class StateModel(Forecaster):
         def lever_inputs(src, cols, off=False):
             p = src["price"][r, cols]
             k = ~torch.isnan(p)
+            reg = regular.expand_as(p)
+            if self.regular_column:  # the recorded regular price, where there is one
+                given = src["regular"][r, cols]
+                reg = torch.where(torch.isnan(given) | (given <= 0), reg, given)
             if off:
-                p = torch.where(k, regular.expand_as(p), p)
+                p = torch.where(k, reg, p)
             feats = [torch.nan_to_num(p) / level, k.float()]
             for name, e in zip(self.extra, src["extra"]):
                 v = e[r, cols]
@@ -287,7 +298,7 @@ class StateModel(Forecaster):
                     v = torch.zeros_like(v)
                 feats += [torch.nan_to_num(v), known.float()]
             if self.regular_price:
-                feats.append(torch.nan_to_num(p) / regular)
+                feats.append(torch.nan_to_num(p) / reg)
             cal = src["calendar"][cols]
             return torch.cat([torch.stack(feats, dim=2), cal], dim=2), k
 
@@ -454,6 +465,7 @@ class StateModel(Forecaster):
             "units": data["units"][:, tail],
             "price": data["price"][:, tail],
             "extra": [e[:, tail] for e in data["extra"]],
+            **({"regular": data["regular"][:, tail]} if self.regular_column else {}),
             "calendar": data["calendar"][tail],
         }
         return self

@@ -146,3 +146,21 @@ def test_earlier_period_inputs_match_between_training_and_forecasting(split, mor
         np.testing.assert_allclose(got[i].numpy(), want[i].numpy(), rtol=1e-6)
     model.save(tmp_path / "m.pt")
     np.testing.assert_array_equal(model.predict(future), StateModel.load(tmp_path / "m.pt", device="cpu").predict(future))
+
+
+def test_recorded_regular_price_replaces_the_rule(split):
+    """With a recorded regular price the plan at that price has no lift, even
+    when the item has been on promotion for the whole of recent history."""
+    train, test = split
+    regular = train.groupby("series_id")["price"].max()
+    add = lambda p: p.assign(base_price=p["series_id"].map(regular).to_numpy())
+    train = add(train)
+    recent = train[DATE] > np.sort(train[DATE].unique())[-20]
+    train.loc[recent, "price"] = (train.loc[recent, "base_price"] * 0.8).round(2)
+    model = build_model("state_model", **{**SETTINGS, "steps": 5, "regular_column": "base_price"}).fit(train)
+    plan = add(test).drop(columns=[UNITS]).assign(promo=0)
+    plan["price"] = plan["base_price"]
+    parts = model.breakdown(plan)
+    np.testing.assert_allclose(parts["lift"], 0, atol=1e-4 * parts["forecast"].max())
+    ruled = build_model("state_model", **{**SETTINGS, "steps": 5}).fit(train)
+    assert np.abs(ruled.breakdown(plan)["lift"]).max() > 1e-3
