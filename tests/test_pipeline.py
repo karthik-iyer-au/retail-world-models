@@ -301,3 +301,24 @@ def test_combination_weights_are_chosen_on_validation_and_favour_the_better_mode
     np.testing.assert_allclose(both.predict(future), sum(w * f for w, f in zip(both.weights, parts)))
     lone = build_model("combination", models=[members[0], members[0]], validation_periods=7).fit(train)
     np.testing.assert_allclose(lone.predict(future), parts[0])
+
+
+def test_download_is_tried_again_and_leaves_no_part_file(tmp_path, monkeypatch):
+    import io
+    import urllib.error
+
+    from rwm.data import fetch
+
+    calls = {"n": 0}
+
+    def flaky(request, timeout=None):
+        calls["n"] += 1
+        if calls["n"] < 3:
+            raise urllib.error.URLError("temporary")
+        return io.BytesIO(b"data")
+
+    monkeypatch.setattr(fetch.urllib.request, "urlopen", flaky)
+    monkeypatch.setattr(fetch.time, "sleep", lambda s: None)
+    fetch._from_url("https://example.org/f.csv", tmp_path / "f.csv")
+    assert (tmp_path / "f.csv").read_bytes() == b"data" and calls["n"] == 3
+    assert not list(tmp_path.glob("*.part"))

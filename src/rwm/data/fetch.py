@@ -16,6 +16,7 @@ import json
 import shutil
 import subprocess
 import sys
+import time
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -57,12 +58,28 @@ def _from_drive(files: dict[str, str], folder: Path) -> None:
             gdown.download(id=file_id, output=str(folder / name), quiet=True)
 
 
-def _from_url(url: str, path: Path) -> None:
-    if not path.exists():
-        request = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(request) as response, open(path, "wb") as out:
-            while block := response.read(1 << 20):
-                out.write(block)
+def _from_url(url: str, path: Path, tries: int = 6) -> None:
+    """Download once the file is not already there. A failed attempt is
+    tried again after a growing wait, and a part-written file is never left
+    under the final name."""
+    if path.exists():
+        return
+    part = path.with_name(path.name + ".part")
+    for attempt in range(tries):
+        try:
+            request = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(request, timeout=120) as response, open(part, "wb") as out:
+                while block := response.read(1 << 20):
+                    out.write(block)
+            part.replace(path)
+            return
+        except OSError as error:  # network errors and timeouts
+            part.unlink(missing_ok=True)
+            if attempt == tries - 1:
+                raise
+            wait = 15 * 2**attempt
+            print(f"download of {path.name} failed ({error}); trying again in {wait}s", flush=True)
+            time.sleep(wait)
 
 
 def fetch_m5(folder: Path) -> None:
