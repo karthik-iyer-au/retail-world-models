@@ -47,6 +47,9 @@ in `levers` set to zero.
   `encoder_lr_scale` of the usual rate) or `frozen` (left as pretraining
   made it, so only the readout learns). `latent_ema` is how slowly the
   target copy follows.
+- `regular_hold`: where no regular price is recorded, a price held for this
+  many periods in a row becomes the regular price (the latest such price),
+  in place of "highest in the last `regular_window` periods".
 - `regular_column`: a column holding the regular price the retailer recorded
   (for example `base_price`), used in place of the 12-period rule wherever
   it is filled in.
@@ -215,6 +218,7 @@ class StateModel(Forecaster):
         finetune: str = "full",
         encoder_lr_scale: float = 0.1,
         latent_ema: float = 0.99,
+        regular_hold: int = 0,
     ):
         self._settings = {k: v for k, v in locals().items() if k not in ("self", "__class__")}
         self.horizon, self.history, self.train_periods = horizon, history, train_periods
@@ -235,6 +239,7 @@ class StateModel(Forecaster):
         self.latent_weight = latent_weight
         self.plan_lags = plan_lags
         self.regular_column = regular_column
+        self.regular_hold = regular_hold
         if finetune not in ("full", "low_lr", "frozen"):
             raise ValueError("finetune must be full, low_lr or frozen")
         self.pretrain_steps, self.finetune = pretrain_steps, finetune
@@ -294,6 +299,17 @@ class StateModel(Forecaster):
         # regular price: the highest price in the last `regular_window` periods
         recent = torch.nan_to_num(price[:, -self.regular_window :], nan=float("-inf")).amax(1, keepdim=True)
         regular = torch.where(torch.isfinite(recent) & (recent > 0), recent, level)
+        if self.regular_hold:
+            # a price held for `regular_hold` periods in a row is the regular
+            # price from then on, so a lasting price change is not read as a
+            # promotion; the latest such price wins
+            run = torch.ones_like(price)
+            for j in range(1, L):
+                same = (price[:, j] - price[:, j - 1]).abs() <= 0.01 * price[:, j - 1]  # False where either is missing
+                run[:, j] = torch.where(same, run[:, j - 1] + 1, run[:, j])
+            held = (run >= self.regular_hold) & known
+            last = (held * torch.arange(1, L + 1, device=self._dev)[None]).amax(1, keepdim=True)
+            regular = torch.where(last > 0, torch.nan_to_num(price).gather(1, (last - 1).clamp(min=0)), regular)
 
         def lever_inputs(src, cols, off=False):
             p = src["price"][r, cols]

@@ -187,3 +187,19 @@ def test_a_frozen_encoder_is_left_as_pretraining_made_it(split):
     w = lambda m: m._net.inp.weight.detach().numpy()
     np.testing.assert_array_equal(w(a), w(b))
     assert np.abs(w(a) - w(c)).max() > 0
+
+
+def test_a_price_held_for_several_periods_becomes_the_regular_price(split):
+    """A lasting price drop is the new regular price, not a promotion."""
+    train, test = split
+    train = train.copy()
+    recent = train[DATE] > np.sort(train[DATE].unique())[-9]
+    new = (train.groupby("series_id")["price"].transform("max") * 0.7).round(2)
+    train.loc[recent, "price"] = new[recent]
+    plan = test.drop(columns=[UNITS]).assign(promo=0)
+    plan["price"] = plan["series_id"].map(train[recent].groupby("series_id")["price"].first()).to_numpy()
+    held = build_model("state_model", **{**SETTINGS, "steps": 5, "regular_hold": 4}).fit(train)
+    parts = held.breakdown(plan)
+    np.testing.assert_allclose(parts["lift"], 0, atol=1e-4 * parts["forecast"].max())
+    ruled = build_model("state_model", **{**SETTINGS, "steps": 5}).fit(train)
+    assert np.abs(ruled.breakdown(plan)["lift"]).max() > 1e-3

@@ -1,0 +1,15 @@
+# On Dominick's analgesics: longer training, the held-price rule, and the
+# seasonal calendar with promotion crowding, for our lift model; the calendar
+# and crowding for LightGBM. Three seeds each.
+datasets:
+  - name: dominicks
+    codes: [ana]
+runs:
+  - config: configs/experiments/dominicks_ana_dev_lightgbm_merchant_inputs.yaml
+    seeds: [1, 2, 3]
+  - config: configs/experiments/dominicks_ana_dev_state_model_lift_longer.yaml
+    seeds: [1, 2, 3]
+  - config: configs/experiments/dominicks_ana_dev_state_model_lift_held_price.yaml
+    seeds: [1, 2, 3]
+  - config: configs/experiments/dominicks_ana_dev_state_model_lift_merchant_inputs.yaml
+    seeds: [1, 2, 3]
