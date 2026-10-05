@@ -21,6 +21,12 @@ split a number came from.
 | By level | Item-store up to chain total, shown separately | Is the error on single items or does it add up | In use from the Dominick's follow-up onward |
 | By horizon | Week 1 against week 8 | Which model is weak far ahead | To build |
 
+One exception to record: on Breakfast at the Frat the three benchmarks
+(seasonal naive, average of last 8 weeks, LightGBM) were scored on the last
+three windows, which include the final window, before the final window was
+locked. Our model has never been run on it. The benchmarks must not be
+tuned any further on that dataset before the final run.
+
 Rules that apply to every comparison:
 - A benchmark gets every input our model gets (calendar, crowding, base price).
 - Averaging several fits, when used, is applied to both sides.

@@ -47,6 +47,10 @@ def summary_row(folder: Path) -> str:
     if len(levels) > 1:  # the top and bottom of the hierarchy, to show where the error sits
         for i in (0, -1):
             row += f" | {levels[i]['level']} {mean([s['by_level'][i]['wrmsse'] for s in m['splits']]):.4f}"
+    if "by_horizon" in m["splits"][0]:  # first and last period ahead
+        first = mean([s["by_horizon"][0] for s in m["splits"]])
+        final = mean([s["by_horizon"][-1] for s in m["splits"]])
+        row += f" | ahead 1 {first:.4f} last {final:.4f}"
     if "forecast_to_actual" in m["splits"][0]:
         row += " | forecast/actual " + " ".join(f"{s['forecast_to_actual']:.3f}" for s in m["splits"])
     conditions = m["splits"][0].get("by_condition", {})

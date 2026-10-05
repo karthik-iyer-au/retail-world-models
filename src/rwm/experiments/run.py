@@ -119,6 +119,16 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
                     "on": rmsse_where(*args, on, revenue, ev.get("scale_lag", 1)),
                     "off": rmsse_where(*args, recorded & ~on, revenue, ev.get("scale_lag", 1)),
                 }
+        # Accuracy at item-by-store level for each period ahead, to show whether a
+        # model weakens further out.
+        cols = dates[t0:t1]
+        there = to_matrix(test.assign(_row=1.0), SERIES, DATE, "_row", cols, names) > 0
+        made = to_matrix(out, SERIES, DATE, "forecast", cols, names)
+        by_horizon = []
+        for h in range(len(cols)):
+            only = np.zeros_like(there)
+            only[:, h] = there[:, h]
+            by_horizon.append(rmsse_where(units[:, :t0], units[:, t0:t1], made, only, revenue, ev.get("scale_lag", 1))["wrmsse"])
         per_split.append(
             {
                 "origin": sp.origin,
@@ -129,6 +139,7 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
                 # all forecast units over all actual units: above 1 is over-forecasting
                 "forecast_to_actual": float(out["forecast"].sum() / max(float(out[UNITS].sum()), 1e-9)),
                 **({"by_condition": by_condition} if by_condition else {}),
+                "by_horizon": by_horizon,
             }
         )
 
