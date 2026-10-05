@@ -98,6 +98,11 @@ weeks:
 | Lift model + the plan for the four weeks before each forecast week | 0.411 | 0.406 to 0.418 | 0.833 | 0.846 | 0.551 | 0.409 |
 | Lift model + the same week last year and its neighbours | 0.408 | 0.394 to 0.420 | 0.848 | 0.877 | 0.544 | 0.410 |
 | Lift model + both of the above | 0.418 | 0.414 to 0.424 | 0.882 | 0.900 | 0.539 | 0.413 |
+| Lift model + recorded base price as the regular price | 0.434 | 0.418 to 0.460 | 0.897 | 0.933 | 0.558 | 0.418 |
+| Lift model + US seasonal calendar | 0.425 | 0.416 to 0.434 | 0.847 | 0.871 | 0.543 | 0.409 |
+| Lift model + crowding | 0.406 | 0.400 to 0.414 | 0.836 | 0.868 | 0.540 | 0.406 |
+| Lift model + base price, calendar and crowding | 0.446 | 0.425 to 0.459 | 0.856 | 0.893 | 0.547 | 0.422 |
+| LightGBM + calendar and crowding | 0.426 | 0.413 to 0.435 | 0.817 | 0.834 | 0.510 | 0.407 |
 | LightGBM, average of five fits (three repeats) | 0.417 | 0.408 to 0.425 | 0.811 | 0.821 | 0.508 | 0.402 |
 | Lever step: regular price, baseline times lift, average of five fits (three repeats) | 0.400 | 0.397 to 0.404 | 0.813 | 0.839 | 0.535 | 0.402 |
 
@@ -106,6 +111,13 @@ item-to-item part makes the forecast worse in every version, and makes it
 vary more from seed to seed. Limiting it to products in the same category
 narrows the gap but does not close it. It is not kept in this form. Training
 for longer does not help either, so the first version was not stopped early.
+
+Calendar, crowding and base price: none of them helps either model on
+these two windows. The windows run from late July to early November 2011
+and hold only Labor Day and Halloween, and training sees each event once
+or twice, so this is a weak test of the calendar. The recorded base price
+changes about twelve times a year per item and equals the shelf price in
+every week without a promotion, so it is not a slow-moving regular price.
 
 Lever step: building the forecast as baseline times lift is the part that
 helps. It beats LightGBM overall in all five runs and halves the spread
