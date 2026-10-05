@@ -95,6 +95,8 @@ weeks:
 | Lever step: regular price, baseline times lift, latent loss | 0.411 | 0.401 to 0.422 | 0.829 | 0.868 | 0.548 | 0.407 |
 | Lever step: latent loss alone | 0.428 | 0.414 to 0.440 | 0.825 | 0.867 | 0.556 | 0.412 |
 | Lever step: regular price, baseline times lift, 52 weeks of history | 0.413 | 0.408 to 0.418 | 0.836 | 0.875 | 0.542 | 0.407 |
+| LightGBM, average of five fits (three repeats) | 0.417 | 0.408 to 0.425 | 0.811 | 0.821 | 0.508 | 0.402 |
+| Lever step: regular price, baseline times lift, average of five fits (three repeats) | 0.400 | 0.397 to 0.404 | 0.813 | 0.839 | 0.535 | 0.402 |
 
 Reading: with all 55 products in a store able to affect each other, the
 item-to-item part makes the forecast worse in every version, and makes it
