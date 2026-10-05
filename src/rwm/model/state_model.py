@@ -61,6 +61,15 @@ in `levers` set to zero.
 - `regular_column`: a column holding the regular price the retailer recorded
   (for example `base_price`), used in place of the 12-period rule wherever
   it is filled in.
+- `rollout`: the world-model form. A transition step takes the state and one
+  period's plan and gives the state one period later. It is applied period
+  by period across the horizon, and each period's sales are read from the
+  state as it stands after the plan so far, so an earlier promotion can
+  change a later period through the state. With `lift_readout` the
+  baseline comes from a second rollout under the "nothing planned" plan.
+  With the latent loss on, each rolled state is checked against the state
+  the encoder gives once those periods are history (at the last step and at
+  two steps on the way): the transition is the JEPA predictor.
 - `plan_lags`: each forecast period also sees what was planned for the
   periods just before it, so a promotion last week can lower this week
   (pantry loading). With `lift_readout` that dip is part of the lift.
@@ -93,7 +102,8 @@ def _calendar(dates: np.ndarray) -> np.ndarray:
 def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, horizon: int,
                d_model: int, layers: int, heads: int, dropout: float,
                neighbours: str | None = None, n_products: int = 0, conditions: int = 4,
-               lift_readout: bool = False, latent: bool = False, readout_dropout: float = 0.0):
+               lift_readout: bool = False, latent: bool = False, readout_dropout: float = 0.0,
+               rollout: bool = False):
     import torch
     from torch import nn
 
@@ -133,11 +143,14 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
                 nn.Dropout(readout_dropout),
                 nn.Linear(d_model, 1),
             )
+            self.rollout = rollout
+            if rollout:  # the transition: this period's plan moves the state on by one period
+                self.cell = nn.GRUCell(n_fut, d_model)
             self.head = readout()
             self.lift = readout() if lift_readout else None
             self.next = nn.Sequential(
                 nn.Linear(d_model + horizon * n_fut, 2 * d_model), nn.GELU(), nn.Linear(2 * d_model, d_model)
-            ) if latent else None
+            ) if latent and not rollout else None
 
         def state(self, hist):
             """The item's state: one vector summarising its recent history."""
@@ -172,25 +185,42 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
             got = (w.to(msg.dtype) @ msg).permute(0, 3, 1, 2, 4).reshape(G * M, H, -1)
             return got, w
 
+        def roll(self, state, plan):
+            """The state carried forward one period at a time under a plan:
+            entry h is the state after living through periods 0..h."""
+            out = []
+            for h in range(plan.shape[1]):
+                state = self.cell(plan[:, h, :], state)
+                out.append(state)
+            return torch.stack(out, dim=1)
+
         def forward(self, hist, fut, cats, group=None, fut_off=None, full=False):
             """Log of expected sales relative to the item's scale. With `full`,
             also the baseline part, the state and the item-to-item weights."""
             h = fut.shape[1]
             state = self.state(hist)
-            parts = [state] + [e(cats[:, i]) for i, e in enumerate(self.emb)]
-            fixed = torch.cat(parts, dim=1)[:, None, :].expand(-1, h, -1)
+            labels = [e(cats[:, i]) for i, e in enumerate(self.emb)]
+            fixed = torch.cat([state] + labels, dim=1)[:, None, :].expand(-1, h, -1)
             steps = self.step(torch.arange(h, device=fut.device))[None].expand(len(fut), -1, -1)
-            shared, w = [fixed, steps], None
+            rest, w = [torch.cat(labels, dim=1)[:, None, :].expand(-1, h, -1)] if labels else [], None
+            rest.append(steps)
             if self.neighbours:
                 got, w = self.context(fixed, fut, group)
-                shared.append(got)
-            run = lambda net, plan: net(torch.cat(shared + [plan], dim=2)).squeeze(-1)
+                rest.append(got)
+            still = state[:, None, :].expand(-1, h, -1)
+            # with rollout each period is read from the state as it stands after the plan so far
+            states = lambda plan: self.roll(state, plan) if self.rollout else still
+            run = lambda net, plan, st: net(torch.cat([st] + rest + [plan], dim=2)).squeeze(-1)
+            on = states(fut)
             if self.lift is None:
-                base = out = run(self.head, fut).clamp(-10, 10)
+                base = out = run(self.head, fut, on).clamp(-10, 10)
             else:
-                base = run(self.head, fut_off).clamp(-10, 10)
-                out = (base + run(self.lift, fut) - run(self.lift, fut_off)).clamp(-10, 10)
-            return {"log_mu": out, "base": base, "state": state, "weights": w} if full else out
+                off = states(fut_off)
+                base = run(self.head, fut_off, off).clamp(-10, 10)
+                out = (base + run(self.lift, fut, on) - run(self.lift, fut_off, off)).clamp(-10, 10)
+            if not full:
+                return out
+            return {"log_mu": out, "base": base, "state": state, "weights": w, "rolled": on if self.rollout else None}
 
     return Net()
 
@@ -236,6 +266,7 @@ class StateModel(Forecaster):
         total_weight: float = 0.0,
         readout_dropout: float = 0.0,
         weight_decay: float = 1e-4,
+        rollout: bool = False,
     ):
         self._settings = {k: v for k, v in locals().items() if k not in ("self", "__class__")}
         self.horizon, self.history, self.train_periods = horizon, history, train_periods
@@ -276,7 +307,7 @@ class StateModel(Forecaster):
         self.net_args = dict(d_model=d_model, layers=layers, heads=heads, dropout=dropout,
                              neighbours=neighbours, conditions=conditions,
                              lift_readout=lift_readout, latent=latent_weight > 0 or pretrain_steps > 0,
-                             readout_dropout=readout_dropout)
+                             readout_dropout=readout_dropout, rollout=rollout)
         self.steps, self.batch, self.lr = steps, batch, lr
         self.power, self.seed, self.device = tweedie_power, seed, device
         self.mixed_precision = mixed_precision  # faster on a GPU; has no effect on a CPU
@@ -514,8 +545,19 @@ class StateModel(Forecaster):
                         with torch.no_grad():
                             hist_later = self._window(data, {**data, "start": start}, rows, later)[0]
                             want = slow.state(hist_later)
-                        guess = self._net.next(torch.cat([out["state"], out["plan"].flatten(1)], dim=1))
-                        latent = (1 - torch.nn.functional.cosine_similarity(guess.float(), want.float(), dim=1)).mean()
+                        far = lambda a, b: (1 - torch.nn.functional.cosine_similarity(a.float(), b.float(), dim=1)).mean()
+                        if self._net.rollout:
+                            # each rolled state must match the state the encoder gives once
+                            # those periods are history; checked at the end and at two steps on the way
+                            latent = far(out["rolled"][:, H - 1], want)
+                            for k in torch.randint(1, H, (2,), generator=gen).tolist() if H > 1 else []:
+                                with torch.no_grad():
+                                    seen = slow.state(self._window(data, {**data, "start": start}, rows, start + k)[0])
+                                latent = latent + far(out["rolled"][:, k - 1], seen)
+                            latent = latent / (3 if H > 1 else 1)
+                        else:
+                            guess = self._net.next(torch.cat([out["state"], out["plan"].flatten(1)], dim=1))
+                            latent = far(guess, want)
                 loss = latent_weight * latent
                 if forecast:
                     log_mu = out["log_mu"].float()
