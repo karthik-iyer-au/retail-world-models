@@ -103,6 +103,13 @@ weeks:
 | Lift model + crowding | 0.406 | 0.400 to 0.414 | 0.836 | 0.868 | 0.540 | 0.406 |
 | Lift model + base price, calendar and crowding | 0.446 | 0.425 to 0.459 | 0.856 | 0.893 | 0.547 | 0.422 |
 | LightGBM + calendar and crowding | 0.426 | 0.413 to 0.435 | 0.817 | 0.834 | 0.510 | 0.407 |
+| Lift model + latent loss alongside, weight 0.1 | 0.411 | 0.406 to 0.417 | 0.840 | 0.871 | 0.542 | 0.406 |
+| Lift model + latent loss alongside, weight 2 | 0.410 | 0.407 to 0.415 | 0.816 | 0.869 | 0.546 | 0.406 |
+| Lift model, 3,000 steps latent-only pretraining, then all trained | 0.407 | 0.400 to 0.412 | 0.836 | 0.869 | 0.542 | 0.406 |
+| Lift model, pretraining, then encoder at a tenth of the rate | 0.414 | 0.402 to 0.425 | 0.842 | 0.882 | 0.547 | 0.406 |
+| Lift model, pretraining, then encoder frozen | 0.428 | 0.416 to 0.441 | 0.836 | 0.901 | 0.547 | 0.417 |
+| Lift model, pretraining, encoder at a tenth, latent loss kept on | 0.415 | 0.402 to 0.425 | 0.835 | 0.874 | 0.546 | 0.405 |
+| Lift model, 10,000 steps pretraining, then encoder at a tenth | 0.408 | 0.400 to 0.422 | 0.826 | 0.849 | 0.543 | 0.408 |
 | LightGBM, average of five fits (three repeats) | 0.417 | 0.408 to 0.425 | 0.811 | 0.821 | 0.508 | 0.402 |
 | Lever step: regular price, baseline times lift, average of five fits (three repeats) | 0.400 | 0.397 to 0.404 | 0.813 | 0.839 | 0.535 | 0.402 |
 
@@ -118,6 +125,12 @@ and hold only Labor Day and Halloween, and training sees each event once
 or twice, so this is a weak test of the calendar. The recorded base price
 changes about twelve times a year per item and equals the shelf price in
 every week without a promotion, so it is not a slow-moving regular price.
+
+Latent (JEPA-style) loss on the direct model: no recipe beats the lift
+model overall (0.406). Long pretraining followed by a slowed encoder is
+level overall and the best of the seven on display and circular weeks.
+With the encoder frozen after latent-only pretraining the model still
+reaches 0.428, so the pretrained state alone carries most of the signal.
 
 Lever step: building the forecast as baseline times lift is the part that
 helps. It beats LightGBM overall in all five runs and halves the spread

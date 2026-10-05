@@ -1,0 +1,14 @@
+# The world model (state rolled forward week by week) with and without the
+# latent check, and with the best recipe from the JEPA study. Breakfast at the Frat.
+datasets:
+  - name: breakfast_at_the_frat
+    from: /content/drive/MyDrive/retail-world-model/data
+runs:
+  - config: configs/experiments/frat_dev_world_model_plain.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/frat_dev_world_model_latent.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/frat_dev_world_model_best_recipe.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/frat_dev_world_model_best_recipe_fixes.yaml
+    seeds: [1, 2, 3, 4, 5]

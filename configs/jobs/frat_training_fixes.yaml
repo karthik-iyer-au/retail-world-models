@@ -1,0 +1,14 @@
+# Fixes for bias that adds up: validation stop, totals term, dropout and weight
+# decay, one at a time and together. Lift model, Breakfast at the Frat.
+datasets:
+  - name: breakfast_at_the_frat
+    from: /content/drive/MyDrive/retail-world-model/data
+runs:
+  - config: configs/experiments/frat_dev_lift_validation_stop.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/frat_dev_lift_totals_loss.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/frat_dev_lift_dropout_decay.yaml
+    seeds: [1, 2, 3, 4, 5]
+  - config: configs/experiments/frat_dev_lift_all_three_fixes.yaml
+    seeds: [1, 2, 3, 4, 5]
