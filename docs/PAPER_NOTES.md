@@ -166,3 +166,4 @@ explanations pass more of these checks also forecast better?
 
 - Correction to an earlier note: the world model is not behind on Dominick's. Without the totals loss it scores 0.667 (lift 0.676, LightGBM 0.715). The 0.73 figures were caused by the totals loss.
 - Plan split, collapse penalty and week weighting give no overall gain on either dataset at one untuned setting each. The plan split improves item-by-store and promoted-week accuracy on Dominick's (0.693, 1.276) and worsens totals (0.793): it trades level for shape.
+- Plan A against plan B result (Frat): all models pick the better week about 78% of the time; LightGBM 78.2%, ours 77.4% to 77.5%. No advantage for the world model on this test.

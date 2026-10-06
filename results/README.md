@@ -294,3 +294,16 @@ against 0.676, three seeds, inside seed spread) and ahead of LightGBM. The
 earlier gap (0.732) came from the totals loss, not from the world model. The
 plan split helps at item-by-store level (0.693) and on promoted weeks (1.276)
 but hurts the total (0.793).
+
+## Plan A against plan B, Breakfast at the Frat (development windows, 3 seeds)
+
+Same item and store, two weeks in the window with different lever mixes.
+
+| Run | Picks the week that sold more | Miss on the size of the change (log scale, lower is better) |
+|---|---|---|
+| LightGBM | 78.2% | 0.448 |
+| Lift model | 77.4% | 0.460 |
+| World model | 77.5% | 0.459 |
+| World model + plan split | 77.5% | 0.458 |
+
+All four are level; LightGBM is marginally ahead on both scores.
