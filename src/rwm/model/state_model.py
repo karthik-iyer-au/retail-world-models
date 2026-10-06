@@ -73,6 +73,12 @@ in `levers` set to zero.
   other (variance and covariance terms, after VICReg, Bardes et al. 2022).
 - `rollout_discount`: below 1, the latent check counts near periods for more
   than far ones (after TD-MPC2, Hansen et al. 2024).
+- `scale_cap`: a quantile (for example 0.9). When set, an item's level is its
+  average recent sales with each period capped at that quantile of its own
+  recent sales, so a single extreme week does not set the level.
+- `scale_window`: when set, an item's level is its average over the latest
+  that many periods (if at least half of them are recorded), not over the
+  whole history window.
 - `cold_start`: a series with no history is forecast by borrowing the state
   and scale of the `cold_neighbours` known series most like it in the same
   store (most `categorical` labels in common), run with its own labels and
@@ -314,6 +320,8 @@ class StateModel(Forecaster):
         weight_decay: float = 1e-4,
         rollout: bool = False,
         likelihood: str = "tweedie",
+        scale_cap: float | None = None,
+        scale_window: int | None = None,
         plan_split: bool = False,
         split_weight: float = 0.1,
         state_spread_weight: float = 0.0,
@@ -348,6 +356,7 @@ class StateModel(Forecaster):
         if likelihood not in ("tweedie", "negative_binomial"):
             raise ValueError("likelihood must be tweedie or negative_binomial")
         self.likelihood = likelihood
+        self.scale_cap, self.scale_window = scale_cap, scale_window
         if plan_split and not rollout:
             raise ValueError("plan_split needs rollout")
         self.plan_split, self.split_weight = plan_split, split_weight
@@ -413,6 +422,22 @@ class StateModel(Forecaster):
         n_known = known.sum(1, keepdim=True).clamp(min=1)
         # each item's own recent level, over the periods it was on sale
         scale = (units * known).sum(1, keepdim=True) / n_known
+        if self.scale_window is not None:
+            # the level from the latest periods only, so an item whose sales have
+            # fallen away (a seasonal or in-and-out line) is not held at its old level
+            k = self.scale_window
+            n_late = known[:, -k:].sum(1, keepdim=True)
+            late = (units[:, -k:] * known[:, -k:]).sum(1, keepdim=True) / n_late.clamp(min=1)
+            scale = torch.where(n_late >= max(1, k // 2), late, scale)
+        if self.scale_cap is not None:
+            # a steadier level: each period's sales count for no more than the
+            # item's own `scale_cap` quantile, so one huge week (a deep one-off
+            # promotion) does not lift the level for half a year afterwards
+            ordered = torch.where(known, units, torch.full_like(units, float("inf"))).sort(dim=1).values
+            at = ((n_known - 1).float() * self.scale_cap).round().long()
+            top = torch.nan_to_num(ordered.gather(1, at), posinf=0.0)
+            capped = (torch.minimum(units, top) * known).sum(1, keepdim=True) / n_known
+            scale = torch.where(capped > 0, capped, scale)
         scale = torch.where(scale > 0, scale, torch.ones_like(scale))
         level = torch.nan_to_num(price).sum(1, keepdim=True) / n_known
         level = torch.where(level > 0, level, torch.ones_like(level))

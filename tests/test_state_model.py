@@ -118,3 +118,27 @@ def test_negative_binomial_likelihood_also_beats_the_simple_benchmarks(split):
     assert ours < rmse(build_model("recent_average").fit(train).predict(future))
     with pytest.raises(ValueError):
         build_model("state_model", **SETTINGS, likelihood="other")
+
+
+def test_level_options_change_only_the_level(split):
+    """A capped level and a latest-weeks level both run, and the latest-weeks
+    level follows an item whose sales have fallen away."""
+    train, test = split
+    quick = {**SETTINGS, "steps": 5}
+    for extra in ({"scale_cap": 0.9}, {"scale_window": 8}):
+        model = build_model("state_model", **quick, **extra).fit(train)
+        assert np.isfinite(model.predict(test.drop(columns=[UNITS]))).all()
+    faded = train.copy()
+    late = faded[DATE] > np.sort(faded[DATE].unique())[-9]
+    one = faded[SERIES] == faded[SERIES].astype(str).min()  # the first series in the model's order
+    faded.loc[late & one, UNITS] = 0.0
+    future = test.drop(columns=[UNITS])
+    fut_dates = np.sort(future[DATE].unique())
+    rows = torch.zeros(1, dtype=torch.long)
+    levels = []
+    for extra in ({}, {"scale_window": 8}):
+        m = build_model("state_model", **quick, **extra).fit(faded)
+        start = torch.full_like(rows, m._past["price"].shape[1])
+        fut = m._tensors(future, fut_dates, with_units=False)
+        levels.append(float(m._window(m._past, {**fut, "start": torch.zeros_like(rows)}, rows, start)[2]))
+    assert levels[1] < levels[0]

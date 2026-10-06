@@ -1,0 +1,109 @@
+# Test of the level fix on the worst Dominick's categories, plus two where we were already level (ana, fre) as a check that it does no harm.
+datasets:
+- name: dominicks
+  codes:
+  - sna
+  - sdr
+  - bat
+  - bjc
+  - cig
+  - che
+  - ana
+  - fre
+runs:
+- config: configs/experiments/dominicks_sna_dev_lift_level4.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_dev_lift_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_dev_world_model_level4.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_lift_level4.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_lift_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_world_model_level4.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bat_dev_lift_level4.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bat_dev_lift_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bat_dev_world_model_level4.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bat_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bjc_dev_lift_level4.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bjc_dev_lift_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bjc_dev_world_model_level4.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bjc_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_cig_dev_lift_level4.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_cig_dev_lift_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_cig_dev_world_model_level4.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_cig_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_che_dev_lift_level4.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_che_dev_lift_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_che_dev_world_model_level4.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_che_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ana_dev_lift_level4.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ana_dev_lift_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ana_dev_world_model_level4.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ana_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fre_dev_lift_level4.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fre_dev_lift_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fre_dev_world_model_level4.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fre_dev_world_model_level8.yaml
+  seeds:
+  - 1

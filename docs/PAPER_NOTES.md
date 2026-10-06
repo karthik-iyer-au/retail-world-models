@@ -180,3 +180,11 @@ explanations pass more of these checks also forecast better?
 - The analgesics result does not generalise. Analgesics was the category used to set our models, so reporting it alone would be selective. The paper must report all categories.
 - Our models fail badly in a few categories (snacks, soft drinks, bath soap), which suggests a stability problem (scaling of large-volume items, or the regular-price estimate) to diagnose before any more tuning.
 - The first Colab session ended after about 23 hours; the queue resumed from saved runs in a new session.
+
+## Diagnosis of the Dominick's failures (7 Oct)
+
+- Where the error is: item-by-store accuracy is close to LightGBM in every bad category (for example snacks 0.74 against 0.67). The loss is at the category total, where our models over-forecast by 20% to 40% in one window.
+- Cause, reproduced on a six-store sample of snacks (lift model, first window, forecast over actual 1.63): the over-forecast sits in items with a partial, spiky recent history. Items recorded in 8 to 20 of the last 26 weeks are 8% of sales and are forecast at 9 times actual. These are in-and-out and seasonal lines that sold heavily for a few weeks (one week in September 1996 had category sales 3.5 times normal on a 10 cent promotion) and then fell away. Our model sets each item's level from its 26-week average, so it holds them at the old level.
+- Capping extreme weeks in the level (`scale_cap`) helps little (1.63 to 1.53). Taking the level from the latest weeks (`scale_window`) removes most of it: 1.31 with 8 weeks, 1.14 with 4 weeks. Sample result, one seed, 800 steps; to be confirmed on full data.
+- LightGBM does not have this problem because it sees short recent averages directly.
+- Also found: the Dominick's loader fails on cigarettes under the local pandas version (mixed types in the SALE column); it ran on Colab. To fix.
