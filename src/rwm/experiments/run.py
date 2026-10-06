@@ -156,6 +156,31 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
             only = np.zeros_like(there)
             only[:, h] = there[:, h]
             by_horizon.append(rmsse_where(units[:, :t0], units[:, t0:t1], made, only, revenue, ev.get("scale_lag", 1))["wrmsse"])
+        # Plan A against plan B: for the same item and store, two weeks in the
+        # window with different lever mixes. Does the forecast say which week
+        # sells more, and by how much?
+        plan_pairs = {}
+        if ev.get("plan_pairs"):
+            lv = ev["plan_pairs"]["levers"]
+            code = sum((to_matrix(test, SERIES, DATE, c, cols, names) > 0) * 2**i for i, c in enumerate(lv))
+            actual = units[:, t0:t1]
+            right = wrong = n_pairs = 0
+            gap = 0.0
+            for a in range(len(cols)):
+                for b in range(a + 1, len(cols)):
+                    m = there[:, a] & there[:, b] & (code[:, a] != code[:, b])
+                    da, df = actual[m, a] - actual[m, b], made[m, a] - made[m, b]
+                    right += int(((da * df) > 0).sum())
+                    wrong += int(((da * df) < 0).sum()) + int(((da != 0) & (df == 0)).sum())
+                    gap += float(np.abs(np.log1p(made[m, a]) - np.log1p(made[m, b]) - np.log1p(actual[m, a]) + np.log1p(actual[m, b])).sum())
+                    n_pairs += int(m.sum())
+            plan_pairs = {
+                "plan_pairs": n_pairs,
+                # share of pairs where the forecast picks the week that really sold more
+                "plan_pair_order": right / max(right + wrong, 1),
+                # average miss on the size of the change between the two weeks (log scale)
+                "plan_pair_change_error": gap / max(n_pairs, 1),
+            }
         per_split.append(
             {
                 "origin": sp.origin,
@@ -167,6 +192,7 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
                 "forecast_to_actual": float(out["forecast"].sum() / max(float(out[UNITS].sum()), 1e-9)),
                 **({"by_condition": by_condition} if by_condition else {}),
                 "by_horizon": by_horizon,
+                **plan_pairs,
                 **(
                     {
                         k: rmsse_where(units[:, :t0], units[:, t0:t1], made, there & (to_matrix(rare_mix, SERIES, DATE, "_" + k.split("_")[0], cols, names) > 0), revenue, ev.get("scale_lag", 1))["wrmsse"]

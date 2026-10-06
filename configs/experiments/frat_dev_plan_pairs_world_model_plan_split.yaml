@@ -1,0 +1,49 @@
+# Plan A against plan B: same item and store, two weeks with different lever mixes.
+name: frat_dev_plan_pairs_world_model_plan_split
+seed: 0
+dataset:
+  name: breakfast_at_the_frat
+model:
+  name: state_model
+  params:
+    horizon: 8
+    history: 26
+    train_periods: 90
+    categorical:
+    - item_id
+    - store_id
+    - cat_id
+    - manufacturer
+    - store_segment
+    extra:
+    - promo
+    - display
+    - feature
+    - tpr_only
+    d_model: 64
+    layers: 2
+    heads: 4
+    steps: 3000
+    batch: 256
+    lr: 0.001
+    regular_price: true
+    lift_readout: true
+    rollout: true
+    seed: 0
+    plan_split: true
+evaluation:
+  horizon: 8
+  n_origins: 2
+  holdout_periods: 8
+  scale_lag: 1
+  weight_window: 13
+  conditions:
+  - promo
+  - display
+  - feature
+  - tpr_only
+  plan_pairs:
+    levers:
+    - display
+    - feature
+    - tpr_only

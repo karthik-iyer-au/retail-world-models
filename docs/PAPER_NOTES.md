@@ -155,3 +155,9 @@ explanations pass more of these checks also forecast better?
 - Related work to cite: WorldTS (arXiv 2609.31162), latent dynamics first then a frozen readout, for forecasting with known future inputs. Accuracy claims not verified.
 - Not read: AD-WM (arXiv 2609.30264), rate-limited.
 - New-item result: borrowing from similar items takes new-item error from 1.510 (zero forecast) to 0.890 on Frat. LightGBM had no new-item route in that run; rerun with one queued.
+
+## Plan A against plan B (built 6 Oct, `evaluation.plan_pairs`)
+
+- For the same item and store, every pair of weeks in the test window whose lever mix differs. Two scores: share of pairs where the forecast picks the week that really sold more, and the average miss on the size of the change (log scale).
+- This uses real weeks only, so it is a check on ranking real plans, not a causal claim: the two weeks also differ in season and in whatever else changed.
+- Fairness: same pairs for every model.

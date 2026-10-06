@@ -51,6 +51,8 @@ def summary_row(folder: Path) -> str:
         first = mean([s["by_horizon"][0] for s in m["splits"]])
         final = mean([s["by_horizon"][-1] for s in m["splits"]])
         row += f" | ahead 1 {first:.4f} last {final:.4f}"
+    if "plan_pair_order" in m["splits"][0]:
+        row += f" | plan pairs right {mean([s['plan_pair_order'] for s in m['splits']]):.3f} change error {mean([s['plan_pair_change_error'] for s in m['splits']]):.3f}"
     if "rare_plans" in m["splits"][0]:
         row += f" | rare plans {mean([s['rare_plans'] for s in m['splits']]):.3f} usual {mean([s['usual_plans'] for s in m['splits']]):.3f}"
     if "new_items" in m["splits"][0]:
