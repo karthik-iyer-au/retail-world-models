@@ -187,3 +187,21 @@ worse here.
 All six runs of our model without the item-to-item part beat LightGBM
 overall. The item-to-item part does not help here either. On single item-store weeks
 LightGBM is still ahead, with or without a promotion code.
+
+## Dominick's analgesics: training fixes and the world model (development windows, 3 seeds)
+
+Lower is better. Reference: LightGBM 0.715, lift model 0.676, lift model trained for 24,000 steps 1.473.
+
+| Run | Overall | Total | Item by store | Promo on | Promo off | Forecast / actual |
+|---|---|---|---|---|---|---|
+| Lift, stop on validation | 0.683 | 0.714 | 0.708 | 1.340 | 0.604 | 1.016 |
+| Lift, totals in the loss | 0.819 | 1.042 | 0.701 | 1.291 | 0.601 | 0.909 |
+| Lift, all fixes, long training | 0.716 | 0.751 | 0.712 | 1.341 | 0.605 | 0.971 |
+| World model, fixes | 0.732 | 0.838 | 0.704 | 1.297 | 0.604 | 0.937 |
+| World model, best recipe, fixes | 0.729 | 0.843 | 0.699 | 1.272 | 0.602 | 0.944 |
+
+None beats the plain lift model (0.676). Stopping on validation keeps long
+training safe (0.683 against 1.473 without it). Adding totals to the loss makes
+the total worse, not better: it under-forecasts by 9%. The world model is level
+with the lift model at item-by-store level and behind at the total, where it
+under-forecasts by 6%.

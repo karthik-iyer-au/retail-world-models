@@ -129,3 +129,9 @@ explanations pass more of these checks also forecast better?
   labels, not a learned similarity. A learned one is still to build.
 - Limit: the error scale for a new item uses its real history, which the model
   never saw. This is for scoring only.
+
+## Dominick's training fixes and world model (recorded 6 Oct)
+
+- Negative result: a loss term on store totals worsens the total (1.042) by pulling forecasts 9% low.
+- Validation stopping removes the long-training failure (0.683 against 1.473) but does not beat the short run (0.676).
+- World model on Dominick's: 0.729 to 0.732 overall, behind LightGBM (0.715) and the lift model (0.676). Item-by-store accuracy is level (0.699 to 0.704); the gap is under-forecasting at summed levels.
