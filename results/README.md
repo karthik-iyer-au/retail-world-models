@@ -224,3 +224,25 @@ Lower is better. Frat 5 seeds, Dominick's analgesics 3 seeds. Combination weight
 The combination is the best result on Frat (0.388) and beats both parts on
 display and circular weeks. On Dominick's it is level with the lift model.
 Negative binomial is level with Tweedie on both.
+
+## New-item test, Breakfast at the Frat (development windows, 3 seeds)
+
+One product in ten never seen in training. Item-by-store accuracy, lower is better.
+
+| Run | Overall | New items | Known items |
+|---|---|---|---|
+| LightGBM | 0.627 | 1.510 | 0.509 |
+| Lift model, no new-item handling (forecast zero) | 0.594 | 1.510 | 0.526 |
+| Lift model, borrow from similar items | 0.461 | 0.890 | 0.526 |
+| Lift model, borrow, item label hidden 10% in training | 0.459 | 0.879 | 0.525 |
+
+LightGBM's new-item score equals the zero forecast (1.510): it returns no
+usable forecast for an unseen series. Its row is a floor, not a fair
+competitor, until it is given a cold-start route of its own.
+
+## Unusual-plan test, first run
+
+No test week had a lever mix under 2% of training rows, so the rare group was
+empty. Promoted weeks with a usual mix: LightGBM 0.703, lift 0.733, world
+model 0.735. The test needs a different definition of unusual before it says
+anything.
