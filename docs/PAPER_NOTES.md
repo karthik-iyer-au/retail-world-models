@@ -167,3 +167,9 @@ explanations pass more of these checks also forecast better?
 - Correction to an earlier note: the world model is not behind on Dominick's. Without the totals loss it scores 0.667 (lift 0.676, LightGBM 0.715). The 0.73 figures were caused by the totals loss.
 - Plan split, collapse penalty and week weighting give no overall gain on either dataset at one untuned setting each. The plan split improves item-by-store and promoted-week accuracy on Dominick's (0.693, 1.276) and worsens totals (0.793): it trades level for shape.
 - Plan A against plan B result (Frat): all models pick the better week about 78% of the time; LightGBM 78.2%, ours 77.4% to 77.5%. No advantage for the world model on this test.
+
+## Overnight part 1 (recorded 6 Oct)
+
+- Five seeds on Dominick's analgesics: world model 0.666, LightGBM 0.702, lift model 0.718. The lift model's earlier 0.676 was a three-seed figure that did not hold; report five seeds and the spread. The world model is the steadier of our two.
+- World model + LightGBM combination: Frat 0.390 (lift + LightGBM 0.388), Dominick's 0.668 (world model alone 0.666). On Dominick's the combination adds nothing.
+- Negative result: new-item borrowing fails on Dominick's (2.999 against LightGBM 0.923) because there are no attribute labels to match on. The new-item claim holds only where item attributes exist; a learned similarity over real attributes (size, brand from the item description) is needed before claiming more.

@@ -307,3 +307,31 @@ Same item and store, two weeks in the window with different lever mixes.
 | World model + plan split | 77.5% | 0.458 |
 
 All four are level; LightGBM is marginally ahead on both scores.
+
+## Overnight part 1: world model + LightGBM, five seeds on Dominick's, new items on Dominick's (development windows)
+
+| Data | Run | Seeds | Overall | Total | Item by store | Promo on | Promo off |
+|---|---|---|---|---|---|---|---|
+| Frat | World model + LightGBM combination | 5 | 0.390 | 0.315 | 0.483 | 0.695 | 0.394 |
+| Dominick's | World model + LightGBM combination | 3 | 0.668 | 0.738 | 0.685 | 1.267 | 0.588 |
+| Dominick's | World model (no totals loss) | 5 | 0.666 | 0.688 | 0.706 | 1.303 | 0.606 |
+| Dominick's | Lift model | 5 | 0.718 | 0.791 | 0.709 | 1.329 | 0.603 |
+| Dominick's | LightGBM | 5 | 0.702 | 0.814 | 0.688 | 1.283 | 0.588 |
+
+Frat combination: display weeks 0.799, circular weeks 0.809 (lift + LightGBM gave 0.388 overall, 0.800, 0.814).
+
+The lift model's 0.676 on three seeds does not hold on five (0.718): seeds 4
+and 5 were much worse, so it is unsteady on Dominick's. The world model holds
+(0.667 on three seeds, 0.666 on five) and is ahead of LightGBM (0.702).
+
+New items, Dominick's analgesics, 3 seeds (one product in ten never seen in training):
+
+| Run | New items | Known items |
+|---|---|---|
+| LightGBM, from labels, price and plan | 0.923 | 0.685 |
+| Lift model, borrow from similar items | 2.999 | 0.705 |
+
+Borrowing fails here. The Dominick's setup gives the model only item and
+store labels, so "most labels in common" has nothing to match on and the new
+item borrows the sales level of arbitrary items in the store. The Frat result
+(0.890 against 1.310) relied on category and manufacturer labels.
