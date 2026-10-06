@@ -246,3 +246,22 @@ No test week had a lever mix under 2% of training rows, so the rare group was
 empty. Promoted weeks with a usual mix: LightGBM 0.703, lift 0.733, world
 model 0.735. The test needs a different definition of unusual before it says
 anything.
+
+## New items with a LightGBM route, and unusual plans judged item by item (Frat, 3 seeds)
+
+| Run | Overall | New items | Known items |
+|---|---|---|---|
+| LightGBM, new item from labels, price and plan | 0.577 | 1.310 | 0.509 |
+| Lift model, borrow from similar items (from above) | 0.461 | 0.890 | 0.526 |
+
+Unusual = a lever mix the item had in under 2% of its own training weeks.
+
+| Run | Unusual plans | Usual plans |
+|---|---|---|
+| LightGBM | 0.696 | 0.697 |
+| Lift model | 0.743 | 0.725 |
+| World model | 0.730 | 0.730 |
+
+On new items the lift model with borrowing is well ahead of LightGBM (0.890
+against 1.310). On unusual plans no model degrades much, and LightGBM stays
+ahead on promoted weeks either way.
