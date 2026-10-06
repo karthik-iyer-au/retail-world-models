@@ -277,3 +277,20 @@ Reference: world model 0.408, lift model 0.406 (display 0.840, circular 0.863, t
 | All of them | 0.424 | 0.342 | 0.516 | 0.869 | 0.907 | 0.547 | 0.411 | 1.030 |
 
 None improves on the world model as it was. One untuned setting per trick.
+
+## World model and tricks, Dominick's analgesics (development windows, 3 seeds)
+
+Reference: LightGBM 0.715, lift model 0.676, earlier world model with the totals loss 0.732.
+
+| Run | Overall | Total | Item by store | Promo on | Promo off | Forecast / actual |
+|---|---|---|---|---|---|---|
+| World model, validation stopping, no totals loss | 0.667 | 0.687 | 0.707 | 1.309 | 0.608 | 1.053 |
+| + plan split | 0.704 | 0.793 | 0.693 | 1.276 | 0.594 | 1.031 |
+| + latent check, collapse penalty, near weeks weighted more | 0.685 | 0.717 | 0.705 | 1.291 | 0.606 | 1.017 |
+| + all of them | 0.730 | 0.852 | 0.692 | 1.282 | 0.592 | 1.017 |
+
+Without the totals loss the world model is level with the lift model (0.667
+against 0.676, three seeds, inside seed spread) and ahead of LightGBM. The
+earlier gap (0.732) came from the totals loss, not from the world model. The
+plan split helps at item-by-store level (0.693) and on promoted weeks (1.276)
+but hurts the total (0.793).

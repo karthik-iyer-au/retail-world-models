@@ -161,3 +161,8 @@ explanations pass more of these checks also forecast better?
 - For the same item and store, every pair of weeks in the test window whose lever mix differs. Two scores: share of pairs where the forecast picks the week that really sold more, and the average miss on the size of the change (log scale).
 - This uses real weeks only, so it is a check on ranking real plans, not a causal claim: the two weeks also differ in season and in whatever else changed.
 - Fairness: same pairs for every model.
+
+## World-model tricks: results (6 Oct)
+
+- Correction to an earlier note: the world model is not behind on Dominick's. Without the totals loss it scores 0.667 (lift 0.676, LightGBM 0.715). The 0.73 figures were caused by the totals loss.
+- Plan split, collapse penalty and week weighting give no overall gain on either dataset at one untuned setting each. The plan split improves item-by-store and promoted-week accuracy on Dominick's (0.693, 1.276) and worsens totals (0.793): it trades level for shape.

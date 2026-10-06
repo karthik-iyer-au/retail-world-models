@@ -29,10 +29,10 @@ they are cited.
 |---|---|---|---|
 | LeCun (2022), a path towards autonomous machine intelligence; Assran et al. (2023), I-JEPA | Predict the future state, not the future data; a slow-moving copy of the encoder as the target | `latent_weight`, `latent_ema`, `pretrain_steps`, `finetune` | Level with no state check on Frat (0.407 to 0.415); frozen encoder worse (0.428) |
 | Author's own M-JEPA (github.com/Kar488/M-JEPA) | Method only: fine-tuning recipes compared one by one; leakage-resistant splits | JEPA study configs | Best recipe: long pretraining, slowed encoder (0.408) |
-| Cho et al. (2014), the GRU | The step that moves the state on one period under the plan | `rollout` | World model level on Frat (0.408), behind on Dominick's (0.73 against 0.676) |
-| Hansen, Su, Wang (2024), TD-MPC2 | Near periods weighted more in the rollout check | `rollout_discount` | No gain on Frat (0.427 with the collapse penalty and latent check) |
-| Bardes, Ponce, LeCun (2022), VICReg | Variance and covariance penalty against a collapsed state | `state_spread_weight` | No gain on Frat (same run) |
-| "DWM: separating world effects from actions in latent world models" (arXiv 2607.18715) | Plan effect kept apart from the no-plan state | `plan_split` | No gain on Frat (0.417 against 0.408) |
+| Cho et al. (2014), the GRU | The step that moves the state on one period under the plan | `rollout` | World model level with the lift model on both: Frat 0.408 against 0.406, Dominick's 0.667 against 0.676 |
+| Hansen, Su, Wang (2024), TD-MPC2 | Near periods weighted more in the rollout check | `rollout_discount` | No gain (Frat 0.427; Dominick's 0.685 against 0.667) |
+| Bardes, Ponce, LeCun (2022), VICReg | Variance and covariance penalty against a collapsed state | `state_spread_weight` | No gain (same runs) |
+| "DWM: separating world effects from actions in latent world models" (arXiv 2607.18715) | Plan effect kept apart from the no-plan state | `plan_split` | No overall gain (Frat 0.417 against 0.408; Dominick's 0.704 against 0.667). Better item-by-store and promoted-week accuracy on Dominick's, worse totals |
 | Hafner et al. (2023), DreamerV3 | A state with randomness; squashed targets | Not built | Candidate for unrecorded circular placement |
 | Assran et al. (2025), V-JEPA 2 (action-conditioned variant) | Frozen encoder, train the predictor only, rollout loss | Compared in the JEPA study | Frozen was worse for us. Details to verify |
 | LeWorldModel and SIGReg | One-term penalty against collapse | Not built (VICReg form used) | To verify |
