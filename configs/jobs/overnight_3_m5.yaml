@@ -1,0 +1,10 @@
+# Lift model and world model on M5.
+datasets:
+- name: m5
+runs:
+- config: configs/experiments/m5_validation_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/m5_validation_world_model.yaml
+  seeds:
+  - 1

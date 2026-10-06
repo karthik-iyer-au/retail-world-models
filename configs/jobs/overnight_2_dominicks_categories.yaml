@@ -1,0 +1,275 @@
+# Every other Dominick's category, smallest first: LightGBM, lift model, world model, one seed.
+datasets:
+- name: dominicks
+  codes:
+  - bat
+  - oat
+  - ptw
+  - tti
+  - ber
+  - frd
+  - soa
+  - cra
+  - did
+  - tbr
+  - fsf
+  - tna
+  - cig
+  - frj
+  - sna
+  - tpa
+  - lnd
+  - fec
+  - bjc
+  - cer
+  - cso
+  - gro
+  - sha
+  - coo
+  - che
+  - fre
+  - sdr
+runs:
+- config: configs/experiments/dominicks_bat_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bat_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bat_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_oat_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_oat_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_oat_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ptw_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ptw_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ptw_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_tti_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_tti_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_tti_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ber_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ber_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ber_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_frd_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_frd_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_frd_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_soa_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_soa_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_soa_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_cra_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_cra_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_cra_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_did_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_did_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_did_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_tbr_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_tbr_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_tbr_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fsf_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fsf_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fsf_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_tna_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_tna_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_tna_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_cig_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_cig_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_cig_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_frj_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_frj_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_frj_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_tpa_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_tpa_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_tpa_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_lnd_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_lnd_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_lnd_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fec_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fec_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fec_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bjc_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bjc_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bjc_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_cer_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_cer_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_cer_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_cso_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_cso_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_cso_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_gro_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_gro_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_gro_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sha_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sha_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sha_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_coo_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_coo_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_coo_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_che_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_che_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_che_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fre_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fre_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fre_dev_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_world_model.yaml
+  seeds:
+  - 1

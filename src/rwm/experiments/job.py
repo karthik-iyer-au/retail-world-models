@@ -76,7 +76,14 @@ def main() -> None:
     for job_file in args.job:
         job = yaml.safe_load(Path(job_file).read_text())
         for d in job.get("datasets", []):
-            fetch.main([d["name"], *d.get("codes", []), *(["--from", d["from"]] if d.get("from") else [])])
+            # one part at a time, so a download that fails does not stop the others;
+            # runs that needed the missing part fail on their own and the queue goes on
+            for codes in [[c] for c in d.get("codes", [])] or [[]]:
+                try:
+                    fetch.main([d["name"], *codes, *(["--from", d["from"]] if d.get("from") else [])])
+                except BaseException:  # includes a download tool exiting
+                    print(f"COULD NOT FETCH {d['name']} {' '.join(codes)}", flush=True)
+                    traceback.print_exc()
         folders, failed = [], []
         for r in job["runs"]:
             base = yaml.safe_load((REPO_ROOT / r["config"]).read_text())

@@ -1,0 +1,35 @@
+# Our lift model on the M5 practice window (LightGBM 0.715, plain model 0.699).
+name: m5_validation_lift
+seed: 0
+dataset:
+  name: m5
+model:
+  name: state_model
+  params:
+    horizon: 28
+    history: 112
+    train_periods: 730
+    categorical:
+    - item_id
+    - dept_id
+    - cat_id
+    - store_id
+    - state_id
+    extra:
+    - event
+    - snap
+    d_model: 128
+    layers: 3
+    heads: 4
+    steps: 30000
+    batch: 1024
+    lr: 0.001
+    seed: 0
+    mixed_precision: true
+    regular_price: true
+    lift_readout: true
+evaluation:
+  horizon: 28
+  n_origins: 1
+  scale_lag: 1
+  weight_window: 28
