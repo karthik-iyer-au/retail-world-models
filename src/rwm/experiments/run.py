@@ -98,11 +98,18 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
         if ev.get("rare_plans"):
             lv = ev["rare_plans"]["levers"]
             mix = lambda f: (f[lv].fillna(0).to_numpy() > 0).astype(int) @ (2 ** np.arange(len(lv)))
-            share = np.bincount(mix(train), minlength=2 ** len(lv)) / len(train)
+            below, by = ev["rare_plans"].get("below", 0.02), ev["rare_plans"].get("by")
             code = mix(test)
+            if by:  # how often this item (or other label) got this mix in training
+                seen = pd.DataFrame({"k": train[by].astype(str).to_numpy(), "m": mix(train)})
+                share = (seen.groupby(["k", "m"]).size() / seen.groupby("k").size()).rename("s").reset_index()
+                mine = pd.DataFrame({"k": test[by].astype(str).to_numpy(), "m": code}).merge(share, how="left", on=["k", "m"])
+                freq = mine["s"].fillna(0.0).to_numpy()
+            else:
+                freq = (np.bincount(mix(train), minlength=2 ** len(lv)) / len(train))[code]
             rare_mix = test.assign(
-                _rare=((code > 0) & (share[code] < ev["rare_plans"].get("below", 0.02))).astype(float),
-                _usual=((code > 0) & (share[code] >= ev["rare_plans"].get("below", 0.02))).astype(float),
+                _rare=((code > 0) & (freq < below)).astype(float),
+                _usual=((code > 0) & (freq >= below)).astype(float),
             )
         del train
         fitted.append((sp.origin, model))

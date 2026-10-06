@@ -21,3 +21,15 @@ def test_run_scores_rare_and_usual_plans_apart(tmp_path):
     config["name"] = "usual"
     s = json.loads((run(config, out_root=tmp_path) / "metrics.json").read_text())["splits"][0]
     assert np.isfinite(s["usual_plans"])
+
+
+def test_rare_plans_can_be_judged_item_by_item(tmp_path):
+    config = {
+        "name": "rare_by_item", "seed": 0,
+        "dataset": {"name": "synthetic", "params": {"n_items": 6, "n_periods": 150}},
+        "model": {"name": "seasonal_naive"},
+        "evaluation": {"horizon": 14, "n_origins": 1,
+                       "rare_plans": {"levers": ["promo"], "below": 0.5, "by": "item_id"}},
+    }
+    s = json.loads((run(config, out_root=tmp_path) / "metrics.json").read_text())["splits"][0]
+    assert np.isfinite(s["rare_plans"])

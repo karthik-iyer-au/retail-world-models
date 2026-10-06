@@ -55,3 +55,16 @@ def test_run_scores_new_items_apart(tmp_path):
     m = json.loads((run(config, out_root=tmp_path) / "metrics.json").read_text())
     s = m["splits"][0]
     assert np.isfinite(s["new_items"]) and np.isfinite(s["known_items"])
+
+
+def test_lightgbm_cold_start_forecasts_a_new_item():
+    train, test = _split()
+    kw = dict(horizon=7, train_periods=90, categorical=["store_id", "item_id"], extra=["promo"],
+              lags=(0, 7), windows=(7, 14), spread_window=7, price_window=14, rounds=20,
+              params={"min_data_in_leaf": 5})
+    plan = test.drop(columns=[UNITS])
+    new = (test[ITEM] == "I5").to_numpy()
+    off = build_model("lightgbm_direct", **kw).fit(train[train[ITEM] != "I5"]).predict(plan)
+    on = build_model("lightgbm_direct", cold_start=True, **kw).fit(train[train[ITEM] != "I5"]).predict(plan)
+    assert (off[new] == 0).all() and (on[new] > 0).all()
+    assert np.allclose(off[~new], on[~new])

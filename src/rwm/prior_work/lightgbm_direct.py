@@ -74,7 +74,11 @@ class LightGBMDirect(Forecaster):
         seed: int = 0,
         threads: int = 2,
         params: dict | None = None,
+        cold_start: bool = False,
     ):
+        # forecast a series with no history from its labels, price and plan
+        # alone (sales-history inputs are left missing); otherwise it gets zero
+        self.cold_start = cold_start
         self.horizon = horizon
         self.train_periods = train_periods
         self.group_by = group_by
@@ -230,4 +234,21 @@ class LightGBMDirect(Forecaster):
             r = g["names"].get_indexer(series[rows])
             ok = r >= 0
             out[rows[ok]] = pred[r[ok], col[rows[ok]]]
+            if self.cold_start and (~ok).any():
+                new = part.iloc[np.flatnonzero(~ok)]
+                names = pd.Index(new[SERIES].unique()).sort_values()
+                first = new.drop_duplicates(SERIES).set_index(SERIES).loc[names]
+                m, back = len(names), len(g["dates"])
+                blank = lambda: np.full((m, back), np.nan, dtype=np.float32)
+                fresh = {
+                    "names": names,
+                    "dates": g["dates"],
+                    "units": blank(),
+                    "price": blank(),
+                    "extra": {c: blank() for c in self.extra},
+                    # a label not seen in training is coded -1, which LightGBM reads as missing
+                    "cats": {c: self._cat_levels[c].get_indexer(first[c].astype(str)) for c in self.categorical},
+                }
+                got = g["booster"].predict(self._predict_table(fresh, new, fut_dates)).reshape(m, h)
+                out[rows[~ok]] = got[names.get_indexer(series[rows[~ok]]), col[rows[~ok]]]
         return np.clip(out, 0, None)

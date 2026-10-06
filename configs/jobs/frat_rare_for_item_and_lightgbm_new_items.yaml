@@ -1,0 +1,25 @@
+# Unusual plans judged item by item, and LightGBM with a new-item route.
+datasets:
+- name: breakfast_at_the_frat
+  from: /content/drive/MyDrive/retail-world-model/data
+runs:
+- config: configs/experiments/frat_dev_rare_for_item_lightgbm.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/frat_dev_rare_for_item_lift.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/frat_dev_rare_for_item_world_model.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/frat_dev_new_items_lightgbm_cold_start.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
