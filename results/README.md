@@ -205,3 +205,22 @@ training safe (0.683 against 1.473 without it). Adding totals to the loss makes
 the total worse, not better: it under-forecasts by 9%. The world model is level
 with the lift model at item-by-store level and behind at the total, where it
 under-forecasts by 6%.
+
+## Combination with LightGBM, and negative binomial likelihood (development windows)
+
+Lower is better. Frat 5 seeds, Dominick's analgesics 3 seeds. Combination weights are set on a validation window.
+
+| Data | Run | Overall | Total | Item by store | Promo on | Display | Circular | Tag only | Promo off |
+|---|---|---|---|---|---|---|---|---|---|
+| Frat | LightGBM (reference) | 0.421 | | | | 0.817 | 0.822 | 0.508 | 0.405 |
+| Frat | Lift model (reference) | 0.406 | | | | 0.840 | 0.863 | 0.537 | 0.406 |
+| Frat | Lift + LightGBM combination | 0.388 | 0.307 | 0.485 | 0.701 | 0.800 | 0.814 | 0.511 | 0.396 |
+| Frat | Lift, negative binomial | 0.410 | 0.320 | 0.506 | 0.739 | 0.842 | 0.864 | 0.546 | 0.408 |
+| Dominick's | LightGBM (reference) | 0.715 | | | 1.259 | | | | 0.587 |
+| Dominick's | Lift model (reference) | 0.676 | | | | | | | |
+| Dominick's | Lift + LightGBM combination | 0.670 | 0.742 | 0.686 | 1.275 | | | | 0.586 |
+| Dominick's | Lift, negative binomial | 0.665 | 0.701 | 0.701 | 1.289 | | | | 0.600 |
+
+The combination is the best result on Frat (0.388) and beats both parts on
+display and circular weeks. On Dominick's it is level with the lift model.
+Negative binomial is level with Tweedie on both.

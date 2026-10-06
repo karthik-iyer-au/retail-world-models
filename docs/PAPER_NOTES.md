@@ -141,3 +141,8 @@ explanations pass more of these checks also forecast better?
 - Tests so far cover one item's own price and promotion plan, scored on accuracy only. Parity with LightGBM there is the entry ticket, not the result.
 - The claim to test: one model that holds up when the plan changes. Tests, in order: (1) plan A against plan B ranking, (2) unusual lever mixes (`evaluation.rare_plans`, built), (3) range change (new items built; delisting to build), (4) category totals under a changed plan (needs the item-to-item model fixed).
 - Limits to state: no public data on shelf space or stock; placement within display and circular is not recorded.
+
+## Combination and likelihood (recorded 6 Oct)
+
+- Lift model + LightGBM combination: Frat 0.388 (LightGBM 0.421, lift 0.406), better than both parts on display (0.800) and circular (0.814) weeks. Dominick's 0.670, level with lift (0.676). The two models make different errors on Frat promoted weeks.
+- Negative binomial against Tweedie: no material difference (Frat 0.410 against 0.406; Dominick's 0.665 against 0.676).
