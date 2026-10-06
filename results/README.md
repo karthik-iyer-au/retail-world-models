@@ -265,3 +265,15 @@ Unusual = a lever mix the item had in under 2% of its own training weeks.
 On new items the lift model with borrowing is well ahead of LightGBM (0.890
 against 1.310). On unusual plans no model degrades much, and LightGBM stays
 ahead on promoted weeks either way.
+
+## World-model tricks from the literature, Breakfast at the Frat (development windows, 5 seeds)
+
+Reference: world model 0.408, lift model 0.406 (display 0.840, circular 0.863, tag only 0.537), LightGBM 0.421.
+
+| Run | Overall | Total | Item by store | Display | Circular | Tag only | Promo off | Forecast / actual |
+|---|---|---|---|---|---|---|---|---|
+| Plan split | 0.417 | 0.326 | 0.509 | 0.875 | 0.897 | 0.533 | 0.408 | 1.003 |
+| Latent check, collapse penalty, near weeks weighted more | 0.427 | 0.355 | 0.517 | 0.872 | 0.936 | 0.544 | 0.409 | 1.034 |
+| All of them | 0.424 | 0.342 | 0.516 | 0.869 | 0.907 | 0.547 | 0.411 | 1.030 |
+
+None improves on the world model as it was. One untuned setting per trick.
