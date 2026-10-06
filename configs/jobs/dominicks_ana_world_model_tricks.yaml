@@ -1,0 +1,20 @@
+# World-model training tricks from the literature: plan split, collapse penalty, week weighting.
+datasets:
+- name: dominicks
+  codes:
+  - ana
+runs:
+- config: configs/experiments/dominicks_ana_dev_world_model_plain.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/dominicks_ana_dev_world_model_plan_split.yaml
+  seeds: &id001
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/dominicks_ana_dev_world_model_plan_split_checked.yaml
+  seeds: *id001
+- config: configs/experiments/dominicks_ana_dev_world_model_checked.yaml
+  seeds: *id001

@@ -80,3 +80,25 @@ def test_saved_world_model_gives_the_same_forecast_when_loaded(split, fitted, tm
     np.testing.assert_array_equal(
         fitted.predict(future), StateModel.load(tmp_path / "model.pt", device="cpu").predict(future)
     )
+
+
+def test_plan_split_adds_nothing_until_something_is_planned(split):
+    train, test = split
+    quick = {**SETTINGS, "steps": 30, "plan_split": True, "latent_weight": 0.5,
+             "state_spread_weight": 0.1, "rollout_discount": 0.8}
+    model = build_model("state_model", **quick).fit(train)
+    future = test.drop(columns=[UNITS])
+    fut_dates = np.sort(future[DATE].unique())
+    rows = torch.arange(len(model._names))
+    zero, start = torch.zeros_like(rows), torch.full_like(rows, model._past["price"].shape[1])
+    fut = model._tensors(future, fut_dates, with_units=False)
+    model._net.eval()
+    with torch.no_grad():
+        hist, plan, _, _, _, plan_off = model._window(model._past, {**fut, "start": zero}, rows, start)
+        out = model._net(hist, plan, model._cats[rows], None, plan_off, True)
+    changed = (plan - plan_off).abs().sum(2) > 0
+    before = changed.cumsum(1) == 0  # periods before the first planned one
+    assert changed.any() and before.any()
+    assert (out["effect"][before] == 0).all()
+    assert (out["effect"][changed].abs().sum(1) > 0).all()
+    assert np.isfinite(model.predict(future)).all()

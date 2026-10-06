@@ -1,0 +1,16 @@
+# World-model training tricks from the literature: plan split, collapse penalty, week weighting.
+datasets:
+- name: breakfast_at_the_frat
+  from: /content/drive/MyDrive/retail-world-model/data
+runs:
+- config: configs/experiments/frat_dev_world_model_plan_split.yaml
+  seeds: &id001
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+- config: configs/experiments/frat_dev_world_model_plan_split_checked.yaml
+  seeds: *id001
+- config: configs/experiments/frat_dev_world_model_checked.yaml
+  seeds: *id001

@@ -61,6 +61,18 @@ in `levers` set to zero.
 - `regular_column`: a column holding the regular price the retailer recorded
   (for example `base_price`), used in place of the 12-period rule wherever
   it is filled in.
+- `plan_split` (with `rollout`): the rolled state is the sum of two parts.
+  One is rolled under the "nothing planned" plan and never sees the plan. The
+  other is what the plan adds: exactly zero until something is planned, and
+  able to linger afterwards. `split_weight` keeps the two parts pointing in
+  different directions. After the DWM paper, "Separating world effects
+  from actions in latent world models" (arXiv 2607.18715), adapted: here the no-plan part
+  is separate by construction.
+- `state_spread_weight`: a penalty that keeps the state from collapsing: each
+  direction keeps some spread across items and directions do not copy each
+  other (variance and covariance terms, after VICReg, Bardes et al. 2022).
+- `rollout_discount`: below 1, the latent check counts near periods for more
+  than far ones (after TD-MPC2, Hansen et al. 2024).
 - `cold_start`: a series with no history is forecast by borrowing the state
   and scale of the `cold_neighbours` known series most like it in the same
   store (most `categorical` labels in common), run with its own labels and
@@ -110,7 +122,7 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
                d_model: int, layers: int, heads: int, dropout: float,
                neighbours: str | None = None, n_products: int = 0, conditions: int = 4,
                lift_readout: bool = False, latent: bool = False, readout_dropout: float = 0.0,
-               rollout: bool = False, spread: bool = False):
+               rollout: bool = False, spread: bool = False, plan_split: bool = False):
     import torch
     from torch import nn
 
@@ -155,6 +167,13 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
             self.spread = nn.Parameter(torch.zeros(())) if spread else None
             if rollout:  # the transition: this period's plan moves the state on by one period
                 self.cell = nn.GRUCell(n_fut, d_model)
+            self.plan_split = plan_split
+            if plan_split:
+                # what the plan adds to the state, carried forward on its own. With no
+                # bias terms it is exactly zero until something is planned, and it can
+                # linger afterwards (a heavy promotion still matters weeks later).
+                self.effect_in = nn.Linear(d_model, d_model, bias=False)
+                self.effect = nn.GRUCell(n_fut + d_model, d_model, bias=False)
             self.head = readout()
             self.lift = readout() if lift_readout else None
             self.next = nn.Sequential(
@@ -203,6 +222,18 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
                 out.append(state)
             return torch.stack(out, dim=1)
 
+        def roll_split(self, state, plan, plan_off):
+            """The state under a plan as two parts: the state had nothing been
+            planned (it never sees the plan), plus what the plan added."""
+            world = self.roll(state, plan_off)
+            change = plan - plan_off
+            planned = (change.abs().sum(dim=2, keepdim=True) > 0).to(change.dtype)
+            e, out = torch.zeros_like(state), []
+            for h in range(plan.shape[1]):
+                e = self.effect(torch.cat([change[:, h], planned[:, h] * self.effect_in(world[:, h])], dim=1), e)
+                out.append(e)
+            return world, torch.stack(out, dim=1)
+
         def forward(self, hist, fut, cats, group=None, fut_off=None, full=False):
             """Log of expected sales relative to the item's scale. With `full`,
             also the baseline part, the state and the item-to-item weights."""
@@ -220,16 +251,22 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
             # with rollout each period is read from the state as it stands after the plan so far
             states = lambda plan: self.roll(state, plan) if self.rollout else still
             run = lambda net, plan, st: net(torch.cat([st] + rest + [plan], dim=2)).squeeze(-1)
-            on = states(fut)
+            world = effect = None
+            if self.plan_split:
+                world, effect = self.roll_split(state, fut, fut_off)
+                on = world + effect
+            else:
+                on = states(fut)
             if self.lift is None:
                 base = out = run(self.head, fut, on).clamp(-10, 10)
             else:
-                off = states(fut_off)
+                off = world if self.plan_split else states(fut_off)
                 base = run(self.head, fut_off, off).clamp(-10, 10)
                 out = (base + run(self.lift, fut, on) - run(self.lift, fut_off, off)).clamp(-10, 10)
             if not full:
                 return out
-            return {"log_mu": out, "base": base, "state": state, "weights": w, "rolled": on if self.rollout else None}
+            return {"log_mu": out, "base": base, "state": state, "weights": w, "rolled": on if self.rollout else None,
+                    "world": world, "effect": effect}
 
     return Net()
 
@@ -277,6 +314,10 @@ class StateModel(Forecaster):
         weight_decay: float = 1e-4,
         rollout: bool = False,
         likelihood: str = "tweedie",
+        plan_split: bool = False,
+        split_weight: float = 0.1,
+        state_spread_weight: float = 0.0,
+        rollout_discount: float = 1.0,
         cold_start: bool = False,
         cold_neighbours: int = 10,
         unknown_label_rate: float = 0.0,
@@ -307,6 +348,10 @@ class StateModel(Forecaster):
         if likelihood not in ("tweedie", "negative_binomial"):
             raise ValueError("likelihood must be tweedie or negative_binomial")
         self.likelihood = likelihood
+        if plan_split and not rollout:
+            raise ValueError("plan_split needs rollout")
+        self.plan_split, self.split_weight = plan_split, split_weight
+        self.state_spread_weight, self.rollout_discount = state_spread_weight, rollout_discount
         if cold_start and neighbours:
             raise ValueError("cold_start with neighbours is not supported yet")
         self.cold_start, self.cold_neighbours = cold_start, cold_neighbours
@@ -327,7 +372,7 @@ class StateModel(Forecaster):
         self.net_args = dict(d_model=d_model, layers=layers, heads=heads, dropout=dropout,
                              neighbours=neighbours, conditions=conditions,
                              lift_readout=lift_readout, latent=latent_weight > 0 or pretrain_steps > 0,
-                             readout_dropout=readout_dropout, rollout=rollout,
+                             readout_dropout=readout_dropout, rollout=rollout, plan_split=plan_split,
                              spread=likelihood == "negative_binomial")
         self.steps, self.batch, self.lr = steps, batch, lr
         self.power, self.seed, self.device = tweedie_power, seed, device
@@ -581,16 +626,35 @@ class StateModel(Forecaster):
                         if self._net.rollout:
                             # each rolled state must match the state the encoder gives once
                             # those periods are history; checked at the end and at two steps on the way
-                            latent = far(out["rolled"][:, H - 1], want)
+                            # with a discount below 1, near periods count for more than far ones
+                            rho = self.rollout_discount
+                            latent, weight = rho ** (H - 1) * far(out["rolled"][:, H - 1], want), rho ** (H - 1)
                             for k in torch.randint(1, H, (2,), generator=gen).tolist() if H > 1 else []:
                                 with torch.no_grad():
                                     seen = slow.state(self._window(data, {**data, "start": start}, rows, start + k)[0])
-                                latent = latent + far(out["rolled"][:, k - 1], seen)
-                            latent = latent / (3 if H > 1 else 1)
+                                latent = latent + rho ** (k - 1) * far(out["rolled"][:, k - 1], seen)
+                                weight = weight + rho ** (k - 1)
+                            latent = latent / weight
                         else:
                             guess = self._net.next(torch.cat([out["state"], out["plan"].flatten(1)], dim=1))
                             latent = far(guess, want)
                 loss = latent_weight * latent
+                if self.plan_split and self.split_weight > 0:
+                    # keep what the plan adds apart from what would have happened anyway
+                    w_, e_ = out["world"].float().flatten(0, 1), out["effect"].float().flatten(0, 1)
+                    live = e_.abs().sum(1) > 0
+                    if live.any():
+                        cos = torch.nn.functional.cosine_similarity(w_[live], e_[live], dim=1)
+                        loss = loss + self.split_weight * cos.abs().mean()
+                if self.state_spread_weight > 0:
+                    # stop the state shrinking onto a few directions: every direction
+                    # keeps some spread across items, and directions do not copy each other
+                    z = out["state"].float()
+                    z = z - z.mean(0)
+                    spread = torch.relu(1 - torch.sqrt(z.var(0) + 1e-4)).mean()
+                    cov = (z.T @ z) / max(len(z) - 1, 1)
+                    copy = (cov - torch.diag(torch.diag(cov))).pow(2).sum() / z.shape[1]
+                    loss = loss + self.state_spread_weight * (spread + 0.04 * copy)
                 if forecast:
                     log_mu = out["log_mu"].float()
                     target = data["units"][rows[:, None], ahead] / scale

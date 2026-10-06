@@ -146,3 +146,12 @@ explanations pass more of these checks also forecast better?
 
 - Lift model + LightGBM combination: Frat 0.388 (LightGBM 0.421, lift 0.406), better than both parts on display (0.800) and circular (0.814) weeks. Dominick's 0.670, level with lift (0.676). The two models make different errors on Frat promoted weeks.
 - Negative binomial against Tweedie: no material difference (Frat 0.410 against 0.406; Dominick's 0.665 against 0.676).
+
+## World-model literature check (6 Oct)
+
+- Matches the literature: state rolled forward under the plan and checked against a slow-copy encoder's state for the real future (TD-MPC2, V-JEPA 2-AC); pretrain then fine-tune.
+- Added from the literature, to test: plan effect kept apart from the no-plan state (DWM, arXiv 2607.18715; ours is separate by construction and exactly zero until something is planned); variance and covariance penalty against collapse (VICReg; SIGReg in LeWorldModel is the related one-term form); near periods weighted more in the rollout check (TD-MPC2).
+- Not built: a state with randomness (DreamerV3), relevant to unrecorded circular placement.
+- Related work to cite: WorldTS (arXiv 2609.31162), latent dynamics first then a frozen readout, for forecasting with known future inputs. Accuracy claims not verified.
+- Not read: AD-WM (arXiv 2609.30264), rate-limited.
+- New-item result: borrowing from similar items takes new-item error from 1.510 (zero forecast) to 0.890 on Frat. LightGBM had no new-item route in that run; rerun with one queued.
