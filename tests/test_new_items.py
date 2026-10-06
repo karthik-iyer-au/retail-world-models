@@ -2,6 +2,9 @@
 import json
 
 import numpy as np
+import pytest
+
+pytest.importorskip("torch")
 
 from rwm.data.schema import DATE, ITEM, SERIES, UNITS
 from rwm.data.synthetic import load_synthetic
@@ -58,6 +61,7 @@ def test_run_scores_new_items_apart(tmp_path):
 
 
 def test_lightgbm_cold_start_forecasts_a_new_item():
+    pytest.importorskip("lightgbm")
     train, test = _split()
     kw = dict(horizon=7, train_periods=90, categorical=["store_id", "item_id"], extra=["promo"],
               lags=(0, 7), windows=(7, 14), spread_window=7, price_window=14, rounds=20,

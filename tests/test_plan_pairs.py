@@ -1,6 +1,10 @@
 """Plan A against plan B: two weeks of the same item with different plans."""
 import json
 
+import pytest
+
+pytest.importorskip("lightgbm")
+
 from rwm.experiments.run import run
 
 
