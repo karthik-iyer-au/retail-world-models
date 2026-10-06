@@ -173,3 +173,10 @@ explanations pass more of these checks also forecast better?
 - Five seeds on Dominick's analgesics: world model 0.666, LightGBM 0.702, lift model 0.718. The lift model's earlier 0.676 was a three-seed figure that did not hold; report five seeds and the spread. The world model is the steadier of our two.
 - World model + LightGBM combination: Frat 0.390 (lift + LightGBM 0.388), Dominick's 0.668 (world model alone 0.666). On Dominick's the combination adds nothing.
 - Negative result: new-item borrowing fails on Dominick's (2.999 against LightGBM 0.923) because there are no attribute labels to match on. The new-item claim holds only where item attributes exist; a learned similarity over real attributes (size, brand from the item description) is needed before claiming more.
+
+## All Dominick's categories (recorded 7 Oct)
+
+- 28 categories, one seed, settings from analgesics unchanged. LightGBM wins 14, lift 5, world model 9. Mean overall: LightGBM 0.688, lift 0.784, world model 0.747. On promoted weeks LightGBM wins 24 of 27.
+- The analgesics result does not generalise. Analgesics was the category used to set our models, so reporting it alone would be selective. The paper must report all categories.
+- Our models fail badly in a few categories (snacks, soft drinks, bath soap), which suggests a stability problem (scaling of large-volume items, or the regular-price estimate) to diagnose before any more tuning.
+- The first Colab session ended after about 23 hours; the queue resumed from saved runs in a new session.

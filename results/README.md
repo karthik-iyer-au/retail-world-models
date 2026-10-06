@@ -335,3 +335,45 @@ Borrowing fails here. The Dominick's setup gives the model only item and
 store labels, so "most labels in common" has nothing to match on and the new
 item borrows the sales level of arbitrary items in the store. The Frat result
 (0.890 against 1.310) relied on category and manufacturer labels.
+
+## All 28 Dominick's categories (development windows, one seed; analgesics is the five-seed mean)
+
+Overall score and promoted-week score, lower is better. Same settings as analgesics, not tuned per category.
+
+| Category | LightGBM | Lift | World model | Promo: LightGBM | Promo: Lift | Promo: World model |
+|---|---|---|---|---|---|---|
+| bat | 1.188 | 1.568 | 1.465 | 0.763 | 1.236 | 0.911 |
+| oat | 1.084 | 1.026 | 1.060 | 3.394 | 3.394 | 3.405 |
+| ptw | 0.486 | 0.445 | 0.485 | 2.591 | 2.542 | 2.530 |
+| tti | 0.394 | 0.413 | 0.465 | 2.057 | 2.233 | 2.277 |
+| ber | 0.454 | 0.460 | 0.470 | 0.998 | 1.048 | 1.017 |
+| frd | 0.930 | 0.905 | 0.873 | 1.040 | 1.061 | 0.987 |
+| soa | 0.517 | 0.521 | 0.516 | 0.900 | 1.034 | 1.022 |
+| cra | 0.709 | 0.967 | 0.687 | 0.832 | 0.886 | 0.903 |
+| did | 0.344 | 0.436 | 0.393 | 1.147 | 1.244 | 1.171 |
+| tbr | 0.647 | 0.671 | 0.699 | 1.014 | 1.048 | 1.071 |
+| fsf | 0.650 | 0.748 | 0.832 | 1.914 | 2.048 | 1.981 |
+| tna | 1.163 | 1.030 | 0.959 | 1.440 | 1.418 | 1.533 |
+| cig | 0.534 | 0.918 | 0.690 | n/a | n/a | n/a |
+| frj | 0.314 | 0.360 | 0.376 | 0.486 | 0.566 | 0.591 |
+| sna | 0.587 | 0.959 | 1.463 | 0.937 | 1.130 | 1.071 |
+| tpa | 0.731 | 0.802 | 0.779 | 1.183 | 1.346 | 1.324 |
+| lnd | 0.768 | 0.735 | 0.687 | 1.200 | 1.400 | 1.214 |
+| fec | 0.414 | 0.358 | 0.397 | 1.063 | 1.363 | 1.529 |
+| bjc | 0.992 | 1.248 | 1.229 | 1.926 | 2.714 | 3.070 |
+| cer | 0.753 | 0.795 | 0.673 | 1.855 | 2.022 | 2.044 |
+| cso | 0.613 | 0.532 | 0.583 | 1.226 | 1.258 | 1.272 |
+| gro | 0.901 | 1.208 | 0.809 | 1.049 | 1.243 | 1.120 |
+| sha | 0.994 | 0.938 | 0.906 | 0.919 | 1.084 | 1.069 |
+| coo | 0.487 | 0.503 | 0.522 | 0.686 | 0.700 | 0.714 |
+| che | 0.742 | 0.900 | 0.996 | 1.068 | 1.229 | 1.361 |
+| fre | 0.417 | 0.374 | 0.382 | 0.732 | 0.770 | 0.735 |
+| sdr | 0.747 | 1.406 | 0.864 | 0.721 | 1.425 | 0.878 |
+| ana | 0.702 | 0.718 | 0.666 | 1.283 | 1.329 | 1.303 |
+| Mean | 0.688 | 0.784 | 0.747 | 1.275 | 1.436 | 1.411 |
+| Median | 0.676 | 0.772 | 0.689 | | | |
+
+Categories won overall: LightGBM 14, lift model 5, world model 9 of 28. One of our two models beats LightGBM in 14. The world model beats the lift model in 15.
+Categories won on promoted weeks: LightGBM 24, lift model 1, world model 2 of 27 (cigarettes has no promoted weeks in the windows).
+
+LightGBM is the better model across Dominick's as a whole. Our models were set on analgesics and run unchanged; several categories go badly wrong (snacks 1.463, soft drinks lift 1.406, bath soap), which points to instability, not a small gap. One seed per category, so single-category differences are not reliable.
