@@ -93,6 +93,17 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
         panel = train = panel[panel[DATE] <= sp.train_end]
         model = build_model(config["model"]["name"], **config["model"].get("params", {}))
         model.fit(train if held is None else train[~train[ITEM].astype(str).isin(held)])
+        # Unusual plans: lever mixes that made up a small share of training rows.
+        rare_mix = None
+        if ev.get("rare_plans"):
+            lv = ev["rare_plans"]["levers"]
+            mix = lambda f: (f[lv].fillna(0).to_numpy() > 0).astype(int) @ (2 ** np.arange(len(lv)))
+            share = np.bincount(mix(train), minlength=2 ** len(lv)) / len(train)
+            code = mix(test)
+            rare_mix = test.assign(
+                _rare=((code > 0) & (share[code] < ev["rare_plans"].get("below", 0.02))).astype(float),
+                _usual=((code > 0) & (share[code] >= ev["rare_plans"].get("below", 0.02))).astype(float),
+            )
         del train
         fitted.append((sp.origin, model))
         pred = np.asarray(model.predict(test.drop(columns=[UNITS])), dtype=float)
@@ -149,6 +160,14 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
                 "forecast_to_actual": float(out["forecast"].sum() / max(float(out[UNITS].sum()), 1e-9)),
                 **({"by_condition": by_condition} if by_condition else {}),
                 "by_horizon": by_horizon,
+                **(
+                    {
+                        k: rmsse_where(units[:, :t0], units[:, t0:t1], made, there & (to_matrix(rare_mix, SERIES, DATE, "_" + k.split("_")[0], cols, names) > 0), revenue, ev.get("scale_lag", 1))["wrmsse"]
+                        for k in ("rare_plans", "usual_plans")
+                    }
+                    if rare_mix is not None
+                    else {}
+                ),
                 **(
                     {
                         "new_items": rmsse_where(units[:, :t0], units[:, t0:t1], made, there & is_new[:, None], revenue, ev.get("scale_lag", 1))["wrmsse"],

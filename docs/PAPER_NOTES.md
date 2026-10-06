@@ -135,3 +135,9 @@ explanations pass more of these checks also forecast better?
 - Negative result: a loss term on store totals worsens the total (1.042) by pulling forecasts 9% low.
 - Validation stopping removes the long-training failure (0.683 against 1.473) but does not beat the short run (0.676).
 - World model on Dominick's: 0.729 to 0.732 overall, behind LightGBM (0.715) and the lift model (0.676). Item-by-store accuracy is level (0.699 to 0.704); the gap is under-forecasting at summed levels.
+
+## Scope of the world-model claim (agreed 6 Oct)
+
+- Tests so far cover one item's own price and promotion plan, scored on accuracy only. Parity with LightGBM there is the entry ticket, not the result.
+- The claim to test: one model that holds up when the plan changes. Tests, in order: (1) plan A against plan B ranking, (2) unusual lever mixes (`evaluation.rare_plans`, built), (3) range change (new items built; delisting to build), (4) category totals under a changed plan (needs the item-to-item model fixed).
+- Limits to state: no public data on shelf space or stock; placement within display and circular is not recorded.
