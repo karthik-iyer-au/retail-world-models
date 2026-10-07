@@ -13,17 +13,17 @@ terms a merchant uses. The first rule that fits wins:
 
   new_line          fewer than `min_periods` selling periods to judge from
   in_and_out        sold in under half of its periods
-  kvi               a top seller (in the top `top` share of items by units)
-                    that sells at least `lift` times its ordinary rate on deal
+  volume_driver     a top seller (in the top `top` share of items by units)
+                    that sells on deal: at least `lift` times its ordinary
+                    rate, or half or more of its units
   long_tail         among the slowest sellers that together make up the last
                     `tail` share of units
   hi_lo             half or more of its units sold on deal
   promo_responsive  sells at least `lift` times its ordinary rate on deal
   core              everything else: steady everyday sellers
 
-KVI here is a proxy from sales and deal response. A retailer's own KVI list
-also uses shopper price perception and basket data, which these datasets do
-not have.
+A volume driver is not called a KVI (known-value item): a KVI list rests on
+shopper price perception and basket data, which these datasets do not have.
 
 Only periods up to `until` are used, so a role never sees the periods a model
 is tested on. The label is fixed per item; it is a description of the item,
@@ -82,7 +82,7 @@ def add_roles(
     role[responsive] = "promo_responsive"
     role[(m["on_share"] >= 0.5).to_numpy()] = "hi_lo"
     role[slow.reindex(m.index).to_numpy()] = "long_tail"
-    role[top_seller.reindex(m.index).to_numpy() & (responsive | (m["on_share"] >= 0.5).to_numpy())] = "kvi"
+    role[top_seller.reindex(m.index).to_numpy() & (responsive | (m["on_share"] >= 0.5).to_numpy())] = "volume_driver"
     role[(m["presence"] < 0.5).to_numpy()] = "in_and_out"
     role[(m["periods"] < min_periods).to_numpy()] = "new_line"
     m[ROLE] = role

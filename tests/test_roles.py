@@ -31,7 +31,7 @@ def test_roles_follow_the_measures():
     m = add_roles(panel, until=dates[31], top=0.25, tail=0.02)
     assert m.loc["steady", ROLE] == "core"
     assert m.loc["responsive", ROLE] == "promo_responsive"
-    assert m.loc["driven", ROLE] == "kvi"  # the top seller, and it sells on deal
+    assert m.loc["driven", ROLE] == "volume_driver"  # the top seller, and it sells on deal
     assert m.loc["in_out", ROLE] == "in_and_out"
     assert np.isclose(m.loc["responsive", "lift"], 2.5)
     # when no item counts as a top seller, the same item is a hi-lo line
