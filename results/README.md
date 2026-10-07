@@ -377,3 +377,15 @@ Categories won overall: LightGBM 14, lift model 5, world model 9 of 28. One of o
 Categories won on promoted weeks: LightGBM 24, lift model 1, world model 2 of 27 (cigarettes has no promoted weeks in the windows).
 
 LightGBM is the better model across Dominick's as a whole. Our models were set on analgesics and run unchanged; several categories go badly wrong (snacks 1.463, soft drinks lift 1.406, bath soap), which points to instability, not a small gap. One seed per category, so single-category differences are not reliable.
+
+## M5 practice window: lift model and world model (one seed each)
+
+Reference: LightGBM 0.715, plain model 0.699 (five-seed mean).
+
+| Run | Overall | Total | Item by store | First day ahead | Last day ahead | Forecast / actual |
+|---|---|---|---|---|---|---|
+| Lift model | 0.683 | 0.563 | 0.832 | 0.597 | 0.765 | 0.954 |
+| World model | 0.692 | 0.600 | 0.833 | 0.590 | 0.777 | 0.941 |
+
+Both are ahead of LightGBM and of the plain model. One seed each, so the
+difference between the two is not established. Both under-forecast by about 5%.

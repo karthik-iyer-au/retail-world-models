@@ -188,3 +188,7 @@ explanations pass more of these checks also forecast better?
 - Capping extreme weeks in the level (`scale_cap`) helps little (1.63 to 1.53). Taking the level from the latest weeks (`scale_window`) removes most of it: 1.31 with 8 weeks, 1.14 with 4 weeks. Sample result, one seed, 800 steps; to be confirmed on full data.
 - LightGBM does not have this problem because it sees short recent averages directly.
 - Also found: the Dominick's loader fails on cigarettes under the local pandas version (mixed types in the SALE column); it ran on Colab. To fix.
+
+## M5 with the lift model and the world model (7 Oct)
+
+- Practice window, one seed: lift model 0.683, world model 0.692, plain model 0.699 (five seeds), LightGBM 0.715. More seeds needed before ranking our three. Both new runs under-forecast by about 5%.
