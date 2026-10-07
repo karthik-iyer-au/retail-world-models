@@ -79,6 +79,11 @@ in `levers` set to zero.
 - `scale_window`: when set, an item's level is its average over the latest
   that many periods (if at least half of them are recorded), not over the
   whole history window.
+- `level_views`: a list of period counts (for example `[4, 8]`). The item is
+  still scaled by its usual level, and the model is also told how its level
+  over each of those latest spans compares with it, so it can learn per item
+  whether the recent weeks or the longer run is the better guide. This is
+  the alternative to fixing one window with `scale_window`.
 - `scale_unpromoted`: when set, an item's level is its average over ordinary
   periods only (regular price, no lever on), if it has at least three; with
   `scale_window`, over the ordinary periods among the latest that many.
@@ -383,6 +388,7 @@ class StateModel(Forecaster):
         scale_cap: float | None = None,
         scale_window: int | None = None,
         scale_unpromoted: bool = False,
+        level_views: list[int] | None = None,
         volume_weight: float = 0.0,
         volume_by: str = "units",
         peak_weight: float = 0.0,
@@ -425,6 +431,7 @@ class StateModel(Forecaster):
         self.likelihood = likelihood
         self.scale_cap, self.scale_window = scale_cap, scale_window
         self.scale_unpromoted = scale_unpromoted
+        self.level_views = list(level_views or [])
         self.volume_weight = volume_weight
         if volume_by not in ("units", "dollars"):
             raise ValueError("volume_by must be 'units' or 'dollars'")
@@ -608,11 +615,23 @@ class StateModel(Forecaster):
         if extra:
             fut = torch.cat([fut] + extra, dim=2)
             fut_off = torch.cat([fut_off] + extra_off, dim=2)
+        if self.level_views:
+            # how the item's latest levels compare with the level it is scaled by, so the
+            # model can learn, item by item, whether to trust the recent weeks or the
+            # longer run. The same in the plan and the "nothing planned" plan.
+            views = []
+            for k in self.level_views:
+                n_k = known[:, -k:].sum(1, keepdim=True)
+                late = (units[:, -k:] * known[:, -k:]).sum(1, keepdim=True) / n_k.clamp(min=1)
+                ratio = torch.log((late + 0.1 * scale) / (1.1 * scale)).clamp(-3, 3)
+                views.append(torch.where(n_k >= max(1, k // 2), ratio, torch.zeros_like(ratio)))
+            v = torch.cat(views, dim=1)[:, None, :].expand(-1, fut.shape[1], -1).to(fut.dtype)
+            fut, fut_off = torch.cat([fut, v], dim=2), torch.cat([fut_off, v], dim=2)
         return hist, fut, scale, on_sale, ahead, fut_off
 
     def _new_net(self):
         q = 2 + 2 * len(self.extra) + int(self.regular_price)  # inputs describing one period's plan
-        n_fut = q + 4 + self.plan_lags * q + len(self._year_offsets) * (q + 2)
+        n_fut = q + 4 + self.plan_lags * q + len(self._year_offsets) * (q + 2) + len(self.level_views)
         return _build_net(
             2 + q + 4, n_fut, [len(v) for v in self._levels.values()], self.history, self.horizon,
             n_products=len(self._products), **self.net_args,

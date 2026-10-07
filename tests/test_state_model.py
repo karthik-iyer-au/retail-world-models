@@ -125,7 +125,7 @@ def test_level_options_change_only_the_level(split):
     level follows an item whose sales have fallen away."""
     train, test = split
     quick = {**SETTINGS, "steps": 5}
-    for extra in ({"scale_cap": 0.9}, {"scale_window": 8}, {"scale_unpromoted": True, "regular_price": True}, {"volume_weight": 0.5}, {"volume_weight": 0.5, "volume_by": "dollars"}):
+    for extra in ({"scale_cap": 0.9}, {"scale_window": 8}, {"scale_unpromoted": True, "regular_price": True}, {"volume_weight": 0.5}, {"volume_weight": 0.5, "volume_by": "dollars"}, {"level_views": [4, 8]}):
         model = build_model("state_model", **quick, **extra).fit(train)
         assert np.isfinite(model.predict(test.drop(columns=[UNITS]))).all()
     faded = train.copy()
