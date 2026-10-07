@@ -28,17 +28,27 @@ def _panel():
 
 def test_roles_follow_the_measures():
     panel, dates = _panel()
-    m = add_roles(panel, until=dates[31])
-    assert m.loc["steady", ROLE] == "steady"
-    assert m.loc["responsive", ROLE] == "responsive"
-    assert m.loc["driven", ROLE] == "promotion_driven"
+    m = add_roles(panel, until=dates[31], top=0.25, tail=0.02)
+    assert m.loc["steady", ROLE] == "core"
+    assert m.loc["responsive", ROLE] == "promo_responsive"
+    assert m.loc["driven", ROLE] == "kvi"  # the top seller, and it sells on deal
     assert m.loc["in_out", ROLE] == "in_and_out"
     assert np.isclose(m.loc["responsive", "lift"], 2.5)
-    # first seen after the cut-off: no measures, labelled new
+    # when no item counts as a top seller, the same item is a hi-lo line
+    assert add_roles(panel.copy(), until=dates[31], top=0.0, tail=0.0).loc["driven", ROLE] == "hi_lo"
+    # first seen after the cut-off: no measures, labelled a new line
     assert "late" not in m.index
-    assert set(panel.loc[panel["item_id"] == "late", ROLE]) == {"new"}
+    assert set(panel.loc[panel["item_id"] == "late", ROLE]) == {"new_line"}
     # one role per item, the same in every store
     assert (panel.groupby("item_id")[ROLE].nunique() == 1).all()
+
+
+def test_slowest_sellers_are_the_long_tail():
+    panel, dates = _panel()
+    tiny = panel[panel["item_id"] == "steady"].copy()
+    tiny["item_id"], tiny["series_id"], tiny["units"] = "slow", "slow_" + tiny["store_id"], tiny["units"] * 0.01
+    both = pd.concat([panel, tiny], ignore_index=True)
+    assert add_roles(both, until=dates[31], tail=0.01).loc["slow", ROLE] == "long_tail"
 
 
 def test_roles_do_not_see_later_periods():
@@ -65,7 +75,7 @@ def test_run_with_roles_as_a_label_and_as_the_level_picker(tmp_path):
         "model": {"name": "state_model", "params": {
             "horizon": 4, "history": 12, "categorical": ["item_id", "item_role"], "extra": ["promo"],
             "levers": ["promo"], "d_model": 16, "layers": 1, "heads": 2, "steps": 20, "batch": 32,
-            "scale_window_by": {"label": "item_role", "windows": {"steady": 4, "responsive": 8}},
+            "scale_window_by": {"label": "item_role", "windows": {"core": 4, "promo_responsive": 8}},
         }},
         "evaluation": {"horizon": 4, "n_origins": 2},
     }

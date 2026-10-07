@@ -1,4 +1,4 @@
-# Dominick's fre: world model with the item role as a label and picking the level: 4 weeks for in-and-out items, 8 for promotion-driven and new items, 26 for the rest. Roles are measured before the test windows.
+# Dominick's fre: world model with the item role as a label and picking the level: 4 weeks for in-and-out lines, 8 for hi-lo lines, KVIs and new lines, 26 for the rest. Roles are measured before the test windows.
 name: dominicks_fre_dev_peaks_world_model_role_level
 seed: 0
 dataset:
@@ -38,8 +38,9 @@ model:
       label: item_role
       windows:
         in_and_out: 4
-        promotion_driven: 8
-        new: 8
+        hi_lo: 8
+        kvi: 8
+        new_line: 8
 evaluation:
   horizon: 8
   n_origins: 2
