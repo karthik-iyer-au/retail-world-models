@@ -1,0 +1,65 @@
+# Item roles from each item's own promotion response: as a label for LightGBM and the world model, and picking the world model's level. Six Dominick's categories.
+datasets:
+- name: dominicks
+  codes:
+  - che
+  - sna
+  - sdr
+  - bjc
+  - ana
+  - fre
+runs:
+- config: configs/experiments/dominicks_che_dev_peaks_lightgbm_roles.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_che_dev_peaks_world_model_roles.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_che_dev_peaks_world_model_role_level.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_dev_peaks_lightgbm_roles.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_dev_peaks_world_model_roles.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_dev_peaks_world_model_role_level.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_peaks_lightgbm_roles.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_peaks_world_model_roles.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_peaks_world_model_role_level.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bjc_dev_peaks_lightgbm_roles.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bjc_dev_peaks_world_model_roles.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bjc_dev_peaks_world_model_role_level.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ana_dev_peaks_lightgbm_roles.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ana_dev_peaks_world_model_roles.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ana_dev_peaks_world_model_role_level.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fre_dev_peaks_lightgbm_roles.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fre_dev_peaks_world_model_roles.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fre_dev_peaks_world_model_role_level.yaml
+  seeds:
+  - 1

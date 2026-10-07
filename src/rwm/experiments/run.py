@@ -24,6 +24,7 @@ from rwm.data import load_dataset
 from rwm.data import manifest as data_manifest
 from rwm.data.calendar import add_calendar, add_season
 from rwm.data.crowding import add_crowding
+from rwm.data.roles import add_roles
 from rwm.data.schema import ITEM, DATE, PRICE, SERIES, UNITS
 from rwm.evaluation.hierarchy import rmsse_where, to_matrix, wrmsse
 from rwm.evaluation.splits import rolling_origins
@@ -60,6 +61,12 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
         add_season(panel, **(extras["season"] if isinstance(extras["season"], dict) else {}))
     if "crowding" in extras:
         add_crowding(panel, **extras["crowding"])
+    if "roles" in extras:
+        # item roles are measured only on periods before every test window
+        # of this run (and before the held-out final periods)
+        every = np.sort(panel[DATE].unique())
+        back = ev.get("holdout_periods", 0) + ev["horizon"] + (ev["n_origins"] - 1) * (ev.get("step") or ev["horizon"])
+        add_roles(panel, until=every[-back - 1], **(extras["roles"] or {}))
     dates = np.sort(panel[DATE].unique())
     if ev.get("holdout_periods"):
         # The last periods are set aside for the final test and are not loaded into this run.

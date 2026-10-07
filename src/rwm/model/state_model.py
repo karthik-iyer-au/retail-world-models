@@ -79,6 +79,10 @@ in `levers` set to zero.
 - `scale_window`: when set, an item's level is its average over the latest
   that many periods (if at least half of them are recorded), not over the
   whole history window.
+- `scale_window_by`: lets a label pick the level, for example
+  `{label: item_role, windows: {in_and_out: 4, promotion_driven: 8}}`. Items
+  with a listed value of the label use that many latest periods; the rest
+  use `scale_window` (or the whole history window when that is not set).
 - `level_views`: a list of period counts (for example `[4, 8]`). The item is
   still scaled by its usual level, and the model is also told how its level
   over each of those latest spans compares with it, so it can learn per item
@@ -389,6 +393,7 @@ class StateModel(Forecaster):
         scale_window: int | None = None,
         scale_unpromoted: bool = False,
         level_views: list[int] | None = None,
+        scale_window_by: dict | None = None,
         volume_weight: float = 0.0,
         volume_by: str = "units",
         peak_weight: float = 0.0,
@@ -432,6 +437,7 @@ class StateModel(Forecaster):
         self.scale_cap, self.scale_window = scale_cap, scale_window
         self.scale_unpromoted = scale_unpromoted
         self.level_views = list(level_views or [])
+        self.scale_window_by, self._row_window = scale_window_by, None
         self.volume_weight = volume_weight
         if volume_by not in ("units", "dollars"):
             raise ValueError("volume_by must be 'units' or 'dollars'")
@@ -507,7 +513,14 @@ class StateModel(Forecaster):
         n_known = known.sum(1, keepdim=True).clamp(min=1)
         # each item's own recent level, over the periods it was on sale
         scale = (units * known).sum(1, keepdim=True) / n_known
-        if self.scale_window is not None:
+        if self._row_window is not None:
+            # each item's own number of latest periods, picked by its label
+            k = self._row_window[rows][:, None]
+            late_cols = known & (torch.arange(L, device=self._dev)[None] >= L - k)
+            n_late = late_cols.sum(1, keepdim=True)
+            late = (units * late_cols).sum(1, keepdim=True) / n_late.clamp(min=1)
+            scale = torch.where((k < L) & (n_late >= (k // 2).clamp(min=1)), late, scale)
+        elif self.scale_window is not None:
             # the level from the latest periods only, so an item whose sales have
             # fallen away (a seasonal or in-and-out line) is not held at its old level
             k = self.scale_window
@@ -679,6 +692,10 @@ class StateModel(Forecaster):
             [self._levels[c].get_indexer(first[c].astype(str)) + 1 for c in self.categorical], axis=1
         ) if self.categorical else np.zeros((len(self._names), 0), dtype=np.int64)
         self._cats = torch.as_tensor(cats, device=self._dev, dtype=torch.long)
+        if self.scale_window_by:
+            picked = first[self.scale_window_by["label"]].astype(str).map(self.scale_window_by["windows"])
+            picked = picked.fillna(self.scale_window or L).clip(upper=L).to_numpy(dtype=np.int64).copy()
+            self._row_window = torch.as_tensor(picked, device=self._dev, dtype=torch.long)
 
         self._stores = first[STORE].astype(str).to_numpy()
         self._products = pd.Index(first[ITEM].astype(str).unique()).sort_values()
