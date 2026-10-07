@@ -306,3 +306,5 @@ Roll-forward normalisation (layer normalisation on the rolled state), against th
 | fre | 0.393 | 0.396 | 0.411 | 0.394 |
 
 Normalisation helps in two categories, hurts in three and is level in one. It is ruled out as a general fix. With sales feedback and normalisation the snack crackers after-promotion forecast is right (0.97 of actual, error 0.419 against 0.585) and item error is the lowest of any world-model version (0.702), but the category total gets much worse (1.60). The M5 run with normalisation is recorded separately when it finishes.
+
+M5 practice window, world model with roll-forward normalisation (`m5_validation_world_model_roll_norm`, one seed, only change is `roll_norm: true`): overall 0.646, total 0.510, item 0.835, forecast/actual 0.962. Without it the world model scored 0.692 (total 0.600, item 0.833), the lift model 0.683 and LightGBM 0.715. The gain is in the totals, not the item level. Normalisation helps on the 28-step daily roll-forward and not on the 8-step weekly one on Dominick's. One seed; needs more seeds before it is claimed.
