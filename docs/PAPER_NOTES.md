@@ -222,3 +222,7 @@ explanations pass more of these checks also forecast better?
 - Added a peaks-and-dips score (`evaluation.after_promo`): forecast over actual and error in promoted weeks, in the weeks just after a promotion ended, and in ordinary weeks. This is the direct measure of whether a model sees the dip.
 - Job `dominicks_peaks_and_dips` (30 runs, six categories) compares LightGBM, the world model, feedback, weighting, and both.
 - Clarified against stable-worldmodel (arXiv 2605.21800): its solver-and-cost loop is how a trained model is used to choose actions; it does not train the model. The matching piece for us would be a promotion optimiser, which is not built.
+
+## 8-week level across all Dominick's categories (7 Oct)
+
+- World model, mean overall: 0.747 with the 26-week level, 0.717 with the 8-week level; LightGBM 0.688. Median 0.689, 0.736, 0.676. Wins against LightGBM: 14 then 10 of 28. The change removes the worst failures and is not a uniform gain; it should become the default only together with whatever the peaks-and-dips job supports.

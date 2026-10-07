@@ -412,3 +412,40 @@ drinks and bath soap. Cheese and cigarettes do not improve. The remaining
 error is still at the category total: forecast over actual is far from 1 in
 one window (cigarettes lift 1.58, soft drinks lift 1.33, cheese 0.84), and
 item-by-store accuracy stays near LightGBM. One seed per run.
+
+## World model with an 8-week level, all 28 Dominick's categories (development windows, one seed)
+
+| Category | LightGBM | World model, 26-week level | World model, 8-week level |
+|---|---|---|---|
+| bat | 1.188 | 1.465 | 1.195 |
+| oat | 1.084 | 1.060 | 1.036 |
+| ptw | 0.486 | 0.485 | 0.425 |
+| tti | 0.394 | 0.465 | 0.427 |
+| ber | 0.454 | 0.470 | 0.505 |
+| frd | 0.930 | 0.873 | 0.884 |
+| soa | 0.517 | 0.516 | 0.518 |
+| cra | 0.709 | 0.687 | 0.749 |
+| did | 0.344 | 0.393 | 0.406 |
+| tbr | 0.647 | 0.699 | 0.686 |
+| fsf | 0.650 | 0.832 | 0.742 |
+| tna | 1.163 | 0.959 | 1.004 |
+| cig | 0.534 | 0.690 | 0.643 |
+| frj | 0.314 | 0.376 | 0.342 |
+| sna | 0.587 | 1.463 | 0.874 |
+| tpa | 0.731 | 0.779 | 0.857 |
+| lnd | 0.768 | 0.687 | 0.729 |
+| fec | 0.414 | 0.397 | 0.417 |
+| bjc | 0.992 | 1.229 | 1.100 |
+| cer | 0.753 | 0.673 | 0.805 |
+| cso | 0.613 | 0.583 | 0.500 |
+| gro | 0.901 | 0.809 | 0.874 |
+| sha | 0.994 | 0.906 | 0.921 |
+| coo | 0.487 | 0.522 | 0.491 |
+| che | 0.742 | 0.996 | 1.116 |
+| fre | 0.417 | 0.382 | 0.393 |
+| sdr | 0.747 | 0.864 | 0.747 |
+| ana | 0.702 | 0.666 | 0.679 |
+| Mean | 0.688 | 0.747 | 0.717 |
+| Median | 0.676 | 0.689 | 0.736 |
+
+The 8-week level beats LightGBM in 10 of 28 categories (the 26-week level did in 14) and improves on the 26-week level in 13. It removes the large failures (snacks 1.463 to 0.874, bath soap 1.465 to 1.195) and gives a little back in some categories that were fine. LightGBM is still ahead on the mean. One seed.
