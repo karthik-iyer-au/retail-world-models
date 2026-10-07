@@ -1,0 +1,37 @@
+# Test of the volume-weighted loss on the eight Dominick's categories used for the level fix.
+datasets:
+- name: dominicks
+  codes:
+  - sna
+  - sdr
+  - bat
+  - bjc
+  - cig
+  - che
+  - ana
+  - fre
+runs:
+- config: configs/experiments/dominicks_sna_dev_world_model_level8_units_loss.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_world_model_level8_units_loss.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bat_dev_world_model_level8_units_loss.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bjc_dev_world_model_level8_units_loss.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_cig_dev_world_model_level8_units_loss.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_che_dev_world_model_level8_units_loss.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ana_dev_world_model_level8_units_loss.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fre_dev_world_model_level8_units_loss.yaml
+  seeds:
+  - 1

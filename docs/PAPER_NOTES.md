@@ -198,3 +198,10 @@ explanations pass more of these checks also forecast better?
 - Full-data check on eight categories, one seed: a latest-weeks level cuts the snacks error (lift 0.959 to 0.728, world model 1.463 to 0.874) and brings the world model level with LightGBM on soft drinks and bath soap. Controls are unharmed (analgesics lift 0.718 to 0.649). Cheese and cigarettes do not improve, and the lift model on soft drinks and bath soap does not improve.
 - So in-and-out items are one cause, not the only one. What remains is a category-total bias that differs by window and by model. Next diagnosis: cheese (under-forecast 16% in the first window) and cigarettes (over-forecast 58% in the second window for the lift model).
 - The world model with an 8-week level is the steadiest version so far across these eight.
+
+## Second diagnosis: cheese (7 Oct, six-store sample, lift model)
+
+- First window (Thanksgiving and Christmas): promoted weeks are under-forecast by about a third, and the two holiday weeks by 25% to 45%. LightGBM on the same sample has the same miss (promoted weeks 0.68 of actual, against 0.66 for ours). This is not a fault particular to our model. Year-ago inputs, the holiday calendar, the world-model rollout and longer training do not fix it.
+- Second window (January, after the holidays): our model over-forecasts ordinary weeks by 11%; LightGBM is level. A level from non-promoted weeks, year-ago inputs and the calendar do not fix it.
+- A structural difference from LightGBM: our loss is taken on sales relative to each item's own level, so every item counts alike; LightGBM's loss is on units, so big sellers count for more and category totals are held closer. Weighting our loss by volume (`volume_weight`) with a Tweedie power of 1.1 (LightGBM's) cuts the January over-forecast from 1.068 to 1.044 and the snacks first-window over-forecast from 1.63 to 1.39. It helps, it is not the whole gap, and combined with the 4-week level on snacks it is no better than the 4-week level alone (1.20 against 1.14).
+- Sample results, one seed, 800 steps. Full-data job `dominicks_units_loss` is ready.

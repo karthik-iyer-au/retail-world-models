@@ -79,6 +79,13 @@ in `levers` set to zero.
 - `scale_window`: when set, an item's level is its average over the latest
   that many periods (if at least half of them are recorded), not over the
   whole history window.
+- `scale_unpromoted`: when set, an item's level is its average over ordinary
+  periods only (regular price, no lever on), if it has at least three; with
+  `scale_window`, over the ordinary periods among the latest that many.
+- `volume_weight`: each training example's loss is multiplied by the item's
+  level raised to this power. 0 treats every item alike. With the Tweedie
+  loss, 2 minus the Tweedie power makes the loss the same as one taken on
+  units, which is what LightGBM minimises.
 - `cold_start`: a series with no history is forecast by borrowing the state
   and scale of the `cold_neighbours` known series most like it in the same
   store (most `categorical` labels in common), run with its own labels and
@@ -322,6 +329,8 @@ class StateModel(Forecaster):
         likelihood: str = "tweedie",
         scale_cap: float | None = None,
         scale_window: int | None = None,
+        scale_unpromoted: bool = False,
+        volume_weight: float = 0.0,
         plan_split: bool = False,
         split_weight: float = 0.1,
         state_spread_weight: float = 0.0,
@@ -357,6 +366,8 @@ class StateModel(Forecaster):
             raise ValueError("likelihood must be tweedie or negative_binomial")
         self.likelihood = likelihood
         self.scale_cap, self.scale_window = scale_cap, scale_window
+        self.scale_unpromoted = scale_unpromoted
+        self.volume_weight = volume_weight
         if plan_split and not rollout:
             raise ValueError("plan_split needs rollout")
         self.plan_split, self.split_weight = plan_split, split_weight
@@ -456,6 +467,20 @@ class StateModel(Forecaster):
             held = (run >= self.regular_hold) & known
             last = (held * torch.arange(1, L + 1, device=self._dev)[None]).amax(1, keepdim=True)
             regular = torch.where(last > 0, torch.nan_to_num(price).gather(1, (last - 1).clamp(min=0)), regular)
+
+        if self.scale_unpromoted:
+            # the level from ordinary periods only: at (or within 5% of) the regular
+            # price with no lever on. Promoted periods would lift the level, and
+            # the periods after a run of promotions would then be forecast too high.
+            quiet = known & (torch.nan_to_num(price) >= 0.95 * regular)
+            for name, e in zip(self.extra, past["extra"]):
+                if name in self.levers:
+                    quiet = quiet & ~(torch.nan_to_num(e[r, back]) > 0)
+            if self.scale_window is not None:
+                quiet[:, : -self.scale_window] = False
+            n_quiet = quiet.sum(1, keepdim=True)
+            ordinary = (units * quiet).sum(1, keepdim=True) / n_quiet.clamp(min=1)
+            scale = torch.where((n_quiet >= 3) & (ordinary > 0), ordinary, scale)
 
         def lever_inputs(src, cols, off=False, r=r):
             p = src["price"][r, cols]
@@ -693,6 +718,12 @@ class StateModel(Forecaster):
                         r = 1 / torch.nn.functional.softplus(self._net.spread).clamp(min=1e-4)
                         each = -(torch.lgamma(y + r) - torch.lgamma(r) - torch.lgamma(y + 1)
                                  + r * torch.log(r / (r + m)) + y * torch.log(m / (r + m)))
+                    if self.volume_weight:
+                        # bigger sellers count for more, as they do when the loss is taken
+                        # on units and not on sales relative to each item's own level; without
+                        # this, small misses on big items add up at the category total
+                        w = scale.float().pow(self.volume_weight)
+                        each = each * (w / w.mean())
                     loss = loss + (each * on_sale).sum() / on_sale.sum().clamp(min=1)
                     if self.total_weight > 0:
                         # the same forecast summed over the items drawn for each date, against
