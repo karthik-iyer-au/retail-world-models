@@ -1,0 +1,47 @@
+# Rules normalisation in the roll-forward in or out, on the six peaks-and-dips categories.
+datasets:
+- name: dominicks
+  codes:
+  - che
+  - sna
+  - sdr
+  - bjc
+  - ana
+  - fre
+runs:
+- config: configs/experiments/dominicks_che_dev_peaks_world_model_roll_norm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_che_dev_peaks_feedback_roll_norm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_dev_peaks_world_model_roll_norm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_dev_peaks_feedback_roll_norm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_peaks_world_model_roll_norm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_peaks_feedback_roll_norm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bjc_dev_peaks_world_model_roll_norm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bjc_dev_peaks_feedback_roll_norm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ana_dev_peaks_world_model_roll_norm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ana_dev_peaks_feedback_roll_norm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fre_dev_peaks_world_model_roll_norm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fre_dev_peaks_feedback_roll_norm.yaml
+  seeds:
+  - 1

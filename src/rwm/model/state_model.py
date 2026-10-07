@@ -93,6 +93,8 @@ in `levers` set to zero.
   periods after it. In training the real sales are fed for `teacher_rate` of
   the examples and the model's own forecast for the rest; when forecasting it
   is always its own.
+- `roll_norm` (with `rollout`): layer normalisation on the state after each
+  step of the roll-forward.
 - `peak_weight`: each period's loss is multiplied by 1 plus this times how far
   that period's sales sit from the item's usual level (capped), so peaks and
   dips count for more than ordinary periods.
@@ -146,7 +148,7 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
                neighbours: str | None = None, n_products: int = 0, conditions: int = 4,
                lift_readout: bool = False, latent: bool = False, readout_dropout: float = 0.0,
                rollout: bool = False, spread: bool = False, plan_split: bool = False,
-               feedback: bool = False, teacher_rate: float = 0.5):
+               feedback: bool = False, teacher_rate: float = 0.5, roll_norm: bool = False):
     import torch
     from torch import nn
 
@@ -192,6 +194,8 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
             if rollout:  # the transition: this period's plan moves the state on by one period
                 self.cell = nn.GRUCell(n_fut + (1 if feedback else 0), d_model)
             self.feedback, self.teacher_rate = feedback, teacher_rate
+            # keeps the rolled state on a steady scale from step to step
+            self.roll_norm = nn.LayerNorm(d_model) if roll_norm and rollout else nn.Identity()
             self.plan_split = plan_split
             if plan_split:
                 # what the plan adds to the state, carried forward on its own. With no
@@ -243,7 +247,7 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
             entry h is the state after living through periods 0..h."""
             out = []
             for h in range(plan.shape[1]):
-                state = self.cell(plan[:, h, :], state)
+                state = self.roll_norm(self.cell(plan[:, h, :], state))
                 out.append(state)
             return torch.stack(out, dim=1)
 
@@ -276,11 +280,11 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
                 use_real = torch.rand(len(state), device=state.device) < self.teacher_rate
             outs, bases, ons = [], [], []
             for h in range(fut.shape[1]):
-                s_on = self.cell(torch.cat([fut[:, h], squash(y_on).to(fut.dtype)], dim=1), s_on)
+                s_on = self.roll_norm(self.cell(torch.cat([fut[:, h], squash(y_on).to(fut.dtype)], dim=1), s_on))
                 if self.lift is None:
                     out = base = read(self.head, s_on, fut[:, h], h).clamp(-10, 10)
                 else:
-                    s_off = self.cell(torch.cat([fut_off[:, h], squash(y_off).to(fut.dtype)], dim=1), s_off)
+                    s_off = self.roll_norm(self.cell(torch.cat([fut_off[:, h], squash(y_off).to(fut.dtype)], dim=1), s_off))
                     base = read(self.head, s_off, fut_off[:, h], h).clamp(-10, 10)
                     out = (base + read(self.lift, s_on, fut[:, h], h) - read(self.lift, s_off, fut_off[:, h], h)).clamp(-10, 10)
                     y_off = torch.exp(base.float()).detach()
@@ -384,6 +388,7 @@ class StateModel(Forecaster):
         peak_weight: float = 0.0,
         feedback: bool = False,
         teacher_rate: float = 0.5,
+        roll_norm: bool = False,
         plan_split: bool = False,
         split_weight: float = 0.1,
         state_spread_weight: float = 0.0,
@@ -428,6 +433,7 @@ class StateModel(Forecaster):
         if feedback and (not rollout or neighbours or plan_split):
             raise ValueError("feedback needs rollout, and does not work with neighbours or plan_split")
         self.feedback, self.teacher_rate = feedback, teacher_rate
+        self.roll_norm = roll_norm
         if plan_split and not rollout:
             raise ValueError("plan_split needs rollout")
         self.plan_split, self.split_weight = plan_split, split_weight
@@ -453,7 +459,7 @@ class StateModel(Forecaster):
                              neighbours=neighbours, conditions=conditions,
                              lift_readout=lift_readout, latent=latent_weight > 0 or pretrain_steps > 0,
                              readout_dropout=readout_dropout, rollout=rollout, plan_split=plan_split,
-                             feedback=feedback, teacher_rate=teacher_rate,
+                             feedback=feedback, teacher_rate=teacher_rate, roll_norm=roll_norm,
                              spread=likelihood == "negative_binomial")
         self.steps, self.batch, self.lr = steps, batch, lr
         self.power, self.seed, self.device = tweedie_power, seed, device

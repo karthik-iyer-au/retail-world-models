@@ -107,7 +107,7 @@ def test_plan_split_adds_nothing_until_something_is_planned(split):
 def test_feedback_version_also_learns_the_dip_after_a_promotion(split):
     """With each period's sales fed into the next step, the model still has
     zero lift when nothing is planned, and learns the rise and the dip."""
-    model = build_model("state_model", **{**SETTINGS, "feedback": True, "peak_weight": 0.5}).fit(split[0])
+    model = build_model("state_model", **{**SETTINGS, "feedback": True, "peak_weight": 0.5, "roll_norm": True}).fit(split[0])
     off, on, first = _plans(*split)
     second = (off[DATE] == np.sort(off[DATE].unique())[1]).to_numpy()
     a, b = model.predict(off), model.predict(on)

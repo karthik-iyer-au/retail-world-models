@@ -1,0 +1,7 @@
+# Normalisation in the roll-forward on M5, where the roll is 28 steps long.
+datasets:
+- name: m5
+runs:
+- config: configs/experiments/m5_validation_world_model_roll_norm.yaml
+  seeds:
+  - 1
