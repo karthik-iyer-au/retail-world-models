@@ -1,0 +1,12 @@
+# Is the M5 gain from roll-forward normalisation real? Two more seeds with and without it.
+datasets:
+- name: m5
+runs:
+- config: configs/experiments/m5_validation_world_model_roll_norm.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/m5_validation_world_model.yaml
+  seeds:
+  - 2
+  - 3
