@@ -389,3 +389,26 @@ Reference: LightGBM 0.715, plain model 0.699 (five-seed mean).
 
 Both are ahead of LightGBM and of the plain model. One seed each, so the
 difference between the two is not established. Both under-forecast by about 5%.
+
+## Level fix on eight Dominick's categories (development windows, one seed)
+
+The item's level taken from its latest 4 or 8 weeks, not the 26-week average. Overall score, lower is better.
+
+| Category | LightGBM | Lift, as before | Lift, 4 weeks | Lift, 8 weeks | World model, as before | World model, 4 weeks | World model, 8 weeks |
+|---|---|---|---|---|---|---|---|
+| sna | 0.587 | 0.959 | 0.728 | 0.739 | 1.463 | 1.097 | 0.874 |
+| sdr | 0.747 | 1.406 | 1.383 | 1.429 | 0.864 | 0.800 | 0.747 |
+| bat | 1.188 | 1.568 | 1.528 | 2.203 | 1.465 | 1.217 | 1.195 |
+| bjc | 0.992 | 1.248 | 1.173 | 1.123 | 1.229 | 1.131 | 1.100 |
+| cig | 0.534 | 0.918 | 1.245 | 1.216 | 0.690 | 0.688 | 0.643 |
+| che | 0.742 | 0.900 | 0.937 | 0.970 | 0.996 | 1.026 | 1.116 |
+| ana (control) | 0.702 | 0.718 | 0.649 | 0.666 | 0.666 | 0.667 | 0.679 |
+| fre (control) | 0.417 | 0.374 | 0.367 | 0.366 | 0.382 | 0.378 | 0.393 |
+
+The fix helps where the diagnosis applied and does no harm to the controls,
+but it does not close the gap. Snacks improves a lot and stays behind
+LightGBM. The world model with an 8-week level reaches LightGBM on soft
+drinks and bath soap. Cheese and cigarettes do not improve. The remaining
+error is still at the category total: forecast over actual is far from 1 in
+one window (cigarettes lift 1.58, soft drinks lift 1.33, cheese 0.84), and
+item-by-store accuracy stays near LightGBM. One seed per run.

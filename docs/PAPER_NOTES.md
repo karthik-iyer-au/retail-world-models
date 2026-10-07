@@ -192,3 +192,9 @@ explanations pass more of these checks also forecast better?
 ## M5 with the lift model and the world model (7 Oct)
 
 - Practice window, one seed: lift model 0.683, world model 0.692, plain model 0.699 (five seeds), LightGBM 0.715. More seeds needed before ranking our three. Both new runs under-forecast by about 5%.
+
+## Level fix confirmed in part (7 Oct)
+
+- Full-data check on eight categories, one seed: a latest-weeks level cuts the snacks error (lift 0.959 to 0.728, world model 1.463 to 0.874) and brings the world model level with LightGBM on soft drinks and bath soap. Controls are unharmed (analgesics lift 0.718 to 0.649). Cheese and cigarettes do not improve, and the lift model on soft drinks and bath soap does not improve.
+- So in-and-out items are one cause, not the only one. What remains is a category-total bias that differs by window and by model. Next diagnosis: cheese (under-forecast 16% in the first window) and cigarettes (over-forecast 58% in the second window for the lift model).
+- The world model with an 8-week level is the steadiest version so far across these eight.
