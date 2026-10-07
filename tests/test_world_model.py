@@ -102,3 +102,17 @@ def test_plan_split_adds_nothing_until_something_is_planned(split):
     assert (out["effect"][before] == 0).all()
     assert (out["effect"][changed].abs().sum(1) > 0).all()
     assert np.isfinite(model.predict(future)).all()
+
+
+def test_feedback_version_also_learns_the_dip_after_a_promotion(split):
+    """With each period's sales fed into the next step, the model still has
+    zero lift when nothing is planned, and learns the rise and the dip."""
+    model = build_model("state_model", **{**SETTINGS, "feedback": True, "peak_weight": 0.5}).fit(split[0])
+    off, on, first = _plans(*split)
+    second = (off[DATE] == np.sort(off[DATE].unique())[1]).to_numpy()
+    a, b = model.predict(off), model.predict(on)
+    assert np.isfinite(a).all() and np.isfinite(b).all()
+    quiet = model.breakdown(off)
+    np.testing.assert_allclose(quiet["lift"], 0, atol=1e-4 * quiet["forecast"].max())
+    assert b[first].sum() / a[first].sum() > 1.4
+    assert b[second].sum() / a[second].sum() < 0.8

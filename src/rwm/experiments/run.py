@@ -83,6 +83,12 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
     ds.panel = None
     # New-item test: a random share of products is kept out of training
     # altogether, in every window, and scored on its own.
+    # For the peaks-and-dips check: was any named lever on, for each series and period.
+    lever_on = None
+    if ev.get("after_promo"):
+        lever_on = np.zeros(units.shape, dtype=bool)
+        for c in ev["after_promo"]["levers"]:
+            lever_on |= np.nan_to_num(to_matrix(panel, SERIES, DATE, c, dates, names)) > 0
     held = None
     if ev.get("new_items"):
         products = np.sort(panel[ITEM].astype(str).unique())
@@ -183,6 +189,21 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
                 # average miss on the size of the change between the two weeks (log scale)
                 "plan_pair_change_error": gap / max(n_pairs, 1),
             }
+        # Peaks and dips: forecast over actual in promoted periods, in the periods
+        # just after a promotion ended, and in all other periods.
+        peaks = {}
+        if lever_on is not None:
+            k = ev["after_promo"].get("periods", 2)
+            now = lever_on[:, t0:t1]
+            just = np.zeros_like(now)
+            for j in range(1, k + 1):
+                just |= lever_on[:, t0 - j : t1 - j]
+            groups = {"promoted": there & now, "after_promo": there & ~now & just, "ordinary": there & ~now & ~just}
+            act = units[:, t0:t1]
+            peaks = {"peaks": {g: {"forecast_to_actual": float(made[m].sum() / max(float(np.nansum(act[m])), 1e-9)),
+                                   "share_of_units": float(np.nansum(act[m]) / max(float(np.nansum(act[there])), 1e-9)),
+                                   **{"rmsse": rmsse_where(units[:, :t0], act, made, m, revenue, ev.get("scale_lag", 1))["wrmsse"]}}
+                               for g, m in groups.items()}}
         per_split.append(
             {
                 "origin": sp.origin,
@@ -195,6 +216,7 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
                 **({"by_condition": by_condition} if by_condition else {}),
                 "by_horizon": by_horizon,
                 **plan_pairs,
+                **peaks,
                 **(
                     {
                         k: rmsse_where(units[:, :t0], units[:, t0:t1], made, there & (to_matrix(rare_mix, SERIES, DATE, "_" + k.split("_")[0], cols, names) > 0), revenue, ev.get("scale_lag", 1))["wrmsse"]

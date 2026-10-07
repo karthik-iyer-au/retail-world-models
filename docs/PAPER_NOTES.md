@@ -214,3 +214,11 @@ explanations pass more of these checks also forecast better?
 - Volume weighting now has a dollar form (`volume_by: dollars`) so items sold by weight and by pack are on one footing.
 - Open: whether full-length training on all years with these inputs learns the seasonal level. Job `dominicks_seasonal_long` tests that.
 - Related platform, not our method: stable-worldmodel (arXiv 2605.21800), a library and benchmark for world models in control and video, with tests under controlled changes in the environment. Our "unusual plan" tests are the same idea applied to retail.
+
+## Peaks and dips: what was missing and what was added (7 Oct)
+
+- Gap found in the world-model version: the roll-forward was fed each week's plan but not each week's sales, so it was autoregressive on actions and not on outcomes. Added `feedback`: each week's sales are fed into the next step (real sales for a share of training examples, the model's own forecast otherwise and always when forecasting; the no-plan path always uses its own). On generated data it still gives zero lift with nothing planned and learns the rise and the dip.
+- Added `peak_weight`: weeks far from the item's usual level count for more in the loss. Risk to check: over-calling promotions and worse ordinary weeks.
+- Added a peaks-and-dips score (`evaluation.after_promo`): forecast over actual and error in promoted weeks, in the weeks just after a promotion ended, and in ordinary weeks. This is the direct measure of whether a model sees the dip.
+- Job `dominicks_peaks_and_dips` (30 runs, six categories) compares LightGBM, the world model, feedback, weighting, and both.
+- Clarified against stable-worldmodel (arXiv 2605.21800): its solver-and-cost loop is how a trained model is used to choose actions; it does not train the model. The matching piece for us would be a promotion optimiser, which is not built.

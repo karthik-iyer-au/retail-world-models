@@ -88,6 +88,14 @@ in `levers` set to zero.
   units, which is what LightGBM minimises. `volume_by: dollars` uses the
   item's dollar sales (level times usual price) in place of its unit level,
   so items sold by weight and by pack are counted on one footing.
+- `feedback` (with `rollout`): each period's sales are fed into the next step
+  of the roll-forward, so the size of a promotion's sales can shape the
+  periods after it. In training the real sales are fed for `teacher_rate` of
+  the examples and the model's own forecast for the rest; when forecasting it
+  is always its own.
+- `peak_weight`: each period's loss is multiplied by 1 plus this times how far
+  that period's sales sit from the item's usual level (capped), so peaks and
+  dips count for more than ordinary periods.
 - `cold_start`: a series with no history is forecast by borrowing the state
   and scale of the `cold_neighbours` known series most like it in the same
   store (most `categorical` labels in common), run with its own labels and
@@ -137,7 +145,8 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
                d_model: int, layers: int, heads: int, dropout: float,
                neighbours: str | None = None, n_products: int = 0, conditions: int = 4,
                lift_readout: bool = False, latent: bool = False, readout_dropout: float = 0.0,
-               rollout: bool = False, spread: bool = False, plan_split: bool = False):
+               rollout: bool = False, spread: bool = False, plan_split: bool = False,
+               feedback: bool = False, teacher_rate: float = 0.5):
     import torch
     from torch import nn
 
@@ -181,7 +190,8 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
             # for the negative binomial: how much more spread out sales are than a Poisson count
             self.spread = nn.Parameter(torch.zeros(())) if spread else None
             if rollout:  # the transition: this period's plan moves the state on by one period
-                self.cell = nn.GRUCell(n_fut, d_model)
+                self.cell = nn.GRUCell(n_fut + (1 if feedback else 0), d_model)
+            self.feedback, self.teacher_rate = feedback, teacher_rate
             self.plan_split = plan_split
             if plan_split:
                 # what the plan adds to the state, carried forward on its own. With no
@@ -249,7 +259,39 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
                 out.append(e)
             return world, torch.stack(out, dim=1)
 
-        def forward(self, hist, fut, cats, group=None, fut_off=None, full=False):
+        def roll_feedback(self, state, hist, fut, fut_off, rest, teacher):
+            """The state carried forward with each period's sales fed into the
+            next step, so what a promotion sold can shape the periods after it
+            (shoppers who stocked up buy less). In training the real sales are
+            fed for a share of examples (`teacher_rate`) and the model's own
+            forecast for the rest; when forecasting, always its own. The
+            "nothing planned" path always feeds its own forecast, since what
+            would have sold with nothing planned is never observed."""
+            squash = lambda y: torch.log1p(y.clamp(0, 50))[:, None]
+            read = lambda net, st, plan, h: net(torch.cat([st] + [x[:, h] for x in rest] + [plan], dim=1)).squeeze(-1)
+            last = hist[:, -1, 0].float()  # the latest period's sales relative to the item's level
+            s_on, y_on, s_off, y_off = state, last, state, last
+            use_real = None
+            if teacher is not None and self.training:
+                use_real = torch.rand(len(state), device=state.device) < self.teacher_rate
+            outs, bases, ons = [], [], []
+            for h in range(fut.shape[1]):
+                s_on = self.cell(torch.cat([fut[:, h], squash(y_on).to(fut.dtype)], dim=1), s_on)
+                if self.lift is None:
+                    out = base = read(self.head, s_on, fut[:, h], h).clamp(-10, 10)
+                else:
+                    s_off = self.cell(torch.cat([fut_off[:, h], squash(y_off).to(fut.dtype)], dim=1), s_off)
+                    base = read(self.head, s_off, fut_off[:, h], h).clamp(-10, 10)
+                    out = (base + read(self.lift, s_on, fut[:, h], h) - read(self.lift, s_off, fut_off[:, h], h)).clamp(-10, 10)
+                    y_off = torch.exp(base.float()).detach()
+                y_on = torch.exp(out.float()).detach()
+                if use_real is not None:
+                    real = teacher[:, h].float()
+                    y_on = torch.where(use_real & ~torch.isnan(real), torch.nan_to_num(real), y_on)
+                outs.append(out); bases.append(base); ons.append(s_on)
+            return torch.stack(outs, 1), torch.stack(bases, 1), torch.stack(ons, 1)
+
+        def forward(self, hist, fut, cats, group=None, fut_off=None, full=False, teacher=None):
             """Log of expected sales relative to the item's scale. With `full`,
             also the baseline part, the state and the item-to-item weights."""
             h = fut.shape[1]
@@ -267,6 +309,11 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
             states = lambda plan: self.roll(state, plan) if self.rollout else still
             run = lambda net, plan, st: net(torch.cat([st] + rest + [plan], dim=2)).squeeze(-1)
             world = effect = None
+            if self.feedback:
+                out, base, on = self.roll_feedback(state, hist, fut, fut_off, rest, teacher)
+                if not full:
+                    return out
+                return {"log_mu": out, "base": base, "state": state, "weights": w, "rolled": on, "world": None, "effect": None}
             if self.plan_split:
                 world, effect = self.roll_split(state, fut, fut_off)
                 on = world + effect
@@ -334,6 +381,9 @@ class StateModel(Forecaster):
         scale_unpromoted: bool = False,
         volume_weight: float = 0.0,
         volume_by: str = "units",
+        peak_weight: float = 0.0,
+        feedback: bool = False,
+        teacher_rate: float = 0.5,
         plan_split: bool = False,
         split_weight: float = 0.1,
         state_spread_weight: float = 0.0,
@@ -374,6 +424,10 @@ class StateModel(Forecaster):
         if volume_by not in ("units", "dollars"):
             raise ValueError("volume_by must be 'units' or 'dollars'")
         self.volume_by = volume_by
+        self.peak_weight = peak_weight
+        if feedback and (not rollout or neighbours or plan_split):
+            raise ValueError("feedback needs rollout, and does not work with neighbours or plan_split")
+        self.feedback, self.teacher_rate = feedback, teacher_rate
         if plan_split and not rollout:
             raise ValueError("plan_split needs rollout")
         self.plan_split, self.split_weight = plan_split, split_weight
@@ -399,6 +453,7 @@ class StateModel(Forecaster):
                              neighbours=neighbours, conditions=conditions,
                              lift_readout=lift_readout, latent=latent_weight > 0 or pretrain_steps > 0,
                              readout_dropout=readout_dropout, rollout=rollout, plan_split=plan_split,
+                             feedback=feedback, teacher_rate=teacher_rate,
                              spread=likelihood == "negative_binomial")
         self.steps, self.batch, self.lr = steps, batch, lr
         self.power, self.seed, self.device = tweedie_power, seed, device
@@ -557,7 +612,7 @@ class StateModel(Forecaster):
             n_products=len(self._products), **self.net_args,
         ).to(self._dev)
 
-    def _forward(self, past, future, rows, start, picked=None, full=False, fut_rows=None, cats=None):
+    def _forward(self, past, future, rows, start, picked=None, full=False, fut_rows=None, cats=None, teach=False):
         """Run the network for `rows`. `picked` is the group layout (groups by
         slots, -1 for an empty slot) when rows were drawn as whole groups.
         Returns log expected sales (relative to scale), scale, which periods
@@ -568,7 +623,12 @@ class StateModel(Forecaster):
             on_sale = on_sale & (picked.reshape(-1) >= 0)[:, None]
             group = {"shape": tuple(picked.shape), "product": self._product[rows], "open": on_sale}
         cats = self._cats[rows] if cats is None else cats
-        out = self._net(hist, fut, cats, group if self._net.neighbours else None, fut_off, full)
+        teacher = None
+        import torch
+
+        if teach and self.feedback:  # the real sales of each future period, missing where not on sale
+            teacher = torch.where(on_sale, past["units"][rows[:, None], ahead] / scale, torch.full_like(scale, float("nan")).expand_as(on_sale))
+        out = self._net(hist, fut, cats, group if self._net.neighbours else None, fut_off, full, teacher)
         if full:
             out["plan"] = fut
         return out, scale, on_sale, ahead
@@ -670,7 +730,7 @@ class StateModel(Forecaster):
                         hide = torch.rand(len(rows), generator=gen).to(self._dev) < self.unknown_label_rate
                         cats[hide, self.categorical.index(ITEM)] = 0
                     out, scale, on_sale, ahead = self._forward(
-                        data, {**data, "start": start}, rows, start, picked, full=True, cats=cats
+                        data, {**data, "start": start}, rows, start, picked, full=True, cats=cats, teach=True
                     )
                     latent = 0.0
                     if with_latent:
@@ -725,6 +785,13 @@ class StateModel(Forecaster):
                         r = 1 / torch.nn.functional.softplus(self._net.spread).clamp(min=1e-4)
                         each = -(torch.lgamma(y + r) - torch.lgamma(r) - torch.lgamma(y + 1)
                                  + r * torch.log(r / (r + m)) + y * torch.log(m / (r + m)))
+                    if self.peak_weight:
+                        # periods far from the item's usual level (a promotion peak, the dip
+                        # after it) count for more than ordinary periods, which are most of
+                        # the data and would otherwise set what the model learns
+                        away = (target.float() - 1).abs().clamp(max=5)
+                        pw = 1 + self.peak_weight * away
+                        each = each * (pw / (pw * on_sale).sum().clamp(min=1e-6) * on_sale.sum().clamp(min=1))
                     if self.volume_weight:
                         # bigger sellers count for more, as they do when the loss is taken
                         # on units and not on sales relative to each item's own level; without
