@@ -229,7 +229,7 @@ explanations pass more of these checks also forecast better?
 
 ## Peaks and dips: does the world model see the week after a promotion (Dominick's, six categories, one seed)
 
-Job `configs/jobs/dominicks_peaks_and_dips.yaml`. Development windows, 26-week level. Weeks are split into promoted, the weeks just after a promotion, and ordinary. f/a is forecast over actual (1.0 is right), err is RMSSE. Lower error is better.
+Job `configs/jobs/dominicks_peaks_and_dips.yaml`. Development windows, 8-week level. Weeks are split into promoted, the weeks just after a promotion, and ordinary. f/a is forecast over actual (1.0 is right), err is RMSSE. Lower error is better.
 
 | Category | Model | Overall | Total | Item | Promoted f/a | Promoted err | After promo f/a | After promo err | Ordinary f/a | Ordinary err |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -272,3 +272,37 @@ Findings.
 - Both together is not better than either alone, except frozen entrees (0.377, best of all models).
 - LightGBM stays best overall in cheese, snack crackers and bottled juice. The world model is best or level in analgesics, soft drinks and frozen entrees.
 - One seed. None of these changes becomes a default on this evidence.
+
+## Recent and longer level together, and roll-forward normalisation (Dominick's, development windows, one seed)
+
+Jobs `configs/jobs/dominicks_level_views.yaml` and `configs/jobs/dominicks_roll_norm.yaml`.
+
+Level views: the model is scaled by the 26-week level and is also shown the 8-week and 4-week levels as inputs, so it can learn which to trust per item. Overall score, lower is better.
+
+| Category | LightGBM | World model, 26-week level | World model, 8-week level | World model, both levels |
+|---|---|---|---|---|
+| che | 0.742 | 0.996 | 1.116 | 0.883 |
+| sna | 0.587 | 1.463 | 0.874 | 1.515 |
+| sdr | 0.747 | 0.864 | 0.747 | 1.069 |
+| bjc | 0.992 | 1.229 | 1.100 | 1.159 |
+| ana | 0.702 | 0.666 | 0.679 | 0.648 |
+| fre | 0.417 | 0.382 | 0.393 | 0.399 |
+| cig | 0.534 | 0.690 | 0.643 | 0.440 |
+| tpa | 0.731 | 0.779 | 0.857 | 0.831 |
+| ber | 0.454 | 0.470 | 0.505 | 0.490 |
+| did | 0.344 | 0.393 | 0.406 | 0.388 |
+
+Showing both levels is the best world-model version in 4 of 10 categories (cheese, analgesics, cigarettes, dish detergent) and beats LightGBM in 3 (analgesics, frozen entrees, cigarettes). It does not fix the categories the 8-week level fixed: snack crackers (1.515, promoted weeks forecast at 1.86 times actual) and soft drinks (1.069) stay at the 26-week failure. The model does not learn to switch to the recent level for in-and-out items when the recent level is only an input and the 26-week level still sets the scale.
+
+Roll-forward normalisation (layer normalisation on the rolled state), against the same model without it (8-week level):
+
+| Category | World model | World model + normalisation | With sales feedback | With sales feedback + normalisation |
+|---|---|---|---|---|
+| che | 1.116 | 0.963 | 1.072 | 1.019 |
+| sna | 0.874 | 0.933 | 0.941 | 1.268 |
+| sdr | 0.747 | 0.882 | 1.050 | 1.007 |
+| bjc | 1.100 | 1.026 | 1.046 | 1.049 |
+| ana | 0.679 | 0.790 | 0.838 | 0.849 |
+| fre | 0.393 | 0.396 | 0.411 | 0.394 |
+
+Normalisation helps in two categories, hurts in three and is level in one. It is ruled out as a general fix. With sales feedback and normalisation the snack crackers after-promotion forecast is right (0.97 of actual, error 0.419 against 0.585) and item error is the lowest of any world-model version (0.702), but the category total gets much worse (1.60). The M5 run with normalisation is recorded separately when it finishes.
