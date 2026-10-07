@@ -1,0 +1,85 @@
+# The world model with an 8-week level on the 20 Dominick's categories not in the level-fix job.
+datasets:
+- name: dominicks
+  codes:
+  - oat
+  - ptw
+  - tti
+  - ber
+  - frd
+  - soa
+  - cra
+  - did
+  - tbr
+  - fsf
+  - tna
+  - frj
+  - tpa
+  - lnd
+  - fec
+  - cer
+  - cso
+  - gro
+  - sha
+  - coo
+runs:
+- config: configs/experiments/dominicks_oat_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ptw_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_tti_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ber_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_frd_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_soa_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_cra_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_did_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_tbr_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fsf_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_tna_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_frj_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_tpa_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_lnd_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fec_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_cer_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_cso_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_gro_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sha_dev_world_model_level8.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_coo_dev_world_model_level8.yaml
+  seeds:
+  - 1
