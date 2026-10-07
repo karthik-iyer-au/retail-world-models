@@ -1,0 +1,45 @@
+# Does more history, time-of-year input and dollar weighting fix the holiday and January misses? Four Dominick's categories.
+datasets:
+- name: dominicks
+  codes:
+  - che
+  - ana
+  - sna
+  - sdr
+runs:
+- config: configs/experiments/dominicks_che_dev_world_model_level8_long.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_che_dev_world_model_level8_long_seasonal.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_che_dev_world_model_level8_long_seasonal_dollars.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ana_dev_world_model_level8_long.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ana_dev_world_model_level8_long_seasonal.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ana_dev_world_model_level8_long_seasonal_dollars.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_dev_world_model_level8_long.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_dev_world_model_level8_long_seasonal.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_dev_world_model_level8_long_seasonal_dollars.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_world_model_level8_long.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_world_model_level8_long_seasonal.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_world_model_level8_long_seasonal_dollars.yaml
+  seeds:
+  - 1

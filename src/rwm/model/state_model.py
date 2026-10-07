@@ -85,7 +85,9 @@ in `levers` set to zero.
 - `volume_weight`: each training example's loss is multiplied by the item's
   level raised to this power. 0 treats every item alike. With the Tweedie
   loss, 2 minus the Tweedie power makes the loss the same as one taken on
-  units, which is what LightGBM minimises.
+  units, which is what LightGBM minimises. `volume_by: dollars` uses the
+  item's dollar sales (level times usual price) in place of its unit level,
+  so items sold by weight and by pack are counted on one footing.
 - `cold_start`: a series with no history is forecast by borrowing the state
   and scale of the `cold_neighbours` known series most like it in the same
   store (most `categorical` labels in common), run with its own labels and
@@ -331,6 +333,7 @@ class StateModel(Forecaster):
         scale_window: int | None = None,
         scale_unpromoted: bool = False,
         volume_weight: float = 0.0,
+        volume_by: str = "units",
         plan_split: bool = False,
         split_weight: float = 0.1,
         state_spread_weight: float = 0.0,
@@ -368,6 +371,9 @@ class StateModel(Forecaster):
         self.scale_cap, self.scale_window = scale_cap, scale_window
         self.scale_unpromoted = scale_unpromoted
         self.volume_weight = volume_weight
+        if volume_by not in ("units", "dollars"):
+            raise ValueError("volume_by must be 'units' or 'dollars'")
+        self.volume_by = volume_by
         if plan_split and not rollout:
             raise ValueError("plan_split needs rollout")
         self.plan_split, self.split_weight = plan_split, split_weight
@@ -452,6 +458,7 @@ class StateModel(Forecaster):
         scale = torch.where(scale > 0, scale, torch.ones_like(scale))
         level = torch.nan_to_num(price).sum(1, keepdim=True) / n_known
         level = torch.where(level > 0, level, torch.ones_like(level))
+        self._price_level = level  # the item's usual price, for weighting the loss by dollar sales
 
         # regular price: the highest price in the last `regular_window` periods
         recent = torch.nan_to_num(price[:, -self.regular_window :], nan=float("-inf")).amax(1, keepdim=True)
@@ -722,7 +729,8 @@ class StateModel(Forecaster):
                         # bigger sellers count for more, as they do when the loss is taken
                         # on units and not on sales relative to each item's own level; without
                         # this, small misses on big items add up at the category total
-                        w = scale.float().pow(self.volume_weight)
+                        size = scale.float() * (self._price_level.float() if self.volume_by == "dollars" else 1.0)
+                        w = size.pow(self.volume_weight)
                         each = each * (w / w.mean())
                     loss = loss + (each * on_sale).sum() / on_sale.sum().clamp(min=1)
                     if self.total_weight > 0:

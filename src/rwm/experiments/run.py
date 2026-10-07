@@ -22,7 +22,7 @@ import yaml
 
 from rwm.data import load_dataset
 from rwm.data import manifest as data_manifest
-from rwm.data.calendar import add_calendar
+from rwm.data.calendar import add_calendar, add_season
 from rwm.data.crowding import add_crowding
 from rwm.data.schema import ITEM, DATE, PRICE, SERIES, UNITS
 from rwm.evaluation.hierarchy import rmsse_where, to_matrix, wrmsse
@@ -56,6 +56,8 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
     extras = config["dataset"]
     if "calendar" in extras:
         add_calendar(panel, **extras["calendar"])
+    if extras.get("season"):
+        add_season(panel, **(extras["season"] if isinstance(extras["season"], dict) else {}))
     if "crowding" in extras:
         add_crowding(panel, **extras["crowding"])
     dates = np.sort(panel[DATE].unique())

@@ -74,12 +74,14 @@ def events(country: str, years) -> pd.DataFrame:
     return pd.DataFrame(rows, columns=["date", "event"]).sort_values("date", ignore_index=True)
 
 
-def add_calendar(panel: pd.DataFrame, country: str, anchor: str = "start", period_days: int | None = None) -> list[str]:
+def add_calendar(panel: pd.DataFrame, country: str, anchor: str = "start", period_days: int | None = None, after: int = 0) -> list[str]:
     """Adds two columns per event to `panel`, in place: `ev_<name>` is 1 in
     the period that holds the event, and `pre_<name>` is 1 in the period
     before it (when the shopping for it happens). Returns the new column
     names. `anchor` says whether a row's date is the first or last day of
-    its period; `period_days` defaults to the usual gap between dates."""
+    its period; `period_days` defaults to the usual gap between dates. With
+    `after`, `post<k>_<name>` is 1 in the k-th period after the event, for k
+    up to `after`, so the lull that follows a big event can be told apart."""
     if anchor not in ("start", "end"):
         raise ValueError("anchor must be 'start' or 'end'")
     dates = pd.DatetimeIndex(np.sort(panel[DATE].unique()))
@@ -95,4 +97,22 @@ def add_calendar(panel: pd.DataFrame, country: str, anchor: str = "start", perio
         panel[f"ev_{name}"] = here[lookup].astype(np.int8)
         panel[f"pre_{name}"] = before[lookup].astype(np.int8)
         added += [f"ev_{name}", f"pre_{name}"]
+        for k in range(1, after + 1):
+            later = ((when >= start[:, None] - k * n * day) & (when < start[:, None] - (k - 1) * n * day)).any(1)
+            panel[f"post{k}_{name}"] = later[lookup].astype(np.int8)
+            added.append(f"post{k}_{name}")
+    return added
+
+
+def add_season(panel: pd.DataFrame, harmonics: int = 2) -> list[str]:
+    """Adds the time of year to `panel`, in place, as smooth waves
+    (`season_sin1`, `season_cos1`, ...): a model can then learn a seasonal
+    shape that differs by item or category, which fixed event flags cannot
+    give. Returns the new column names."""
+    angle = panel[DATE].dt.dayofyear.to_numpy() / 365.25 * 2 * np.pi
+    added = []
+    for k in range(1, harmonics + 1):
+        panel[f"season_sin{k}"] = np.sin(k * angle).astype(np.float32)
+        panel[f"season_cos{k}"] = np.cos(k * angle).astype(np.float32)
+        added += [f"season_sin{k}", f"season_cos{k}"]
     return added

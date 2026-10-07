@@ -205,3 +205,12 @@ explanations pass more of these checks also forecast better?
 - Second window (January, after the holidays): our model over-forecasts ordinary weeks by 11%; LightGBM is level. A level from non-promoted weeks, year-ago inputs and the calendar do not fix it.
 - A structural difference from LightGBM: our loss is taken on sales relative to each item's own level, so every item counts alike; LightGBM's loss is on units, so big sellers count for more and category totals are held closer. Weighting our loss by volume (`volume_weight`) with a Tweedie power of 1.1 (LightGBM's) cuts the January over-forecast from 1.068 to 1.044 and the snacks first-window over-forecast from 1.63 to 1.39. It helps, it is not the whole gap, and combined with the 4-week level on snacks it is no better than the 4-week level alone (1.20 against 1.14).
 - Sample results, one seed, 800 steps. Full-data job `dominicks_units_loss` is ready.
+
+## Cheese, continued: seasonal inputs and the world model in January (7 Oct, six-store sample, 800 steps)
+
+- Cheese peaks do not sit on a fixed week relative to the holiday (1993 and 1994: mid December; 1995: mid November and mid to late December; 1996: Thanksgiving week and the week of 26 December). They follow the chain's promotion timing. Event flags alone cannot place them.
+- January window, forecast over actual (LightGBM 0.96 overall, 1.00 on ordinary weeks): lift 1.07, world-model rollout 1.08, calendar with after-event flags 1.06, smooth time-of-year input 1.09. None closes it at this training length. The over-forecast lasts all eight weeks, so it is a seasonal level (cheese sells more in November and December), not a one-week dip.
+- The world-model rollout was tested on the January window and gives no gain there.
+- Volume weighting now has a dollar form (`volume_by: dollars`) so items sold by weight and by pack are on one footing.
+- Open: whether full-length training on all years with these inputs learns the seasonal level. Job `dominicks_seasonal_long` tests that.
+- Related platform, not our method: stable-worldmodel (arXiv 2605.21800), a library and benchmark for world models in control and video, with tests under controlled changes in the environment. Our "unusual plan" tests are the same idea applied to retail.

@@ -44,3 +44,29 @@ def test_crowding_counts_the_other_items_on_the_lever():
     np.testing.assert_allclose(first["display_share"], [1 / 3, 1 / 3, 2 / 3, 2 / 3])
     np.testing.assert_allclose(first["display_share_within"], [1, 1, 0, 0])
     assert (p.loc[p["d"] == 2, "display_share"] == 0).all()
+
+
+def test_calendar_can_flag_the_periods_after_an_event():
+    import pandas as pd
+    from rwm.data.calendar import add_calendar
+    from rwm.data.schema import DATE
+
+    panel = pd.DataFrame({DATE: pd.date_range("2021-12-06", periods=8, freq="7D")})
+    added = add_calendar(panel, "US", "start", 7, after=2)
+    assert "post2_christmas" in added
+    xmas = panel.index[panel["ev_christmas"] == 1][0]
+    assert panel.loc[xmas + 1, "post1_christmas"] == 1 and panel.loc[xmas + 2, "post2_christmas"] == 1
+    assert panel["post1_christmas"].sum() == 1 and panel.loc[xmas, "post1_christmas"] == 0
+
+
+def test_season_columns_repeat_each_year():
+    import numpy as np
+    import pandas as pd
+    from rwm.data.calendar import add_season
+    from rwm.data.schema import DATE
+
+    panel = pd.DataFrame({DATE: pd.to_datetime(["2020-03-01", "2021-03-01", "2021-09-01"])})
+    added = add_season(panel, harmonics=1)
+    assert added == ["season_sin1", "season_cos1"]
+    assert np.isclose(panel.loc[0, "season_sin1"], panel.loc[1, "season_sin1"], atol=0.03)
+    assert not np.isclose(panel.loc[1, "season_sin1"], panel.loc[2, "season_sin1"], atol=0.03)

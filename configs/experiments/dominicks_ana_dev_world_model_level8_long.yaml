@@ -1,0 +1,42 @@
+# Dominick's category ana: world model, 8-week level, all years of history used for training.
+dataset:
+  name: dominicks
+  params:
+    categories:
+    - ana
+evaluation:
+  conditions:
+  - promo
+  holdout_periods: 8
+  horizon: 8
+  n_origins: 2
+  scale_lag: 1
+  weight_window: 13
+model:
+  name: state_model
+  params:
+    batch: 512
+    categorical:
+    - item_id
+    - store_id
+    d_model: 64
+    extra:
+    - promo
+    - cost
+    heads: 4
+    history: 26
+    horizon: 8
+    layers: 2
+    levers:
+    - promo
+    lift_readout: true
+    lr: 0.001
+    regular_price: true
+    rollout: true
+    scale_window: 8
+    seed: 0
+    steps: 6000
+    train_periods: 330
+    validation_periods: 8
+name: dominicks_ana_dev_world_model_level8_long
+seed: 0
