@@ -1,6 +1,6 @@
 # Figure and table style for the papers
 
-Reference: the author's MolSanity paper (public repo Kar488/molsanity, `paper/`) and the M-JEPA paper. The M-JEPA repo holds the code and reviewer letters but not the manuscript or its figures, so its visual style still needs the paper itself. Style only is taken; no text or code is copied.
+Reference: the author's MolSanity paper (public repo Kar488/molsanity, `paper/`) and the M-JEPA manuscript (JCIM revision 12). MolSanity sets the figure style; M-JEPA adds figure types. Style only is taken; no text or code is copied.
 
 ## Layout
 - Two-column, 10pt. One overview diagram in the method section; most figures in Results; supplementary material separate.
@@ -48,3 +48,18 @@ Accuracy diagnostics:
 - one item in one store followed through;
 - the items that miss most;
 - every model on the same test, and where two models disagree.
+
+## Figure types from the M-JEPA manuscript
+- Overview in three columns: input, what the method learns, how it is used downstream.
+- Staged pipeline with an explicit leakage barrier between selection and final test. Ours: development windows, then the locked final 8 weeks.
+- Box plots with jittered points per run, faceted by condition, n under each box, shaded bands marking regimes.
+- Faceted scatter of a setting against error, colour for one factor and marker for another.
+- Small-multiple reliability diagrams, one panel per task, diagonal as perfect, shaded gap. Ours: forecast against actual by band, per category.
+- Trade-off scatter, one point per task, quadrants labelled. Ours: accuracy gain against plan-response gain per category.
+
+## Illustrations of the data (chart types only, redrawn on public data)
+- The data cube: item x store x week, with one cell opened up to show the row (sales, price, promotion, display, feature, cost and the rest). In the paper this is the panel; for merchants, the data cube. Not "prism".
+- Small pictures, one per data rule: values as of their week, every week present, why a week was low, items linked.
+- One item in one store over the whole history: weekly sales coloured regular against promotion, discount below, display or feature below that.
+- The item-week as a graph: one item linked to its stores, its offer, its substitutes, the season and its history, line width for units.
+- Messages to state to sales: what each link says this week, the learned state, the forecast against actual. This is the world model's own picture.
