@@ -1,6 +1,6 @@
 # Figure and table style for the papers
 
-Reference: the author's MolSanity paper (public repo Kar488/molsanity, `paper/`). The M-JEPA repo holds no manuscript or figure style, so it is not used. Style only is taken; no text or code is copied.
+Reference: the author's MolSanity paper (public repo Kar488/molsanity, `paper/`) and the M-JEPA paper. The M-JEPA repo holds the code and reviewer letters but not the manuscript or its figures, so its visual style still needs the paper itself. Style only is taken; no text or code is copied.
 
 ## Layout
 - Two-column, 10pt. One overview diagram in the method section; most figures in Results; supplementary material separate.
@@ -29,19 +29,22 @@ Reference: the author's MolSanity paper (public repo Kar488/molsanity, `paper/`)
 - Fixed colours: LightGBM, world model, lift model, plain model, blends.
 - Likely figures: overview of state, plan and roll-forward; accuracy by dataset and category (dot plot with seed ranges); promoted / after-promotion / ordinary forecast-over-actual; plan A vs plan B; new items; per-category wins.
 
-## Presenting results to merchants (figure and slide conventions)
+## Chart ideas from example material
 
-Representation conventions only. No data, names, numbers, branding or colours are taken from any retailer's material.
+Chart types only, drawn in the MolSanity style above. No layout, data, names, numbers, branding or colours are taken from the examples.
 
-- A title that states the finding with its number, under a short kicker line naming the scope ("Dominick's, six categories: promoted weeks").
-- Every chart carries two short notes underneath: "How to read it" (what a row, bar or band is) and "What it does not show" (the limits of the data or method).
-- A footnote line on every figure with the period, the unit of count and how the counts are made.
-- Headline numbers as a row of tiles (value, label, comparison underneath) above the chart they summarise.
-- Chart forms that suit plan questions:
-  - dot plot of measured against assumed, with the measured band, one row per deal type;
-  - diverging bars for gains and losses by group, the group size in brackets;
-  - a waterfall from last year's plan to the new plan, one step per change;
-  - a calendar strip, one row per item and one cell per week, the cell showing deal depth and coloured by display and circular;
-  - small multiples of weekly series with the scored weeks shaded.
-- One worked example per figure: a single item followed through, in a boxed note.
-- Plain merchant language, sentence-case labels, no axis that hides a non-zero start without saying so.
+Plan and promotion charts:
+- dot plot of measured lift against the lift a model assumes, with the measured band, one row per deal type;
+- diverging bars for gains and losses by item group, group size in brackets;
+- waterfall from a baseline plan to a changed plan, one step per change;
+- calendar strip: one row per item, one cell per week, cell shading for deal depth and display or circular;
+- small multiples of weekly series with the scored weeks shaded.
+
+Accuracy diagnostics:
+- forecast against actual at each level of the hierarchy (item-store, item, store, category);
+- over or under forecast by how fast the item sells (velocity bands);
+- units missed by store and week (heatmap);
+- category by week over the whole history, actual against the model, with the promotion plan by week underneath (items on deal, share of units on deal, average depth);
+- one item in one store followed through;
+- the items that miss most;
+- every model on the same test, and where two models disagree.
