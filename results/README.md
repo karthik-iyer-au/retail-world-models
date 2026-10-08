@@ -531,3 +531,34 @@ Roll-forward normalisation (layer normalisation on the rolled state), against th
 Normalisation helps in two categories, hurts in three and is level in one. It is ruled out as a general fix. With sales feedback and normalisation the snack crackers after-promotion forecast is right (0.97 of actual, error 0.419 against 0.585) and item error is the lowest of any world-model version (0.702), but the category total gets much worse (1.60). The M5 run with normalisation is recorded separately when it finishes.
 
 M5 practice window, world model with roll-forward normalisation (`m5_validation_world_model_roll_norm`, one seed, only change is `roll_norm: true`): overall 0.646, total 0.510, item 0.835, forecast/actual 0.962. Without it the world model scored 0.692 (total 0.600, item 0.833), the lift model 0.683 and LightGBM 0.715. The gain is in the totals, not the item level. Normalisation helps on the 28-step daily roll-forward and not on the 8-step weekly one on Dominick's. One seed; needs more seeds before it is claimed.
+
+## Item roles (Dominick's, six categories, development windows, one seed)
+
+Job `configs/jobs/dominicks_item_roles.yaml`. Each item gets one role from its own sales before the test windows (`src/rwm/data/roles.py`): new line, in-and-out, volume driver (top 5% of items by units that sell on deal), long tail (slowest items making the last 5% of units), hi-lo (half or more of units on deal), promo responsive (at least twice ordinary sales on deal), core. Volume driver is not called a KVI: a KVI list rests on shopper price perception and basket data, which these datasets do not have.
+
+Overall score, lower is better. Baselines are the peaks-and-dips rows above (world model with an 8-week level).
+
+| Category | LightGBM | LightGBM + role | World model | World model + role | World model + role picks the level |
+|---|---|---|---|---|---|
+| Cheese | 0.742 | 0.754 | 1.116 | 1.107 | 1.074 |
+| Snack crackers | 0.587 | 0.577 | 0.874 | 1.163 | 2.422 |
+| Soft drinks | 0.747 | 0.734 | 0.747 | 0.919 | 1.046 |
+| Bottled juice | 0.992 | 0.987 | 1.100 | 1.062 | 1.140 |
+| Analgesics | 0.701 | 0.694 | 0.679 | 0.639 | 0.655 |
+| Frozen entrees | 0.417 | 0.423 | 0.393 | 0.411 | 0.415 |
+
+Forecast over actual in promoted weeks and the weeks just after:
+
+| Category | World model promoted | + role | + role picks level | World model after promo | + role | + role picks level |
+|---|---|---|---|---|---|---|
+| Cheese | 1.207 | 1.072 | 1.079 | 1.035 | 1.070 | 1.062 |
+| Snack crackers | 1.195 | 1.438 | 2.419 | 1.329 | 1.436 | 1.188 |
+| Soft drinks | 1.010 | 0.977 | 1.102 | 1.316 | 1.255 | 1.333 |
+
+Findings.
+
+- The role label does almost nothing for LightGBM: within 0.013 of the plain run in every category, better in four. LightGBM already reads the same information from its sales and price history.
+- For the world model the label moves results by more than LightGBM's but in both directions: best world-model result so far on analgesics (0.639) and better on bottled juice, worse on snack crackers and soft drinks. Single-seed world-model runs have varied by up to about 0.07 on analgesics, so only the snack crackers and soft drinks losses are clearly larger than run-to-run variation.
+- Letting the role pick the level does not fix snack crackers or soft drinks. Snack crackers collapses (2.422): item-level error improves (0.725 against 0.843) but promoted weeks are forecast at 2.4 times actual and the category total breaks (3.45). This is the same pattern as sales feedback with normalisation: better items, a broken total in promoted weeks.
+- The after-promotion dip in soft drinks (about 1.3 times actual) is not fixed by any role variant.
+- No role variant becomes a default. The role table itself is kept for reporting results by item type.
