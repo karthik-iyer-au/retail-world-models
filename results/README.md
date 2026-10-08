@@ -661,3 +661,22 @@ Findings.
 - With normalisation the world model beats LightGBM on the three-seed mean in analgesics (0.696 against 0.701) and frozen entrees (0.404 against 0.419). LightGBM stays ahead in cheese, snack crackers, soft drinks and bottled juice; the gaps are 0.28, 0.24, 0.07 and 0.06.
 - After-promotion weeks are still over-forecast in snack crackers and soft drinks (1.15 and 1.13): the dip after a deal is under-learned there, which neither switching nor normalisation addresses.
 - Next: averaging fits with normalisation on, which combines the two changes that each reduce seed noise.
+
+## Lift model on M5, three seeds
+
+Job `configs/jobs/m5_lift_seeds.yaml` (commit 7e5c0f4): seeds 2 and 3 of `m5_validation_lift`, added to seed 1. Overall WRMSSE on the M5 practice window, lower is better.
+
+| Model | Seeds | Mean | Range |
+|---|---|---|---|
+| LightGBM | 1 | 0.715 | |
+| Lift model | 3 | 0.713 | 0.683 to 0.734 |
+| World model | 3 | 0.707 | 0.680 to 0.750 |
+| World model + normalised roll-forward | 3 | **0.656** | 0.646 to 0.675 |
+
+Lift model by seed: 0.683, 0.721, 0.734 (category total 0.641 and 0.664 for seeds 2 and 3; item-store 0.830 and 0.833).
+
+Findings.
+
+- The lift model's first seed (0.683) was a good draw. Over three seeds it ties LightGBM (0.713 against 0.715) and is level with the plain world model.
+- The world model with the normalised roll-forward is the only model clearly ahead on M5: 0.057 better than the lift model on the mean, and its worst seed (0.675) beats the lift model's mean.
+- Normalisation is now the M5 default for the world model in the paper comparison.
