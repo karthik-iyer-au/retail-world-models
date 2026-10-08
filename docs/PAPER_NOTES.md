@@ -370,6 +370,6 @@ Job `configs/jobs/dominicks_peaks_seeds.yaml` adds seeds 2 and 3 to the peaks-an
 
 Findings.
 
-- LightGBM is steady across seeds (ranges within 0.03). The world model is not: its range is 0.07 to 0.38 within a category (soft drinks 0.747 to 1.123, cheese 0.981 to 1.168).
+- LightGBM is steady across seeds (ranges within 0.03). The world model is not: its range within a category is 0.04 to 0.38 (soft drinks 0.747 to 1.123, cheese 0.981 to 1.168).
 - On the mean, LightGBM is ahead in five of six categories. The world model is ahead only on frozen entrees (0.406 against 0.419) and level on analgesics (0.711 against 0.701).
 - The world model's single-seed wins on analgesics and soft drinks earlier were within its seed spread. Run-to-run instability is the main weakness on Dominick's, and the case for seed averaging or a steadier model (roll-forward normalisation fixed this on M5) is strong.
