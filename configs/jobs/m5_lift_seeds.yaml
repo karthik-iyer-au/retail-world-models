@@ -1,0 +1,8 @@
+# Seeds 2 and 3 for the lift model on the M5 practice window, so the M5 comparison (LightGBM, lift model, world model with and without roll-forward normalisation) rests on three seeds for every learned model.
+datasets:
+- name: m5
+runs:
+- config: configs/experiments/m5_validation_lift.yaml
+  seeds:
+  - 2
+  - 3
