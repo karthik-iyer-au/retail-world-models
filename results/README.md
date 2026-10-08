@@ -638,3 +638,26 @@ Findings.
 - It is not uniformly better: bottled juice gets worse (1.170) and soft drinks is slightly worse than the single-fit mean (0.816 against 0.789). One averaged run per category is itself one draw, so these two differences are within the spread seen earlier.
 - LightGBM stays ahead on cheese, snack crackers, soft drinks and bottled juice. The gap is smallest in soft drinks (0.06) and largest in cheese (0.17).
 - Item-level error with averaging is the best of any world-model version in cheese (0.696) and snack crackers (0.700); the remaining gap to LightGBM in those categories is mostly in the category totals.
+
+## Brand switching with the normalised roll-forward (Dominick's, six categories, three seeds)
+
+Job `configs/jobs/dominicks_switching_roll_norm.yaml` (commit 73c6686): the world model with brand switching and layer normalisation in the roll-forward (`roll_norm`), seeds 1 to 3. Overall score, three-seed mean with the range across seeds in brackets; lower is better.
+
+| Category | LightGBM | World model | World model + switching | World model + switching + normalised roll-forward |
+|---|---|---|---|---|
+| Cheese | 0.749 | 1.088 (0.981 to 1.167) | 1.111 (1.005 to 1.198) | 1.028 (0.963 to 1.067) |
+| Snack crackers | 0.586 | 0.813 (0.751 to 0.874) | 0.752 (0.727 to 0.776) | 0.830 (0.713 to 0.979) |
+| Soft drinks | 0.759 | 0.902 (0.747 to 1.123) | 0.789 (0.711 to 0.895) | 0.827 (0.749 to 0.887) |
+| Bottled juice | 0.987 | 1.074 (1.033 to 1.100) | 1.066 (1.009 to 1.101) | 1.047 (1.020 to 1.080) |
+| Analgesics | 0.701 | 0.711 (0.655 to 0.800) | 0.707 (0.661 to 0.778) | **0.696** (0.661 to 0.760) |
+| Frozen entrees | 0.419 | 0.406 (0.391 to 0.434) | 0.416 (0.398 to 0.434) | **0.404** (0.386 to 0.419) |
+
+Three-seed means of the other measures with normalisation: category total 1.275, 0.850, 0.991, 1.175, 0.774, 0.349; item 0.732, 0.770, 0.647, 0.903, 0.707, 0.494; promoted-week forecast over actual 1.08, 1.05, 0.92, 0.96, 0.92, 0.83 (cheese to frozen entrees).
+
+Findings.
+
+- Normalisation narrows the spread across seeds in five of six categories, as it did on M5: cheese 0.19 to 0.10, soft drinks 0.18 to 0.14, bottled juice 0.09 to 0.06, analgesics 0.12 to 0.10, frozen entrees 0.04 to 0.03 (against switching alone). Snack crackers is the exception: seed 3 drifts to 0.979 (total 1.12, promoted and after-promotion weeks over-forecast by 16 and 20 per cent), so its range widens from 0.05 to 0.27.
+- It improves the mean over switching alone in four categories (cheese by 0.08, bottled juice by 0.02, analgesics and frozen entrees by 0.01) and worsens it in snack crackers (by 0.08, all from seed 3) and soft drinks (by 0.04).
+- With normalisation the world model beats LightGBM on the three-seed mean in analgesics (0.696 against 0.701) and frozen entrees (0.404 against 0.419). LightGBM stays ahead in cheese, snack crackers, soft drinks and bottled juice; the gaps are 0.28, 0.24, 0.07 and 0.06.
+- After-promotion weeks are still over-forecast in snack crackers and soft drinks (1.15 and 1.13): the dip after a deal is under-learned there, which neither switching nor normalisation addresses.
+- Next: averaging fits with normalisation on, which combines the two changes that each reduce seed noise.
