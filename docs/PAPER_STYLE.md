@@ -28,3 +28,20 @@ Reference: the author's MolSanity paper (public repo Kar488/molsanity, `paper/`)
 ## For this paper
 - Fixed colours: LightGBM, world model, lift model, plain model, blends.
 - Likely figures: overview of state, plan and roll-forward; accuracy by dataset and category (dot plot with seed ranges); promoted / after-promotion / ordinary forecast-over-actual; plan A vs plan B; new items; per-category wins.
+
+## Presenting results to merchants (figure and slide conventions)
+
+Representation conventions only. No data, names, numbers, branding or colours are taken from any retailer's material.
+
+- A title that states the finding with its number, under a short kicker line naming the scope ("Dominick's, six categories: promoted weeks").
+- Every chart carries two short notes underneath: "How to read it" (what a row, bar or band is) and "What it does not show" (the limits of the data or method).
+- A footnote line on every figure with the period, the unit of count and how the counts are made.
+- Headline numbers as a row of tiles (value, label, comparison underneath) above the chart they summarise.
+- Chart forms that suit plan questions:
+  - dot plot of measured against assumed, with the measured band, one row per deal type;
+  - diverging bars for gains and losses by group, the group size in brackets;
+  - a waterfall from last year's plan to the new plan, one step per change;
+  - a calendar strip, one row per item and one cell per week, the cell showing deal depth and coloured by display and circular;
+  - small multiples of weekly series with the scored weeks shaded.
+- One worked example per figure: a single item followed through, in a boxed note.
+- Plain merchant language, sentence-case labels, no axis that hides a non-zero start without saying so.
