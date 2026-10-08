@@ -1,0 +1,41 @@
+# Brand switching with roll-forward normalisation, three seeds, six Dominick's categories.
+datasets:
+- name: dominicks
+  codes:
+  - che
+  - sna
+  - sdr
+  - bjc
+  - ana
+  - fre
+runs:
+- config: configs/experiments/dominicks_che_dev_peaks_world_model_switching_roll_norm.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/dominicks_sna_dev_peaks_world_model_switching_roll_norm.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/dominicks_sdr_dev_peaks_world_model_switching_roll_norm.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/dominicks_bjc_dev_peaks_world_model_switching_roll_norm.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/dominicks_ana_dev_peaks_world_model_switching_roll_norm.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/dominicks_fre_dev_peaks_world_model_switching_roll_norm.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
