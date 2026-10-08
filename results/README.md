@@ -577,3 +577,22 @@ Findings.
 References: lift model 0.683 and LightGBM 0.715 (one seed each in this table's setting; LightGBM is deterministic).
 
 The gain holds on three seeds: 0.656 against 0.707, and the worst normalised seed (0.675) is better than the best plain seed (0.680). All of it is in the totals; item-by-store error is unchanged (0.834 against 0.831). Normalisation also makes the model steadier across seeds (range 0.029 against 0.070). It is the best M5 result so far and ahead of LightGBM by 0.059. On Dominick's (8 weekly steps) it did not help; on M5 (28 daily steps) it does, which fits the reading that it stops the rolled state drifting over a long roll.
+
+## LightGBM against the world model on three seeds (Dominick's, six categories, development windows)
+
+Job `configs/jobs/dominicks_peaks_seeds.yaml` adds seeds 2 and 3 to the peaks-and-dips runs (world model with an 8-week level). Overall score, mean of three seeds (range), lower is better.
+
+| Category | LightGBM | World model | Seeds where the world model is better |
+|---|---|---|---|
+| Cheese | 0.749 (0.742 to 0.759) | 1.088 (0.981 to 1.167) | 0 of 3 |
+| Snack crackers | 0.586 (0.581 to 0.590) | 0.813 (0.751 to 0.874) | 0 of 3 |
+| Soft drinks | 0.759 (0.747 to 0.775) | 0.902 (0.747 to 1.123) | 1 of 3 |
+| Bottled juice | 0.987 (0.979 to 0.992) | 1.074 (1.033 to 1.100) | 0 of 3 |
+| Analgesics | 0.701 (0.689 to 0.712) | 0.711 (0.655 to 0.800) | 2 of 3 |
+| Frozen entrees | 0.419 (0.417 to 0.421) | 0.406 (0.391 to 0.434) | 2 of 3 |
+
+Findings.
+
+- LightGBM is steady across seeds (ranges within 0.03). The world model is not: its range is 0.07 to 0.38 within a category (soft drinks 0.747 to 1.123, cheese 0.981 to 1.168).
+- On the mean, LightGBM is ahead in five of six categories. The world model is ahead only on frozen entrees (0.406 against 0.419) and level on analgesics (0.711 against 0.701).
+- The world model's single-seed wins on analgesics and soft drinks earlier were within its seed spread. Run-to-run instability is the main weakness on Dominick's, and the case for seed averaging or a steadier model (roll-forward normalisation fixed this on M5) is strong.
