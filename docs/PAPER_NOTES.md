@@ -395,3 +395,23 @@ Findings.
 - The learned share is itself a finding and reads as merchants would expect: in snack crackers most of a promotion's lift is taken from other crackers (the share of new sales is 0.0 to 0.66), while in bottled juice, analgesics and frozen entrees the lift is mostly new to the category (about 0.9). Where the share comes out at 1.0 the step changes nothing, which is a built-in check (frozen entrees and bottled juice seed 3 match the world model exactly).
 - Elsewhere it is level or slightly worse (cheese +0.02, frozen entrees +0.01): one share per run is too blunt where the switching is small.
 - LightGBM is still ahead on the mean in five of six categories; switching closes the soft drinks gap to 0.03 and leaves the instability across seeds as the main weakness. A three-seed average inside each run is queued next.
+
+## Averaging three fits inside each run (Dominick's, six categories)
+
+Job `configs/jobs/dominicks_switching_avg3.yaml`: the world model with brand switching, each run the average of three fits with different seeds (one run per category). Overall score, lower is better. The other columns are three-seed means of single fits.
+
+| Category | LightGBM | World model | World model + switching | World model + switching, average of 3 fits |
+|---|---|---|---|---|
+| Cheese | 0.749 | 1.088 | 1.111 | 0.921 |
+| Snack crackers | 0.586 | 0.813 | 0.752 | 0.722 |
+| Soft drinks | 0.759 | 0.902 | 0.789 | 0.816 |
+| Bottled juice | 0.987 | 1.074 | 1.066 | 1.170 |
+| Analgesics | 0.701 | 0.711 | 0.707 | **0.651** |
+| Frozen entrees | 0.419 | 0.406 | 0.416 | **0.411** |
+
+Findings.
+
+- Averaging three fits gives the best world-model result so far on cheese (0.921), snack crackers (0.722) and analgesics (0.651, ahead of LightGBM by 0.050). It beats LightGBM in two categories (analgesics, frozen entrees).
+- It is not uniformly better: bottled juice gets worse (1.170) and soft drinks is slightly worse than the single-fit mean (0.816 against 0.789). One averaged run per category is itself one draw, so these two differences are within the spread seen earlier.
+- LightGBM stays ahead on cheese, snack crackers, soft drinks and bottled juice. The gap is smallest in soft drinks (0.06) and largest in cheese (0.17).
+- Item-level error with averaging is the best of any world-model version in cheese (0.696) and snack crackers (0.700); the remaining gap to LightGBM in those categories is mostly in the category totals.
