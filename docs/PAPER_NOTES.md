@@ -339,3 +339,18 @@ Findings.
 - Letting the role pick the level does not fix snack crackers or soft drinks. Snack crackers collapses (2.422): item-level error improves (0.725 against 0.843) but promoted weeks are forecast at 2.4 times actual and the category total breaks (3.45). This is the same pattern as sales feedback with normalisation: better items, a broken total in promoted weeks.
 - The after-promotion dip in soft drinks (about 1.3 times actual) is not fixed by any role variant.
 - No role variant becomes a default. The role table itself is kept for reporting results by item type.
+
+## M5 practice window: roll-forward normalisation, three seeds
+
+| Run | Seed 1 | Seed 2 | Seed 3 | Mean | Range |
+|---|---|---|---|---|---|
+| World model + normalisation, overall | 0.646 | 0.675 | 0.647 | 0.656 | 0.646 to 0.675 |
+| World model, overall | 0.692 | 0.680 | 0.750 | 0.707 | 0.680 to 0.750 |
+| World model + normalisation, total | 0.510 | 0.577 | 0.518 | 0.535 | |
+| World model, total | 0.600 | 0.579 | 0.722 | 0.634 | |
+| World model + normalisation, item by store | 0.835 | 0.833 | 0.835 | 0.834 | |
+| World model, item by store | 0.833 | 0.830 | 0.830 | 0.831 | |
+
+References: lift model 0.683 and LightGBM 0.715 (one seed each in this table's setting; LightGBM is deterministic).
+
+The gain holds on three seeds: 0.656 against 0.707, and the worst normalised seed (0.675) is better than the best plain seed (0.680). All of it is in the totals; item-by-store error is unchanged (0.834 against 0.831). Normalisation also makes the model steadier across seeds (range 0.029 against 0.070). It is the best M5 result so far and ahead of LightGBM by 0.059. On Dominick's (8 weekly steps) it did not help; on M5 (28 daily steps) it does, which fits the reading that it stops the rolled state drifting over a long roll.
