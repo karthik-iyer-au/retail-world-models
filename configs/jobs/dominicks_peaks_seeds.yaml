@@ -1,0 +1,59 @@
+# Seeds 2 and 3 for LightGBM and the world model (8-week level) on the six peaks-and-dips categories, so the comparison rests on three seeds.
+datasets:
+- name: dominicks
+  codes:
+  - che
+  - sna
+  - sdr
+  - bjc
+  - ana
+  - fre
+runs:
+- config: configs/experiments/dominicks_che_dev_peaks_lightgbm.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_che_dev_peaks_world_model.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_sna_dev_peaks_lightgbm.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_sna_dev_peaks_world_model.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_sdr_dev_peaks_lightgbm.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_sdr_dev_peaks_world_model.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_bjc_dev_peaks_lightgbm.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_bjc_dev_peaks_world_model.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_ana_dev_peaks_lightgbm.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_ana_dev_peaks_world_model.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_fre_dev_peaks_lightgbm.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_fre_dev_peaks_world_model.yaml
+  seeds:
+  - 2
+  - 3
