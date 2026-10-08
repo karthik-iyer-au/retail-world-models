@@ -373,3 +373,25 @@ Findings.
 - LightGBM is steady across seeds (ranges within 0.03). The world model is not: its range within a category is 0.04 to 0.38 (soft drinks 0.747 to 1.123, cheese 0.981 to 1.168).
 - On the mean, LightGBM is ahead in five of six categories. The world model is ahead only on frozen entrees (0.406 against 0.419) and level on analgesics (0.711 against 0.701).
 - The world model's single-seed wins on analgesics and soft drinks earlier were within its seed spread. Run-to-run instability is the main weakness on Dominick's, and the case for seed averaging or a steadier model (roll-forward normalisation fixed this on M5) is strong.
+
+## Brand switching between items in a store-week (Dominick's, six categories, three seeds)
+
+Job `configs/jobs/dominicks_switching.yaml`. The world model (8-week level) is run as before; in each store and week its item forecasts are rescaled so that the store's total for the category is the baseline total plus a learned share of the summed promotion lift. The share is learned on the validation weeks (one per run and origin); the rest of each item's lift is treated as taken from other items. Same seeds as the world model rows, so each pair differs only in the switching step.
+
+Overall score, mean of three seeds (range); learned share of lift that is new sales, range over runs.
+
+| Category | LightGBM | World model | World model + switching | Seeds where switching is better | Share of lift that is new sales |
+|---|---|---|---|---|---|
+| Cheese | 0.749 | 1.088 | 1.111 (1.005 to 1.198) | 0 of 3 | 0.70 to 1.00 |
+| Snack crackers | 0.586 | 0.813 | 0.752 (0.727 to 0.776) | 3 of 3 | 0.00 to 0.66 |
+| Soft drinks | 0.759 | 0.902 | 0.789 (0.711 to 0.895) | 3 of 3 | 0.64 to 1.00 |
+| Bottled juice | 0.987 | 1.074 | 1.066 (1.009 to 1.101) | 1 of 3, 1 level | 0.69 to 1.00 |
+| Analgesics | 0.701 | 0.711 | 0.707 (0.661 to 0.778) | 1 of 3 | 0.71 to 1.00 |
+| Frozen entrees | 0.419 | 0.406 | 0.416 (0.398 to 0.434) | 0 of 3, 1 level | 0.68 to 1.00 |
+
+Findings.
+
+- Switching fixes what it was built for. In snack crackers and soft drinks, the two categories where promoted weeks broke the total, it is better on every seed: snack crackers 0.813 to 0.752, soft drinks 0.902 to 0.789. Promoted-week forecast over actual in snack crackers falls from 1.20 to 0.98 on seed 1, and the item-level error improves too (0.843 to 0.803), so it does not trade item accuracy for the total.
+- The learned share is itself a finding and reads as merchants would expect: in snack crackers most of a promotion's lift is taken from other crackers (the share of new sales is 0.0 to 0.66), while in bottled juice, analgesics and frozen entrees the lift is mostly new to the category (about 0.9). Where the share comes out at 1.0 the step changes nothing, which is a built-in check (frozen entrees and bottled juice seed 3 match the world model exactly).
+- Elsewhere it is level or slightly worse (cheese +0.02, frozen entrees +0.01): one share per run is too blunt where the switching is small.
+- LightGBM is still ahead on the mean in five of six categories; switching closes the soft drinks gap to 0.03 and leaves the instability across seeds as the main weakness. A three-seed average inside each run is queued next.
