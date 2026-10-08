@@ -1,0 +1,41 @@
+# Brand switching between items in a store-week, against the peaks-and-dips rows. Three seeds.
+datasets:
+- name: dominicks
+  codes:
+  - che
+  - sna
+  - sdr
+  - bjc
+  - ana
+  - fre
+runs:
+- config: configs/experiments/dominicks_che_dev_peaks_world_model_switching.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/dominicks_sna_dev_peaks_world_model_switching.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/dominicks_sdr_dev_peaks_world_model_switching.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/dominicks_bjc_dev_peaks_world_model_switching.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/dominicks_ana_dev_peaks_world_model_switching.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/dominicks_fre_dev_peaks_world_model_switching.yaml
+  seeds:
+  - 1
+  - 2
+  - 3

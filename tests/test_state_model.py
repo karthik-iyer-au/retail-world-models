@@ -142,3 +142,31 @@ def test_level_options_change_only_the_level(split):
         fut = m._tensors(future, fut_dates, with_units=False)
         levels.append(float(m._window(m._past, {**fut, "start": torch.zeros_like(rows)}, rows, start)[2]))
     assert levels[1] < levels[0]
+
+
+def test_switching_keeps_group_totals_to_the_learned_share():
+    import numpy as np
+    import pytest
+
+    pytest.importorskip("torch")
+    from rwm.data.synthetic import load_synthetic
+    from rwm.model.state_model import StateModel
+
+    panel = load_synthetic(n_items=6, n_periods=80).panel
+    dates = np.sort(panel["date"].unique())
+    train, future = panel[panel["date"] <= dates[-5]], panel[panel["date"] > dates[-5]]
+    m = StateModel(horizon=4, history=12, categorical=["item_id", "store_id"], extra=["promo"], levers=["promo"],
+                   d_model=16, layers=1, heads=2, steps=30, batch=32, regular_price=True, lift_readout=True,
+                   validation_periods=4, switching=["store_id"]).fit(train)
+    assert 0.0 <= m.new_share <= 1.0
+    f, b = m.predict(future), m._predict(future, "base")
+    m.new_share = 1.0  # all lift is new sales: forecasts unchanged
+    with_one, group = m.predict(future), m._group
+    m._group = None
+    assert np.allclose(with_one, m.predict(future))
+    m._group = group
+    m.new_share = 0.0  # all lift is switching: each store's total equals its baseline total
+    zero = future.assign(f=m.predict(future), b=b).groupby(["store_id", "date"])[["f", "b"]].sum()
+    assert np.allclose(zero["f"], zero["b"], rtol=1e-6)
+    with pytest.raises(ValueError):
+        StateModel(horizon=4, switching=["store_id"])

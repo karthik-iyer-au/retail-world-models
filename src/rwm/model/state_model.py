@@ -83,6 +83,19 @@ in `levers` set to zero.
   `{label: item_role, windows: {in_and_out: 4, promotion_driven: 8}}`. Items
   with a listed value of the label use that many latest periods; the rest
   use `scale_window` (or the whole history window when that is not set).
+- `switching`: a list of label columns (for example `[store_id]`) that
+  make a group of items competing for the same shoppers. Items forecast
+  one by one each add their own promotion lift, but in a store-week where
+  many items are promoted much of each item's lift is taken from the
+  others, so the group total rises by far less than the sum. With this set,
+  the model learns on the validation periods one number per run, the share
+  of the summed forecast lift that is new sales for the group (the rest is
+  switching), and in each group and period rescales the item forecasts so
+  the group total is the baseline total plus that share of the lift. Each
+  item keeps its share of the group as forecast, so a promoted item still
+  gains against the rest. This follows market-share (attraction) models,
+  where an item's sales are the category's sales times its share. Needs
+  `lift_readout` and `validation_periods`.
 - `level_views`: a list of period counts (for example `[4, 8]`). The item is
   still scaled by its usual level, and the model is also told how its level
   over each of those latest spans compares with it, so it can learn per item
@@ -394,6 +407,7 @@ class StateModel(Forecaster):
         scale_unpromoted: bool = False,
         level_views: list[int] | None = None,
         scale_window_by: dict | None = None,
+        switching: list[str] | None = None,
         volume_weight: float = 0.0,
         volume_by: str = "units",
         peak_weight: float = 0.0,
@@ -438,6 +452,9 @@ class StateModel(Forecaster):
         self.scale_unpromoted = scale_unpromoted
         self.level_views = list(level_views or [])
         self.scale_window_by, self._row_window = scale_window_by, None
+        self.switching, self._group, self.new_share = list(switching or []), None, None
+        if self.switching and not (lift_readout and validation_periods):
+            raise ValueError("switching needs lift_readout and validation_periods")
         self.volume_weight = volume_weight
         if volume_by not in ("units", "dollars"):
             raise ValueError("volume_by must be 'units' or 'dollars'")
@@ -696,6 +713,9 @@ class StateModel(Forecaster):
             picked = first[self.scale_window_by["label"]].astype(str).map(self.scale_window_by["windows"])
             picked = picked.fillna(self.scale_window or L).clip(upper=L).to_numpy(dtype=np.int64).copy()
             self._row_window = torch.as_tensor(picked, device=self._dev, dtype=torch.long)
+        if self.switching:
+            key = first[self.switching].astype(str).agg("|".join, axis=1)
+            self._group = torch.as_tensor(pd.factorize(key)[0], device=self._dev, dtype=torch.long)
 
         self._stores = first[STORE].astype(str).to_numpy()
         self._products = pd.Index(first[ITEM].astype(str).unique()).sort_values()
@@ -883,6 +903,9 @@ class StateModel(Forecaster):
         if best["weights"] is not None:  # go back to the point that did best on the validation periods
             self._net.load_state_dict(best["weights"])
         self.best_step = best["step"]
+        if self.switching:
+            self.new_share = self._learn_new_share(data, t - V)
+            print(f"share of forecast lift that is new sales for the group: {self.new_share:.3f}", flush=True)
 
         tail = slice(max(0, t - self._keep), t)
         self._past = {
@@ -919,6 +942,41 @@ class StateModel(Forecaster):
             scores.append(level(sums(f), sums(y)))
         return float(np.mean(scores))
 
+    def _learn_new_share(self, data, origin: int) -> float:
+        """The share of the summed forecast lift in a group and period that
+        shows up as extra group sales on the validation periods: least
+        squares of (actual - baseline) on (forecast - baseline) over group
+        totals, kept between 0 and 1."""
+        import torch
+
+        n, H = len(self._names), self.horizon
+        on, base, y = (torch.zeros(n, H, device=self._dev) for _ in range(3))
+        self._net.eval()
+        with torch.no_grad():
+            for rows, picked in self._batches():
+                start = torch.full_like(rows, origin)
+                got, scale, on_sale, ahead = self._forward(data, {**data, "start": start}, rows, start, picked, full=True)
+                real = on_sale if picked is None else on_sale & (picked.reshape(-1) >= 0)[:, None]
+                on[rows] += torch.exp(got["log_mu"].float()) * scale * real
+                base[rows] += torch.exp(got["base"].float()) * scale * real
+                y[rows] += data["units"][rows[:, None], ahead] * real
+        sums = lambda a: torch.zeros(int(self._group.max()) + 1, H, device=self._dev).index_add_(0, self._group, a)
+        lift, gain = sums(on) - sums(base), sums(y) - sums(base)
+        share = (lift * gain).sum() / (lift * lift).sum().clamp(min=1e-9)
+        return float(share.clamp(0.0, 1.0))
+
+    def _switch(self, on: np.ndarray, base: np.ndarray) -> np.ndarray:
+        """Rescale item forecasts so each group's total in each period is the
+        baseline total plus `new_share` of the summed lift."""
+        g = self._group.cpu().numpy()
+        k = int(g.max()) + 1
+        on_sum, base_sum = np.zeros((k, on.shape[1])), np.zeros((k, on.shape[1]))
+        np.add.at(on_sum, g, on)
+        np.add.at(base_sum, g, base)
+        target = base_sum + self.new_share * (on_sum - base_sum)
+        factor = np.divide(target, on_sum, out=np.ones_like(on_sum), where=on_sum > 0)
+        return on * factor[g]
+
     def _future(self, future: pd.DataFrame):
         fut_dates = np.sort(future[DATE].unique())
         h = len(fut_dates)
@@ -946,6 +1004,8 @@ class StateModel(Forecaster):
 
         fut_dates, fut = self._future(future)
         out = np.zeros((len(self._names), self.horizon), dtype=np.float64)
+        switch = key == "log_mu" and self.new_share is not None and self._group is not None
+        base = np.zeros_like(out) if switch else None
         self._net.eval()
         with torch.no_grad():
             for rows, picked in self._batches():
@@ -955,6 +1015,10 @@ class StateModel(Forecaster):
                 )
                 real = torch.ones_like(rows, dtype=torch.bool) if picked is None else picked.reshape(-1) >= 0
                 out[rows[real].cpu().numpy()] = (torch.exp(got[key]) * scale)[real].cpu().numpy()
+                if switch:
+                    base[rows[real].cpu().numpy()] = (torch.exp(got["base"]) * scale)[real].cpu().numpy()
+        if switch:
+            out = self._switch(out, base)
         r = series_rows(future[SERIES], self._names)
         c = pd.Index(fut_dates).get_indexer(future[DATE])
         pred = np.where(r >= 0, out[np.clip(r, 0, None), c], 0.0)
@@ -1059,6 +1123,8 @@ class StateModel(Forecaster):
                 "stores": list(self._stores),
                 "product": cpu(self._product),
                 "members": None if self._members is None else cpu(self._members),
+                "group": None if self._group is None else cpu(self._group),
+                "new_share": self.new_share,
                 "past": {
                     k: [cpu(e) for e in v] if isinstance(v, list) else cpu(v)
                     for k, v in self._past.items()
@@ -1086,6 +1152,8 @@ class StateModel(Forecaster):
         model._stores = np.array(saved.get("stores", []), dtype=object)
         model._product = saved["product"].to(model._dev)
         model._members = None if saved["members"] is None else saved["members"].to(model._dev)
+        model._group = None if saved.get("group") is None else saved["group"].to(model._dev)
+        model.new_share = saved.get("new_share")
         model._net = model._new_net()
         model._net.load_state_dict(saved["weights"])
         return model
