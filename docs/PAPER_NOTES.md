@@ -522,3 +522,9 @@ Chosen on the development windows only; the configs are copies of the developmen
 Jobs: `final_m5.yaml`, `final_dominicks.yaml`, `final_frat.yaml`, `final_m5_lift.yaml`, run in that order after the averaged M5 practice run.
 
 The Frat benchmarks (seasonal naive, average of last 8 weeks, LightGBM) were scored once on windows that included the final 8 weeks before the window was locked (see "How data is split"); the final LightGBM here uses the development settings, which were not tuned on that score.
+
+## Terms for the two models (agreed 9 October 2026)
+
+- Lift model: a direct multi-horizon forecaster, conditioned on the plan. One encoded state, and each future week forecast from it with that week's plan; no transition between weeks.
+- World model: an action-conditioned latent dynamics model (latent rollout). A learned transition, next state = f(state, this week's plan), applied week by week, with baseline and lift read out from each state. It is autoregressive in the latent state, not in sales: forecast sales are never fed back as inputs.
+- Both are trained on what sold (the consequence) as the target; the comparison between them measures what the transition adds.
