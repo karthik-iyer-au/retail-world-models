@@ -699,6 +699,6 @@ Category total by window (first, second): cheese 1.33, 1.10; snack crackers 0.93
 Findings.
 
 - Analgesics reaches 0.625, the best result on any Dominick's category so far and 0.076 ahead of LightGBM. Soft drinks reaches 0.770, the best world-model result there and 0.011 behind LightGBM.
-- Snack crackers fails in the second window: promoted weeks are forecast at 2.6 times actual and the category total error is 4.20, while its item-store error (0.61) is the best of any version. The failure is in the summed lift, not the item forecasts: the switching share learned on the validation weeks does not hold for the second window's promotions. This is the same over-forecast of promoted weeks seen on seed 3 with normalisation alone.
+- Snack crackers fails in the second window: promoted weeks are forecast at 2.6 times actual and the category total error is 4.20, while its item-store error (0.61) is the best of any version. The error is in the category total, not the item forecasts, so it sits in how promotion lift adds up across items in the store; the learned switching share for this run has not yet been checked. This is the same over-forecast of promoted weeks seen on seed 3 with normalisation alone.
 - Cheese and bottled juice do not improve on the best earlier versions.
 - One run per category is one draw; seeds 2 and 3 of this setup are queued next to separate the change from the noise.
