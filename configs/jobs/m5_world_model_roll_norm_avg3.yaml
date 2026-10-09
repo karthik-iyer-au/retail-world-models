@@ -1,0 +1,7 @@
+# The averaged world model with normalisation on the M5 practice window, seed 1 (three fits, about 4.5 h on a T4).
+datasets:
+- name: m5
+runs:
+- config: configs/experiments/m5_validation_world_model_roll_norm_avg3.yaml
+  seeds:
+  - 1

@@ -1,0 +1,40 @@
+# The world model on the M5 practice window with normalisation in the roll-forward, as the average of three fits with different seeds (averaging steadied Dominick's).
+name: m5_validation_world_model_roll_norm_avg3
+seed: 0
+dataset:
+  name: m5
+model:
+  name: seed_average
+  params:
+    model: state_model
+    members: 3
+    seed: 0
+    params:
+      horizon: 28
+      history: 112
+      train_periods: 730
+      categorical:
+      - item_id
+      - dept_id
+      - cat_id
+      - store_id
+      - state_id
+      extra:
+      - event
+      - snap
+      d_model: 128
+      layers: 3
+      heads: 4
+      steps: 30000
+      batch: 1024
+      lr: 0.001
+      mixed_precision: true
+      regular_price: true
+      lift_readout: true
+      rollout: true
+      roll_norm: true
+evaluation:
+  horizon: 28
+  n_origins: 1
+  scale_lag: 1
+  weight_window: 28
