@@ -1,0 +1,6 @@
+# Final test on the official M5 test period: the lift model, three seeds (run last).
+datasets:
+- name: m5
+runs:
+- config: configs/experiments/m5_test_lift.yaml
+  seeds: [1, 2, 3]

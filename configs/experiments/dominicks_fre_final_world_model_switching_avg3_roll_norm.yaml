@@ -1,0 +1,53 @@
+# Final test: Dominick's fre, the last 8 weeks, world model with brand switching and normalisation, average of three fits. Settings copied unchanged from the development config dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm.yaml;
+# fixed before the run and not tuned on this window. Reported once.
+name: dominicks_fre_final_world_model_switching_avg3_roll_norm
+seed: 0
+dataset:
+  name: dominicks
+  params:
+    categories:
+    - fre
+model:
+  name: seed_average
+  params:
+    model: state_model
+    members: 3
+    seed: 0
+    params:
+      horizon: 8
+      history: 26
+      train_periods: 156
+      categorical:
+      - item_id
+      - store_id
+      extra:
+      - promo
+      - cost
+      levers:
+      - promo
+      d_model: 64
+      layers: 2
+      heads: 4
+      steps: 6000
+      batch: 512
+      lr: 0.001
+      regular_price: true
+      lift_readout: true
+      rollout: true
+      validation_periods: 8
+      scale_window: 8
+      switching:
+      - store_id
+      roll_norm: true
+evaluation:
+  horizon: 8
+  n_origins: 1
+  holdout_periods: 0
+  scale_lag: 1
+  weight_window: 13
+  conditions:
+  - promo
+  after_promo:
+    levers:
+    - promo
+    periods: 2

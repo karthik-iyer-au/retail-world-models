@@ -1,0 +1,13 @@
+# Final test on the last 8 weeks of Breakfast at the Frat, three seeds each: LightGBM,
+# the lift model and the world model. Settings were fixed on the development windows.
+# The data file is taken from a Drive folder because dunnhumby files have no public download.
+datasets:
+- name: breakfast_at_the_frat
+  from: /content/drive/MyDrive/retail-world-model/data
+runs:
+- config: configs/experiments/frat_final_lightgbm.yaml
+  seeds: [1, 2, 3]
+- config: configs/experiments/frat_final_lift.yaml
+  seeds: [1, 2, 3]
+- config: configs/experiments/frat_final_world_model.yaml
+  seeds: [1, 2, 3]

@@ -1,0 +1,31 @@
+# Final test on the last 8 weeks of Dominick's, six categories, three seeds each:
+# LightGBM and the world model with brand switching, normalisation and three averaged fits.
+# Settings were fixed on the development windows before this run.
+datasets:
+- name: dominicks
+  codes: [che, sna, sdr, bjc, ana, fre]
+runs:
+- config: configs/experiments/dominicks_che_final_lightgbm.yaml
+  seeds: [1, 2, 3]
+- config: configs/experiments/dominicks_che_final_world_model_switching_avg3_roll_norm.yaml
+  seeds: [1, 2, 3]
+- config: configs/experiments/dominicks_sna_final_lightgbm.yaml
+  seeds: [1, 2, 3]
+- config: configs/experiments/dominicks_sna_final_world_model_switching_avg3_roll_norm.yaml
+  seeds: [1, 2, 3]
+- config: configs/experiments/dominicks_sdr_final_lightgbm.yaml
+  seeds: [1, 2, 3]
+- config: configs/experiments/dominicks_sdr_final_world_model_switching_avg3_roll_norm.yaml
+  seeds: [1, 2, 3]
+- config: configs/experiments/dominicks_bjc_final_lightgbm.yaml
+  seeds: [1, 2, 3]
+- config: configs/experiments/dominicks_bjc_final_world_model_switching_avg3_roll_norm.yaml
+  seeds: [1, 2, 3]
+- config: configs/experiments/dominicks_ana_final_lightgbm.yaml
+  seeds: [1, 2, 3]
+- config: configs/experiments/dominicks_ana_final_world_model_switching_avg3_roll_norm.yaml
+  seeds: [1, 2, 3]
+- config: configs/experiments/dominicks_fre_final_lightgbm.yaml
+  seeds: [1, 2, 3]
+- config: configs/experiments/dominicks_fre_final_world_model_switching_avg3_roll_norm.yaml
+  seeds: [1, 2, 3]

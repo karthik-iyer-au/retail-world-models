@@ -1,0 +1,10 @@
+# Final test on the official M5 test period (23 May to 19 June 2016): the world model with
+# normalisation and LightGBM, three seeds each (the earlier LightGBM test run, seed 0, is kept as it is).
+# Settings were fixed on the practice window before this run.
+datasets:
+- name: m5
+runs:
+- config: configs/experiments/m5_test_world_model_roll_norm.yaml
+  seeds: [1, 2, 3]
+- config: configs/experiments/m5_test_lightgbm.yaml
+  seeds: [1, 2, 3]
