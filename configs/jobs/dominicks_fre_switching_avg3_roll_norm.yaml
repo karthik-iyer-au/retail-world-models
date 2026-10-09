@@ -1,0 +1,9 @@
+# Frozen entrees, seed 1 of the averaged world model with brand switching and normalised roll-forward (re-run after the runtime stopped before it finished).
+datasets:
+- name: dominicks
+  codes:
+  - fre
+runs:
+- config: configs/experiments/dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm.yaml
+  seeds:
+  - 1
