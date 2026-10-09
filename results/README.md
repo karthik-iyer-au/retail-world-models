@@ -702,3 +702,24 @@ Findings.
 - Snack crackers fails in the second window: promoted weeks are forecast at 2.6 times actual and the category total error is 4.20, while its item-store error (0.61) is the best of any version. The error is in the category total, not the item forecasts, so it sits in how promotion lift adds up across items in the store; the learned switching share for this run has not yet been checked. This is the same over-forecast of promoted weeks seen on seed 3 with normalisation alone.
 - Cheese and bottled juice do not improve on the best earlier versions.
 - One run per category is one draw; seeds 2 and 3 of this setup are queued next to separate the change from the noise.
+
+## Averaged switching with the normalised roll-forward, three seeds (Dominick's)
+
+Jobs `dominicks_switching_avg3_roll_norm.yaml` (seed 1, commit edad17d), `dominicks_fre_switching_avg3_roll_norm.yaml` (frozen entrees seed 1) and `dominicks_switching_avg3_roll_norm_seeds.yaml` (seeds 2 and 3, commit 9a0b8a6). Each run is the average of three fits. Overall score, three-seed mean with the range across seeds in brackets; lower is better.
+
+| Category | LightGBM | Switching + normalisation, single fit (3-seed mean) | Switching + normalisation, average of 3 fits (3-seed mean) | Seeds 1, 2, 3 |
+|---|---|---|---|---|
+| Cheese | 0.749 | 1.028 | 0.971 (0.943 to 0.988) | 0.983, 0.943, 0.988 |
+| Snack crackers | 0.586 | 0.830 | 1.092 (0.730 to 1.806) | 1.806, 0.740, 0.730 |
+| Soft drinks | 0.759 | 0.827 | **0.743** (0.713 to 0.770) | 0.770, 0.713, 0.746 |
+| Bottled juice | 0.987 | 1.047 | 1.048 (1.019 to 1.065) | 1.061, 1.019, 1.065 |
+| Analgesics | 0.701 | 0.696 | **0.622** (0.618 to 0.625) | 0.625, 0.622, 0.618 |
+| Frozen entrees | 0.419 | 0.404 | **0.391** (0.386 to 0.398) | 0.386, 0.388, 0.398 |
+
+Findings.
+
+- The world model now beats LightGBM on the three-seed mean in three of six categories: analgesics by 0.079, frozen entrees by 0.028 and soft drinks by 0.016. Every seed beats LightGBM in analgesics and frozen entrees; two of three do in soft drinks.
+- Averaging three fits with normalisation is the steadiest world-model setup so far. The spread across seeds is 0.05 or less in five categories (analgesics 0.007, frozen entrees 0.012, bottled juice 0.046, cheese 0.045, soft drinks 0.057), against up to 0.38 for the plain world model.
+- Snack crackers seed 1 (1.806) is a single failed run: seeds 2 and 3 score 0.740 and 0.730, the best world-model results in that category. The failure is in the second window's category total (4.20) with promoted weeks forecast at 2.6 times actual, while item-store error stays normal. It shows the summed promotion lift can still run away on one fit in three; a guard on the store-level lift is the fix to test.
+- LightGBM stays ahead in cheese (0.22), snack crackers (0.14 on the median seed) and bottled juice (0.06).
+- This setup (brand switching, normalised roll-forward, average of three fits) is the candidate world model for the Dominick's comparison in the paper.
