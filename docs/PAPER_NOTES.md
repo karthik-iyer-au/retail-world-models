@@ -527,4 +527,5 @@ The Frat benchmarks (seasonal naive, average of last 8 weeks, LightGBM) were sco
 
 - Lift model: a direct multi-horizon forecaster, conditioned on the plan. One encoded state, and each future week forecast from it with that week's plan; no transition between weeks.
 - World model: an action-conditioned latent dynamics model (latent rollout). A learned transition, next state = f(state, this week's plan), applied week by week, with baseline and lift read out from each state. It is autoregressive in the latent state, not in sales: forecast sales are never fed back as inputs.
-- Both are trained on what sold (the consequence) as the target; the comparison between them measures what the transition adds.
+- The forecast is the predicted consequence of the plan (baseline plus the lift the plan adds); what sold is the observed consequence, and training compares the two. The world model's predicted consequence also includes the next state, so a plan's effect carries into later weeks; the lift model's stops at the week it is in.
+- The loop, in these terms: state + action (this week's plan) -> predicted consequence (sales, and for the world model the next state) -> compared with the observed consequence. The comparison between the two models measures what carrying the consequence forward adds.
