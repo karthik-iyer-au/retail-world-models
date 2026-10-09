@@ -14,6 +14,7 @@ runs only.
 """
 import argparse
 import json
+import shutil
 from pathlib import Path
 
 import numpy as np
@@ -29,9 +30,10 @@ from rwm.data.schema import ITEM, DATE, PRICE, SERIES, UNITS
 from rwm.evaluation.hierarchy import rmsse_where, to_matrix, wrmsse
 from rwm.evaluation.splits import rolling_origins
 from rwm.forecaster import build_model
+from rwm.utils import resume
 from rwm.utils.hashing import sha256_file
 from rwm.utils.paths import DATA_RAW, RESULTS
-from rwm.utils.run_manifest import build_manifest
+from rwm.utils.run_manifest import _git, build_manifest
 from rwm.utils.seed import set_seed
 
 
@@ -103,11 +105,20 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
         n_held = max(1, int(round(ev["new_items"]["share"] * len(products))))
         held = set(rng.choice(products, n_held, replace=False))
         is_new = panel.drop_duplicates(SERIES).set_index(SERIES)[ITEM].astype(str).isin(held).reindex(names).to_numpy()
+    # Training saves partway through, so a run cut short goes on from there when
+    # started again. Kept per config and per version of the code folder (not
+    # the whole commit, so a results-only commit does not lose them); removed once the run is saved.
+    # Runs from uncommitted code save nothing partway, since their code cannot be matched later.
+    partial = None
+    if manifest["git"]["commit"] and not manifest["git"]["dirty"]:
+        code = _git("rev-parse", "HEAD:src")
+        partial = out_root / "_partial" / f"{config['name']}_{manifest['config_sha256'][:8]}_{code[:8]}"
     for sp in reversed(splits):
         test = panel[panel[DATE].isin(sp.test_dates)].reset_index(drop=True)
         panel = train = panel[panel[DATE] <= sp.train_end]
         model = build_model(config["model"]["name"], **config["model"].get("params", {}))
-        model.fit(train if held is None else train[~train[ITEM].astype(str).isin(held)])
+        with resume.scope(partial, f"origin{sp.origin}"):
+            model.fit(train if held is None else train[~train[ITEM].astype(str).isin(held)])
         # Unusual plans: lever mixes that made up a small share of training rows.
         rare_mix = None
         if ev.get("rare_plans"):
@@ -269,6 +280,8 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
     (run_dir / "manifest.json").write_text(json.dumps(manifest, indent=2, default=str) + "\n")
     (run_dir / "metrics.json").write_text(json.dumps(metrics, indent=2) + "\n")
     pd.concat(forecasts).to_csv(run_dir / "forecasts.csv", index=False)
+    if partial is not None:
+        shutil.rmtree(partial, ignore_errors=True)
     return run_dir
 
 

@@ -151,6 +151,7 @@ import pandas as pd
 
 from rwm.data.schema import DATE, ITEM, PRICE, SERIES, STORE, UNITS
 from rwm.forecaster import Forecaster, register_model
+from rwm.utils import resume
 from rwm.utils.frames import frame_to_matrix, series_rows
 
 
@@ -767,8 +768,38 @@ class StateModel(Forecaster):
             sched = torch.optim.lr_scheduler.LambdaLR(opt, shape)
             scaler = torch.amp.GradScaler("cuda", enabled=amp)
             with_latent = latent_weight > 0
+            every = max(1, steps // 20)
+            first = 0
+            saved = resume.load(label, self._dev)
+            if saved is not None and saved["steps"] == steps:
+                # a run cut short goes on from its last save
+                self._net.load_state_dict(saved["net"])
+                opt.load_state_dict(saved["opt"])
+                sched.load_state_dict(saved["sched"])
+                scaler.load_state_dict(saved["scaler"])
+                if slow is not None and saved["slow"] is not None:
+                    slow.load_state_dict(saved["slow"])
+                best.update(saved["best"])
+                gen.set_state(saved["gen"])
+                torch.set_rng_state(saved["rng"])
+                if saved["cuda_rng"] is not None and torch.cuda.is_available():
+                    torch.cuda.set_rng_state_all(saved["cuda_rng"])
+                self.loss_log[:], self.validation_log[:] = saved["loss_log"], saved["validation_log"]
+                first = saved["step"]
+                print(f"{label}: going on from the save at step {first} of {steps}", flush=True)
+
+            def keep(step_done):
+                resume.save({
+                    "steps": steps, "step": step_done,
+                    "net": self._net.state_dict(), "opt": opt.state_dict(), "sched": sched.state_dict(),
+                    "scaler": scaler.state_dict(), "slow": slow.state_dict() if slow is not None else None,
+                    "best": dict(best), "gen": gen.get_state(), "rng": torch.get_rng_state(),
+                    "cuda_rng": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None,
+                    "loss_log": list(self.loss_log), "validation_log": list(self.validation_log),
+                }, label)
+
             self._net.train()
-            for step in range(steps):
+            for step in range(first, steps):
                 if self._members is None:
                     picked = None
                     rows = torch.randint(0, n, (self.batch,), generator=gen).to(self._dev)
@@ -891,8 +922,10 @@ class StateModel(Forecaster):
                                     weights={k: v.detach().clone() for k, v in self._net.state_dict().items()})
                     print(f"validation after step {step + 1}: {score:.4f} (best {best['score']:.4f} at {best['step']})", flush=True)
                     self._net.train()
-                if (step + 1) % max(1, steps // 20) == 0:
+                if (step + 1) % every == 0:
                     print(f"{label} step {step + 1} of {steps}, loss {loss.item():.4f}", flush=True)
+                if (step + 1) % every == 0 or step == steps - 1:
+                    keep(step + 1)
 
         # optional first stretch: learn the state from the latent loss alone
         train(self.pretrain_steps, False, 1.0, 1.0, "pretraining")

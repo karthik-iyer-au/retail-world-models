@@ -14,7 +14,9 @@ A job file lists the datasets to fetch and the runs to make:
 
 Every run is strict: committed code and data that matches its checksums.
 A run already saved in the output folder for exactly the same config is kept
-and not repeated, so a job that was cut short can be started again. The job
+and not repeated, so a job that was cut short can be started again. A run cut
+off partway goes on from its last training save (kept in <out>/_partial, about
+every 5% of training steps, for models that save; removed once the run is saved). The job
 ends by printing one summary line per run.
 """
 import argparse

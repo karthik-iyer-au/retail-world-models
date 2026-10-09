@@ -18,6 +18,7 @@ import numpy as np
 import pandas as pd
 
 from rwm.forecaster import _MODELS, Forecaster, build_model, register_model
+from rwm.utils import resume
 
 
 @register_model("seed_average")
@@ -33,8 +34,9 @@ class SeedAverage(Forecaster):
         ]
 
     def fit(self, train: pd.DataFrame) -> "SeedAverage":
-        for m in self.models:
-            m.fit(train)
+        for i, m in enumerate(self.models):
+            with resume.scope(None, f"member{i}"):  # each member saves its own training
+                m.fit(train)
         return self
 
     def predict(self, future: pd.DataFrame) -> np.ndarray:
