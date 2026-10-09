@@ -529,3 +529,20 @@ The Frat benchmarks (seasonal naive, average of last 8 weeks, LightGBM) were sco
 - World model: an action-conditioned latent dynamics model (latent rollout). A learned transition, next state = f(state, this week's plan), applied week by week, with baseline and lift read out from each state. It is autoregressive in the latent state, not in sales: forecast sales are never fed back as inputs.
 - The forecast is the predicted consequence of the plan (baseline plus the lift the plan adds); what sold is the observed consequence, and training compares the two. The world model's predicted consequence also includes the next state, so a plan's effect carries into later weeks; the lift model's stops at the week it is in.
 - The loop, in these terms: state + action (this week's plan) -> predicted consequence (sales, and for the world model the next state) -> compared with the observed consequence. The comparison between the two models measures what carrying the consequence forward adds.
+
+## Averaging three fits on M5 (practice window, seed 1)
+
+Job `configs/jobs/m5_world_model_roll_norm_avg3.yaml` (commit 8c10468): the world model with normalised roll-forward, the average of three fits in one run. Wall clock about 5 h on one T4 (three fits of about 80 minutes each, plus data loading and scoring).
+
+| Model | Overall | Category total | Item by store |
+|---|---|---|---|
+| LightGBM | 0.715 | | |
+| Lift model, 3-seed mean | 0.713 | | |
+| World model, 3-seed mean | 0.707 | | |
+| World model + normalisation, single fits, 3-seed mean (range) | **0.656** (0.646 to 0.675) | | |
+| World model + normalisation, average of 3 fits | 0.665 | 0.574 | 0.828 |
+
+Findings.
+
+- Averaging three fits does not improve the world model on M5: 0.665 sits inside the range of single fits and above their mean. On M5 the single fits are already steady (range 0.03), so there is little seed noise for averaging to remove, unlike Dominick's.
+- The M5 final test therefore uses single fits of the world model with normalisation, as fixed in the final-test plan before this result was read.

@@ -723,3 +723,20 @@ Findings.
 - Snack crackers seed 1 (1.806) is a single failed run: seeds 2 and 3 score 0.740 and 0.730, the best world-model results in that category. The failure is in the second window's category total (4.20) with promoted weeks forecast at 2.6 times actual, while item-store error stays normal. It shows the summed promotion lift can still run away on one fit in three; a guard on the store-level lift is the fix to test.
 - LightGBM stays ahead in cheese (0.22), snack crackers (0.14 on the median seed) and bottled juice (0.06).
 - This setup (brand switching, normalised roll-forward, average of three fits) is the candidate world model for the Dominick's comparison in the paper.
+
+## Averaging three fits on M5 (practice window, seed 1)
+
+Job `configs/jobs/m5_world_model_roll_norm_avg3.yaml` (commit 8c10468): the world model with normalised roll-forward, the average of three fits in one run. Wall clock about 5 h on one T4 (three fits of about 80 minutes each, plus data loading and scoring).
+
+| Model | Overall | Category total | Item by store |
+|---|---|---|---|
+| LightGBM | 0.715 | | |
+| Lift model, 3-seed mean | 0.713 | | |
+| World model, 3-seed mean | 0.707 | | |
+| World model + normalisation, single fits, 3-seed mean (range) | **0.656** (0.646 to 0.675) | | |
+| World model + normalisation, average of 3 fits | 0.665 | 0.574 | 0.828 |
+
+Findings.
+
+- Averaging three fits does not improve the world model on M5: 0.665 sits inside the range of single fits and above their mean. On M5 the single fits are already steady (range 0.03), so there is little seed noise for averaging to remove, unlike Dominick's.
+- The M5 final test therefore uses single fits of the world model with normalisation, as fixed in the final-test plan before this result was read.
