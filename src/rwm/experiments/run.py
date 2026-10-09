@@ -15,6 +15,8 @@ runs only.
 import argparse
 import json
 import shutil
+import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
@@ -46,6 +48,7 @@ def _data_files(ds, strict: bool) -> list[dict]:
 
 
 def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
+    started = time.time()
     set_seed(config["seed"])
     ds = load_dataset(config["dataset"]["name"], **config["dataset"].get("params", {}))
     manifest = build_manifest(config, _data_files(ds, strict))
@@ -86,7 +89,7 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
 
     splits = rolling_origins(dates, ev["horizon"], ev["n_origins"], ev.get("step"))
     window = ev.get("weight_window", 28)
-    forecasts, per_split, fitted = [], [], []
+    forecasts, per_split, fitted, timing = [], [], [], []
     # Latest window first. After each window the table is cut back to that
     # window's training rows, so only one copy of the data is held at a time.
     ds.panel = None
@@ -117,8 +120,12 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
         test = panel[panel[DATE].isin(sp.test_dates)].reset_index(drop=True)
         panel = train = panel[panel[DATE] <= sp.train_end]
         model = build_model(config["model"]["name"], **config["model"].get("params", {}))
+        fit_started = time.time()
         with resume.scope(partial, f"origin{sp.origin}"):
             model.fit(train if held is None else train[~train[ITEM].astype(str).isin(held)])
+        fit_seconds = time.time() - fit_started
+        # wall-clock seconds per window, kept in the manifest (not the scores) so scores stay
+        # identical between repeats; a fit that went on from a partway save counts only the time after the restart
         # Unusual plans: lever mixes that made up a small share of training rows.
         rare_mix = None
         if ev.get("rare_plans"):
@@ -139,7 +146,10 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
             )
         del train
         fitted.append((sp.origin, model))
+        predict_started = time.time()
         pred = np.asarray(model.predict(test.drop(columns=[UNITS])), dtype=float)
+        predict_seconds = time.time() - predict_started
+        timing.append({"origin": sp.origin, "fit_seconds": round(fit_seconds, 1), "predict_seconds": round(predict_seconds, 1)})
         if len(pred) != len(test):
             raise RuntimeError("model returned the wrong number of forecasts")
         out = test[[SERIES, DATE, UNITS]].copy()
@@ -277,6 +287,9 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
             model.save(path)
             checkpoints.append({"file": path.name, "bytes": path.stat().st_size, "sha256": sha256_file(path)})
     metrics["checkpoints"] = checkpoints
+    manifest["finished_utc"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    manifest["wall_seconds"] = round(time.time() - started, 1)
+    manifest["timing"] = sorted(timing, key=lambda w: w["origin"])
     (run_dir / "manifest.json").write_text(json.dumps(manifest, indent=2, default=str) + "\n")
     (run_dir / "metrics.json").write_text(json.dumps(metrics, indent=2) + "\n")
     pd.concat(forecasts).to_csv(run_dir / "forecasts.csv", index=False)

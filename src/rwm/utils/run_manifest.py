@@ -3,7 +3,11 @@
 A result is only reportable if its manifest shows: a clean git commit, the
 exact config, the checksums of the data it read, the seed, and the installed
 package versions. With those five things the run can be repeated exactly.
+The manifest also records the machine (processor, cores, memory, GPU and its
+memory, CUDA version) and, once the run ends, how long each window took to fit
+and forecast, so run times can be reported.
 """
+import os
 import platform
 import subprocess
 import sys
@@ -50,6 +54,41 @@ def compute_device() -> str:
     return "cpu"
 
 
+def hardware() -> dict:
+    """The machine the run used: processor, cores, memory and GPU."""
+    info = {"cpu": platform.processor() or platform.machine(), "logical_cores": os.cpu_count()}
+    try:
+        with open("/proc/cpuinfo") as f:
+            for line in f:
+                if line.startswith("model name"):
+                    info["cpu"] = line.split(":", 1)[1].strip()
+                    break
+    except OSError:
+        pass
+    try:
+        with open("/proc/meminfo") as f:
+            for line in f:
+                if line.startswith("MemTotal"):
+                    info["memory_gb"] = round(int(line.split()[1]) / 1024**2, 1)
+                    break
+    except OSError:
+        pass
+    try:
+        import torch
+
+        info["torch"] = torch.__version__
+        if torch.cuda.is_available():
+            props = torch.cuda.get_device_properties(0)
+            info["gpu"] = props.name
+            info["gpu_memory_gb"] = round(props.total_memory / 1024**3, 1)
+            info["gpu_count"] = torch.cuda.device_count()
+            info["cuda"] = torch.version.cuda
+            info["cudnn"] = torch.backends.cudnn.version()
+    except ImportError:
+        pass
+    return info
+
+
 def build_manifest(config: dict, data_files: list[dict]) -> dict:
     return {
         "created_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -61,5 +100,6 @@ def build_manifest(config: dict, data_files: list[dict]) -> dict:
         "python": sys.version.split()[0],
         "platform": platform.platform(),
         "device": compute_device(),
+        "hardware": hardware(),
         "packages": installed_packages(),
     }

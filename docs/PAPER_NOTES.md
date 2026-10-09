@@ -500,3 +500,11 @@ Findings.
 - Snack crackers seed 1 (1.806) is a single failed run: seeds 2 and 3 score 0.740 and 0.730, the best world-model results in that category. The failure is in the second window's category total (4.20) with promoted weeks forecast at 2.6 times actual, while item-store error stays normal. It shows the summed promotion lift can still run away on one fit in three; a guard on the store-level lift is the fix to test.
 - LightGBM stays ahead in cheese (0.22), snack crackers (0.14 on the median seed) and bottled juice (0.06).
 - This setup (brand switching, normalised roll-forward, average of three fits) is the candidate world model for the Dominick's comparison in the paper.
+
+## Compute and reproducibility (for the paper's reproducibility statement)
+
+- Every run writes `manifest.json` next to its scores: code commit (runs refuse to start on uncommitted code), the full config and its checksum, the seed, checksums of every data file read, Python and package versions (including PyTorch), operating system, and the device.
+- From commit "Record hardware and run times" on, the manifest also records the machine (processor, logical cores, memory, GPU name and memory, GPU count, CUDA and cuDNN versions), the start and finish time, total wall-clock seconds, and fit and forecast seconds for each window.
+- Runs saved before that commit have their start time in the manifest and their finish time from when `metrics.json` was written; `scripts/run_times.py <results folder>` builds one table of every run (device, start, finish, wall minutes, score) and the total GPU-hours, marking which times are recorded and which come from file times.
+- All GPU runs so far used Google Colab Pro+ with one NVIDIA T4 (16 GB); LightGBM runs used the Colab CPU.
+- Development runs (choosing the setup) use the rolling windows before the held-out final 8 weeks; the final 8 weeks are not loaded by any development run. The paper should state how many setups were tried on the development windows (the results README lists every one) and report the locked final test once.

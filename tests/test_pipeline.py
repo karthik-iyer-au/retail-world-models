@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -68,7 +69,9 @@ def test_run_is_repeatable_and_recorded(tmp_path):
     assert ma == mb
     man = json.loads((a / "manifest.json").read_text())
     assert man["config_sha256"] == sha256_obj(CONFIG)
-    assert {"git", "seed", "packages", "data_files", "python"} <= set(man)
+    assert {"git", "seed", "packages", "data_files", "python", "hardware", "wall_seconds", "finished_utc", "timing"} <= set(man)
+    assert man["hardware"]["logical_cores"] >= 1 and man["wall_seconds"] >= 0
+    assert all(w["fit_seconds"] >= 0 and w["predict_seconds"] >= 0 for w in man["timing"])
     assert np.isfinite(ma["wrmsse"])
 
 
@@ -322,3 +325,15 @@ def test_download_is_tried_again_and_leaves_no_part_file(tmp_path, monkeypatch):
     fetch._from_url("https://example.org/f.csv", tmp_path / "f.csv")
     assert (tmp_path / "f.csv").read_bytes() == b"data" and calls["n"] == 3
     assert not list(tmp_path.glob("*.part"))
+
+
+def test_run_times_table_lists_each_saved_run(tmp_path):
+    import subprocess
+    import sys
+
+    folder = run(CONFIG, out_root=tmp_path / "res")
+    out = tmp_path / "times.csv"
+    subprocess.run([sys.executable, "scripts/run_times.py", str(tmp_path / "res"), "--out", str(out)], check=True,
+                   cwd=Path(__file__).resolve().parents[1])
+    text = out.read_text()
+    assert folder.name in text and "recorded" in text
