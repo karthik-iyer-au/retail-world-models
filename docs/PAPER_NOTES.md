@@ -508,3 +508,17 @@ Findings.
 - Runs saved before that commit have their start time in the manifest and their finish time from when `metrics.json` was written; `scripts/run_times.py <results folder>` builds one table of every run (device, start, finish, wall minutes, score) and the total GPU-hours, marking which times are recorded and which come from file times.
 - All GPU runs so far used Google Colab Pro+ with one NVIDIA T4 (16 GB); LightGBM runs used the Colab CPU.
 - Development runs (choosing the setup) use the rolling windows before the held-out final 8 weeks; the final 8 weeks are not loaded by any development run. The paper should state how many setups were tried on the development windows (the results README lists every one) and report the locked final test once.
+
+## Final tests, fixed on 9 October 2026 before any of them ran
+
+Chosen on the development windows only; the configs are copies of the development configs with only the name and the scored window changed (checked by `tests/test_final_configs.py`). Each is run once with seeds 1, 2 and 3 and reported as it comes out, with no reruns or changes chosen after seeing the results.
+
+| Dataset | Window | Models |
+|---|---|---|
+| M5 | official test period, 23 May to 19 June 2016 (`include_test`) | world model with normalised roll-forward; LightGBM, one model per store; lift model |
+| Dominick's (cheese, snack crackers, soft drinks, bottled juice, analgesics, frozen entrees) | last 8 weeks | world model with brand switching, normalised roll-forward, average of three fits; LightGBM |
+| Breakfast at the Frat | last 8 weeks | world model; lift model with readout dropout and weight decay; LightGBM with all recorded levers |
+
+Jobs: `final_m5.yaml`, `final_dominicks.yaml`, `final_frat.yaml`, `final_m5_lift.yaml`, run in that order after the averaged M5 practice run.
+
+The Frat benchmarks (seasonal naive, average of last 8 weeks, LightGBM) were scored once on windows that included the final 8 weeks before the window was locked (see "How data is split"); the final LightGBM here uses the development settings, which were not tuned on that score.
