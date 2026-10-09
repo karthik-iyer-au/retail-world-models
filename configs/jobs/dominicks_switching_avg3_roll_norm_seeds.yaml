@@ -1,0 +1,35 @@
+# Seeds 2 and 3 of the averaged world model with brand switching and normalised roll-forward, six Dominick's categories, so the averaged version also has a spread across seeds.
+datasets:
+- name: dominicks
+  codes:
+  - che
+  - sna
+  - sdr
+  - bjc
+  - ana
+  - fre
+runs:
+- config: configs/experiments/dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm.yaml
+  seeds:
+  - 2
+  - 3
