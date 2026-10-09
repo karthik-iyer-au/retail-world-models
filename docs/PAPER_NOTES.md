@@ -457,3 +457,25 @@ Findings.
 - The lift model's first seed (0.683) was a good draw. Over three seeds it ties LightGBM (0.713 against 0.715) and is level with the plain world model.
 - The world model with the normalised roll-forward is the only model clearly ahead on M5: 0.057 better than the lift model on the mean, and its worst seed (0.675) beats the lift model's mean.
 - Normalisation is now the M5 default for the world model in the paper comparison.
+
+## Averaging three fits with switching and the normalised roll-forward (Dominick's, seed 1)
+
+Job `configs/jobs/dominicks_switching_avg3_roll_norm.yaml` (commit edad17d): the world model with brand switching and the normalised roll-forward, each run the average of three fits. One run per category; frozen entrees did not finish because the runtime stopped. Overall score, lower is better.
+
+| Category | LightGBM | Switching + normalisation (3-seed mean) | Switching, average of 3 fits | Switching + normalisation, average of 3 fits |
+|---|---|---|---|---|
+| Cheese | 0.749 | 1.028 | 0.921 | 0.983 |
+| Snack crackers | 0.586 | 0.830 | 0.722 | 1.806 |
+| Soft drinks | 0.759 | 0.827 | 0.816 | 0.770 |
+| Bottled juice | 0.987 | 1.047 | 1.170 | 1.061 |
+| Analgesics | 0.701 | 0.696 | 0.651 | **0.625** |
+| Frozen entrees | 0.419 | 0.404 | 0.411 | not finished |
+
+Category total by window (first, second): cheese 1.33, 1.10; snack crackers 0.93, 4.20; soft drinks 1.02, 0.82; bottled juice 1.10, 1.26; analgesics 0.73, 0.52. Item-store error by window: cheese 0.74, 0.69; snack crackers 0.81, 0.61; soft drinks 0.58, 0.66; bottled juice 0.72, 1.12; analgesics 0.67, 0.72.
+
+Findings.
+
+- Analgesics reaches 0.625, the best result on any Dominick's category so far and 0.076 ahead of LightGBM. Soft drinks reaches 0.770, the best world-model result there and 0.011 behind LightGBM.
+- Snack crackers fails in the second window: promoted weeks are forecast at 2.6 times actual and the category total error is 4.20, while its item-store error (0.61) is the best of any version. The failure is in the summed lift, not the item forecasts: the switching share learned on the validation weeks does not hold for the second window's promotions. This is the same over-forecast of promoted weeks seen on seed 3 with normalisation alone.
+- Cheese and bottled juice do not improve on the best earlier versions.
+- One run per category is one draw; seeds 2 and 3 of this setup are queued next to separate the change from the noise.
