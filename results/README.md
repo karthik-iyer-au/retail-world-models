@@ -841,7 +841,7 @@ Findings.
 
 | Version | Overall | Total | Item by store | Forecast / actual | Kept |
 |---|---|---|---|---|---|
-| Version 1 (normalised roll-forward) | 0.646 | 0.510 | 0.835 | | |
+| Version 1 (normalised roll-forward) | 0.646 | 0.510 | 0.835 | 0.962 | |
 | A: weekday as seven inputs | 0.653 | 0.531 | 0.832 | 0.948 | No |
 | A+B: and M5 events by kind | 0.646 | 0.514 | 0.833 | 0.947 | B kept on A (0.646 against 0.653); level with version 1 |
 | A+B+C: and 60,000 training steps | 0.642 | 0.496 | 0.845 | 0.953 | No (0.004 lower, bar is 0.029) |
