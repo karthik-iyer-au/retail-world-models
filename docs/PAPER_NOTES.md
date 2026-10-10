@@ -608,3 +608,21 @@ Order of work:
 4. The changes are checked on the Dominick's and Frat development windows only where they apply (B and C; A is daily-only).
 
 Also: the fast-seller comparison repeated with items banded by their sales in the 28 days before the test period (`compare_forecasts.py --band-from` with the practice-window runs), to remove the pull towards under-forecasting that banding by test-period sales gives.
+
+### Fast sellers, banded by sales before the test period (10 October 2026)
+
+Items put in bands by their average daily sales over 25 April to 22 May 2016, the 28 days before the test period (`--band-from` the practice-window run `20261007T153614_m5_validation_world_model_roll_norm_seed1_59a9247d`). Tables on Drive `results/_analysis/m5_test_world_model_vs_lightgbm_banded_before/`.
+
+| Sales before the test | Units sold | World model bias | LightGBM bias | World model item error | LightGBM item error | Pairs where the world model is closer |
+|---|---|---|---|---|---|---|
+| No sales | 22,347 | -22.8% | -38.9% | 103.5% | 101.0% | 74.9% |
+| Under 0.5 a day | 111,113 | -7.1% | -4.7% | 138.0% | 139.8% | 55.5% |
+| 0.5 to 1 | 134,383 | +0.4% | +1.1% | 107.8% | 108.8% | 52.0% |
+| 1 to 3 | 347,280 | +2.8% | +0.8% | 80.7% | 81.4% | 51.8% |
+| 3 to 10 | 360,844 | +5.4% | -0.6% | 60.6% | 60.5% | 49.5% |
+| Over 10 | 253,175 | +6.1% | -5.4% | 43.6% | 46.1% | 53.1% |
+
+- Banded this way, the earlier fast-seller reading does not hold as stated. Banding by test-period sales had pulled both models towards under-forecasting the top band.
+- The world model's excess comes from items that were selling well just before the test: +5.4% on items at 3 to 10 a day and +6.1% on items over 10 a day (about 35,000 of its 32,000 net extra units; slow sellers are under). It carries a recent high level forward. LightGBM sits close to actual on these items.
+- Item by item the world model is still slightly better on the fastest items (43.6% against 46.1%) and level on 3 to 10 a day.
+- Candidate change D for the revision, added to the plan before any revised run: the level the model starts from should lean less on the latest weeks for items selling above their longer-run rate. To be defined and screened on the practice window with A to C.
