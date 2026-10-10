@@ -44,3 +44,15 @@ def test_summed_error_lets_opposite_errors_cancel(tmp_path):
     t = pd.read_csv(tmp_path / "out" / "by_all.csv", index_col=0)
     assert t.loc["all", "A summed error %"] == 0
     assert t.loc["all", "A item error %"] == 50
+
+
+def test_bands_can_come_from_an_earlier_window(tmp_path):
+    a = _run(tmp_path / "a", lambda d: d["units"])
+    b = _run(tmp_path / "b", lambda d: d["units"])
+    early = _run(tmp_path / "early", lambda d: d["units"])
+    f = pd.read_csv(early / "forecasts.csv")
+    f.loc[f["series_id"].str.startswith("FOODS"), "units"] = 20.0  # sold fast before, 2 a day now
+    f.to_csv(early / "forecasts.csv", index=False)
+    cf.main(["--a", str(a), "--b", str(b), "--band-from", str(early), "--out", str(tmp_path / "out")])
+    t = pd.read_csv(tmp_path / "out" / "by_sales_band.csv", index_col=0)
+    assert set(t.index) == {"1 to 3", "over 10"}

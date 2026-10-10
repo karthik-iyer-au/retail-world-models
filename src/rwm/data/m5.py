@@ -39,6 +39,9 @@ HIERARCHY = [
 ]
 
 
+EVENT_TYPES = ("National", "Religious", "Cultural", "Sporting")  # the kinds in calendar.csv
+
+
 @register_dataset("m5")
 def load_m5(
     root: str | None = None,
@@ -122,6 +125,13 @@ def load_m5(
             "cat_id": repeat("cat_id"),
             "state_id": repeat("state_id"),
             "event": np.tile(cal["event_name_1"].notna().to_numpy(dtype=np.int8), n),
+            # the event by kind, from either of the day's two event columns
+            **{
+                f"event_{k.lower()}": np.tile(
+                    ((cal["event_type_1"] == k) | (cal["event_type_2"] == k)).to_numpy(dtype=np.int8), n
+                )
+                for k in EVENT_TYPES
+            },
             "snap": snap.ravel(),
         },
         copy=False,

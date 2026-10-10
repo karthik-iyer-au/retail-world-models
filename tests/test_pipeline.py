@@ -83,6 +83,8 @@ def test_m5_loader_on_files_in_m5_layout(tmp_path):
             "date": pd.date_range("2011-01-29", periods=14).astype(str),
             "wm_yr_wk": [11101] * 7 + [11102] * 7,
             "event_name_1": [None] * 13 + ["X"],
+            "event_type_1": [None] * 13 + ["National"],
+            "event_type_2": [None] * 12 + ["Sporting", None],
             "snap_CA": [1] * 14, "snap_TX": [0] * 14, "snap_WI": [0] * 14,
         }
     )
@@ -106,6 +108,8 @@ def test_m5_loader_on_files_in_m5_layout(tmp_path):
     assert ca[UNITS].tolist() == list(map(float, range(14)))
     assert ca["price"].tolist() == [2.0] * 7 + [1.5] * 7
     assert ca["snap"].eq(1).all() and ca["event"].sum() == 1
+    assert ca["event_national"].tolist() == [0] * 13 + [1] and ca["event_sporting"].tolist() == [0] * 12 + [1, 0]
+    assert ca["event_religious"].sum() == 0 and ca["event_cultural"].sum() == 0
     tx = p[p[SERIES] == "A_1_TX_1"]
     assert tx["price"].isna().all() and tx["snap"].eq(0).all()
 

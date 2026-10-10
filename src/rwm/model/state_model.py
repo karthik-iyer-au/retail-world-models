@@ -115,6 +115,8 @@ in `levers` set to zero.
   periods after it. In training the real sales are fed for `teacher_rate` of
   the examples and the model's own forecast for the rest; when forecasting it
   is always its own.
+- `weekday_flags`: the day of the week as seven separate inputs in place of
+  a smooth weekly cycle, on which Sunday and Monday sit next to each other.
 - `roll_norm` (with `rollout`): layer normalisation on the state after each
   step of the roll-forward.
 - `peak_weight`: each period's loss is multiplied by 1 plus this times how far
@@ -158,11 +160,16 @@ from rwm.utils.frames import frame_to_matrix, series_rows
 TOTAL_DATES = 8  # dates per batch when the totals term is on
 
 
-def _calendar(dates: np.ndarray) -> np.ndarray:
-    """Position in the week and in the year, as smooth cycles."""
+def _calendar(dates: np.ndarray, weekday_flags: bool = False) -> np.ndarray:
+    """Position in the week and in the year, as smooth cycles. With
+    `weekday_flags` the week is seven separate on/off inputs instead, so
+    Sunday and Monday are no closer to each other than any two days."""
     d = pd.DatetimeIndex(dates)
-    week = 2 * np.pi * d.dayofweek.to_numpy() / 7
     year = 2 * np.pi * (d.dayofyear.to_numpy() - 1) / 365.25
+    if weekday_flags:
+        days = np.eye(7, dtype=np.float32)[d.dayofweek.to_numpy()]
+        return np.concatenate([days, np.stack([np.sin(year), np.cos(year)], axis=1)], axis=1).astype(np.float32)
+    week = 2 * np.pi * d.dayofweek.to_numpy() / 7
     return np.stack([np.sin(week), np.cos(week), np.sin(year), np.cos(year)], axis=1).astype(np.float32)
 
 
@@ -415,6 +422,7 @@ class StateModel(Forecaster):
         feedback: bool = False,
         teacher_rate: float = 0.5,
         roll_norm: bool = False,
+        weekday_flags: bool = False,
         plan_split: bool = False,
         split_weight: float = 0.1,
         state_spread_weight: float = 0.0,
@@ -465,6 +473,7 @@ class StateModel(Forecaster):
             raise ValueError("feedback needs rollout, and does not work with neighbours or plan_split")
         self.feedback, self.teacher_rate = feedback, teacher_rate
         self.roll_norm = roll_norm
+        self.weekday_flags = weekday_flags
         if plan_split and not rollout:
             raise ValueError("plan_split needs rollout")
         self.plan_split, self.split_weight = plan_split, split_weight
@@ -502,7 +511,7 @@ class StateModel(Forecaster):
 
         names = self._names if names is None else names
         to = lambda a: torch.as_tensor(a, device=self._dev)
-        out = {"calendar": to(_calendar(dates))}
+        out = {"calendar": to(_calendar(dates, self.weekday_flags))}
         if with_units:
             out["units"] = to(np.nan_to_num(frame_to_matrix(frame, names, dates, UNITS)))
         if self._has_price:
@@ -662,9 +671,10 @@ class StateModel(Forecaster):
 
     def _new_net(self):
         q = 2 + 2 * len(self.extra) + int(self.regular_price)  # inputs describing one period's plan
-        n_fut = q + 4 + self.plan_lags * q + len(self._year_offsets) * (q + 2) + len(self.level_views)
+        c = 9 if self.weekday_flags else 4  # calendar inputs
+        n_fut = q + c + self.plan_lags * q + len(self._year_offsets) * (q + 2) + len(self.level_views)
         return _build_net(
-            2 + q + 4, n_fut, [len(v) for v in self._levels.values()], self.history, self.horizon,
+            2 + q + c, n_fut, [len(v) for v in self._levels.values()], self.history, self.horizon,
             n_products=len(self._products), **self.net_args,
         ).to(self._dev)
 

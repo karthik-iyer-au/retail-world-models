@@ -1,0 +1,12 @@
+# Revised world model, screening on the M5 practice window (25 April to 22 May 2016), seed 1.
+# Changes A (weekday inputs), A+B (event kinds), A+B+C (60,000 steps). The unrevised model's
+# seed 1 on this window is 0.646. Plan in docs/PAPER_NOTES.md, "Revised world model: plan".
+datasets:
+- name: m5
+runs:
+- config: configs/experiments/m5_validation_world_model_v2_weekday.yaml
+  seeds: [1]
+- config: configs/experiments/m5_validation_world_model_v2_weekday_events.yaml
+  seeds: [1]
+- config: configs/experiments/m5_validation_world_model_v2_weekday_events_60k.yaml
+  seeds: [1]

@@ -588,3 +588,23 @@ From `scripts/compare_forecasts.py` on the six final-test runs; tables saved to 
 5. LightGBM's better total is partly opposite errors cancelling. By each pair's sales in the test window: both models over-forecast slow sellers by the same amount (under 0.5 a day: +37% and +40%; 0.5 to 1: +8% both). On items selling over 10 a day, LightGBM is 17.5% under (48,000 units) and the world model 7.1% under (19,500 units); the world model is closer on 60% of these pairs. LightGBM's shortfall on fast sellers offsets its excess on slow sellers. Caveat: bands are set by test-window sales, which pushes the top band towards under-forecasting for any model, so the comparison between models is the reading, not the level.
 
 What to fix (to be tested on Dominick's and Frat and on the M5 practice window, not on the M5 test period): the day-of-week pattern after weekends and holidays, and the level in Foods. A daily total check on the rolled level (does the sum of item forecasts match a store-level forecast) is the direct way to stop item errors stacking.
+
+## Revised world model: plan (written 10 October 2026, before any revised run)
+
+The first final test (version 1) stays reported as it came out. The revision answers the M5 error analysis above and is judged on data it was not built on.
+
+Changes, each a single switch:
+
+- A. Day of the week as seven separate inputs (`weekday_flags`). Version 1 gives the day as a smooth weekly cycle, on which Sunday sits next to Monday, which fits the Sunday-into-Monday over-forecast. LightGBM takes the day as a number its trees can split anywhere.
+- B. M5 events by kind (national, religious, cultural, sporting) as inputs next to the single event flag. Version 1 sees Memorial Day and a sporting final as the same signal.
+- C. Twice the training steps (60,000), the training-length check.
+- Not taken up: the totals term in the loss. On Dominick's it made the total worse (9% under) and it hurt on Frat.
+
+Order of work:
+
+1. Screening on the M5 practice window (25 April to 22 May 2016), seed 1: A, A+B, A+B+C. Version 1 seed 1 scores 0.646 there. A change is kept if it lowers the overall score; C is kept only if it also lowers it by more than the seed-to-seed range of version 1 (0.029), since it doubles the cost.
+2. Confirmation on two M5 windows not used for any choice (29 February to 27 March and 28 March to 24 April 2016), three seeds: version 1, version 2 and LightGBM. Version 2 is the better model only if it beats version 1 on both windows.
+3. Version 2 on the official test period, three seeds, reported next to version 1 and labelled as made after seeing the test-period errors.
+4. The changes are checked on the Dominick's and Frat development windows only where they apply (B and C; A is daily-only).
+
+Also: the fast-seller comparison repeated with items banded by their sales in the 28 days before the test period (`compare_forecasts.py --band-from` with the practice-window runs), to remove the pull towards under-forecasting that banding by test-period sales gives.

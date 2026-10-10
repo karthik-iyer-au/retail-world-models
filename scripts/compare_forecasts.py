@@ -77,6 +77,9 @@ def main(argv=None):
     p.add_argument("--b", nargs="+", required=True)
     p.add_argument("--names", nargs=2, default=["A", "B"])
     p.add_argument("--out", default=None)
+    p.add_argument("--band-from", default=None,
+                   help="a run folder whose forecasts.csv holds the sales just before this window; "
+                        "pairs are put in sales bands by those sales instead of by sales in this window")
     args = p.parse_args(argv)
 
     A, B = load(args.a), load(args.b)
@@ -87,8 +90,14 @@ def main(argv=None):
     df["weekday"] = df["date"].dt.day_name()
     first = df["date"].min()
     df["week ahead"] = "week " + (1 + (df["date"] - first).dt.days // 7).astype(str)
-    # Sales band: each pair's average daily sales over the window it was scored on.
-    rate = df.groupby("series_id")["units"].transform("mean")
+    # Sales band: each pair's average daily sales over the window it was scored on,
+    # or, with --band-from, over an earlier window (free of the pull towards
+    # under-forecasting that bands set by the scored sales themselves carry).
+    if args.band_from:
+        before = pd.read_csv(Path(args.band_from) / "forecasts.csv", usecols=["series_id", "units"])
+        rate = df["series_id"].map(before.groupby("series_id")["units"].mean()).fillna(0)
+    else:
+        rate = df.groupby("series_id")["units"].transform("mean")
     df["sales band"] = pd.cut(rate, [-0.1, 0, 0.5, 1, 3, 10, np.inf],
                               labels=["no sales", "under 0.5 a day", "0.5 to 1", "1 to 3", "3 to 10", "over 10"])
     df["day had sales"] = np.where(df["units"] > 0, "sold", "sold nothing")
