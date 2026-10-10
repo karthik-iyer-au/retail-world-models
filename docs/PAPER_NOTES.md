@@ -554,3 +554,18 @@ Findings.
 - The loss is at the aggregate levels (total 0.379 against 0.247). At item by store the world model is slightly better (0.897 against 0.905). The world model over-forecasts by about 2.6%, LightGBM under-forecasts by about 2.1%.
 - What the paper can claim on M5: the world model is competitive with published mid-table entries and better than the statistical benchmarks, and is not better than a tuned gradient-boosted baseline on the official period. The case for the world model rests on Dominick's and Frat, where plans and promotions carry the signal, and on what it does that LightGBM cannot (rolling a plan forward week by week).
 - Compute: one Tesla T4 (14.6 GB), 2-core Xeon 2.0 GHz, 12.7 GB memory, torch 2.11.0 with CUDA 13.0. About 101 minutes per world model seed, 78 per LightGBM seed.
+
+### M5 by level: where the world model leads (test period, three seeds each; practice window for comparison)
+
+| Level | World model, test | LightGBM, test | World model, practice | LightGBM, practice |
+|---|---|---|---|---|
+| Overall (official measure) | 0.638 | **0.547** | **0.656** | 0.715 |
+| Total | 0.379 | **0.247** | **0.535** | 0.659 |
+| Item | **0.999** | 1.002 | | 0.860 |
+| Item by state | **0.951** | 0.954 | | 0.853 |
+| Item by store | **0.897** | 0.905 | **0.834** | 0.847 |
+
+- At item by store, the level a store orders at, the world model is ahead on both windows: 0.897 against 0.905 on the test period (no overlap across seeds: 0.896 to 0.898 against 0.905 to 0.906) and 0.834 against 0.847 on the practice window. The margin is about 1% to 1.5%.
+- LightGBM wins the official measure on the test period because the world model is far worse at the totals. The world model forecasts about 2.6% above actual sales; its item-level errors lean the same way and add up at the top of the hierarchy.
+- Wording for the paper: LightGBM scores better on the official measure; the world model is slightly more accurate at item by store on both windows and loses at the totals through an upward bias. The official measure was named as primary before the runs, so it stays the headline.
+- Correcting the bias is future work, to be tested on Dominick's and Frat, not tuned on M5.
