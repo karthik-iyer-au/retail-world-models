@@ -639,3 +639,8 @@ Items put in bands by their average daily sales over 25 April to 22 May 2016, th
 - LightGBM 0.549, world model 0.681, lift model 0.714 (three seeds each, no overlap between LightGBM and the others). Development had all three level at about 0.41.
 - Across the three final tests: LightGBM wins M5 and Frat on the official measure and 3 of 6 Dominick's categories; the world model wins 2 Dominick's categories clearly and is level in one. The world model is the better of our two models on Frat and on M5 practice runs.
 - The development-to-final drop on Frat (0.41 to 0.68 for ours, 0.42 to 0.55 for LightGBM) needs an explanation before the paper: what changes in the last 8 weeks (new items, promotions, the holiday period at the end of 2011) and why our models lose more. To check with `compare_forecasts.py` on the Frat final runs.
+
+## Final M5 lift result (read 10 October 2026)
+
+- Lift model 0.663 (0.622 to 0.719) on the official test period, against world model 0.638 and LightGBM 0.547. All three final tests are now in except one Dominick's run (frozen entrees, world model, seed 3).
+- Both of our models share the M5 pattern: slightly better than LightGBM at item by store, about 2.5% over in total, worse at the summed levels. The over-forecast is not caused by the roll-forward; it comes from what the two models share (scaling by each item's recent level, the Tweedie loss on scaled sales, the inputs).

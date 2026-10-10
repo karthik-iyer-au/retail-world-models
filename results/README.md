@@ -777,6 +777,9 @@ Findings.
 | LightGBM, seed 1 | `20261009T194733_m5_test_lightgbm_seed1_df4acc88` |
 | LightGBM, seed 2 | `20261009T210651_m5_test_lightgbm_seed2_3ca7ac16` |
 | LightGBM, seed 3 | `20261009T222439_m5_test_lightgbm_seed3_885a8e3b` |
+| Lift model, seed 1 | `20261010T050747_m5_test_lift_seed1_f804aed5` |
+| Lift model, seed 2 | `20261010T063747_m5_test_lift_seed2_c820f109` |
+| Lift model, seed 3 | `m5_test_lift_seed3_f626198e` |
 
 ## Final test on the last 8 weeks of Dominick's (three seeds; frozen entrees world model two seeds so far)
 
@@ -821,3 +824,15 @@ Findings.
 | LightGBM, seeds 1 to 3 | `frat_final_lightgbm_seed1_0ae11c20`, `_seed2_af4d0223`, `_seed3_4ce9a34b` |
 | Lift model, seeds 1 to 3 | `frat_final_lift_seed1_84375413`, `_seed2_276bab72`, `_seed3_c9b2c390` |
 | World model, seeds 1 to 3 | `frat_final_world_model_seed1_b8d962b7`, `_seed2_625b5483`, `_seed3_c6d076ef` |
+
+### Lift model on the official M5 test period (job `final_m5_lift.yaml`, commit 53fffe5, three seeds)
+
+| Model | Seed 1 | Seed 2 | Seed 3 | Mean | Range | Total | Item by store | Forecast / actual |
+|---|---|---|---|---|---|---|---|---|
+| Lift model | 0.719 | 0.647 | 0.622 | 0.663 | 0.622 to 0.719 | 0.368 | 0.896 | 1.024 |
+| World model + normalisation | 0.627 | 0.647 | 0.639 | 0.638 | 0.627 to 0.647 | 0.379 | 0.897 | 1.026 |
+| LightGBM | 0.548 | 0.547 | 0.547 | **0.547** | 0.547 to 0.548 | 0.247 | 0.905 | 0.979 |
+
+- The lift model sits with the world model, behind LightGBM: 0.663 against 0.638 and 0.547. Its seeds spread three times as wide (0.10 against 0.02).
+- Both of our models are slightly better than LightGBM at item by store (0.896 and 0.897 against 0.905) and both forecast about 2.5% over in total, so the M5 error pattern belongs to both, not to the roll-forward.
+- Practice window: lift 0.713, world model 0.656, LightGBM 0.715.
