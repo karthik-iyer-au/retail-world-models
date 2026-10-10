@@ -844,7 +844,9 @@ Findings.
 | Version 1 (normalised roll-forward) | 0.646 | 0.510 | 0.835 | | |
 | A: weekday as seven inputs | 0.653 | 0.531 | 0.832 | 0.948 | No |
 | A+B: and M5 events by kind | 0.646 | 0.514 | 0.833 | 0.947 | B kept on A (0.646 against 0.653); level with version 1 |
+| A+B+C: and 60,000 training steps | 0.642 | 0.496 | 0.845 | 0.953 | No (0.004 lower, bar is 0.029) |
 
 - A does not lower the overall score (0.653 against 0.646), so under the plan it is not kept. The difference is inside version 1's seed-to-seed range (0.029), so A neither helps nor hurts clearly. Item by store is marginally better (0.832 against 0.835).
 - A+B (event kinds on top of A) scores 0.646, the same as version 1 and 0.007 better than A alone, inside seed noise. B is kept under the rule against A; against version 1 the two changes together make no difference.
+- A+B+C (60,000 steps instead of 30,000) scores 0.642, 0.004 below A+B. That is well short of the 0.029 needed to justify doubling the training cost, so C is not kept. The gain is at the totals (0.496 against 0.514); item by store gets worse (0.845 against 0.833). Longer training fits the aggregate level a little better and the single items a little worse, so a short run is not what holds the world model back on M5.
 - A+B and A+B+C were already queued with A in them; they still show whether B and C add anything on top of A. Change D is screened on version 1 instead of on A (decided before any D result).
