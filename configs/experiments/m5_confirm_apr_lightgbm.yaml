@@ -1,0 +1,28 @@
+# Confirmation window 28 March to 24 April 2016: the last 28 days before the M5 test period are held out and not loaded.
+# Settings copied unchanged from m5_validation_lightgbm.yaml. Not used for any choice. Plan in docs/PAPER_NOTES.md, 'Revised world model: plan'.
+name: m5_confirm_apr_lightgbm
+seed: 0
+dataset:
+  name: m5
+model:
+  name: lightgbm_direct
+  params:
+    horizon: 28
+    train_periods: 730
+    group_by: store_id
+    categorical:
+    - item_id
+    - dept_id
+    - cat_id
+    extra:
+    - event
+    - snap
+    rounds: 800
+    seed: 0
+    threads: 2
+evaluation:
+  horizon: 28
+  n_origins: 1
+  scale_lag: 1
+  weight_window: 28
+  holdout_periods: 28
