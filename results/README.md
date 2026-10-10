@@ -836,3 +836,13 @@ Findings.
 - The lift model sits with the world model, behind LightGBM: 0.663 against 0.638 and 0.547. Its seeds spread three times as wide (0.10 against 0.02).
 - Both of our models are slightly better than LightGBM at item by store (0.896 and 0.897 against 0.905) and both forecast about 2.5% over in total, so the M5 error pattern belongs to both, not to the roll-forward.
 - Practice window: lift 0.713, world model 0.656, LightGBM 0.715.
+
+## Revised world model, screening on the M5 practice window (seed 1)
+
+| Version | Overall | Total | Item by store | Forecast / actual | Kept |
+|---|---|---|---|---|---|
+| Version 1 (normalised roll-forward) | 0.646 | 0.510 | 0.835 | | |
+| A: weekday as seven inputs | 0.653 | 0.531 | 0.832 | 0.948 | No |
+
+- A does not lower the overall score (0.653 against 0.646), so under the plan it is not kept. The difference is inside version 1's seed-to-seed range (0.029), so A neither helps nor hurts clearly. Item by store is marginally better (0.832 against 0.835).
+- A+B and A+B+C were already queued with A in them; they still show whether B and C add anything on top of A. Change D is screened on version 1 instead of on A (decided before any D result).

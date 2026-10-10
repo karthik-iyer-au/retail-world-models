@@ -1,5 +1,5 @@
-# Revised world model, changes A and D: weekday inputs and the item's level against its
-# level over the past 364 days. M5 practice window, seed 1. Plan in docs/PAPER_NOTES.md.
+# Revised world model, change D alone on version 1: the item's level against its level over
+# the past 364 days. M5 practice window, seed 1. A (weekday inputs) was not kept, so D goes on version 1.
 dataset:
   name: m5
 evaluation:
@@ -34,7 +34,6 @@ model:
     seed: 1
     steps: 30000
     train_periods: 730
-    weekday_flags: true
     long_level: 364
-name: m5_validation_world_model_v2_weekday_long_level
+name: m5_validation_world_model_v2_long_level
 seed: 1
