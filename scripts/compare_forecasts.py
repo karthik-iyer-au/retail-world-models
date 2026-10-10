@@ -11,7 +11,7 @@ M5 series ids are "<item>_<store>", e.g. FOODS_3_090_CA_1, so state, store,
 category and department are read from the id. Other datasets get the store
 and item split only.
 
-Writes one CSV per table to --out and prints the tables as markdown.
+Writes one CSV per table to --out and prints the tables.
 """
 import argparse
 from pathlib import Path
@@ -58,7 +58,7 @@ def table(df: pd.DataFrame, key: str, names: list[str]) -> pd.DataFrame:
     # do not count here.
     daily = df.groupby([key, "date"], observed=True)[["units", "fa", "fb"]].sum()
     for n, col in ((a, "fa"), (b, "fb")):
-        e = (daily[col] - daily["units"]).abs().groupby(level=0).sum()
+        e = (daily[col] - daily["units"]).abs().groupby(level=0, observed=True).sum()
         out[f"{n} summed error %"] = 100 * e / out["actual units"]
     # Error item by item, added up: what the shelves see.
     for n, col in ((a, "fa"), (b, "fb")):
@@ -66,7 +66,7 @@ def table(df: pd.DataFrame, key: str, names: list[str]) -> pd.DataFrame:
     # Share of item-store pairs in the group where model a is closer over the window.
     per = df.assign(ea=(df["fa"] - df["units"]).abs(), eb=(df["fb"] - df["units"]).abs())
     per = per.groupby(["series_id", key], observed=True)[["ea", "eb"]].sum()
-    closer = (per["ea"] < per["eb"]).groupby(level=1).mean()
+    closer = (per["ea"] < per["eb"]).groupby(level=1, observed=True).mean()
     out[f"pairs where {a} is closer %"] = 100 * closer
     return out.round(1)
 
@@ -102,7 +102,7 @@ def main(argv=None):
             continue
         t = table(df, k, args.names)
         print(f"\n### By {k}\n")
-        print(t.to_markdown())
+        print(t.to_string())
         if out:
             t.to_csv(out / f"by_{k.replace(' ', '_')}.csv")
 
@@ -110,7 +110,7 @@ def main(argv=None):
     tot = df.groupby("date")[["units", "fa", "fb"]].sum()
     tot.columns = ["actual units", f"{args.names[0]} units", f"{args.names[1]} units"]
     print("\n### Company total, day by day\n")
-    print(tot.round(0).to_markdown())
+    print(tot.round(0).to_string())
     if out:
         tot.to_csv(out / "total_by_day.csv")
 
