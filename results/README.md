@@ -777,3 +777,25 @@ Findings.
 | LightGBM, seed 1 | `20261009T194733_m5_test_lightgbm_seed1_df4acc88` |
 | LightGBM, seed 2 | `20261009T210651_m5_test_lightgbm_seed2_3ca7ac16` |
 | LightGBM, seed 3 | `20261009T222439_m5_test_lightgbm_seed3_885a8e3b` |
+
+## Final test on the last 8 weeks of Dominick's (three seeds; frozen entrees world model two seeds so far)
+
+Job `configs/jobs/final_dominicks.yaml`, commit 53fffe5, run 9 to 10 October 2026 on one Tesla T4. Settings fixed on the development windows before the run; reported as they came out. World model = brand switching, normalised roll-forward, average of three fits. Lower is better.
+
+| Category | World model, overall (range) | LightGBM, overall (range) | World model, item by store | LightGBM, item by store | World model, forecast / actual | LightGBM, forecast / actual | Development (world model / LightGBM) |
+|---|---|---|---|---|---|---|---|
+| Cheese | 0.897 (0.881 to 0.928) | 0.708 (0.699 to 0.721) | 0.715 | 0.702 | 0.776 | 0.892 | 0.971 / 0.749 |
+| Snack crackers | 0.448 (0.397 to 0.531) | 0.412 (0.405 to 0.419) | 0.608 | 0.596 | 0.929 | 0.917 | 1.092 / 0.586 |
+| Soft drinks | 0.830 (0.805 to 0.868) | 0.989 (0.982 to 0.996) | 0.734 | 0.652 | 0.835 | 0.743 | 0.743 / 0.759 |
+| Bottled juice | 0.987 (0.943 to 1.029) | 0.994 (0.989 to 0.998) | 0.816 | 0.750 | 0.839 | 0.787 | 1.048 / 0.987 |
+| Analgesics | 0.867 (0.842 to 0.894) | 0.978 (0.971 to 0.987) | 0.713 | 0.714 | 0.925 | 0.904 | 0.622 / 0.701 |
+| Frozen entrees | 0.489 (0.487 to 0.492) | 0.478 (0.475 to 0.483) | 0.561 | 0.529 | 0.888 | 0.795 | 0.391 / 0.419 |
+
+Findings.
+
+- The world model is better in two categories: soft drinks (0.830 against 0.989) and analgesics (0.867 against 0.978). Both were also its wins on the development windows. Every world-model seed beats every LightGBM seed in both.
+- Bottled juice is level (0.987 against 0.994; the world model's seeds span LightGBM's).
+- LightGBM is better in cheese (0.708 against 0.897, as on development), snack crackers (0.412 against 0.448) and frozen entrees (0.478 against 0.489 on two world-model seeds). Frozen entrees was a world-model win on development (0.391 against 0.419) and did not hold.
+- The opposite pattern to M5: on Dominick's the world model's gains are at the totals and LightGBM is better or level item by store in every category. Both models forecast below actual sales in these 8 weeks, LightGBM more so (as low as 0.74 in soft drinks).
+- The test weeks are harder than the development windows for both models in soft drinks, bottled juice and analgesics.
+- Frozen entrees, world model seed 3: the runtime dropped during this run; the restart could not resume it (random states saved on the GPU were restored without moving them to the CPU, fixed after). It runs again from the start, settings unchanged (`configs/jobs/final_dominicks_fre_seed3.yaml`), and is added when in.

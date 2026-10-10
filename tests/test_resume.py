@@ -70,3 +70,30 @@ def test_nothing_is_saved_outside_a_scope(split, tmp_path, monkeypatch):
     build_model("state_model", **{**SETTINGS, "steps": 4}).fit(split[0])
     assert resume.path("training") is None
     assert list(tmp_path.iterdir()) == []
+
+
+
+class _OnGpu:
+    """Stands in for a random state that was loaded onto a GPU: torch refuses it
+    as a random state until .cpu() brings it back."""
+    def __init__(self, t):
+        self.t = t
+
+    def cpu(self):
+        return self.t
+
+
+def test_saved_random_states_load_onto_another_device(split, tmp_path, monkeypatch):
+    train, _ = split
+    with resume.scope(tmp_path, "origin0"):
+        build_model("state_model", **{**SETTINGS, "steps": 4}).fit(train)
+    real_load = resume.load
+
+    def load_on_gpu(tag, device=None):
+        s = real_load(tag, device)
+        s["gen"], s["rng"], s["step"] = _OnGpu(s["gen"]), _OnGpu(s["rng"]), 2
+        return s
+
+    monkeypatch.setattr(resume, "load", load_on_gpu)
+    with resume.scope(tmp_path, "origin0"):
+        build_model("state_model", **{**SETTINGS, "steps": 4}).fit(train)  # goes on from step 2

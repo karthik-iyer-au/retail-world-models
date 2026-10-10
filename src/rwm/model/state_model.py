@@ -790,10 +790,11 @@ class StateModel(Forecaster):
                 if slow is not None and saved["slow"] is not None:
                     slow.load_state_dict(saved["slow"])
                 best.update(saved["best"])
-                gen.set_state(saved["gen"])
-                torch.set_rng_state(saved["rng"])
+                # random states must be CPU byte tensors whatever device the save was loaded onto
+                gen.set_state(saved["gen"].cpu())
+                torch.set_rng_state(saved["rng"].cpu())
                 if saved["cuda_rng"] is not None and torch.cuda.is_available():
-                    torch.cuda.set_rng_state_all(saved["cuda_rng"])
+                    torch.cuda.set_rng_state_all([s.cpu() for s in saved["cuda_rng"]])
                 self.loss_log[:], self.validation_log[:] = saved["loss_log"], saved["validation_log"]
                 first = saved["step"]
                 print(f"{label}: going on from the save at step {first} of {steps}", flush=True)

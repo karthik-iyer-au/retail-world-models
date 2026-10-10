@@ -1,0 +1,10 @@
+# Final test, Dominick's frozen entrees, world model seed 3 only. The run in final_dominicks.yaml
+# (commit 53fffe5) was cut off by the runtime dropping and then could not resume (random states
+# saved on the GPU were restored without moving them to the CPU). It is run here from the start,
+# unchanged in settings; the fix touches only resuming, which a fresh run does not use.
+datasets:
+- name: dominicks
+  codes: [fre]
+runs:
+- config: configs/experiments/dominicks_fre_final_world_model_switching_avg3_roll_norm.yaml
+  seeds: [3]
