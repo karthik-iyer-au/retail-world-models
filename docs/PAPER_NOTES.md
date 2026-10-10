@@ -629,7 +629,7 @@ Items put in bands by their average daily sales over 25 April to 22 May 2016, th
 
 ## Final Dominick's result (read 10 October 2026)
 
-- World model better in 2 of 6 categories (soft drinks 0.830 against 0.989, analgesics 0.867 against 0.978, all seeds apart), level in 1 (bottled juice), LightGBM better in 3 (cheese, snack crackers, frozen entrees; frozen entrees on two of three world-model seeds).
+- World model better in 2 of 6 categories (soft drinks 0.830 against 0.989, analgesics 0.867 against 0.978, all seeds apart), level in 1 (bottled juice), LightGBM better in 2 (cheese, snack crackers) and slightly ahead in frozen entrees (0.478 against 0.485, three seeds each, ranges touching).
 - Development predicted world-model wins in soft drinks, analgesics and frozen entrees; the first two held, frozen entrees did not.
 - On Dominick's the world model wins at the totals and loses item by store; on M5 it is the reverse. The paper should say plainly that neither model dominates and that where the world model wins depends on the data.
 - Run times about 9 minutes per world-model run (three fits) and 3 to 11 minutes per LightGBM run on one T4.
