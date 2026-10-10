@@ -569,3 +569,22 @@ Findings.
 - LightGBM wins the official measure on the test period because the world model is far worse at the totals. The world model forecasts about 2.6% above actual sales; its item-level errors lean the same way and add up at the top of the hierarchy.
 - Wording for the paper: LightGBM scores better on the official measure; the world model is slightly more accurate at item by store on both windows and loses at the totals through an upward bias. The official measure was named as primary before the runs, so it stays the headline.
 - Correcting the bias is future work, to be tested on Dominick's and Frat, not tuned on M5.
+
+### M5 test period: where the world model's forecast goes wrong (three-seed average forecasts against LightGBM)
+
+From `scripts/compare_forecasts.py` on the six final-test runs; tables saved to Drive `results/_analysis/m5_test_world_model_vs_lightgbm/`. 28 days, 1,229,140 units sold.
+
+| | Actual | World model | LightGBM |
+|---|---|---|---|
+| Units | 1,229,140 | 1,261,570 (+2.6%) | 1,203,490 (-2.1%) |
+| Error of the daily company total, % of units | | 3.7 | 2.8 |
+| Error item by item, % of units | | 75.7 | 76.6 |
+| Item-store pairs where this model is closer | | 53.8% | 46.2% |
+
+1. The over-forecast is in Foods. Foods is +3.9% (+32,000 units, the whole net excess); Foods 3 alone is +4.5% (+25,000). Hobbies (-1.4%) and Household (+0.7%) are close. LightGBM is under in all three.
+2. One store carries the most: CA_3 +7.5% (+12,900 units). TX_2 +4.5%, WI_2 +3.3%. Two stores are under (CA_4 -1.3%, WI_3 -1.6%).
+3. Sundays and Mondays. Monday +6.4%, Sunday +5.1%, Tuesday and Wednesday about 0 (-0.4%, -0.6%). The worst days are Sunday 29 May (+11.7%, Memorial Day weekend), Monday 6 June (+11.6%), Thursday 2 June (+10.5%) and Monday 13 June (+7.4%). The model carries the weekend level into Monday.
+4. It does not grow with the horizon: +4.1%, +2.1%, +4.4%, -0.1% in weeks 1 to 4. The rolled-forward state is not drifting.
+5. LightGBM's better total is partly opposite errors cancelling. By each pair's sales in the test window: both models over-forecast slow sellers by the same amount (under 0.5 a day: +37% and +40%; 0.5 to 1: +8% both). On items selling over 10 a day, LightGBM is 17.5% under (48,000 units) and the world model 7.1% under (19,500 units); the world model is closer on 60% of these pairs. LightGBM's shortfall on fast sellers offsets its excess on slow sellers. Caveat: bands are set by test-window sales, which pushes the top band towards under-forecasting for any model, so the comparison between models is the reading, not the level.
+
+What to fix (to be tested on Dominick's and Frat and on the M5 practice window, not on the M5 test period): the day-of-week pattern after weekends and holidays, and the level in Foods. A daily total check on the rolled level (does the sum of item forecasts match a store-level forecast) is the direct way to stop item errors stacking.
