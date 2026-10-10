@@ -843,6 +843,8 @@ Findings.
 |---|---|---|---|---|---|
 | Version 1 (normalised roll-forward) | 0.646 | 0.510 | 0.835 | | |
 | A: weekday as seven inputs | 0.653 | 0.531 | 0.832 | 0.948 | No |
+| A+B: and M5 events by kind | 0.646 | 0.514 | 0.833 | 0.947 | B kept on A (0.646 against 0.653); level with version 1 |
 
 - A does not lower the overall score (0.653 against 0.646), so under the plan it is not kept. The difference is inside version 1's seed-to-seed range (0.029), so A neither helps nor hurts clearly. Item by store is marginally better (0.832 against 0.835).
+- A+B (event kinds on top of A) scores 0.646, the same as version 1 and 0.007 better than A alone, inside seed noise. B is kept under the rule against A; against version 1 the two changes together make no difference.
 - A+B and A+B+C were already queued with A in them; they still show whether B and C add anything on top of A. Change D is screened on version 1 instead of on A (decided before any D result).
