@@ -1,0 +1,16 @@
+# Version 1 of the world model against LightGBM on two M5 windows not used for any choice
+# (29 February to 27 March and 28 March to 24 April 2016), three seeds each. No revised version
+# beat version 1 on the practice window, so there is no version 2 to confirm; these runs check
+# whether the practice-window reading (world model ahead item by store, LightGBM ahead at the totals)
+# holds on other months. Plan in docs/PAPER_NOTES.md, "Revised world model: plan".
+datasets:
+- name: m5
+runs:
+- config: configs/experiments/m5_confirm_apr_world_model_v1.yaml
+  seeds: [1, 2, 3]
+- config: configs/experiments/m5_confirm_apr_lightgbm.yaml
+  seeds: [1, 2, 3]
+- config: configs/experiments/m5_confirm_mar_world_model_v1.yaml
+  seeds: [1, 2, 3]
+- config: configs/experiments/m5_confirm_mar_lightgbm.yaml
+  seeds: [1, 2, 3]

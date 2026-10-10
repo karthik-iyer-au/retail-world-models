@@ -845,8 +845,11 @@ Findings.
 | A: weekday as seven inputs | 0.653 | 0.531 | 0.832 | 0.948 | No |
 | A+B: and M5 events by kind | 0.646 | 0.514 | 0.833 | 0.947 | B kept on A (0.646 against 0.653); level with version 1 |
 | A+B+C: and 60,000 training steps | 0.642 | 0.496 | 0.845 | 0.953 | No (0.004 lower, bar is 0.029) |
+| D: version 1 and the item's level against its past-year level | 0.680 | 0.591 | 0.833 | 0.941 | No (0.034 higher) |
 
 - A does not lower the overall score (0.653 against 0.646), so under the plan it is not kept. The difference is inside version 1's seed-to-seed range (0.029), so A neither helps nor hurts clearly. Item by store is marginally better (0.832 against 0.835).
 - A+B (event kinds on top of A) scores 0.646, the same as version 1 and 0.007 better than A alone, inside seed noise. B is kept under the rule against A; against version 1 the two changes together make no difference.
 - A+B+C (60,000 steps instead of 30,000) scores 0.642, 0.004 below A+B. That is well short of the 0.029 needed to justify doubling the training cost, so C is not kept. The gain is at the totals (0.496 against 0.514); item by store gets worse (0.845 against 0.833). Longer training fits the aggregate level a little better and the single items a little worse, so a short run is not what holds the world model back on M5.
+- D (the item's recent level against its level over the past 364 days, on version 1) scores 0.680, 0.034 worse than version 1. The total gets much worse (0.591 against 0.510) and item by store is unchanged (0.833 against 0.835). Not kept.
+- Outcome: no change beat version 1 under the rules set before screening, so there is no version 2 to confirm or to run on the test period. Version 1 stays the reported model. The confirmation windows are run for version 1 and LightGBM only (`configs/jobs/m5_confirm.yaml`), to check whether the practice-window reading holds on other months.
 - A+B and A+B+C were already queued with A in them; they still show whether B and C add anything on top of A. Change D is screened on version 1 instead of on A (decided before any D result).
