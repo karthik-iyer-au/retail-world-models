@@ -20,6 +20,8 @@ links to a folder in `results/promoted/` holding its manifest and scores.
 | Seasonal naive | 0.870 | 0.847 |
 | LightGBM, one model per store | 0.715 | 0.552 |
 | Our model, item encoder and readout only, one run | 0.708 | not run |
+| LightGBM, final test, seeds 1 to 3 (mean) | | 0.547 |
+| World model with normalised roll-forward, final test, seeds 1 to 3 (mean) | 0.656 | 0.638 |
 
 Published scores on the official test period, from the organisers' files
 (`data/raw/m5_reference/`): seasonal naive 0.847, best statistical benchmark
@@ -740,3 +742,38 @@ Findings.
 
 - Averaging three fits does not improve the world model on M5: 0.665 sits inside the range of single fits and above their mean. On M5 the single fits are already steady (range 0.03), so there is little seed noise for averaging to remove, unlike Dominick's.
 - The M5 final test therefore uses single fits of the world model with normalisation, as fixed in the final-test plan before this result was read.
+
+## Final test on the official M5 test period (23 May to 19 June 2016, three seeds)
+
+Job `configs/jobs/final_m5.yaml`, commit 53fffe5 (clean), run 9 October 2026 on one Tesla T4. Settings fixed on the practice window before the run; reported as they came out, with no reruns.
+
+| Model | Seed 1 | Seed 2 | Seed 3 | Mean | Range |
+|---|---|---|---|---|---|
+| LightGBM, overall | 0.548 | 0.547 | 0.547 | **0.547** | 0.547 to 0.548 |
+| World model + normalisation, overall | 0.627 | 0.647 | 0.639 | 0.638 | 0.627 to 0.647 |
+| LightGBM, total | 0.245 | 0.247 | 0.250 | 0.247 | |
+| World model + normalisation, total | 0.363 | 0.387 | 0.388 | 0.379 | |
+| LightGBM, item by store | 0.905 | 0.906 | 0.905 | 0.905 | |
+| World model + normalisation, item by store | 0.896 | 0.898 | 0.896 | 0.897 | |
+| LightGBM, forecast / actual | 0.979 | 0.980 | 0.978 | 0.979 | |
+| World model + normalisation, forecast / actual | 1.023 | 1.027 | 1.029 | 1.026 | |
+
+Published scores on the same period: winner 0.520, 10th-ranked 0.547, 50th-ranked 0.576, best statistical benchmark 0.671, seasonal naive 0.847. Our earlier LightGBM test run (seed 0) scored 0.552.
+
+Findings.
+
+- LightGBM is the better model on the official test period: 0.547 against 0.638. Its score equals the 10th-ranked entry.
+- The world model sits between the best statistical benchmark (0.671) and the 50th-ranked entry (0.576).
+- This reverses the practice window, where the world model led LightGBM (0.656 against 0.715).
+- The gap is in the totals: 0.379 against 0.247. At item by store the world model is slightly better (0.897 against 0.905).
+- The world model forecasts about 2.6% above actual sales in total. LightGBM is 2.1% below.
+- Run times: world model about 101 minutes per seed (seed 1: 6,091 s wall, 6,017 s training, 3 s prediction); LightGBM about 78 minutes per seed.
+
+| Run | Folder |
+|---|---|
+| World model + normalisation, seed 1 | `20261009T144236_m5_test_world_model_roll_norm_seed1_2d0e0f5e` |
+| World model + normalisation, seed 2 | `20261009T162410_m5_test_world_model_roll_norm_seed2_be1ce9bf` |
+| World model + normalisation, seed 3 | `20261009T180552_m5_test_world_model_roll_norm_seed3_a21d534c` |
+| LightGBM, seed 1 | `20261009T194733_m5_test_lightgbm_seed1_df4acc88` |
+| LightGBM, seed 2 | `20261009T210651_m5_test_lightgbm_seed2_3ca7ac16` |
+| LightGBM, seed 3 | `20261009T222439_m5_test_lightgbm_seed3_885a8e3b` |

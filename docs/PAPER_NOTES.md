@@ -546,3 +546,11 @@ Findings.
 
 - Averaging three fits does not improve the world model on M5: 0.665 sits inside the range of single fits and above their mean. On M5 the single fits are already steady (range 0.03), so there is little seed noise for averaging to remove, unlike Dominick's.
 - The M5 final test therefore uses single fits of the world model with normalisation, as fixed in the final-test plan before this result was read.
+
+## Final M5 test result (official test period, three seeds, read 10 October 2026)
+
+- LightGBM 0.547 (range 0.547 to 0.548), equal to the 10th-ranked entry. World model with normalised roll-forward 0.638 (range 0.627 to 0.647), between the best statistical benchmark (0.671) and the 50th-ranked entry (0.576).
+- The practice-window lead (0.656 against 0.715) did not hold on the test period. The paper reports both windows and says so.
+- The loss is at the aggregate levels (total 0.379 against 0.247). At item by store the world model is slightly better (0.897 against 0.905). The world model over-forecasts by about 2.6%, LightGBM under-forecasts by about 2.1%.
+- What the paper can claim on M5: the world model is competitive with published mid-table entries and better than the statistical benchmarks, and is not better than a tuned gradient-boosted baseline on the official period. The case for the world model rests on Dominick's and Frat, where plans and promotions carry the signal, and on what it does that LightGBM cannot (rolling a plan forward week by week).
+- Compute: one Tesla T4 (14.6 GB), 2-core Xeon 2.0 GHz, 12.7 GB memory, torch 2.11.0 with CUDA 13.0. About 101 minutes per world model seed, 78 per LightGBM seed.
