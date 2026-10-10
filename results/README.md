@@ -799,3 +799,25 @@ Findings.
 - The opposite pattern to M5: on Dominick's the world model's gains are at the totals and LightGBM is better or level item by store in every category. Both models forecast below actual sales in these 8 weeks, LightGBM more so (as low as 0.74 in soft drinks).
 - The test weeks are harder than the development windows for both models in soft drinks, bottled juice and analgesics.
 - Frozen entrees, world model seed 3: the runtime dropped during this run; the restart could not resume it (random states saved on the GPU were restored without moving them to the CPU, fixed after). It runs again from the start, settings unchanged (`configs/jobs/final_dominicks_fre_seed3.yaml`), and is added when in.
+
+## Final test on the last 8 weeks of Breakfast at the Frat (three seeds)
+
+Job `configs/jobs/final_frat.yaml`, commit 53fffe5, run 10 October 2026 on one Tesla T4. Settings fixed on the development windows before the run; reported as they came out. Lower is better.
+
+| Model | Seed 1 | Seed 2 | Seed 3 | Mean | Range | Total (mean) | Item by store (mean) | Forecast / actual (mean) | Development |
+|---|---|---|---|---|---|---|---|---|---|
+| LightGBM, all recorded levers | 0.561 | 0.551 | 0.535 | **0.549** | 0.535 to 0.561 | 0.503 | 0.608 | 0.937 | 0.421 |
+| World model | 0.684 | 0.657 | 0.702 | 0.681 | 0.657 to 0.702 | 0.685 | 0.665 | 1.000 | 0.408 |
+| Lift model, readout dropout and weight decay | 0.680 | 0.744 | 0.718 | 0.714 | 0.680 to 0.744 | 0.758 | 0.677 | 0.977 | 0.406 |
+
+Findings.
+
+- LightGBM is clearly better on the final 8 weeks: 0.549 against 0.681 for the world model and 0.714 for the lift model, and every LightGBM seed beats every seed of the other two. It is better at the total and item by store.
+- On the development windows the three were level (0.406 to 0.421). The final weeks are harder for all three, much more so for ours.
+- The world model is better than the lift model (0.681 against 0.714) and has no bias in total (forecast / actual 1.000); LightGBM is 6% under.
+
+| Run | Folder |
+|---|---|
+| LightGBM, seeds 1 to 3 | `frat_final_lightgbm_seed1_0ae11c20`, `_seed2_af4d0223`, `_seed3_4ce9a34b` |
+| Lift model, seeds 1 to 3 | `frat_final_lift_seed1_84375413`, `_seed2_276bab72`, `_seed3_c9b2c390` |
+| World model, seeds 1 to 3 | `frat_final_world_model_seed1_b8d962b7`, `_seed2_625b5483`, `_seed3_c6d076ef` |

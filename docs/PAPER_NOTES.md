@@ -633,3 +633,9 @@ Items put in bands by their average daily sales over 25 April to 22 May 2016, th
 - Development predicted world-model wins in soft drinks, analgesics and frozen entrees; the first two held, frozen entrees did not.
 - On Dominick's the world model wins at the totals and loses item by store; on M5 it is the reverse. The paper should say plainly that neither model dominates and that where the world model wins depends on the data.
 - Run times about 9 minutes per world-model run (three fits) and 3 to 11 minutes per LightGBM run on one T4.
+
+## Final Frat result (read 10 October 2026)
+
+- LightGBM 0.549, world model 0.681, lift model 0.714 (three seeds each, no overlap between LightGBM and the others). Development had all three level at about 0.41.
+- Across the three final tests: LightGBM wins M5 and Frat on the official measure and 3 of 6 Dominick's categories; the world model wins 2 Dominick's categories clearly and is level in one. The world model is the better of our two models on Frat and on M5 practice runs.
+- The development-to-final drop on Frat (0.41 to 0.68 for ours, 0.42 to 0.55 for LightGBM) needs an explanation before the paper: what changes in the last 8 weeks (new items, promotions, the holiday period at the end of 2011) and why our models lose more. To check with `compare_forecasts.py` on the Frat final runs.
