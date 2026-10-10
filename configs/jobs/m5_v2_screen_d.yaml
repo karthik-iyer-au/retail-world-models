@@ -1,0 +1,7 @@
+# Revised world model, screening change D on the M5 practice window, seed 1: weekday inputs
+# (change A) plus the longer-run level (change D). Plan in docs/PAPER_NOTES.md, "Revised world model: plan".
+datasets:
+- name: m5
+runs:
+- config: configs/experiments/m5_validation_world_model_v2_weekday_long_level.yaml
+  seeds: [1]

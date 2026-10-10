@@ -28,3 +28,14 @@ def test_world_model_trains_and_forecasts_with_weekday_flags():
                     rollout=True, roll_norm=True, weekday_flags=True).fit(train)
     f = m.predict(test.drop(columns=[UNITS]))
     assert len(f) == len(test) and np.isfinite(f).all()
+
+
+def test_world_model_trains_with_the_longer_run_level():
+    p = load_dataset("synthetic", n_stores=2, n_items=3, n_periods=160, seed=1).panel
+    cut = np.sort(p[DATE].unique())[-9]
+    train, test = p[p[DATE] <= cut], p[p[DATE] > cut]
+    m = build_model("state_model", horizon=8, history=16, train_periods=140, categorical=["item_id", "store_id"],
+                    extra=["promo"], d_model=16, layers=1, heads=2, steps=20, batch=32, device="cpu",
+                    rollout=True, roll_norm=True, weekday_flags=True, long_level=56).fit(train)
+    f = m.predict(test.drop(columns=[UNITS]))
+    assert len(f) == len(test) and np.isfinite(f).all()

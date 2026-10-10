@@ -115,6 +115,9 @@ in `levers` set to zero.
   periods after it. In training the real sales are fed for `teacher_rate` of
   the examples and the model's own forecast for the rest; when forecasting it
   is always its own.
+- `long_level`: a number of periods (for example 364). The model is also told
+  how the item's level compares with its average over that many latest
+  periods, so it can learn when a recent high level does not last.
 - `weekday_flags`: the day of the week as seven separate inputs in place of
   a smooth weekly cycle, on which Sunday and Monday sit next to each other.
 - `roll_norm` (with `rollout`): layer normalisation on the state after each
@@ -423,6 +426,7 @@ class StateModel(Forecaster):
         teacher_rate: float = 0.5,
         roll_norm: bool = False,
         weekday_flags: bool = False,
+        long_level: int | None = None,
         plan_split: bool = False,
         split_weight: float = 0.1,
         state_spread_weight: float = 0.0,
@@ -474,6 +478,7 @@ class StateModel(Forecaster):
         self.feedback, self.teacher_rate = feedback, teacher_rate
         self.roll_norm = roll_norm
         self.weekday_flags = weekday_flags
+        self.long_level = long_level
         if plan_split and not rollout:
             raise ValueError("plan_split needs rollout")
         self.plan_split, self.split_weight = plan_split, split_weight
@@ -667,12 +672,28 @@ class StateModel(Forecaster):
                 views.append(torch.where(n_k >= max(1, k // 2), ratio, torch.zeros_like(ratio)))
             v = torch.cat(views, dim=1)[:, None, :].expand(-1, fut.shape[1], -1).to(fut.dtype)
             fut, fut_off = torch.cat([fut, v], dim=2), torch.cat([fut_off, v], dim=2)
+        if self.long_level:
+            # how the item's level (the one it is scaled by) compares with its
+            # level over the latest `long_level` periods, so the model can learn
+            # that an item running above its longer-run rate tends to come back
+            k = self.long_level
+            cols = (start[:, None] + torch.arange(-k, 0, device=self._dev)[None])
+            inside = cols >= 0
+            cols = cols.clamp(min=0)
+            lp = past["price"][r, cols]
+            lk = ~torch.isnan(lp) & inside
+            n_l = lk.sum(1, keepdim=True)
+            long_run = (past["units"][r, cols] * lk).sum(1, keepdim=True) / n_l.clamp(min=1)
+            ratio = torch.log((scale + 0.1 * long_run + 1e-3) / (1.1 * long_run + 1e-3)).clamp(-3, 3)
+            ratio = torch.where(n_l >= max(1, k // 2), ratio, torch.zeros_like(ratio))
+            v = ratio[:, None, :].expand(-1, fut.shape[1], -1).to(fut.dtype)
+            fut, fut_off = torch.cat([fut, v], dim=2), torch.cat([fut_off, v], dim=2)
         return hist, fut, scale, on_sale, ahead, fut_off
 
     def _new_net(self):
         q = 2 + 2 * len(self.extra) + int(self.regular_price)  # inputs describing one period's plan
         c = 9 if self.weekday_flags else 4  # calendar inputs
-        n_fut = q + c + self.plan_lags * q + len(self._year_offsets) * (q + 2) + len(self.level_views)
+        n_fut = q + c + self.plan_lags * q + len(self._year_offsets) * (q + 2) + len(self.level_views) + int(bool(self.long_level))
         return _build_net(
             2 + q + c, n_fut, [len(v) for v in self._levels.values()], self.history, self.horizon,
             n_products=len(self._products), **self.net_args,

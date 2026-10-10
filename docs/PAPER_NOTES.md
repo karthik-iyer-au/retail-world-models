@@ -644,3 +644,7 @@ Items put in bands by their average daily sales over 25 April to 22 May 2016, th
 
 - Lift model 0.663 (0.622 to 0.719) on the official test period, against world model 0.638 and LightGBM 0.547. All three final tests are now in except one Dominick's run (frozen entrees, world model, seed 3).
 - Both of our models share the M5 pattern: slightly better than LightGBM at item by store, about 2.5% over in total, worse at the summed levels. The over-forecast is not caused by the roll-forward; it comes from what the two models share (scaling by each item's recent level, the Tweedie loss on scaled sales, the inputs).
+
+### Change D defined (10 October 2026, before any screening result was read)
+
+- D: `long_level: 364`. One more input per item: the log ratio of the level it is scaled by (its average over the 112-day history window) to its average over the latest 364 days. An item running above its longer-run rate gets a positive value, so the model can learn how much of a recent high level carries on. Screened on top of A (weekday inputs) on the practice window, seed 1, job `configs/jobs/m5_v2_screen_d.yaml`, after the A to C screening job. Kept under the same rule: it must lower the overall score against A alone.

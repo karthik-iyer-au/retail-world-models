@@ -1,0 +1,40 @@
+# Revised world model, changes A and D: weekday inputs and the item's level against its
+# level over the past 364 days. M5 practice window, seed 1. Plan in docs/PAPER_NOTES.md.
+dataset:
+  name: m5
+evaluation:
+  horizon: 28
+  n_origins: 1
+  scale_lag: 1
+  weight_window: 28
+model:
+  name: state_model
+  params:
+    batch: 1024
+    categorical:
+    - item_id
+    - dept_id
+    - cat_id
+    - store_id
+    - state_id
+    d_model: 128
+    extra:
+    - event
+    - snap
+    heads: 4
+    history: 112
+    horizon: 28
+    layers: 3
+    lift_readout: true
+    lr: 0.001
+    mixed_precision: true
+    regular_price: true
+    roll_norm: true
+    rollout: true
+    seed: 1
+    steps: 30000
+    train_periods: 730
+    weekday_flags: true
+    long_level: 364
+name: m5_validation_world_model_v2_weekday_long_level
+seed: 1
