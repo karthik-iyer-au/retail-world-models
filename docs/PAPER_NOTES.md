@@ -670,10 +670,11 @@ Evidence so far, by grain:
 | M5 test period (3 seeds) | World model 0.897, LightGBM 0.905 | LightGBM 0.247, world model 0.379 | LightGBM 0.547, world model 0.638 |
 | M5 practice window (1 seed) | World model 0.835, LightGBM 0.847 | World model 0.510 (LightGBM total not recorded here) | World model 0.646, LightGBM 0.715 |
 | M5 28 Mar to 24 Apr 2016 (3 seeds) | World model 0.833, LightGBM 0.846 | World model 0.283, LightGBM 0.351 | Level, 0.555 against 0.557 |
+| M5 29 Feb to 27 Mar 2016 (3 seeds) | World model 0.851, LightGBM 0.873 | World model 0.398, LightGBM 0.578 | World model 0.642, LightGBM 0.709 |
 | Dominick's final, 6 categories | LightGBM better or level in all 6 | World model wins soft drinks, analgesics | Split 2 / 1 level / 3 |
 | Frat final | LightGBM 0.608, world model 0.665 | LightGBM 0.503, world model 0.685 | LightGBM 0.549 |
 
-- On M5 the world model is lower item by store in every window run so far; the totals, and with them the overall score, go to whichever model gets the month's level right, and that changes from month to month.
+- On M5 the world model is lower item by store in all four windows (every seed beats every LightGBM seed in both confirmation windows); the totals, and with them the overall score, go to whichever model gets the month's level right, and that changes from month to month.
 - On Dominick's the pattern is the reverse; on Frat LightGBM wins at every grain. The paper states this plainly rather than picking the flattering grain.
 - The single weighted M5 score averages results that point in opposite directions at different grains, and one 28-day window is not enough to rank models (four windows reported).
 
@@ -712,3 +713,9 @@ Changes that did not become defaults (window, seeds, result):
 - Unusual plans and plan A against plan B (Frat 3 seeds): all models level (picks the better week 77 to 78%); LightGBM marginally ahead.
 - M5 revision, screened on the practice window, seed 1, against version 1 at 0.646: A weekday inputs 0.653, A+B event kinds 0.646, A+B+C 60,000 steps 0.642 (bar 0.029), D long-run level 0.680. None kept.
 - Fast-seller claim (world model better on fast sellers): withdrawn after banding by sales before the test period.
+
+## M5 confirmation windows result (12 October 2026)
+
+- Four M5 windows now run. Item by store the world model is lower in all four (0.851 / 0.873, 0.833 / 0.846, 0.835 / 0.847, 0.897 / 0.905). Overall: world model wins March and the practice window, level in April, LightGBM wins only the official test period.
+- The totals follow the level: LightGBM is 3% to 6% under in the three earlier windows; the world model is within 1% in both confirmation windows. The official test period is the one month where the world model over-forecasts and LightGBM is closer.
+- For the paper: a ranking from the single official M5 window would have read "LightGBM is better"; over four windows the item-by-store result is consistent and the overall result is one win each way plus a tie and a single-seed win. This is the evidence for grain-first and multi-window evaluation.

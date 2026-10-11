@@ -853,3 +853,37 @@ Findings.
 - D (the item's recent level against its level over the past 364 days, on version 1) scores 0.680, 0.034 worse than version 1. The total gets much worse (0.591 against 0.510) and item by store is unchanged (0.833 against 0.835). Not kept.
 - Outcome: no change beat version 1 under the rules set before screening, so there is no version 2 to confirm or to run on the test period. Version 1 stays the reported model. The confirmation windows are run for version 1 and LightGBM only (`configs/jobs/m5_confirm.yaml`), to check whether the practice-window reading holds on other months.
 - A+B and A+B+C were already queued with A in them; they still show whether B and C add anything on top of A. Change D is screened on version 1 instead of on A (decided before any D result).
+
+## M5 confirmation windows (two windows not used for any choice, three seeds each)
+
+Job `configs/jobs/m5_confirm.yaml`, run 10 to 11 October 2026 on one Tesla T4. Version 1 of the world model (normalised roll-forward, settings unchanged from the final test) and LightGBM (settings unchanged), each window's last day of training the day before it starts. Lower is better.
+
+| Window | Model | Overall (range) | Total | Item by store | Forecast / actual |
+|---|---|---|---|---|---|
+| 29 Feb to 27 Mar 2016 | World model | **0.642** (0.632 to 0.648) | **0.398** | **0.851** | 0.991 |
+| 29 Feb to 27 Mar 2016 | LightGBM | 0.709 (0.706 to 0.713) | 0.578 | 0.873 | 0.943 |
+| 28 Mar to 24 Apr 2016 | World model | **0.555** (0.550 to 0.564) | **0.283** | **0.833** | 1.003 |
+| 28 Mar to 24 Apr 2016 | LightGBM | 0.557 (0.551 to 0.563) | 0.351 | 0.846 | 0.969 |
+
+All M5 windows run, item by store (world model / LightGBM):
+
+| Window | Item by store | Total | Overall | Winner overall |
+|---|---|---|---|---|
+| 29 Feb to 27 Mar (3 seeds) | 0.851 / 0.873 | 0.398 / 0.578 | 0.642 / 0.709 | World model |
+| 28 Mar to 24 Apr (3 seeds) | 0.833 / 0.846 | 0.283 / 0.351 | 0.555 / 0.557 | Level |
+| 25 Apr to 22 May, practice (1 seed) | 0.835 / 0.847 | 0.510 / not recorded | 0.646 / 0.715 | World model |
+| 23 May to 19 Jun, official test (3 seeds) | 0.897 / 0.905 | 0.379 / 0.247 | 0.638 / 0.547 | LightGBM |
+
+Findings.
+
+- Item by store, the world model is lower in all four windows (by 0.008 to 0.022), and in both confirmation windows every world-model seed beats every LightGBM seed.
+- At the totals and overall, the winner depends on the month: the world model in March and on the practice window, level in April, LightGBM on the official test period.
+- The difference follows the level. LightGBM forecasts 3% to 6% under in the three earlier windows and 2% under on the test period; the world model is within 1% in both confirmation windows, 4% under on the practice window and 2.6% over on the test period. Whichever model gets the month's level closer wins the totals.
+- The official test period is the only one of the four windows where LightGBM wins overall.
+
+| Run | Folder |
+|---|---|
+| World model, 28 Mar to 24 Apr, seeds 1 to 3 | `20261010T183629_m5_confirm_apr_world_model_v1_seed1_5e2ec5e1`, `20261010T201424_..._seed2_1e68e9cc`, `20261010T215217_..._seed3_8d3b1ded` |
+| LightGBM, 28 Mar to 24 Apr, seeds 1 to 3 | `20261010T233010_m5_confirm_apr_lightgbm_seed1_6ec54dd4`, `20261011T004642_..._seed2_e4e92596`, `20261011T020455_..._seed3_3cfaf1a9` |
+| World model, 29 Feb to 27 Mar, seeds 1 to 3 | `20261011T054856_m5_confirm_mar_world_model_v1_seed1_a9de76b0`, `20261011T062606_..._seed2_053690e4`, `20261011T080921_..._seed3_5de29ca7` |
+| LightGBM, 29 Feb to 27 Mar, seeds 1 to 3 | `20261011T095159_m5_confirm_mar_lightgbm_seed1_57949c3e`, `20261011T111108_..._seed2_3703521c`, `20261011T123106_..._seed3_526f9b6b` |
