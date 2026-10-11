@@ -1,0 +1,49 @@
+# Change C (twice the training steps) on the Dominick's and Frat development windows, three seeds each,
+# against the existing development runs of the same configs. Runs on a second runtime alongside m5_confirm.yaml.
+datasets:
+- name: dominicks
+  codes:
+  - che
+  - sna
+  - sdr
+  - bjc
+  - ana
+  - fre
+- name: breakfast_at_the_frat
+  from: /content/drive/MyDrive/retail-world-model/data
+runs:
+- config: configs/experiments/dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm_steps2x.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm_steps2x.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm_steps2x.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm_steps2x.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm_steps2x.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm_steps2x.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/frat_dev_world_model_plain_steps2x.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
