@@ -1,0 +1,8 @@
+# LightGBM on the M5 confirmation window 29 February to 27 March 2016, three seeds, run on a
+# separate CPU runtime alongside configs/jobs/m5_confirm.yaml (same configs and seeds, so the
+# main job finds these runs saved and does not repeat them).
+datasets:
+- name: m5
+runs:
+- config: configs/experiments/m5_confirm_mar_lightgbm.yaml
+  seeds: [1, 2, 3]
