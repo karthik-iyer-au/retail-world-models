@@ -28,7 +28,7 @@ model:
       d_model: 64
       layers: 2
       heads: 4
-      steps: 6000
+      steps: 12000
       batch: 512
       lr: 0.001
       regular_price: true
@@ -39,7 +39,6 @@ model:
       switching:
       - store_id
       roll_norm: true
-    steps: 12000
 evaluation:
   horizon: 8
   n_origins: 2
