@@ -654,3 +654,61 @@ Items put in bands by their average daily sales over 25 April to 22 May 2016, th
 - Screening A+B+C (60,000 steps), practice window, seed 1: 0.642 against A+B's 0.646, total 0.496, item by store 0.845, forecast / actual 0.953. The 0.004 gain is below the 0.029 bar, so C is not kept. Doubling training lowers the total error and raises item-by-store error, so training length is not the cause of the M5 gap to LightGBM. Training loss kept falling (3.89 at 51,000 steps) while held-out item error rose.
 - Screening D (long_level 364 on version 1), practice window, seed 1: 0.680 against 0.646, total 0.591, item by store 0.833, forecast / actual 0.941. Not kept: it makes the under-forecast on this window worse (5.9% under) and the total error much worse.
 - Revision outcome: none of A, B, C or D beat version 1 under the rules fixed before screening. There is no version 2. For the paper: the M5 test-period over-forecast on fast sellers was not fixed by weekday inputs, event kinds, longer training or a longer-run level input. On the practice window every version under-forecasts (forecast / actual 0.94 to 0.96, version 1 0.962) while on the test period version 1 over-forecasts (1.026), so the level error changes sign between adjacent months; a fix tuned on one month would not carry to the next. Next: version 1 and LightGBM on the two unseen windows (`configs/jobs/m5_confirm.yaml`, 3 seeds each) to see how often each model leads.
+
+## Paper framing (agreed 11 October 2026)
+
+Contribution: in retail the grain a forecast is judged at changes which model is better, so the grain a business decision needs has to pick the approach. Decisions sit at different grains:
+
+- Item by store by week: price and promotion plans, supplier funding, store inventory and ordering.
+- Category and department totals: sales and units plans, margin (AGP) for merchants.
+- Company total: the financial plan.
+
+Evidence so far, by grain:
+
+| Data | Item by store | Totals | Official overall score |
+|---|---|---|---|
+| M5 test period (3 seeds) | World model 0.897, LightGBM 0.905 | LightGBM 0.247, world model 0.379 | LightGBM 0.547, world model 0.638 |
+| M5 practice window (1 seed) | World model 0.835, LightGBM 0.847 | World model 0.510, LightGBM about 0.6 | World model 0.646, LightGBM 0.715 |
+| M5 28 Mar to 24 Apr 2016 (3 seeds) | World model 0.833, LightGBM 0.846 | World model 0.283, LightGBM 0.351 | Level, 0.555 against 0.557 |
+| Dominick's final, 6 categories | LightGBM better or level in all 6 | World model wins soft drinks, analgesics | Split 2 / 1 level / 3 |
+| Frat final | LightGBM 0.608, world model 0.665 | LightGBM 0.503, world model 0.685 | LightGBM 0.549 |
+
+- On M5 the world model is lower item by store in every window run so far; the totals, and with them the overall score, go to whichever model gets the month's level right, and that changes from month to month.
+- On Dominick's the pattern is the reverse; on Frat LightGBM wins at every grain. The paper states this plainly rather than picking the flattering grain.
+- The single weighted M5 score averages results that point in opposite directions at different grains, and one 28-day window is not enough to rank models (four windows reported).
+
+Reporting rule: every model and every change tried is reported, including those that lost, with the window it was judged on. Table below is the source for the paper's "what did not work" section.
+
+## Every model and change tried, including those that lost
+
+Final tests (settings fixed beforehand, reported once):
+
+| Data | Model | Overall | Result |
+|---|---|---|---|
+| M5 test | LightGBM | 0.547 | Best of ours; equal to 10th-ranked entry |
+| M5 test | World model, normalised roll-forward | 0.638 | Lost overall; best item by store |
+| M5 test | Lift model | 0.663 | Lost; seeds spread 0.10 |
+| M5 test | Seasonal naive | 0.847 | Floor |
+| Frat final | LightGBM, all levers | 0.549 | Best |
+| Frat final | World model | 0.681 | Lost; no total bias (forecast / actual 1.000) |
+| Frat final | Lift model | 0.714 | Lost |
+| Dominick's final | World model (switching, normalised, 3-fit average) | 2 wins, 1 level, 3 losses of 6 | Wins soft drinks and analgesics |
+
+Benchmarks on development windows that lost to LightGBM: seasonal naive (M5 0.870, Frat 0.832), average of last 8 weeks (Frat 0.756), LightGBM with price only (Frat 0.554 against 0.447 with all levers), our item encoder and readout alone (M5 practice 0.708).
+
+Changes that did not become defaults (window, seeds, result):
+
+- Totals term in the loss (Dominick's analgesics, 3 seeds): lift 0.819 against 0.683 without; under-forecasts the total by 9%. Hurt on Frat too.
+- Long training without validation stopping (analgesics): lift 1.473 against 0.676.
+- Negative binomial likelihood instead of Tweedie (Frat 5 seeds, analgesics 3): level (0.410, 0.665).
+- World-model tricks from the literature, one untuned setting each (Frat 5 seeds): plan split 0.417, latent check with collapse penalty and near-week weighting 0.427, all together 0.424, against 0.408 without. On analgesics the plan split helped item by store and promoted weeks but hurt the total.
+- Feeding the model's own sales forecast into the roll-forward (Dominick's 6 categories, 1 seed): fixed the soft drinks after-promotion dip only; worse overall in 4 of 6.
+- Dollar and peak weighting (same): fixed cheese promoted weeks; worse overall in 3 of 6.
+- Item role labels (Dominick's 6 categories, 1 seed): no effect on LightGBM, mixed for the world model; letting the role pick the level broke snack crackers (2.422).
+- Averaging three fits on M5 (practice, seed 1): 0.665, no gain; kept on Dominick's where seed noise is large.
+- Brand switching: kept on Dominick's; slightly worse in cheese and frozen entrees.
+- Combinations with LightGBM: best on Frat development (0.388 lift + LightGBM, 0.390 world model + LightGBM), level on Dominick's. Not carried to final tests (one model per row by design); report as a development result.
+- New items: borrowing from similar items won on Frat (0.890 against LightGBM 1.310) and failed on Dominick's (2.999 against 0.923), where items carry no category or maker labels.
+- Unusual plans and plan A against plan B (Frat 3 seeds): all models level (picks the better week 77 to 78%); LightGBM marginally ahead.
+- M5 revision, screened on the practice window, seed 1, against version 1 at 0.646: A weekday inputs 0.653, A+B event kinds 0.646, A+B+C 60,000 steps 0.642 (bar 0.029), D long-run level 0.680. None kept.
+- Fast-seller claim (world model better on fast sellers): withdrawn after banding by sales before the test period.
