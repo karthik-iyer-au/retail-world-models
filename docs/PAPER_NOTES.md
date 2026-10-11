@@ -668,7 +668,7 @@ Evidence so far, by grain:
 | Data | Item by store | Totals | Official overall score |
 |---|---|---|---|
 | M5 test period (3 seeds) | World model 0.897, LightGBM 0.905 | LightGBM 0.247, world model 0.379 | LightGBM 0.547, world model 0.638 |
-| M5 practice window (1 seed) | World model 0.835, LightGBM 0.847 | World model 0.510, LightGBM about 0.6 | World model 0.646, LightGBM 0.715 |
+| M5 practice window (1 seed) | World model 0.835, LightGBM 0.847 | World model 0.510 (LightGBM total not recorded here) | World model 0.646, LightGBM 0.715 |
 | M5 28 Mar to 24 Apr 2016 (3 seeds) | World model 0.833, LightGBM 0.846 | World model 0.283, LightGBM 0.351 | Level, 0.555 against 0.557 |
 | Dominick's final, 6 categories | LightGBM better or level in all 6 | World model wins soft drinks, analgesics | Split 2 / 1 level / 3 |
 | Frat final | LightGBM 0.608, world model 0.665 | LightGBM 0.503, world model 0.685 | LightGBM 0.549 |
