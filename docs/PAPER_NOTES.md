@@ -728,6 +728,11 @@ Changes that did not become defaults (window, seeds, result):
 - For the paper: the direct lift readout can extrapolate a price cut it has not seen for an item without limit, and whether it does depends on the seed. The failure is invisible item by store weighted by dollar sales (0.833) and dominates the totals. A grain-specific failure: an item-level price planner would see a few absurd forecasts; a category planner would see the month's total 19% too high. Worth checking what the world model forecast for the same five series (from its saved forecasts).
 - Every model is now reported on all four M5 windows (practice window: lift 0.713 over three seeds, seasonal naive 0.870, from the earlier runs).
 
+## World model against LightGBM by sales band, confirmation windows (12 October 2026)
+
+- From one unit a day up the world model is closer on 54% to 63% of item-store pairs in both windows, and LightGBM's under-forecast grows with the sales rate (18% under for items over 10 a day in March, against 10.5%). The slowest band (under 0.5 a day) is the world model's weak spot: 31% to 32% over against 25% to 26%.
+- Bands here are set by sales in the scored window; the earlier test-period banding showed this can mislead (the fast-seller claim was withdrawn). Rerun with `--band-from` the window before before using this in the paper.
+
 ## TimesFM 2.5 zero-shot on M5, median output (12 October 2026)
 
 - Item by store close to LightGBM in all four windows (0.857 to 0.908) with no plan inputs; 27% to 31% under on the total in every window, so overall 1.71 to 1.88, worse than seasonal naive. The median of intermittent daily sales sits below the mean. Mean output queued.

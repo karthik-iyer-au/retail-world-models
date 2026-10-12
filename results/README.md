@@ -921,6 +921,28 @@ Findings.
 
 Series-level table for seed 2 against seed 1: `analysis/lift_apr_seed2/lift_apr_seed2_vs_seed1_by_series.csv` in the results folder on Drive (from `scripts/after_confirm.py`).
 
+## World model against LightGBM by sales band, M5 confirmation windows
+
+`scripts/after_confirm.py` (commit 7046cb4) running `scripts/compare_forecasts.py` on the saved forecasts, three seeds averaged per model. Each item-store pair is banded by its average daily sales in the scored window (this banding pulls forecasts in high bands towards under and low bands towards over for both models alike). Bias is the band's summed forecast against its summed sales.
+
+| Band (sales a day) | Actual units, Mar / Apr | World model bias, Mar / Apr | LightGBM bias, Mar / Apr | Pairs where the world model is closer, Mar / Apr |
+|---|---|---|---|---|
+| Sold nothing | 0 / 0 | forecast 19,972 / 9,040 units | forecast 23,937 / 13,389 units | 66.7% / 66.4% |
+| Under 0.5 | 84,154 / 86,531 | +30.6% / +32.4% | +25.1% / +25.9% | 48.5% / 50.2% |
+| 0.5 to 1 | 128,565 / 131,705 | +1.6% / +4.9% | -0.7% / +1.6% | 50.5% / 52.1% |
+| 1 to 3 | 335,549 / 345,431 | -3.3% / -2.4% | -7.1% / -5.1% | 53.7% / 54.8% |
+| 3 to 10 | 375,147 / 372,636 | -5.6% / -4.2% | -10.9% / -7.8% | 56.4% / 55.2% |
+| Over 10 | 252,652 / 247,323 | -10.5% / -6.5% | -18.4% / -11.1% | 63.1% / 55.8% |
+
+Findings.
+
+- From one unit a day up, the world model is closer on more pairs than LightGBM in both windows (53.7% to 63.1% of pairs), and its band totals are closer to sales: LightGBM's under-forecast grows with the sales rate, to 18% under in March for items selling over 10 a day, against 10.5% for the world model.
+- On the slowest items (under half a unit a day, about 7% of units) the world model over-forecasts more (31% to 32% against 25% to 26%) and is closer on about half the pairs.
+- On pairs that sold nothing, the world model forecast fewer phantom units (20,000 and 9,000 against 24,000 and 13,000).
+- The world model's lead at the totals in March comes from the fast sellers: LightGBM is 46,600 units under on items selling over 10 a day, the world model 26,600.
+
+Tables per state, store, category, department, weekday and week ahead: `analysis/m5_confirm_mar_wm_vs_lgb/` and `analysis/m5_confirm_apr_wm_vs_lgb/` in the results folder on Drive.
+
 ## TimesFM 2.5 zero-shot on the four M5 windows (median output)
 
 Job `configs/jobs/m5_timesfm.yaml`, commit 7046cb4, run 12 October 2026 on one Tesla T4, about 4 minutes per window. TimesFM 2.5 (200M parameters, `google/timesfm-2.5-200m-pytorch`) used as published: not trained or tuned on M5, given each item-store's last 512 days of units and nothing else (no prices, events or SNAP days). The forecast is its default point output, the median. Lower is better.
