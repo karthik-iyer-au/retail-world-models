@@ -748,7 +748,7 @@ Changes that did not become defaults (window, seeds, result):
 
 ## First-time price cuts in April, every model (12 October 2026)
 
-- HOUSEHOLD_1_146 (four stores) sold 120 units in the week of its first price cut in a year (25%); history-only models forecast 3 (LightGBM) and 8 (TimesFM); the world model 121, 243 and 600 by seed; lift 79 and 316 on its working seeds; graph 45 to 59. FOODS_3_443 in WI_1 (68% cut) sold 4; plan-reading models over-forecast.
+- HOUSEHOLD_1_146 (four stores) sold 120 units over the 28 days, which held its first price cut in a year (25%, one week); history-only models forecast 3 (LightGBM) and 8 (TimesFM); the world model 121, 243 and 600 by seed; lift 79 and 316 on its working seeds; graph 45 to 59. FOODS_3_443 in WI_1 (68% cut) sold 4; plan-reading models over-forecast.
 - For the paper: this is the case for a plan-aware model at item-week grain (supplier funding, price decisions): it responds to a price change history has never shown; history-only models cannot. The size of the response is not identified by the data (seeds differ up to five times), which is the honest limit.
 
 ## Graph model over product attributes on M5 (12 October 2026)

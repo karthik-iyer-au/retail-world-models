@@ -969,7 +969,7 @@ Units over the 28 days, each seed separately (`analysis/lift_apr_seed2/april_fai
 | HOUSEHOLD_1_146, four stores together | 120 | 121, 600, 243 | 3.1, 2.9, 3.3 | 79, 206,886, 316 | 7.8 | 59, 45, 55 |
 | FOODS_3_443 in WI_1 | 4 | 26, 1, 18 | 3.4, 3.4, 3.2 | 346, 25,348, 366 | 0.4 | 10, 10, 10 |
 
-- HOUSEHOLD_1_146 had sold almost nothing before (LightGBM and TimesFM, working from history, forecast about 3 and 8 units) and sold 120 in the week of its 25% price cut. The world model, which reads the cut through its plan, forecast 121 on seed 1 and 243 and 600 on the others: the right direction, with the size varying by seed. The lift model's seeds 1 and 3 were 79 and 316; seed 2 reached its ceiling.
+- HOUSEHOLD_1_146 had sold almost nothing before (LightGBM and TimesFM, working from history, forecast about 3 and 8 units) and sold 120 over the 28 days, which held its first price cut in a year (25%, one week). The world model, which reads the cut through its plan, forecast 121 on seed 1 and 243 and 600 on the others: the right direction, with the size varying by seed. The lift model's seeds 1 and 3 were 79 and 316; seed 2 reached its ceiling.
 - FOODS_3_443's 68% cut in WI_1 sold 4 units; every plan-reading model forecast more (world model up to 26, lift 346 to 366 on its working seeds).
 - On first-time price cuts, models that read the plan respond and models that read history do not. How big the response should be is not pinned down by the data: the seeds disagree by up to five times.
 
