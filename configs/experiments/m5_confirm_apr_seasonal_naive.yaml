@@ -1,0 +1,16 @@
+# Confirmation window 28 March to 24 April 2016: the last 28 days before the M5 test period are held out and not loaded.
+# Settings copied unchanged from m5_validation_seasonal_naive.yaml. Not used for any choice.
+name: m5_confirm_apr_seasonal_naive
+seed: 0
+dataset:
+  name: m5
+model:
+  name: seasonal_naive
+  params:
+    season: 7
+evaluation:
+  horizon: 28
+  n_origins: 1
+  scale_lag: 1
+  weight_window: 28
+  holdout_periods: 28

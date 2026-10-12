@@ -1,0 +1,16 @@
+# The lift model (3 seeds) and seasonal naive on the two M5 confirmation windows, so every model is reported on all four M5 windows.
+datasets:
+- name: m5
+runs:
+- config: configs/experiments/m5_confirm_mar_seasonal_naive.yaml
+  seeds: &id001
+  - 1
+- config: configs/experiments/m5_confirm_apr_seasonal_naive.yaml
+  seeds: *id001
+- config: configs/experiments/m5_confirm_mar_lift.yaml
+  seeds: &id002
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/m5_confirm_apr_lift.yaml
+  seeds: *id002
