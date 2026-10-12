@@ -887,3 +887,26 @@ Findings.
 | LightGBM, 28 Mar to 24 Apr, seeds 1 to 3 | `20261010T233010_m5_confirm_apr_lightgbm_seed1_6ec54dd4`, `20261011T004642_..._seed2_e4e92596`, `20261011T020455_..._seed3_3cfaf1a9` |
 | World model, 29 Feb to 27 Mar, seeds 1 to 3 | `20261011T054856_m5_confirm_mar_world_model_v1_seed1_a9de76b0`, `20261011T062606_..._seed2_053690e4`, `20261011T080921_..._seed3_5de29ca7` |
 | LightGBM, 29 Feb to 27 Mar, seeds 1 to 3 | `20261011T095159_m5_confirm_mar_lightgbm_seed1_57949c3e`, `20261011T111108_..._seed2_3703521c`, `20261011T123106_..._seed3_526f9b6b` |
+
+## Change C on the Dominick's and Frat development windows (twice the training steps, three seeds)
+
+Job `configs/jobs/dev_steps2x.yaml`, commit 6a98e67, run 11 to 12 October 2026. Each config is the development config unchanged except for twice the training steps (Dominick's 12,000 instead of 6,000, inside the average of three fits; Frat 6,000 instead of 3,000). Same seeds 1 to 3 as the runs compared against. Overall score, lower is better.
+
+| Data | Normal training (seeds 1, 2, 3; mean) | Twice the steps (seeds 1, 2, 3; mean) | Change in mean |
+|---|---|---|---|
+| Dominick's cheese | 0.983, 0.943, 0.988 (0.971) | 0.896, 0.899, 0.909 (0.901) | 0.070 better |
+| Dominick's snack crackers | 1.806, 0.740, 0.730 (1.092) | 0.817, 0.699, 0.913 (0.810) | mixed: seed 1 no longer fails, seed 3 worse |
+| Dominick's soft drinks | 0.770, 0.713, 0.746 (0.743) | 0.745, 0.788, 0.763 (0.765) | 0.022 worse |
+| Dominick's bottled juice | 1.061, 1.019, 1.065 (1.048) | 1.054, 1.005, 0.986 (1.015) | 0.033 better |
+| Dominick's analgesics | 0.625, 0.622, 0.618 (0.622) | 0.644, 0.645, 0.651 (0.647) | 0.025 worse |
+| Dominick's frozen entrees | 0.386, 0.388, 0.398 (0.391) | 0.394, 0.377, 0.408 (0.393) | level |
+| Frat | 0.406, 0.408, 0.419 (0.411) | 0.420, 0.408, 0.426 (0.418) | 0.007 worse |
+
+Twice the steps, total and item by store (mean of seeds): cheese 1.094 / 0.693, snack crackers 0.837 / 0.676, soft drinks 0.943 / 0.580, bottled juice 1.167 / 0.869, analgesics 0.682 / 0.694, frozen entrees 0.336 / 0.489; Frat 0.340 / 0.509 (normal training on Frat 0.333 / 0.503). The grain split of the normal-training Dominick's runs is not recorded in this file.
+
+Findings.
+
+- Longer training helps in two Dominick's categories (cheese, bottled juice), hurts in two (soft drinks, analgesics), is level in frozen entrees and mixed in snack crackers; on Frat it is slightly worse. On M5 it lowered the overall score by 0.004 and raised item-by-store error.
+- Across seven development comparisons and M5 there is no consistent gain, so C is not kept and the reported world model keeps its original training length. Training length is not what separates the world model from LightGBM.
+- The categories where the world model already beats LightGBM (soft drinks, analgesics, frozen entrees) are the ones where longer training does not help.
+

@@ -719,3 +719,7 @@ Changes that did not become defaults (window, seeds, result):
 - Four M5 windows now run. Item by store the world model is lower in all four (0.851 / 0.873, 0.833 / 0.846, 0.835 / 0.847, 0.897 / 0.905). Overall: world model wins March and the practice window, level in April, LightGBM wins only the official test period.
 - The totals follow the level: LightGBM is 3% to 6% under in the three earlier windows; the world model is within 1% in both confirmation windows. The official test period is the one month where the world model over-forecasts and LightGBM is closer.
 - For the paper: a ranking from the single official M5 window would have read "LightGBM is better"; over four windows the item-by-store result is consistent and the overall result is one win each way plus a tie and a single-seed win. This is the evidence for grain-first and multi-window evaluation.
+
+## Change C on Dominick's and Frat development windows (12 October 2026)
+
+- Twice the training steps, three seeds each: better in cheese (0.971 to 0.901) and bottled juice (1.048 to 1.015), worse in soft drinks (0.743 to 0.765) and analgesics (0.622 to 0.647), level in frozen entrees, mixed in snack crackers, slightly worse on Frat (0.411 to 0.418). With M5 (0.004 better overall, item by store worse), no consistent gain: C is not kept on any dataset. For the paper: the training-length question is answered; the world model is not undertrained.
