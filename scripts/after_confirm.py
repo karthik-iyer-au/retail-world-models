@@ -9,14 +9,14 @@ forecast files are.
    (three seeds each), with scripts/compare_forecasts.py.
 3. World model against LightGBM on the Frat final test (three seeds each),
    to explain the drop from the development windows.
-5. The plan read-back probe (scripts/plan_readback.py) on seed 1 of the world
-   model on the March, April and test windows, and on the lift model
-   (no roll-forward) for comparison.
-
 4. What every model forecast, in April, for the five series where lift seed 2
    failed, and the April world-model-against-LightGBM tables with pairs banded
    by their sales in March (free of the pull that banding by the scored sales
    carries).
+5. The plan read-back probe (scripts/plan_readback.py) on seed 1 of the world
+   model on the March, April and test windows, and on the lift model
+   (no roll-forward) for comparison.
+
 Writes tables to <results>/analysis/ and prints them.
 """
 import argparse
