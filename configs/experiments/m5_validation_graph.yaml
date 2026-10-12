@@ -1,0 +1,32 @@
+# Graph model on the 28 days before the M5 test period (25 April to 22 May 2016).
+# Graph model over product attributes (same item in other stores; same department in the same store), one round of
+# GraphSAGE-style message passing. Inputs, dataset and evaluation copied from m5_validation_lightgbm.yaml. Settings fixed before any run.
+name: m5_validation_graph
+seed: 0
+dataset:
+  name: m5
+model:
+  name: graph_direct
+  params:
+    horizon: 28
+    train_periods: 730
+    relations:
+    - - item_id
+    - - store_id
+      - dept_id
+    categorical:
+    - item_id
+    - dept_id
+    - cat_id
+    extra:
+    - event
+    - snap
+    hidden: 128
+    steps: 6000
+    lr: 0.001
+    seed: 0
+evaluation:
+  horizon: 28
+  n_origins: 1
+  scale_lag: 1
+  weight_window: 28

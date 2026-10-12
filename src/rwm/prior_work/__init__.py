@@ -7,5 +7,6 @@ from rwm.prior_work import timesfm_zero_shot  # noqa: F401  (imports timesfm onl
 
 try:  # needs the optional `trees` dependencies
     from rwm.prior_work import lightgbm_direct  # noqa: F401
+    from rwm.prior_work import graph_direct  # noqa: F401  (also needs torch, imported only when used)
 except ImportError:
     pass
