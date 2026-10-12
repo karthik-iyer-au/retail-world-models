@@ -733,7 +733,7 @@ Changes that did not become defaults (window, seeds, result):
 ## World model against LightGBM by sales band, confirmation windows (12 October 2026)
 
 - From one unit a day up the world model is closer on 54% to 63% of item-store pairs in both windows, and LightGBM's under-forecast grows with the sales rate (18% under for items over 10 a day in March, against 10.5%). The slowest band (under 0.5 a day) is the world model's weak spot: 31% to 32% over against 25% to 26%.
-- Bands here are set by sales in the scored window; the earlier test-period banding showed this can mislead (the fast-seller claim was withdrawn). Rerun with `--band-from` the window before before using this in the paper.
+- Rerun for April with bands set by March sales: both models within 6% in every band that sold in March, so most of the growing LightGBM under-forecast was the banding. The world model is still closer on 50.6% to 54.2% of pairs in every band, a small edge that holds across sales rates. Its weak spot is pairs that sold nothing in March (62% over). Use the March-banded table in the paper, not the scored-window one.
 
 ## TimesFM 2.5 zero-shot on M5, median output (12 October 2026)
 
@@ -745,6 +745,11 @@ Changes that did not become defaults (window, seeds, result):
 - TimesFM 2.5 zero-shot with its mean output is the lowest of every model item by store in all four M5 windows (0.828 to 0.885), with no plan inputs, and 5% to 10% under on the total, so worse overall (0.73 to 0.90). For the paper: at item by store, history read by a large pretrained model beats every plan-aware model; the plan inputs earn their keep in the level of the totals. This sharpens the grain claim and must be stated plainly.
 - Plan read-back: the world model's carried state holds the day's discount (R squared 0.58 to 0.83, control 0.00 to 0.02), events and SNAP days (0.98 to 0.99), and about half the discount a week later (0.46 to 0.59). Evidence that the roll-forward takes the plan in; not evidence that its use of it is right.
 - Frat drop explained: the final 8 weeks are the holiday period, absent from the development windows. The world model gets the 8-week total right (1.000; LightGBM 0.937) but misses the holiday shape (16% over the week of 30 Nov, 15% to 17% under the two December peak weeks, 24% over the week after Christmas). LightGBM, with week-of-year and month inputs, tracks it better. For the paper: a holiday-shape failure at weekly category grain, not a level failure.
+
+## First-time price cuts in April, every model (12 October 2026)
+
+- HOUSEHOLD_1_146 (four stores) sold 120 units in the week of its first price cut in a year (25%); history-only models forecast 3 (LightGBM) and 8 (TimesFM); the world model 121, 243 and 600 by seed; lift 79 and 316 on its working seeds; graph 45 to 59. FOODS_3_443 in WI_1 (68% cut) sold 4; plan-reading models over-forecast.
+- For the paper: this is the case for a plan-aware model at item-week grain (supplier funding, price decisions): it responds to a price change history has never shown; history-only models cannot. The size of the response is not identified by the data (seeds differ up to five times), which is the honest limit.
 
 ## Graph model over product attributes on M5 (12 October 2026)
 

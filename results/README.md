@@ -943,6 +943,36 @@ Findings.
 
 Tables per state, store, category, department, weekday and week ahead: `analysis/m5_confirm_mar_wm_vs_lgb/` and `analysis/m5_confirm_apr_wm_vs_lgb/` in the results folder on Drive.
 
+### April banded by March sales
+
+The same April comparison with each pair banded by its average daily sales in March (`--band-from` the March world-model run), so the band does not depend on the sales being scored. Run 12 October 2026, commit c36d4cf.
+
+| Band (March sales a day) | Actual April units | World model bias | LightGBM bias | Pairs where the world model is closer |
+|---|---|---|---|---|
+| Sold nothing in March | 14,102 | +62.1% | -5.4% | 65.9% |
+| Under 0.5 | 106,500 | -4.5% | -5.6% | 50.6% |
+| 0.5 to 1 | 133,684 | -3.1% | -3.3% | 52.1% |
+| 1 to 3 | 332,022 | -1.3% | -3.3% | 53.8% |
+| 3 to 10 | 358,060 | +1.5% | -1.7% | 53.7% |
+| Over 10 | 239,258 | +1.3% | -3.4% | 54.2% |
+
+- Banded this way both models are within 6% in every band that sold in March, and most of the growing LightGBM under-forecast in the table above was the banding: here LightGBM is 3.4% under on the fastest band, the world model 1.3% over.
+- The world model is still closer on more pairs in every band (50.6% to 54.2%), a small edge that holds from the slowest to the fastest sellers.
+- Its weak spot is pairs that sold nothing in March: 62% over, against LightGBM 5% under.
+
+### April: the five series where lift seed 2 failed, every model
+
+Units over the 28 days, each seed separately (`analysis/lift_apr_seed2/april_failed_series_by_model.csv`). All five had their first price cut in a year inside the window.
+
+| Series | Sold | World model (seeds 1, 2, 3) | LightGBM | Lift | TimesFM mean | Graph |
+|---|---|---|---|---|---|---|
+| HOUSEHOLD_1_146, four stores together | 120 | 121, 600, 243 | 3.1, 2.9, 3.3 | 79, 113,885, 316 | 7.8 | 59, 45, 55 |
+| FOODS_3_443 in WI_1 | 4 | 26, 1, 18 | 3.4, 3.4, 3.2 | 346, 25,348, 366 | 0.4 | 10, 10, 10 |
+
+- HOUSEHOLD_1_146 had sold almost nothing before (LightGBM and TimesFM, working from history, forecast about 3 and 8 units) and sold 120 in the week of its 25% price cut. The world model, which reads the cut through its plan, forecast 121 on seed 1 and 243 and 600 on the others: the right direction, with the size varying by seed. The lift model's seeds 1 and 3 were 79 and 316; seed 2 reached its ceiling.
+- FOODS_3_443's 68% cut in WI_1 sold 4 units; every plan-reading model forecast more (world model up to 26, lift 346 to 366 on its working seeds).
+- On first-time price cuts, models that read the plan respond and models that read history do not. How big the response should be is not pinned down by the data: the seeds disagree by up to five times.
+
 ## TimesFM 2.5 zero-shot on the four M5 windows (median output)
 
 Job `configs/jobs/m5_timesfm.yaml`, commit 7046cb4, run 12 October 2026 on one Tesla T4, about 4 minutes per window. TimesFM 2.5 (200M parameters, `google/timesfm-2.5-200m-pytorch`) used as published: not trained or tuned on M5, given each item-store's last 512 days of units and nothing else (no prices, events or SNAP days). The forecast is its default point output, the median. Lower is better.
