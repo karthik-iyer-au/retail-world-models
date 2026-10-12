@@ -9,10 +9,14 @@ forecast files are.
    (three seeds each), with scripts/compare_forecasts.py.
 3. World model against LightGBM on the Frat final test (three seeds each),
    to explain the drop from the development windows.
-4. The plan read-back probe (scripts/plan_readback.py) on seed 1 of the world
+5. The plan read-back probe (scripts/plan_readback.py) on seed 1 of the world
    model on the March, April and test windows, and on the lift model
    (no roll-forward) for comparison.
 
+4. What every model forecast, in April, for the five series where lift seed 2
+   failed, and the April world-model-against-LightGBM tables with pairs banded
+   by their sales in March (free of the pull that banding by the scored sales
+   carries).
 Writes tables to <results>/analysis/ and prints them.
 """
 import argparse
@@ -83,9 +87,37 @@ def readback(results: Path, out: Path) -> None:
                         "--run", found[0], "--out", str(out / f"{config}.json")], check=False)
 
 
+FAILED = ["HOUSEHOLD_1_146_WI_2", "HOUSEHOLD_1_146_CA_3", "HOUSEHOLD_1_146_TX_3", "HOUSEHOLD_1_146_CA_2", "FOODS_3_443_WI_1"]
+
+
+def failed_series(results: Path, out: Path) -> None:
+    """Units sold and forecast over the April window for the five series, by model (seeds averaged)."""
+    rows = {}
+    for label, config in (("world model", "m5_confirm_apr_world_model_v1"), ("LightGBM", "m5_confirm_apr_lightgbm"),
+                          ("lift", "m5_confirm_apr_lift"), ("TimesFM mean", "m5_confirm_apr_timesfm_mean"),
+                          ("graph", "m5_confirm_apr_graph")):
+        found = runs(results, config, (1, 2, 3)) or runs(results, config, (1,))
+        sums = []
+        for f in found:
+            d = pd.read_csv(Path(f) / "forecasts.csv", usecols=["series_id", "units", "forecast"])
+            d = d[d["series_id"].isin(FAILED)].groupby("series_id")[["units", "forecast"]].sum()
+            sums.append(d)
+            rows.setdefault("sold", d["units"])
+        if sums:
+            for i, d in enumerate(sums, 1):
+                rows[f"{label} seed {i}"] = d["forecast"]
+    if rows:
+        t = pd.DataFrame(rows).round(1)
+        print("\n== April window: five series where lift seed 2 failed ==")
+        print(t.to_string())
+        out.mkdir(parents=True, exist_ok=True)
+        t.to_csv(out / "april_failed_series_by_model.csv")
+
+
 def main(argv=None):
     p = argparse.ArgumentParser()
     p.add_argument("--results", required=True)
+    p.add_argument("--skip-readback", action="store_true")
     args = p.parse_args(argv)
     results = Path(args.results)
     analysis = results / "analysis"
@@ -95,7 +127,16 @@ def main(argv=None):
                 ["World model", "LightGBM"], analysis / f"m5_confirm_{w}_wm_vs_lgb")
     compare(runs(results, "frat_final_world_model"), runs(results, "frat_final_lightgbm"),
             ["World model", "LightGBM"], analysis / "frat_final_wm_vs_lgb")
-    readback(results, analysis / "plan_readback")
+    failed_series(results, analysis / "lift_apr_seed2")
+    march = runs(results, "m5_confirm_mar_world_model_v1", (1,))
+    a, b = runs(results, "m5_confirm_apr_world_model_v1"), runs(results, "m5_confirm_apr_lightgbm")
+    if march and a and b:
+        print("\n== April, banded by March sales ==", flush=True)
+        subprocess.run([sys.executable, str(HERE / "compare_forecasts.py"), "--a", *a, "--b", *b,
+                        "--names", "World model", "LightGBM", "--band-from", march[0],
+                        "--out", str(analysis / "m5_confirm_apr_wm_vs_lgb_banded_by_march")], check=False)
+    if "--skip-readback" not in sys.argv:
+        readback(results, analysis / "plan_readback")
 
 
 if __name__ == "__main__":
