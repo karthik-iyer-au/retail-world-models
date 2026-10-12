@@ -43,3 +43,12 @@ the checksum of every data file read, the seed and the installed package
 versions. Reportable runs use `--strict`, which refuses to start if the code
 is not committed or the data does not match its registered checksum.
 See `docs/REPRODUCE.md`.
+
+## Licence
+
+Non-commercial use only.
+
+- Code, including the figure and table scripts in `paper/figs/`: [PolyForm Noncommercial 1.0.0](LICENSE). Commercial use needs a separate licence from the author.
+- The manuscript text, figures and tables in `paper/`: [CC BY-NC 4.0](LICENSE-docs).
+- Data is not included. M5, Dominick's and Breakfast at the Frat are each obtained from their providers under the providers' own terms.
+

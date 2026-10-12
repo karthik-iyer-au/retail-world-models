@@ -26,7 +26,7 @@ from seasonal naive to a pretrained time-series foundation model
 world model of our own: each item's recent history is turned into a state, and
 that state is carried forward one period at a time under the plan, so that what
 is planned for one week can change the forecast for the weeks after it
-(Figure~\ref{fig:overview}). Before any final test we ran a development study
+(Figure~\ref{fig:overview}). Figure~\ref{fig:solution} sets out the whole study. Before any final test we ran a development study
 on windows that precede the final weeks; every configuration in it is reported
 here, with the ones that lost.
 
@@ -65,6 +65,19 @@ The paper finds and contributes the following.
 \item \textbf{Every model and change that lost is reported}, with its cause
   where one was measured (\S\ref{sec:failures}, Table~\ref{tab:ledger}).
 \end{enumerate}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_solution.pdf}
+\caption{\textbf{The study at a glance: one table of public retail data, seven
+models, settings locked before the final tests, and every model scored at every
+level of the hierarchy, which decides what each retail decision needs.} The
+development windows precede the final weeks and were the only data used to
+choose settings. TimesFM, TimesFM with the plan and the graph model were added
+after the final tests, with settings fixed before their first run. The bottom row
+summarises the results of \S\ref{sec:results} by the decision a forecast feeds.}
+\label{fig:solution}
+\end{figure*}
 
 \begin{figure*}[t]
 \centering
@@ -1073,28 +1086,66 @@ level, over several periods, with the losing models stated.
 \section{Reproducibility and compute}
 \label{sec:repro}
 
-All code, configuration files and tests are in the repository. Every run records
-its code commit (runs refuse to start on uncommitted code), its configuration
-and checksum, the seed, checksums of every data file read, package versions and
-the device in a manifest; the manifest and scores of the \nPromotedRuns{} runs
-read by this manuscript are committed under \texttt{results/promoted/}, and its
-figures, tables and quoted final-test numbers are generated from them by
-\texttt{paper/figs/make\_figures.py} and \texttt{paper/figs/make\_tables.py}.
-Numbers from runs not in that folder (the development study, TimesFM on
-Dominick's and Frat, TimesFM with the plan, and the analyses of saved forecasts)
-are copied into \texttt{paper/figs/rwdata.py} from \texttt{results/README.md},
-which names each run folder. Forecast files and model checkpoints are kept
-outside the repository, with their checksums recorded in each run's scores. GPU
-runs used one NVIDIA Tesla T4 (16 GB) on Google Colab; LightGBM ran on the Colab
-CPU. The world model took about 100 minutes per seed on M5 and 9 minutes per run
-(three fits) on a Dominick's category; LightGBM 78 minutes per seed on M5; the
-graph model 7.5 and TimesFM 4 minutes per M5 window.
+\paragraph{Records}
+All code, configuration files and tests are in the repository. A run refuses to
+start on uncommitted code, and writes a manifest holding the code commit, the
+full configuration and its checksum, the seed, checksums of every data file
+read, Python and package versions, the machine (processor, cores, memory, GPU
+and its memory, CUDA version) and, from 9 October 2026 on, its start and finish
+times and the seconds spent fitting and forecasting each window. The manifest
+and scores of the \nPromotedRuns{} runs read by this manuscript are committed
+under \texttt{results/promoted/}; its figures, tables and quoted final-test
+numbers are generated from them by \texttt{paper/figs/make\_figures.py} and
+\texttt{paper/figs/make\_tables.py} (\texttt{make} in \texttt{paper/}
+rebuilds the manuscript). Numbers from runs not in that folder (the development
+study, TimesFM on Dominick's and Frat, TimesFM with the plan, and the analyses
+of saved forecasts) are copied into \texttt{paper/figs/rwdata.py} from
+\texttt{results/README.md}, which names each run folder. Forecast files and model
+checkpoints are kept outside the repository, with their checksums recorded in
+each run's scores so a stored file can be shown to be the one the run produced.
 
-\section{Data and code availability}
+\paragraph{Seeds and repeat runs}
+Trained models in the final tests ran with seeds 1, 2 and 3. Runs on a GPU do
+not repeat exactly; the seed ranges in every table show how far apart repeats
+fall: on M5, LightGBM seeds differ by 0.001 to 0.012 over all levels and world-model
+seeds by 0.014 to 0.029. TimesFM has no training
+randomness and was run once per window.
 
+\paragraph{Compute}
+Every run used one Google Colab machine: an NVIDIA \computeGpu{} with
+\computeGpuMem{}~GB of memory, a \computeCores-core \computeCpu{} and
+\computeRam{}~GB of memory, PyTorch \computeTorch{} with CUDA \computeCuda.
+LightGBM ran on the machine's CPU. Table~\ref{tab:compute} gives the run time of
+every timed final and comparison run: \computeRuns{} runs and \computeHours{}
+machine-hours in all. A world-model seed on M5 takes about 100 minutes, of which
+about 3 seconds is forecasting the 28 days; LightGBM about 78 minutes; the graph
+model about 7 minutes; TimesFM about 4 minutes, with no training. A Dominick's
+category takes about 9 minutes for the world model (three fits) and 3 to 12 for
+LightGBM, and a Frat run about 2 minutes. The development study ran on the same
+machine type and is not counted in the table.
+
+\input{generated/tab_compute}
+
+\section{Data, code and licence}
+\label{sec:licence}
+
+\paragraph{Data}
 M5 is available from the competition's Kaggle page~\cite{m5accuracy};
 Dominick's from the Kilts Center for Marketing, University of Chicago Booth
 School of Business~\cite{dominicks}; Breakfast at the Frat from
-dunnhumby~\cite{frat}. Code: \url{https://github.com/Kar488/retail-world-models}.
+dunnhumby~\cite{frat}. Each is obtained from its provider under the provider's
+own terms. No data is redistributed with the code; the repository holds loaders
+that read the providers' files and record their checksums.
+
+\paragraph{Code}
+\url{https://github.com/Kar488/retail-world-models}.
+
+\paragraph{Licence}
+The work is released for non-commercial use only. The code, including the
+scripts that draw the figures and tables, is licensed under the PolyForm
+Noncommercial License~1.0.0. The manuscript text, figures and tables are
+licensed under Creative Commons Attribution-NonCommercial~4.0 International
+(CC~BY-NC~4.0). Commercial use of either needs a separate licence from the
+author.
 
 \input{references}

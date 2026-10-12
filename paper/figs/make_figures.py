@@ -817,8 +817,64 @@ def fig_frat_story():
     save(fig, OUT / "fig_frat_story.pdf")
 
 
+# ------------------------------------------------- the study at a glance ---
+def fig_solution():
+    fig = plt.figure(figsize=(FULL, 3.3))
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.set_xlim(0, 20)
+    ax.set_ylim(0, 10)
+    ax.axis("off")
+
+    def box(x, y, w, h, title, lines, face="white", edge=EDGE, tcol=ACCENT, fs=6.2):
+        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.02,rounding_size=0.18",
+                                    facecolor=face, edgecolor=edge, lw=0.8))
+        ax.text(x + 0.15, y + h - 0.2, title, fontsize=7.0, weight="bold", color=tcol, va="top")
+        for i, ln in enumerate(lines):
+            ax.text(x + 0.15, y + h - 0.75 - i * 0.44, ln, fontsize=fs, va="top", color=INK)
+
+    def arrow(x0, y0, x1, y1, color=ACCENT):
+        ax.add_patch(FancyArrowPatch((x0, y0), (x1, y1), arrowstyle="-|>", mutation_scale=8, color=color,
+                                     lw=1.0, shrinkA=0, shrinkB=0))
+
+    top, h = 5.0, 4.6
+    cols = [
+        (0.15, 2.95, "1  Public data", ["M5: daily, 30,490", "item-stores", "Dominick's: weekly,", "6 categories (28 in", "development)", "Frat: weekly, 3,909", "item-stores"]),
+        (3.3, 3.0, "2  One table", ["item × store × period:", "units, price, and the", "plan as known future", "inputs (promotion,", "display, feature,", "events, SNAP days)"]),
+        (6.5, 3.15, "3  Seven models", ["see the plan: world", "model, lift model,", "LightGBM, graph", "model, TimesFM", "with the plan", "history only: TimesFM,", "seasonal naive"]),
+        (9.85, 3.05, "4  Development", ["windows before the", "final weeks only;", "each change screened", "against fixed rules;", "settings written", "down, then locked"]),
+        (13.3, 3.05, "5  Final tests", ["run once, 3 seeds;", "M5: 4 months, two", "never used to choose;", "Dominick's and Frat:", "last 8 weeks; every", "losing model reported"]),
+        (16.55, 3.3, "6  Scored by grain", ["every level, from item", "by store to chain total", "(12 on M5, 6 on the", "others); promoted,", "after-promotion and", "ordinary weeks"]),
+    ]
+    for i, (x, w, t, lines) in enumerate(cols):
+        face = FILL if i in (3, 4) else "white"
+        box(x, top, w, h, t, lines, face=face)
+        if i < len(cols) - 1:
+            nx = cols[i + 1][0]
+            arrow(x + w + 0.02, top + h / 2, nx - 0.02, top + h / 2)
+    ax.plot([13.12, 13.12], [top - 0.1, top + h + 0.1], color=INK, lw=1.0, ls=(0, (3, 2)))
+    ax.text(13.12, top + h + 0.15, "settings locked", fontsize=5.8, ha="center", color=INK)
+    # answers by decision
+    ax.text(0.15, 4.45, "What the grain decides", fontsize=7.6, weight="bold", color=INK, va="top")
+    ans = [
+        ("Store orders", "item by store", "history read by a pretrained\nmodel is enough when prices\nrarely move (M5)", COLOR["tfm"]),
+        ("Promotion and price", "item by week, changed plan", "the plan is needed; history\nalone sees 29% to 63% of\npromoted-week sales", ACCENT),
+        ("Category plans", "category or chain total", "get the month's level right;\nplan-aware models 21% to 47%\nlower error than TimesFM", ACCENT),
+        ("Choosing a model", "any", "score several months: one\nM5 month reversed the\nranking", MUTED),
+    ]
+    w = 4.75
+    for i, (dec, grain, res, c) in enumerate(ans):
+        x = 0.15 + i * (w + 0.2)
+        ax.add_patch(FancyBboxPatch((x, 0.2), w, 3.65, boxstyle="round,pad=0.02,rounding_size=0.18",
+                                    facecolor=tint(c, 0.12), edgecolor=c, lw=0.9))
+        ax.text(x + 0.18, 3.62, dec, fontsize=7.2, weight="bold", color=INK, va="top")
+        ax.text(x + 0.18, 3.0, grain, fontsize=6.2, color=MUTED, va="top", style="italic")
+        ax.text(x + 0.18, 2.35, res, fontsize=6.4, color=INK, va="top", linespacing=1.35)
+    save(fig, OUT / "fig_solution.pdf")
+
+
 def main():
     use_style()
+    fig_solution()
     fig_overview()
     fig_cube()
     fig_readback()

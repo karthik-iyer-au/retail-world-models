@@ -1,0 +1,30 @@
+\begin{table}[t]
+\centering
+\caption{\textbf{Run times of the final and comparison runs, from their manifests.} Wall-clock minutes per
+run (data loading, training, forecasting and scoring) and hours in total, on one Google Colab machine with an NVIDIA Tesla T4 (LightGBM uses its CPU). Dominick's:
+six categories together; a Dominick's world-model run averages three fits. Two M5 runs resumed after the
+Colab runtime dropped record only the resumed part (the shortest values in their rows). Not counted: runs saved before
+run times were recorded, the development study, and TimesFM on Dominick's and Frat.}
+\label{tab:compute}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{llrrlr}
+\toprule
+\textbf{Data} & \textbf{Model} & \textbf{Runs} & \textbf{Median} & \textbf{Range} & \textbf{Hours} \\
+\midrule
+M5 & World model & 9 & 101.5 & 37.3 to 103.2 & 14.0 \\
+M5 & Lift model & 9 & 88.7 & 10.3 to 94.6 & 12.2 \\
+M5 & LightGBM & 9 & 78.1 & 76.5 to 79.9 & 11.7 \\
+M5 & Graph model & 12 & 7.2 & 7.2 to 7.5 & 1.5 \\
+M5 & TimesFM & 8 & 3.9 & 3.8 to 4.1 & 0.5 \\
+M5 & Seasonal naive & 2 & 1.3 & 1.2 to 1.3 & 0.0 \\
+Dominick's & World model & 18 & 9.2 & 9.0 to 10.6 & 2.8 \\
+Dominick's & LightGBM & 18 & 4.6 & 3.1 to 11.5 & 1.7 \\
+Frat & World model & 3 & 2.2 & 2.2 to 2.2 & 0.1 \\
+Frat & Lift model & 3 & 2.0 & 1.9 to 2.0 & 0.1 \\
+Frat & LightGBM & 3 & 1.5 & 1.5 to 1.6 & 0.1 \\
+\midrule
+\multicolumn{5}{l}{All 94 timed runs} & 44.7 \\
+\bottomrule
+\end{tabular}
+\end{table}
