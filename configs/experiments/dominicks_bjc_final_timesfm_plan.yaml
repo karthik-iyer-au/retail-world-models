@@ -1,0 +1,32 @@
+# TimesFM 2.5 with the plan: its own covariate method ("xreg + timesfm"), mean output, the plan inputs
+# promotion and price against the highest price in the context window. A comparison added after the final tests.
+# Dataset and evaluation copied unchanged from dominicks_bjc_final_timesfm_mean.yaml. Settings fixed before any run.
+name: dominicks_bjc_final_timesfm_plan
+seed: 0
+dataset:
+  name: dominicks
+  params:
+    categories:
+    - bjc
+model:
+  name: timesfm
+  params:
+    context: 512
+    batch_size: 256
+    point: mean
+    plan:
+    - promo
+    price_plan: true
+    ridge: 1.0
+evaluation:
+  horizon: 8
+  n_origins: 1
+  holdout_periods: 0
+  scale_lag: 1
+  weight_window: 13
+  conditions:
+  - promo
+  after_promo:
+    levers:
+    - promo
+    periods: 2

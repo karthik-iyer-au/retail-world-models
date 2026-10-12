@@ -1,0 +1,34 @@
+# TimesFM 2.5 with the plan as covariates on every window: M5 (four), Frat final, Dominick's finals (six).
+datasets:
+- name: breakfast_at_the_frat
+  from: /content/drive/MyDrive/retail-world-model/data
+- name: dominicks
+  codes:
+  - che
+  - sna
+  - sdr
+  - bjc
+  - ana
+  - fre
+runs:
+- config: configs/experiments/frat_final_timesfm_plan.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_che_final_timesfm_plan.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_final_timesfm_plan.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_final_timesfm_plan.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bjc_final_timesfm_plan.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ana_final_timesfm_plan.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fre_final_timesfm_plan.yaml
+  seeds:
+  - 1

@@ -1,0 +1,25 @@
+# TimesFM 2.5 with the plan: its own covariate method ("xreg + timesfm"), mean output, the plan inputs
+# event and SNAP days and price against the highest price in the context window. A comparison added after the final tests.
+# Dataset and evaluation copied unchanged from m5_test_timesfm_mean.yaml. Settings fixed before any run.
+name: m5_test_timesfm_plan
+seed: 0
+dataset:
+  name: m5
+  params:
+    include_test: true
+model:
+  name: timesfm
+  params:
+    context: 512
+    batch_size: 256
+    point: mean
+    plan:
+    - event
+    - snap
+    price_plan: true
+    ridge: 1.0
+evaluation:
+  horizon: 28
+  n_origins: 1
+  scale_lag: 1
+  weight_window: 28

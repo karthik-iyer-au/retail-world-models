@@ -1,9 +1,12 @@
 """TimesFM 2.5, a pretrained time-series foundation model (Das et al., 2024),
 used zero-shot: it is not trained or tuned on our data.
 
-It sees each series' unit history only. It gets no prices, promotions or
-calendar, so it answers "what will sell if nothing changes", not "what will
-sell under this plan". It is reported as a comparison on accuracy only.
+By default it sees each series' unit history only: no prices, promotions or
+calendar, so it answers "what will sell if nothing changes". With `plan` (and
+`price_plan`) it also gets the plan, through the package's own covariate
+method (`forecast_with_covariates`, "xreg + timesfm"): a linear model on the
+plan inputs, fitted in context over the series forecast together, and
+TimesFM on what that model leaves. History plus plan in one forecaster.
 
 Needs the optional `foundation` dependencies (`pip install -e ".[foundation]"`)
 and downloads the checkpoint from Hugging Face on first use.
@@ -11,13 +14,13 @@ and downloads the checkpoint from Hugging Face on first use.
 import numpy as np
 import pandas as pd
 
-from rwm.data.schema import DATE, SERIES, UNITS
+from rwm.data.schema import DATE, PRICE, SERIES, UNITS
 from rwm.forecaster import Forecaster, register_model
 
 REPO = "google/timesfm-2.5-200m-pytorch"
 
 
-def _load(context: int, horizon: int, batch_size: int):
+def _load(context: int, horizon: int, batch_size: int, backcast: bool = False):
     import timesfm
     import torch
 
@@ -32,6 +35,7 @@ def _load(context: int, horizon: int, batch_size: int):
         force_flip_invariance=True,
         infer_is_positive=True,
         fix_quantile_crossing=True,
+        return_backcast=backcast,  # needed by forecast_with_covariates
     ))
     return model
 
@@ -51,10 +55,16 @@ class TimesFMZeroShot(Forecaster):
     record in the context window is forecast at zero.
     """
 
-    def __init__(self, context: int = 512, batch_size: int = 256, point: str = "median", loader=None):
+    def __init__(self, context: int = 512, batch_size: int = 256, point: str = "median",
+                 plan: list[str] | None = None, price_plan: bool = False, ridge: float = 1.0, loader=None):
+        # plan: columns given for every period (history and future), e.g. promo, event, snap.
+        # price_plan: also give each period's price against the series' highest price in the context window.
         if point not in ("median", "mean"):
             raise ValueError("point must be 'median' or 'mean'")
         self.point = point
+        self.plan = list(plan or [])
+        self.price_plan = price_plan
+        self.ridge = ridge
         self.context = context
         self.batch_size = batch_size
         self._loader = loader or _load
@@ -75,19 +85,61 @@ class TimesFMZeroShot(Forecaster):
         values = np.where(started & ~seen, 0.0, values)  # after the first record, a missing day sold nothing
         self._series = grid.index.to_numpy()
         self._history = values
+        self._plan_past = {}
+        if self.plan or self.price_plan:
+            for c in self.plan:
+                g = recent.pivot_table(index=SERIES, columns=DATE, values=c, aggfunc="max", observed=True)
+                self._plan_past[c] = g.reindex(index=grid.index, columns=self._dates).to_numpy(dtype="float64")
+            if self.price_plan:
+                g = recent.pivot_table(index=SERIES, columns=DATE, values=PRICE, aggfunc="mean", observed=True)
+                price = g.reindex(index=grid.index, columns=self._dates).to_numpy(dtype="float64")
+                with np.errstate(all="ignore"):
+                    self._top = np.nanmax(price, axis=1)
+                self._plan_past["price"] = price
         return self
+
+    def _covariates(self, future: pd.DataFrame, horizon: int, keep: list[np.ndarray]) -> dict:
+        """Each plan input over each series' history (as kept) and the horizon."""
+        fut_dates = self._end + np.arange(1, horizon + 1) * self._step
+        out = {}
+        for c, past in self._plan_past.items():
+            col = PRICE if c == "price" else c
+            g = future.pivot_table(index=SERIES, columns=DATE, values=col, aggfunc="max", observed=True)
+            fut = g.reindex(index=self._series, columns=fut_dates).to_numpy(dtype="float64")
+            both = np.concatenate([past, fut], axis=1)
+            if c == "price":  # price against the highest in the context window; unknown counts as regular
+                with np.errstate(all="ignore"):
+                    both = both / self._top[:, None]
+                both = np.where(np.isfinite(both) & (both > 0), both, 1.0)
+            else:
+                both = np.nan_to_num(both)
+            series = []
+            for i, k in enumerate(keep):
+                hist = both[i, : len(self._dates)][k] if k.any() else np.zeros(3)
+                series.append(np.concatenate([hist, both[i, len(self._dates):]]).tolist())
+            out[f"plan_{c}"] = series
+        return out
 
     def predict(self, future: pd.DataFrame) -> np.ndarray:
         ahead = ((future[DATE].to_numpy() - self._end) / self._step).astype(int)
         horizon = int(ahead.max())
         rows = {s: i for i, s in enumerate(self._series)}
-        inputs, has = [], np.zeros(len(self._series), dtype=bool)
+        inputs, keep, has = [], [], np.zeros(len(self._series), dtype=bool)
         for i, h in enumerate(self._history):
-            h = h[np.isfinite(h)]
-            has[i] = len(h) > 0
-            inputs.append(h if has[i] else np.zeros(3))
-        model = self._loader(self.context, max(horizon, 1), self.batch_size)
-        median, full = model.forecast(horizon=horizon, inputs=inputs)
+            k = np.isfinite(h)
+            keep.append(k)
+            has[i] = k.any()
+            inputs.append(h[k] if has[i] else np.zeros(3))
+        if self._plan_past:
+            model = self._loader(self.context, max(horizon, 1), self.batch_size, True)
+            median, full = model.forecast_with_covariates(
+                inputs=inputs, dynamic_numerical_covariates=self._covariates(future, horizon, keep),
+                xreg_mode="xreg + timesfm", ridge=self.ridge,
+            )
+            median, full = np.stack(median), np.stack(full)
+        else:
+            model = self._loader(self.context, max(horizon, 1), self.batch_size)
+            median, full = model.forecast(horizon=horizon, inputs=inputs)
         # `full` holds the mean first, then the 0.1 to 0.9 quantiles
         point = median if self.point == "median" else np.asarray(full)[..., 0]
         point = np.clip(np.asarray(point, dtype="float64")[:, :horizon], 0.0, None)
