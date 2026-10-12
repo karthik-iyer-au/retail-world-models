@@ -1,0 +1,20 @@
+# TimesFM on the official M5 test period (23 May to 19 June 2016),
+# scored with the 12-level WRMSSE.
+# TimesFM 2.5 (200M), zero-shot: not trained on M5, sees unit history only (last 512 days), no prices or promotions.
+# Evaluation settings copied unchanged from m5_test_seasonal_naive.yaml.
+name: m5_test_timesfm
+seed: 0
+dataset:
+  name: m5
+  params:
+    include_test: true
+model:
+  name: timesfm
+  params:
+    context: 512
+    batch_size: 256
+evaluation:
+  horizon: 28
+  n_origins: 1
+  scale_lag: 1
+  weight_window: 28
