@@ -1033,8 +1033,8 @@ Findings.
 Findings.
 
 - Over the 8 weeks the world model's total is right (forecast / actual 1.000) and LightGBM is 6.3% under. The world model loses on the week-to-week shape: its weekly totals are off by 10.2% on average against LightGBM's 8.2%, and LightGBM is closer on 58.6% of item-store pairs.
-- The world model's misses are the holiday weeks: it is 16% over in the week before the early-December rise, 15% to 17% under in the two December peak weeks, and 24% over in the week after Christmas, when sales dropped to 50,941. LightGBM, with the calendar and year-ago sales as inputs, follows the holiday shape more closely.
-- This is the development-to-final drop on Frat: the development windows held no holiday weeks.
+- The world model's misses are the holiday weeks: it is 16% over in the week before the early-December rise, 15% to 17% under in the two December peak weeks, and 24% over in the week after Christmas, when sales dropped to 50,941. LightGBM, with week-of-year and month inputs and 90 weeks of training that include the previous holiday season, follows the holiday shape more closely.
+- This is the development-to-final drop on Frat: the two development windows (the 16 weeks before 16 November 2011) held no holiday weeks.
 
 ## Change C on the Dominick's and Frat development windows (twice the training steps, three seeds)
 
