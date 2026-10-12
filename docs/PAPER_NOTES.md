@@ -695,9 +695,9 @@ Final tests (settings fixed beforehand, reported once):
 | Frat final | LightGBM, all levers | 0.549 | Best |
 | Frat final | World model | 0.681 | Lost; no total bias (forecast / actual 1.000) |
 | Frat final | Lift model | 0.714 | Lost |
-| Frat final | TimesFM 2.5 zero-shot, mean output | 0.965 | Lost; 29% to 63% of promoted-week sales on Dominick's, error on promoted weeks 1.284 on Frat |
+| Frat final | TimesFM 2.5 zero-shot, mean output | 0.965 | Lost; error on promoted weeks 1.284 against 0.510 on other weeks |
 | Dominick's final | World model (switching, normalised, 3-fit average) | 2 wins, 1 level, 3 losses of 6 | Wins soft drinks and analgesics |
-| Dominick's final | TimesFM 2.5 zero-shot, mean output | best in 1 of 6 (bottled juice 0.940) | Behind both item by store in 5 of 6 |
+| Dominick's final | TimesFM 2.5 zero-shot, mean output | best in 1 of 6 (bottled juice 0.940) | Behind both item by store in 5 of 6; forecasts 29% to 63% of promoted-week sales |
 
 Benchmarks on development windows that lost to LightGBM: seasonal naive (M5 0.870, Frat 0.832), average of last 8 weeks (Frat 0.756), LightGBM with price only (Frat 0.554 against 0.447 with all levers), our item encoder and readout alone (M5 practice 0.708).
 

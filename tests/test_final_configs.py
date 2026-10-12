@@ -6,7 +6,10 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1] / "configs" / "experiments"
-FINALS = sorted(p for p in ROOT.glob("*.yaml") if re.search(r"_final_|^m5_test_(world_model|lift)", p.stem))
+# TimesFM on the final windows is a comparison added after the final tests, with no
+# development config and nothing to tune, so it is not held to this check.
+FINALS = sorted(p for p in ROOT.glob("*.yaml")
+                if re.search(r"_final_|^m5_test_(world_model|lift)", p.stem) and "timesfm" not in p.stem)
 
 
 def test_there_are_final_configs():
