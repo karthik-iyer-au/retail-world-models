@@ -698,6 +698,7 @@ Final tests (settings fixed beforehand, reported once):
 | Frat final | TimesFM 2.5 zero-shot, mean output | 0.965 | Lost; error on promoted weeks 1.284 against 0.510 on other weeks |
 | Dominick's final | World model (switching, normalised, 3-fit average) | 2 wins, 1 level, 3 losses of 6 | Wins soft drinks and analgesics |
 | Dominick's final | TimesFM 2.5 zero-shot, mean output | best in 1 of 6 (bottled juice 0.940) | Behind both item by store in 5 of 6; forecasts 29% to 63% of promoted-week sales |
+| Frat and Dominick's final | TimesFM with the plan as covariates | best in cheese (0.545); Frat 0.686 | Behind a trained plan-aware model in 4 of 6 categories; M5 unchanged by the plan |
 
 Benchmarks on development windows that lost to LightGBM: seasonal naive (M5 0.870, Frat 0.832), average of last 8 weeks (Frat 0.756), LightGBM with price only (Frat 0.554 against 0.447 with all levers), our item encoder and readout alone (M5 practice 0.708).
 
@@ -757,6 +758,12 @@ Changes that did not become defaults (window, seeds, result):
 
 - Behind both plan-aware models item by store on Frat (0.827 against 0.608 and 0.665) and in five of six Dominick's categories; it forecasts 29% to 63% of promoted-week sales. Best overall only in bottled juice (0.940).
 - For the paper, the clearest grain-and-data result so far: a plan-blind model is best item by store where the plan rarely moves sales (M5 daily, few price changes) and worst where promotions drive the weeks (Dominick's, Frat). The value of a plan-aware model depends on how much of the variance the plan explains, and at which grain the user plans.
+
+## TimesFM with the plan (13 October 2026)
+
+- On Dominick's and Frat the plan recovers most of TimesFM's promoted-week shortfall (60% to 113% of promoted-week sales against 29% to 63%). Best overall in cheese (0.545), level with the world model on Frat (0.686 against 0.681), behind the trained plan-aware models in four of six Dominick's categories.
+- On M5 it changes almost nothing (item by store within 0.002 in every window).
+- For the paper: history plus plan bolted onto a pretrained model is a strong baseline where promotions drive sales, but does not replace a model trained on the plan. Together with TimesFM without the plan this closes the open question for the paper: the plan's value scales with how much of the sales it moves, and how it enters the model matters.
 
 ## Graph model over product attributes on M5 (12 October 2026)
 

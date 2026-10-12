@@ -1116,6 +1116,37 @@ Findings.
 | Frat | `..._frat_final_timesfm_mean_seed1_aa60fa3e` |
 | Dominick's | `..._dominicks_<code>_final_timesfm_mean_seed1_...` (che d9208b19, sna 128f0d21, sdr 56dccef1, bjc 2ecac335, ana c0694fb5, fre 38dabd86) |
 
+## TimesFM with the plan, every window
+
+Jobs `configs/jobs/timesfm_plan_frat_dominicks.yaml` and `configs/jobs/timesfm_plan_m5.yaml`, commit d5a1d0a, run 12 to 13 October 2026, one run each. TimesFM 2.5 with the plan given through the package's own covariate method (`forecast_with_covariates`, "xreg + timesfm": a linear model on the plan inputs fitted in context over each 2,048 series, then TimesFM on what it leaves), mean output. Plan inputs: M5 event and SNAP days; Frat promotion, display, feature, price-reduction-only; Dominick's promotion; and in all three, price against the series' highest price in the context window. Settings fixed before any run. An earlier attempt over every series in one call ran out of memory on soft drinks and was rerun in full with the chunks. Lower is better.
+
+| Data | TimesFM, history only | TimesFM with plan | World model | LightGBM | With plan: item by store | With plan: promoted weeks, forecast / actual (history only) |
+|---|---|---|---|---|---|---|
+| Frat | 0.965 | 0.686 | 0.681 | **0.549** | 0.641 | promotion on: error 0.869 (1.284) |
+| Dominick's cheese | 0.829 | **0.545** | 0.897 | 0.708 | 0.699 | 0.685 (0.343) |
+| Dominick's snack crackers | 0.468 | 0.475 | 0.448 | **0.412** | 0.614 | 1.129 (0.630) |
+| Dominick's soft drinks | 1.070 | 0.974 | **0.830** | 0.989 | 0.780 | 0.932 (0.462) |
+| Dominick's bottled juice | **0.940** | 0.990 | 0.987 | 0.994 | 0.754 | 0.603 (0.327) |
+| Dominick's analgesics | 1.009 | 0.889 | **0.867** | 0.978 | 0.742 | 0.779 (0.306) |
+| Dominick's frozen entrees | 0.563 | 0.566 | 0.485 | **0.478** | 0.599 | 0.942 (0.290) |
+| M5, 29 Feb to 27 Mar | 0.854 | 0.858 | **0.642** | 0.709 | 0.837 | |
+| M5, 28 Mar to 24 Apr | 0.819 | 0.772 | **0.555** | 0.557 | 0.829 | |
+| M5, practice | 0.896 | 0.929 | **0.646** | 0.715 | 0.830 | |
+| M5, official test | 0.729 | 0.719 | 0.638 | **0.547** | 0.883 | |
+
+Findings.
+
+- On the promotion-driven data the plan closes most of TimesFM's promoted-week gap: it forecasts 60% to 113% of promoted-week sales against 29% to 63% without the plan, and overall improves in Frat (0.965 to 0.686), cheese (0.829 to 0.545), soft drinks and analgesics.
+- It is the best model in cheese (0.545 against 0.708 for LightGBM), level with the world model on Frat (0.686 against 0.681), and behind the world model or LightGBM in the other four Dominick's categories. In bottled juice the plan made it slightly worse (0.940 to 0.990).
+- On M5 the plan changes almost nothing: item by store within 0.002 of TimesFM without the plan in every window, overall better in two windows and worse in two. Where prices change rarely, the plan carries little that history does not.
+- So a plan added on top of a pretrained history model recovers much of what promotions cost it, but does not replace a model trained on the plan.
+
+| Run | Folder |
+|---|---|
+| Frat | `20261012T212808_frat_final_timesfm_plan_seed1_b2ff46c9` |
+| Dominick's | `..._dominicks_<code>_final_timesfm_plan_seed1_...` (che 2e0c6e95, sna baf6301b, sdr 48856580, bjc 138b1f69, ana 15af2754, fre 6c07c8c2) |
+| M5 | `..._m5_<window>_timesfm_plan_seed1_...` (confirm_mar 833cbd38, confirm_apr 2b1ef5e7, validation 0122d676, test b53cc129) |
+
 ## Change C on the Dominick's and Frat development windows (twice the training steps, three seeds)
 
 Job `configs/jobs/dev_steps2x.yaml`, commit 6a98e67, run 11 to 12 October 2026. Each config is the development config unchanged except for twice the training steps (Dominick's 12,000 instead of 6,000, inside the average of three fits; Frat 6,000 instead of 3,000). Same seeds 1 to 3 as the runs compared against. Overall score, lower is better.
