@@ -819,56 +819,184 @@ def fig_frat_story():
 
 # ------------------------------------------------- the study at a glance ---
 def fig_solution():
-    fig = plt.figure(figsize=(FULL, 3.3))
-    ax = fig.add_axes([0, 0, 1, 1])
-    ax.set_xlim(0, 20)
-    ax.set_ylim(0, 10)
-    ax.axis("off")
+    fig = plt.figure(figsize=(FULL, 5.0))
+    # ---- top row: method, four schematic panels joined by arrows
+    tops = [fig.add_axes([0.005 + i * 0.25, 0.575, 0.225, 0.40]) for i in range(4)]
+    for ax in tops:
+        ax.set_xlim(0, 10)
+        ax.set_ylim(0, 10)
+        ax.axis("off")
+        ax.add_patch(FancyBboxPatch((0.1, 0.1), 9.8, 9.3, boxstyle="round,pad=0.02,rounding_size=0.35",
+                                    facecolor=FILL, edgecolor="none"))
+    titles = ["Public retail data", "Seven models", "Settings locked first", "Scored at every level"]
+    for ax, t, letter in zip(tops, titles, "abcd"):
+        ax.text(0.45, 9.0, f"({letter})", fontsize=8.5, weight="bold", va="top")
+        ax.text(1.75, 9.0, t, fontsize=7.6, weight="bold", va="top", color=INK)
+    for i in range(3):
+        x0 = 0.005 + i * 0.25 + 0.225
+        fig.patches.append(FancyArrowPatch((x0 + 0.003, 0.775), (x0 + 0.022, 0.775), transform=fig.transFigure,
+                                           arrowstyle="-|>", mutation_scale=10, color=ACCENT, lw=1.3))
 
-    def box(x, y, w, h, title, lines, face="white", edge=EDGE, tcol=ACCENT, fs=6.2):
-        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.02,rounding_size=0.18",
-                                    facecolor=face, edgecolor=edge, lw=0.8))
-        ax.text(x + 0.15, y + h - 0.2, title, fontsize=7.0, weight="bold", color=tcol, va="top")
-        for i, ln in enumerate(lines):
-            ax.text(x + 0.15, y + h - 0.75 - i * 0.44, ln, fontsize=fs, va="top", color=INK)
+    # (a) data cube and the three data sets
+    ax = tops[0]
+    ox, oy, cw, dx, dy = 0.9, 3.0, 0.52, 0.26, 0.2
+    for j in range(6):
+        for i in range(6):
+            x, y = ox + i * cw, oy + j * cw
+            hi = (i == 3 and j == 2)
+            ax.add_patch(Polygon([(x, y), (x + cw, y), (x + cw, y + cw), (x, y + cw)], facecolor=ACCENT if hi else "white",
+                                 edgecolor=EDGE, lw=0.35))
+    for k in range(4):
+        for i in range(6):
+            x, y = ox + i * cw + k * dx, oy + 6 * cw + k * dy
+            ax.add_patch(Polygon([(x, y), (x + cw, y), (x + cw + dx, y + dy), (x + dx, y + dy)], facecolor="#dfe5ec",
+                                 edgecolor=EDGE, lw=0.35))
+        for j in range(6):
+            x, y = ox + 6 * cw + k * dx, oy + j * cw + k * dy
+            ax.add_patch(Polygon([(x, y), (x + dx, y + dy), (x + dx, y + cw + dy), (x, y + cw)], facecolor="#c9d3de",
+                                 edgecolor=EDGE, lw=0.35))
+    ax.text(ox + 3 * cw, oy - 0.35, "period", fontsize=5.6, ha="center", va="top", color=MUTED)
+    ax.text(ox - 0.2, oy + 3 * cw, "item", fontsize=5.6, ha="right", va="center", rotation=90, color=MUTED)
+    ax.text(ox + 6 * cw + 4 * dx + 0.05, oy + 6 * cw + 4 * dy, "store", fontsize=5.6, color=MUTED, va="bottom")
+    rows = [("M5", "daily, 30,490 series"), ("Dominick's", "weekly, 6 categories"), ("Frat", "weekly, 3,909 series")]
+    for r, (n, d) in enumerate(rows):
+        ax.text(0.6, 1.95 - r * 0.62, n, fontsize=6.3, weight="bold", va="center")
+        ax.text(3.6, 1.95 - r * 0.62, d, fontsize=5.9, va="center", color=INK)
+    ax.text(6.55, 5.3, "units, price\nand the plan:\npromotion,\ndisplay,\nfeature,\nevents", fontsize=5.6,
+            va="center", color=INK, linespacing=1.25)
 
-    def arrow(x0, y0, x1, y1, color=ACCENT):
-        ax.add_patch(FancyArrowPatch((x0, y0), (x1, y1), arrowstyle="-|>", mutation_scale=8, color=color,
-                                     lw=1.0, shrinkA=0, shrinkB=0))
+    # (b) models: rolled state chain and the model list
+    ax = tops[1]
+    xs = [0.6, 2.9, 5.2, 7.5]
+    for i, x in enumerate(xs):
+        ax.add_patch(FancyBboxPatch((x, 5.6), 1.6, 1.1, boxstyle="round,pad=0.02,rounding_size=0.15",
+                                    facecolor=ACCENT if i else "white", edgecolor=ACCENT, lw=0.8))
+        ax.text(x + 0.8, 6.15, [r"$s_t$", r"$s_{t+1}$", r"$s_{t+2}$", r"$s_{t+3}$"][i], ha="center", va="center",
+                fontsize=7.5, color="white" if i else ACCENT)
+        if i:
+            ax.add_patch(FancyArrowPatch((x + 0.8, 8.1), (x + 0.8, 6.75), arrowstyle="-|>", mutation_scale=6,
+                                         color=COLOR["tfm_plan"], lw=0.9))
+            ax.text(x + 0.8, 8.15, "plan", fontsize=5.6, ha="center", va="bottom", color=COLOR["tfm_plan"])
+            ax.add_patch(FancyArrowPatch((xs[i - 1] + 1.6, 6.15), (x, 6.15), arrowstyle="-|>", mutation_scale=6,
+                                         color=ACCENT, lw=0.9))
+    ax.text(0.6, 5.0, "state rolled forward under the plan", fontsize=5.7, va="top", color=MUTED)
+    models = [("world", "World model"), ("lift", "Lift model"), ("lgb", "LightGBM"), ("graph", "Graph model"),
+              ("tfm_plan", "TimesFM + plan"), ("tfm", "TimesFM"), ("naive", "Seasonal naive")]
+    for k, (m, n) in enumerate(models):
+        col, row = k % 2, k // 2
+        x, y = 0.7 + col * 4.6, 3.9 - row * 0.85
+        ax.scatter([x], [y], s=16, marker=MARKER[m], color=COLOR[m], edgecolor="white", lw=0.4, zorder=3)
+        ax.text(x + 0.35, y, n, fontsize=5.9, va="center")
+    ax.text(9.6, 0.55, "first five see the plan", fontsize=5.4, ha="right", color=MUTED)
 
-    top, h = 5.0, 4.6
-    cols = [
-        (0.15, 2.95, "1  Public data", ["M5: daily, 30,490", "item-stores", "Dominick's: weekly,", "6 categories (28 in", "development)", "Frat: weekly, 3,909", "item-stores"]),
-        (3.3, 3.0, "2  One table", ["item × store × period:", "units, price, and the", "plan as known future", "inputs (promotion,", "display, feature,", "events, SNAP days)"]),
-        (6.5, 3.15, "3  Seven models", ["see the plan: world", "model, lift model,", "LightGBM, graph", "model, TimesFM", "with the plan", "history only: TimesFM,", "seasonal naive"]),
-        (9.85, 3.05, "4  Development", ["windows before the", "final weeks only;", "each change screened", "against fixed rules;", "settings written", "down, then locked"]),
-        (13.3, 3.05, "5  Final tests", ["run once, 3 seeds;", "M5: 4 months, two", "never used to choose;", "Dominick's and Frat:", "last 8 weeks; every", "losing model reported"]),
-        (16.55, 3.3, "6  Scored by grain", ["every level, from item", "by store to chain total", "(12 on M5, 6 on the", "others); promoted,", "after-promotion and", "ordinary weeks"]),
-    ]
-    for i, (x, w, t, lines) in enumerate(cols):
-        face = FILL if i in (3, 4) else "white"
-        box(x, top, w, h, t, lines, face=face)
-        if i < len(cols) - 1:
-            nx = cols[i + 1][0]
-            arrow(x + w + 0.02, top + h / 2, nx - 0.02, top + h / 2)
-    ax.plot([13.12, 13.12], [top - 0.1, top + h + 0.1], color=INK, lw=1.0, ls=(0, (3, 2)))
-    ax.text(13.12, top + h + 0.15, "settings locked", fontsize=5.8, ha="center", color=INK)
-    # answers by decision
-    ax.text(0.15, 4.45, "What the grain decides", fontsize=7.6, weight="bold", color=INK, va="top")
-    ans = [
-        ("Store orders", "item by store", "history read by a pretrained\nmodel is enough when prices\nrarely move (M5)", COLOR["tfm"]),
-        ("Promotion and price", "item by week, changed plan", "the plan is needed; history\nalone sees 29% to 63% of\npromoted-week sales", ACCENT),
-        ("Category plans", "category or chain total", "get the month's level right;\nplan-aware models 21% to 47%\nlower error than TimesFM", ACCENT),
-        ("Choosing a model", "any", "score several months: one\nM5 month reversed the\nranking", MUTED),
-    ]
-    w = 4.75
-    for i, (dec, grain, res, c) in enumerate(ans):
-        x = 0.15 + i * (w + 0.2)
-        ax.add_patch(FancyBboxPatch((x, 0.2), w, 3.65, boxstyle="round,pad=0.02,rounding_size=0.18",
-                                    facecolor=tint(c, 0.12), edgecolor=c, lw=0.9))
-        ax.text(x + 0.18, 3.62, dec, fontsize=7.2, weight="bold", color=INK, va="top")
-        ax.text(x + 0.18, 3.0, grain, fontsize=6.2, color=MUTED, va="top", style="italic")
-        ax.text(x + 0.18, 2.35, res, fontsize=6.4, color=INK, va="top", linespacing=1.35)
+    # (c) protocol timeline
+    ax = tops[2]
+    def bar(x, y, w, c, t, tc=INK):
+        ax.add_patch(Rectangle((x, y), w, 0.75, facecolor=c, edgecolor="white", lw=0.6))
+        if t:
+            ax.text(x + w / 2, y + 0.375, t, fontsize=5.5, ha="center", va="center", color=tc)
+    ax.text(0.5, 7.55, "M5", fontsize=6.3, weight="bold")
+    bar(0.5, 6.45, 1.4, "#e6e9ee", "")
+    for k, (t, c, tc) in enumerate([("Mar", "#c9d6e4", INK), ("Apr", "#c9d6e4", INK), ("Prac.", "#aab3bf", INK),
+                                     ("Test", ACCENT, "white")]):
+        bar(1.9 + k * 1.9, 6.45, 1.9, c, t, tc)
+    ax.text(0.5, 5.25, "Dominick's, Frat", fontsize=6.3, weight="bold")
+    bar(0.5, 4.15, 2.6, "#e6e9ee", "training")
+    bar(3.1, 4.15, 1.8, "#aab3bf", "dev 1")
+    bar(4.9, 4.15, 1.8, "#aab3bf", "dev 2")
+    bar(6.9, 4.15, 2.6, ACCENT, "final 8 wk", "white")
+    ax.plot([6.8, 6.8], [3.6, 5.1], color=INK, lw=1.0)
+    ax.plot([7.6, 7.6], [6.0, 7.3], color=INK, lw=1.0)
+    ax.text(6.8, 3.45, "lock", fontsize=5.5, ha="center", va="top")
+    ax.text(0.5, 2.6, "3 seeds per model\nfinal run once\nlosers reported", fontsize=5.8, va="top",
+            linespacing=1.35)
+    ax.add_patch(Rectangle((5.4, 2.0), 0.5, 0.4, facecolor="#aab3bf", lw=0))
+    ax.text(6.05, 2.2, "chooses settings", fontsize=5.3, va="center", color=MUTED)
+    ax.add_patch(Rectangle((5.4, 1.3), 0.5, 0.4, facecolor=ACCENT, lw=0))
+    ax.text(6.05, 1.5, "scored once", fontsize=5.3, va="center", color=MUTED)
+
+    # (d) hierarchy pyramid
+    ax = tops[3]
+    levels = ["Chain total", "State, store", "Category, dept.", "Crossings", "Item", "Item × state", "Item × store"]
+    for i, n in enumerate(levels):
+        y = 7.6 - i * 0.98
+        w = 2.0 + i * 0.72
+        c = SEQ(0.15 + 0.8 * i / 6)
+        ax.add_patch(Rectangle((3.45 - w / 2, y), w, 0.82, facecolor=c, edgecolor="white", lw=0.6))
+        ax.text(3.45, y + 0.41, n, fontsize=5.6, ha="center", va="center", color=ink_on(c))
+    for y0, y1, t in ((7.6, 8.42, "financial\nplan"), (5.64, 6.46, "sales and\nmargin plans"),
+                      (1.72, 2.54, "price, promo,\norders")):
+        ax.text(9.7, (y0 + y1) / 2, t, fontsize=5.5, ha="right", va="center", color=ACCENT, linespacing=1.15)
+    ax.text(3.45, 0.75, "12 levels on M5, 6 on the others", fontsize=5.4, ha="center", color=MUTED)
+
+    # ---- bottom row: findings, each from the run records
+    fig.text(0.005, 0.545, "Findings", fontsize=8.0, weight="bold", color=INK)
+    bots = [fig.add_axes([0.055 + i * 0.25, 0.085, 0.175, 0.34]) for i in range(4)]
+    months = ["Mar", "Apr", "Prac.", "Test"]
+    x = np.arange(4)
+    # (e) item by store
+    ax = bots[0]
+    for m in ("tfm", "world", "lgb"):
+        ys = [np.mean(D.m5(m, w)["ixs"]) for w in D.M5_WINDOWS]
+        ax.plot(x, ys, color=COLOR[m], marker=MARKER[m], ms=3.6, lw=1.3 if m == "tfm" else 0.9,
+                markeredgecolor="white", markeredgewidth=0.4, label=LABEL[m])
+    ax.set_title("Store orders: history alone\nis most accurate item by store", fontsize=6.8)
+    ax.set_ylabel("WRMSSE, item by store", fontsize=6.2)
+    # (f) totals
+    ax = bots[1]
+    wdt = 0.26
+    for k, m in enumerate(("tfm", "world", "lgb")):
+        ys = [np.mean(D.m5(m, w)["total"]) for w in D.M5_WINDOWS]
+        ax.bar(x + (k - 1) * wdt, ys, width=wdt, color=COLOR[m], label=LABEL[m])
+    ax.set_title("Category plans: models that\nsee the plan win the totals", fontsize=6.8)
+    ax.set_ylabel("WRMSSE, chain total", fontsize=6.2)
+    # (g) promoted weeks
+    ax = bots[2]
+    for i, c in enumerate(D.CATS):
+        t0, t1 = D.TFM_FINAL[c]["promo_fa"], D.TFM_PLAN_FINAL[c]["promo_fa"]
+        ax.annotate("", xy=(i, t1), xytext=(i, t0), arrowprops=dict(arrowstyle="-|>", color=COLOR["tfm_plan"],
+                                                                    lw=1.1, mutation_scale=6, shrinkA=1, shrinkB=1))
+        ax.scatter([i], [t0], s=14, marker=MARKER["tfm"], color=COLOR["tfm"], zorder=3, edgecolor="white", lw=0.3)
+    ax.axhline(1.0, color=INK, lw=0.7, ls=(0, (3, 2)))
+    ax.set_xticks(range(6))
+    ax.set_xticklabels(["Che", "Sna", "Sdr", "Bjc", "Ana", "Fre"], fontsize=5.6)
+    ax.set_ylim(0.2, 1.2)
+    ax.set_title("Promotions: the plan lifts\npromoted weeks towards sales", fontsize=6.8)
+    ax.set_ylabel("Forecast / sales,\npromoted weeks", fontsize=6.2)
+    ax.text(5.4, 1.03, "right", fontsize=5.3, ha="right", va="bottom", color=INK)
+    # (h) winner by month
+    ax = bots[3]
+    win = []
+    for w in D.M5_WINDOWS:
+        sc = {m: np.mean(D.m5(m, w)["overall"]) for m in ("world", "lgb", "graph", "tfm", "lift")}
+        win.append(min(sc, key=sc.get))
+    for i, (m, w) in enumerate(zip(win, D.M5_WINDOWS)):
+        ys = {mm: np.mean(D.m5(mm, w)["overall"]) for mm in ("world", "lgb", "graph", "tfm", "lift")}
+        ax.add_patch(Rectangle((i - 0.42, 0), 0.84, 1, facecolor=tint(COLOR[m], 0.55), edgecolor="white"))
+        ax.scatter([i], [0.72], s=26, marker=MARKER[m], color=COLOR[m], edgecolor="white", lw=0.4)
+        ax.text(i, 0.42, LABEL[m].replace(" model", "\nmodel"), fontsize=5.5, ha="center", va="center")
+        ax.text(i, 0.12, f"{ys[m]:.3f}", fontsize=5.2, ha="center", color=MUTED)
+    ax.set_xlim(-0.5, 3.5)
+    ax.set_ylim(0, 1)
+    ax.set_yticks([])
+    ax.set_title("Model choice: the test month\nis the only LightGBM win", fontsize=6.8)
+    ax.text(-0.45, -0.2, "most accurate over all 12 levels, by month", fontsize=5.3, color=MUTED, transform=ax.transData)
+    for ax, letter in zip(bots, "efgh"):
+        if ax is not bots[2]:
+            ax.set_xticks(x)
+            ax.set_xticklabels(months, fontsize=5.8)
+        ax.tick_params(labelsize=5.6)
+        if ax is not bots[3]:
+            ax.grid(axis="y")
+            ax.set_axisbelow(True)
+            despine(ax)
+        else:
+            for sp in ax.spines.values():
+                sp.set_visible(False)
+            ax.tick_params(axis="x", length=0)
+        ax.text(-0.33, 1.2, f"({letter})", transform=ax.transAxes, fontsize=8.5, weight="bold", va="bottom")
+    fig.legend(handles=model_handles(["tfm", "world", "lgb", "graph", "tfm_plan"], ms=4), loc="lower center",
+               ncol=5, bbox_to_anchor=(0.5, -0.01), fontsize=6.2, handletextpad=0.2, columnspacing=1.2)
     save(fig, OUT / "fig_solution.pdf")
 
 

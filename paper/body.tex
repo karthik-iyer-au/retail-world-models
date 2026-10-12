@@ -69,13 +69,21 @@ The paper finds and contributes the following.
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figs/fig_solution.pdf}
-\caption{\textbf{The study at a glance: one table of public retail data, seven
-models, settings locked before the final tests, and every model scored at every
-level of the hierarchy, which decides what each retail decision needs.} The
-development windows precede the final weeks and were the only data used to
-choose settings. TimesFM, TimesFM with the plan and the graph model were added
-after the final tests, with settings fixed before their first run. The bottom row
-summarises the results of \S\ref{sec:results} by the decision a forecast feeds.}
+\caption{\textbf{The study at a glance: which model is most accurate depends on the
+level the forecast serves, on how much of the sales the plan moves, and on the
+month.} \textbf{(a--d)} Method. Three public data sets in one item, store and
+period table with the plan as known future inputs; seven models, five of which
+see the plan (the world model rolls each item's state forward under it);
+settings chosen on development windows and locked before the final windows;
+every model scored at every level of the hierarchy, from item by store, where
+orders and promotions are decided, to the chain total. TimesFM, TimesFM with the
+plan and the graph model were added after the final tests with settings fixed
+beforehand. \textbf{(e--h)} Findings, from the run records. \textbf{(e)} M5 item
+by store: TimesFM from history alone is lowest in all four months. \textbf{(f)}
+M5 chain total: the plan-aware models are far lower, and which one wins changes
+by month. \textbf{(g)} Dominick's promoted weeks: forecast against sales for
+TimesFM without the plan (diamond) and with it (arrow head). \textbf{(h)} The
+most accurate model over all 12 M5 levels in each month, with its WRMSSE.}
 \label{fig:solution}
 \end{figure*}
 
