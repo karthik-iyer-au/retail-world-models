@@ -16,6 +16,7 @@ model:
     - snap
     price_plan: true
     ridge: 1.0
+    chunk: 2048
 evaluation:
   horizon: 28
   n_origins: 1

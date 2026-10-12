@@ -18,6 +18,7 @@ model:
     - promo
     price_plan: true
     ridge: 1.0
+    chunk: 2048
 evaluation:
   horizon: 8
   n_origins: 1

@@ -93,3 +93,15 @@ def test_plan_reaches_the_covariate_forecast_aligned_with_each_history():
     assert len(cov["plan_promo"][1]) == 5
     # price against the highest price in the window: A at 4.0 of 5.0, B at 2.0 of 4.0
     assert cov["plan_price"][0][-2:] == [0.8, 1.0] and cov["plan_price"][1][-1] == 0.5
+
+
+def test_covariate_forecast_in_chunks_gives_the_same_result():
+    dates = pd.date_range("2016-01-01", periods=6, freq="D")
+    rows = [(f"S{i}", d, float(i), int(d == dates[2]), 5.0) for i in range(5) for d in dates]
+    train = pd.DataFrame(rows, columns=[SERIES, DATE, UNITS, "promo", "price"])
+    future = pd.DataFrame({SERIES: [f"S{i}" for i in range(5)], DATE: dates[-1] + pd.Timedelta(days=1),
+                           "promo": [1, 0, 1, 0, 1], "price": 5.0})
+    loader = lambda c, h, b, back=False: FakeCovariateModel([])
+    whole = build_model("timesfm", context=6, point="mean", plan=["promo"], loader=loader).fit(train).predict(future)
+    parts = build_model("timesfm", context=6, point="mean", plan=["promo"], chunk=2, loader=loader).fit(train).predict(future)
+    assert whole.tolist() == parts.tolist()

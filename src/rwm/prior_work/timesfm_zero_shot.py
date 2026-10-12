@@ -56,7 +56,8 @@ class TimesFMZeroShot(Forecaster):
     """
 
     def __init__(self, context: int = 512, batch_size: int = 256, point: str = "median",
-                 plan: list[str] | None = None, price_plan: bool = False, ridge: float = 1.0, loader=None):
+                 plan: list[str] | None = None, price_plan: bool = False, ridge: float = 1.0,
+                 chunk: int = 2048, loader=None):
         # plan: columns given for every period (history and future), e.g. promo, event, snap.
         # price_plan: also give each period's price against the series' highest price in the context window.
         if point not in ("median", "mean"):
@@ -65,6 +66,9 @@ class TimesFMZeroShot(Forecaster):
         self.plan = list(plan or [])
         self.price_plan = price_plan
         self.ridge = ridge
+        # series per call of the covariate method: its linear model is shared within a call,
+        # and one call over every series runs out of memory on large categories
+        self.chunk = chunk
         self.context = context
         self.batch_size = batch_size
         self._loader = loader or _load
@@ -132,10 +136,16 @@ class TimesFMZeroShot(Forecaster):
             inputs.append(h[k] if has[i] else np.zeros(3))
         if self._plan_past:
             model = self._loader(self.context, max(horizon, 1), self.batch_size, True)
-            median, full = model.forecast_with_covariates(
-                inputs=inputs, dynamic_numerical_covariates=self._covariates(future, horizon, keep),
-                xreg_mode="xreg + timesfm", ridge=self.ridge,
-            )
+            cov = self._covariates(future, horizon, keep)
+            median, full = [], []
+            for lo in range(0, len(inputs), self.chunk):
+                part = slice(lo, lo + self.chunk)
+                m, f = model.forecast_with_covariates(
+                    inputs=inputs[part], dynamic_numerical_covariates={k: v[part] for k, v in cov.items()},
+                    xreg_mode="xreg + timesfm", ridge=self.ridge,
+                )
+                median += list(m)
+                full += list(f)
             median, full = np.stack(median), np.stack(full)
         else:
             model = self._loader(self.context, max(horizon, 1), self.batch_size)
