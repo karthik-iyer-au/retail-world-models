@@ -1,0 +1,101 @@
+{
+  "model": "lightgbm_direct",
+  "dataset": "dominicks",
+  "levers_available": [
+    "price",
+    "promo",
+    "cost"
+  ],
+  "levels_scored": 6,
+  "wrmsse": 0.4113148380170519,
+  "splits": [
+    {
+      "origin": 0,
+      "train_end": "1997-03-06",
+      "test_start": "1997-03-13",
+      "test_end": "1997-05-01",
+      "wrmsse": 0.4113148380170519,
+      "by_level": [
+        {
+          "level": "total",
+          "series": 1,
+          "wrmsse": 0.3148585992010442,
+          "mean_rmsse": 0.3148585992010442
+        },
+        {
+          "level": "cat_id",
+          "series": 1,
+          "wrmsse": 0.3148585992010442,
+          "mean_rmsse": 0.3148585992010442
+        },
+        {
+          "level": "store_id",
+          "series": 93,
+          "wrmsse": 0.34142899258900294,
+          "mean_rmsse": 0.3020203400975902
+        },
+        {
+          "level": "cat_idxstore_id",
+          "series": 93,
+          "wrmsse": 0.34142899258900294,
+          "mean_rmsse": 0.3020203400975902
+        },
+        {
+          "level": "item_id",
+          "series": 421,
+          "wrmsse": 0.5602097986582366,
+          "mean_rmsse": 0.25891557505730683
+        },
+        {
+          "level": "item_idxstore_id",
+          "series": 30603,
+          "wrmsse": 0.5951040458639801,
+          "mean_rmsse": 0.2498741865807163
+        }
+      ],
+      "forecast_to_actual": 0.9173936738620032,
+      "by_condition": {
+        "promo": {
+          "on": {
+            "periods": 16071,
+            "series": 4670,
+            "wrmsse": 0.6411973713294128
+          },
+          "off": {
+            "periods": 104777,
+            "series": 11532,
+            "wrmsse": 0.487577950038012
+          }
+        }
+      },
+      "by_horizon": [
+        0.44488118904013646,
+        0.5806634899843428,
+        0.5798681078590133,
+        0.44526617086091186,
+        0.38457526675662723,
+        0.4222589330600901,
+        0.39028539555890895,
+        0.5000130231532534
+      ],
+      "peaks": {
+        "promoted": {
+          "forecast_to_actual": 0.8397824764251709,
+          "share_of_units": 0.3356919288635254,
+          "rmsse": 0.6411973713294128
+        },
+        "after_promo": {
+          "forecast_to_actual": 0.9366534948348999,
+          "share_of_units": 0.11014072597026825,
+          "rmsse": 0.33868031813036753
+        },
+        "ordinary": {
+          "forecast_to_actual": 0.960579514503479,
+          "share_of_units": 0.5541673302650452,
+          "rmsse": 0.4953314926291581
+        }
+      }
+    }
+  ],
+  "checkpoints": []
+}

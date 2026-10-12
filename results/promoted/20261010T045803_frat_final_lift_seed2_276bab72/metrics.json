@@ -1,0 +1,127 @@
+{
+  "model": "state_model",
+  "dataset": "breakfast_at_the_frat",
+  "levers_available": [
+    "price",
+    "promo",
+    "display",
+    "feature"
+  ],
+  "levels_scored": 6,
+  "wrmsse": 0.7437437121965086,
+  "splits": [
+    {
+      "origin": 0,
+      "train_end": "2011-11-09",
+      "test_start": "2011-11-16",
+      "test_end": "2012-01-04",
+      "wrmsse": 0.7437437121965086,
+      "by_level": [
+        {
+          "level": "total",
+          "series": 1,
+          "wrmsse": 0.8113493627632395,
+          "mean_rmsse": 0.8113493627632395
+        },
+        {
+          "level": "cat_id",
+          "series": 4,
+          "wrmsse": 0.7640196508812344,
+          "mean_rmsse": 0.7317937992218523
+        },
+        {
+          "level": "store_id",
+          "series": 77,
+          "wrmsse": 0.7636136046706561,
+          "mean_rmsse": 0.7781305113002419
+        },
+        {
+          "level": "cat_idxstore_id",
+          "series": 308,
+          "wrmsse": 0.7431414974147101,
+          "mean_rmsse": 0.6975094769146026
+        },
+        {
+          "level": "item_id",
+          "series": 55,
+          "wrmsse": 0.6874047238669959,
+          "mean_rmsse": 0.6493734527346559
+        },
+        {
+          "level": "item_idxstore_id",
+          "series": 3909,
+          "wrmsse": 0.6929334335822155,
+          "mean_rmsse": 0.5715706486116844
+        }
+      ],
+      "forecast_to_actual": 1.000084090206098,
+      "by_condition": {
+        "promo": {
+          "on": {
+            "periods": 6115,
+            "series": 2287,
+            "wrmsse": 1.017383534880032
+          },
+          "off": {
+            "periods": 20040,
+            "series": 3540,
+            "wrmsse": 0.47538529620661807
+          }
+        },
+        "display": {
+          "on": {
+            "periods": 2308,
+            "series": 1049,
+            "wrmsse": 1.1597610927438993
+          },
+          "off": {
+            "periods": 23847,
+            "series": 3568,
+            "wrmsse": 0.5655305717258676
+          }
+        },
+        "feature": {
+          "on": {
+            "periods": 2436,
+            "series": 1227,
+            "wrmsse": 1.124146746597415
+          },
+          "off": {
+            "periods": 23719,
+            "series": 3583,
+            "wrmsse": 0.5188917192545985
+          }
+        },
+        "tpr_only": {
+          "on": {
+            "periods": 2708,
+            "series": 1196,
+            "wrmsse": 0.6786050494293104
+          },
+          "off": {
+            "periods": 23447,
+            "series": 3566,
+            "wrmsse": 0.6808502087356373
+          }
+        }
+      },
+      "by_horizon": [
+        0.3998563488706452,
+        0.515347394013353,
+        0.5179332333659308,
+        0.5758043584569903,
+        0.5171970005171485,
+        0.47402001259297855,
+        0.6265499072031061,
+        0.6692330926085079
+      ]
+    }
+  ],
+  "checkpoints": [
+    {
+      "file": "checkpoint_origin0.pt",
+      "bytes": 3478245,
+      "sha256": "b4ae8d38dd0106d6e8d2e3afca31e3c3a87c372cf6fed35b7f1a6e479d2b97ca"
+    }
+  ]
+}
