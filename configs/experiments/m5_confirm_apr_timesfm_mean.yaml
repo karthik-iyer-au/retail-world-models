@@ -1,0 +1,20 @@
+# Confirmation window 28 March to 24 April 2016: the last 28 days before the M5 test period are held out and not loaded.
+# Settings copied unchanged from m5_validation_seasonal_naive.yaml. Not used for any choice.
+# TimesFM 2.5 (200M), zero-shot, its mean output as the forecast (m5_confirm_apr_timesfm uses its median): not trained on M5, sees unit history only (last 512 days), no prices or promotions.
+# Evaluation settings copied unchanged from m5_confirm_apr_seasonal_naive.yaml.
+name: m5_confirm_apr_timesfm_mean
+seed: 0
+dataset:
+  name: m5
+model:
+  name: timesfm
+  params:
+    context: 512
+    batch_size: 256
+    point: mean
+evaluation:
+  horizon: 28
+  n_origins: 1
+  scale_lag: 1
+  weight_window: 28
+  holdout_periods: 28

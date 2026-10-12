@@ -728,6 +728,11 @@ Changes that did not become defaults (window, seeds, result):
 - For the paper: the direct lift readout can extrapolate a price cut it has not seen for an item without limit, and whether it does depends on the seed. The failure is invisible item by store weighted by dollar sales (0.833) and dominates the totals. A grain-specific failure: an item-level price planner would see a few absurd forecasts; a category planner would see the month's total 19% too high. Worth checking what the world model forecast for the same five series (from its saved forecasts).
 - Every model is now reported on all four M5 windows (practice window: lift 0.713 over three seeds, seasonal naive 0.870, from the earlier runs).
 
+## TimesFM 2.5 zero-shot on M5, median output (12 October 2026)
+
+- Item by store close to LightGBM in all four windows (0.857 to 0.908) with no plan inputs; 27% to 31% under on the total in every window, so overall 1.71 to 1.88, worse than seasonal naive. The median of intermittent daily sales sits below the mean. Mean output queued.
+- For the paper: a foundation model's default point forecast is a median, which is the wrong target for a merchant's units and dollars at category grain. Another grain-specific result: fine item by store, wrong at every grain a merchant plans against.
+
 ## Change C on Dominick's and Frat development windows (12 October 2026)
 
 - Twice the training steps, three seeds each: better in cheese (0.971 to 0.901) and bottled juice (1.048 to 1.015), worse in soft drinks (0.743 to 0.765) and analgesics (0.622 to 0.647), level in frozen entrees, mixed in snack crackers, slightly worse on Frat (0.411 to 0.418). With M5 (0.004 better overall, item by store worse), no consistent gain: C is not kept on any dataset. For the paper: the training-length question is answered; the world model is not undertrained.

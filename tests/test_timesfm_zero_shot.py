@@ -14,7 +14,8 @@ class FakeModel:
     def forecast(self, horizon, inputs):
         self.seen.extend(inputs)
         point = np.array([[np.mean(x)] * horizon for x in inputs])
-        return point, None
+        full = np.stack([point * 2] + [point] * 9, axis=-1)  # the mean output first, then nine quantiles
+        return point, full
 
 
 def test_histories_and_alignment():
@@ -48,3 +49,12 @@ def test_missing_day_after_first_record_counts_as_zero():
     model = build_model("timesfm", context=6, loader=lambda c, h, b: FakeModel(seen)).fit(train)
     model.predict(pd.DataFrame({SERIES: ["A"], DATE: [dates[-1] + pd.Timedelta(days=1)]}))
     assert seen[0].tolist() == [3.0, 3.0, 3.0, 0.0, 3.0, 3.0]
+
+
+def test_mean_output_is_used_when_asked():
+    dates = pd.date_range("2016-01-01", periods=6, freq="D")
+    train = pd.DataFrame({SERIES: "A", DATE: dates, UNITS: 3.0})
+    future = pd.DataFrame({SERIES: ["A"], DATE: [dates[-1] + pd.Timedelta(days=1)]})
+    loader = lambda c, h, b: FakeModel([])
+    assert build_model("timesfm", context=6, loader=loader).fit(train).predict(future).tolist() == [3.0]
+    assert build_model("timesfm", context=6, point="mean", loader=loader).fit(train).predict(future).tolist() == [6.0]

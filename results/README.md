@@ -921,6 +921,30 @@ Findings.
 
 Series-level table for seed 2 against seed 1: `analysis/lift_apr_seed2/lift_apr_seed2_vs_seed1_by_series.csv` in the results folder on Drive (from `scripts/after_confirm.py`).
 
+## TimesFM 2.5 zero-shot on the four M5 windows (median output)
+
+Job `configs/jobs/m5_timesfm.yaml`, commit 7046cb4, run 12 October 2026 on one Tesla T4, about 4 minutes per window. TimesFM 2.5 (200M parameters, `google/timesfm-2.5-200m-pytorch`) used as published: not trained or tuned on M5, given each item-store's last 512 days of units and nothing else (no prices, events or SNAP days). The forecast is its default point output, the median. Lower is better.
+
+| Window | Overall | Total | Item by store | Forecast / actual |
+|---|---|---|---|---|
+| 29 Feb to 27 Mar 2016 | 1.797 | 2.266 | 0.863 | 0.695 |
+| 28 Mar to 24 Apr 2016 | 1.752 | 2.180 | 0.857 | 0.711 |
+| 25 Apr to 22 May 2016 (practice) | 1.883 | 2.406 | 0.859 | 0.689 |
+| 23 May to 19 Jun 2016 (official test) | 1.708 | 2.077 | 0.908 | 0.726 |
+
+Findings.
+
+- Item by store, TimesFM is close to LightGBM in every window (0.863 against 0.873 in March, 0.857 against 0.846 in April, 0.859 against 0.847 on the practice window, 0.908 against 0.905 on the test period), without seeing any price or promotion.
+- It forecasts 27% to 31% under in every window, so every level above item by store is far worse than seasonal naive (overall 1.71 to 1.88 against 0.85 to 0.92).
+- The under-forecast is the median: for an item that sells nothing on most days the median of next day's sales is near zero while the mean is not. A second run with TimesFM's mean output is queued (`configs/jobs/m5_timesfm_mean.yaml`).
+
+| Run | Folder |
+|---|---|
+| 29 Feb to 27 Mar | `20261012T112939_m5_confirm_mar_timesfm_seed1_8ef3eccc` |
+| 28 Mar to 24 Apr | `20261012T113347_m5_confirm_apr_timesfm_seed1_66f5f3d8` |
+| Practice window | `20261012T113751_m5_validation_timesfm_seed1_78ba30e4` |
+| Official test | `20261012T114149_m5_test_timesfm_seed1_9f023a55` |
+
 ## Change C on the Dominick's and Frat development windows (twice the training steps, three seeds)
 
 Job `configs/jobs/dev_steps2x.yaml`, commit 6a98e67, run 11 to 12 October 2026. Each config is the development config unchanged except for twice the training steps (Dominick's 12,000 instead of 6,000, inside the average of three fits; Frat 6,000 instead of 3,000). Same seeds 1 to 3 as the runs compared against. Overall score, lower is better.

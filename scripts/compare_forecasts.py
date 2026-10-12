@@ -34,6 +34,9 @@ def load(folders: list[str]) -> pd.DataFrame:
 def describe(ids: pd.Series) -> pd.DataFrame:
     """Store, state, item, department and category from M5-style series ids."""
     parts = ids.str.rsplit("_", n=2, expand=True)
+    if parts.shape[1] < 3:  # "<item>_<store>" with no state in the store id (Frat, Dominick's)
+        parts = ids.str.rsplit("_", n=1, expand=True)
+        return pd.DataFrame({"item": parts[0], "store": parts[1]})
     out = pd.DataFrame({"item": parts[0], "store": parts[1] + "_" + parts[2]})
     out["state"] = parts[1]
     item = out["item"].str.split("_", expand=True)

@@ -38,7 +38,12 @@ def _load(context: int, horizon: int, batch_size: int):
 
 @register_model("timesfm")
 class TimesFMZeroShot(Forecaster):
-    """Median forecast of TimesFM 2.5 from the last `context` periods of units.
+    """Forecast of TimesFM 2.5 from the last `context` periods of units.
+
+    `point` picks which output is the forecast: "median" (the model's default
+    point forecast, its 0.5 quantile) or "mean" (its separate mean output).
+    For items that often sell nothing in a day the median sits well below the
+    mean, so the median under-forecasts sales totals.
 
     Dates before a series' first record are left out of its history, so a new
     item is not read as a long run of zeros. Dates after its first record with
@@ -46,7 +51,10 @@ class TimesFMZeroShot(Forecaster):
     record in the context window is forecast at zero.
     """
 
-    def __init__(self, context: int = 512, batch_size: int = 256, loader=None):
+    def __init__(self, context: int = 512, batch_size: int = 256, point: str = "median", loader=None):
+        if point not in ("median", "mean"):
+            raise ValueError("point must be 'median' or 'mean'")
+        self.point = point
         self.context = context
         self.batch_size = batch_size
         self._loader = loader or _load
@@ -79,7 +87,9 @@ class TimesFMZeroShot(Forecaster):
             has[i] = len(h) > 0
             inputs.append(h if has[i] else np.zeros(3))
         model = self._loader(self.context, max(horizon, 1), self.batch_size)
-        point, _ = model.forecast(horizon=horizon, inputs=inputs)
+        median, full = model.forecast(horizon=horizon, inputs=inputs)
+        # `full` holds the mean first, then the 0.1 to 0.9 quantiles
+        point = median if self.point == "median" else np.asarray(full)[..., 0]
         point = np.clip(np.asarray(point, dtype="float64")[:, :horizon], 0.0, None)
         point[~has] = 0.0
         idx = future[SERIES].map(rows)
