@@ -1,0 +1,22 @@
+# TimesFM 2.5 zero-shot (mean output) on the Frat and Dominick's final test windows, so it is reported on every dataset.
+# Frat and Dominick's data are taken from a Drive folder (dunnhumby and Dominick's files have no public download).
+datasets:
+- name: breakfast_at_the_frat
+  from: /content/drive/MyDrive/retail-world-model/data
+- name: dominicks
+  codes: [che, sna, sdr, bjc, ana, fre]
+runs:
+- config: configs/experiments/frat_final_timesfm_mean.yaml
+  seeds: [1]
+- config: configs/experiments/dominicks_che_final_timesfm_mean.yaml
+  seeds: [1]
+- config: configs/experiments/dominicks_sna_final_timesfm_mean.yaml
+  seeds: [1]
+- config: configs/experiments/dominicks_sdr_final_timesfm_mean.yaml
+  seeds: [1]
+- config: configs/experiments/dominicks_bjc_final_timesfm_mean.yaml
+  seeds: [1]
+- config: configs/experiments/dominicks_ana_final_timesfm_mean.yaml
+  seeds: [1]
+- config: configs/experiments/dominicks_fre_final_timesfm_mean.yaml
+  seeds: [1]

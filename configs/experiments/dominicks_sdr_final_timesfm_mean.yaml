@@ -1,0 +1,27 @@
+# Final test window, TimesFM 2.5 zero-shot with its mean output (weekly units history only, no levers).
+# Dataset and evaluation copied unchanged from dominicks_sdr_final_lightgbm.yaml. A comparison added after the final tests; not used for any choice.
+name: dominicks_sdr_final_timesfm_mean
+seed: 0
+dataset:
+  name: dominicks
+  params:
+    categories:
+    - sdr
+model:
+  name: timesfm
+  params:
+    context: 512
+    batch_size: 256
+    point: mean
+evaluation:
+  horizon: 8
+  n_origins: 1
+  holdout_periods: 0
+  scale_lag: 1
+  weight_window: 13
+  conditions:
+  - promo
+  after_promo:
+    levers:
+    - promo
+    periods: 2
