@@ -1090,6 +1090,32 @@ Findings.
 | 28 Mar to 24 Apr | `20261012T141142_m5_confirm_apr_graph_seed1_6f076d89`, `..._seed2_58c7d4a7`, `..._seed3_f566f33c` |
 | Official test | `..._m5_test_graph_seed1_c4f753b4`, `..._seed2_c7d3d616`, `..._seed3_c870d546` |
 
+## TimesFM 2.5 zero-shot on the Frat and Dominick's final windows (mean output)
+
+Job `configs/jobs/timesfm_frat_dominicks.yaml`, commit 4f99140, run 12 October 2026. Same TimesFM setup as on M5 (mean output, weekly units history only, no levers), on the same final 8-week windows as the final tests. One run each. Lower is better; the world model and LightGBM are the three-seed means from the final tests.
+
+| Data | TimesFM overall | World model / LightGBM overall | TimesFM item by store | World model / LightGBM item by store | TimesFM forecast / actual | TimesFM promoted weeks, forecast / actual |
+|---|---|---|---|---|---|---|
+| Frat | 0.965 | 0.681 / 0.549 | 0.827 | 0.665 / 0.608 | 0.847 | (promotion on: error 1.284 against 0.510 off) |
+| Dominick's cheese | 0.829 | 0.897 / 0.708 | 0.792 | 0.715 / 0.702 | 0.855 | 0.343 |
+| Dominick's snack crackers | 0.468 | 0.448 / 0.412 | 0.640 | 0.608 / 0.596 | 0.927 | 0.630 |
+| Dominick's soft drinks | 1.070 | 0.830 / 0.989 | 0.895 | 0.734 / 0.652 | 0.731 | 0.462 |
+| Dominick's bottled juice | **0.940** | 0.987 / 0.994 | 0.782 | 0.816 / 0.750 | 0.866 | 0.327 |
+| Dominick's analgesics | 1.009 | 0.867 / 0.978 | 0.790 | 0.713 / 0.714 | 0.973 | 0.306 |
+| Dominick's frozen entrees | 0.563 | 0.485 / 0.478 | 0.682 | 0.558 / 0.529 | 0.869 | 0.290 |
+
+Findings.
+
+- On the weekly, promotion-driven data TimesFM is behind both plan-aware models item by store in every category but bottled juice, and on Frat (0.827 against 0.608 and 0.665). The reverse of M5, where it was best item by store in every window.
+- The reason shows in the promoted weeks: TimesFM forecasts 29% to 63% of what sold in a promoted week, and 6% to 21% over in ordinary weeks. With no plan it cannot see the promotion coming.
+- Overall it is the lowest in one category (bottled juice, 0.940) and the highest of the three in three (soft drinks, analgesics, frozen entrees).
+- So whether history alone is enough depends on how much of the sales the plan moves: on M5, where prices change rarely, history read by a large model is best item by store; where promotions drive the weeks, the plan is needed.
+
+| Run | Folder |
+|---|---|
+| Frat | `..._frat_final_timesfm_mean_seed1_aa60fa3e` |
+| Dominick's | `..._dominicks_<code>_final_timesfm_mean_seed1_...` (che d9208b19, sna 128f0d21, sdr 56dccef1, bjc 2ecac335, ana c0694fb5, fre 38dabd86) |
+
 ## Change C on the Dominick's and Frat development windows (twice the training steps, three seeds)
 
 Job `configs/jobs/dev_steps2x.yaml`, commit 6a98e67, run 11 to 12 October 2026. Each config is the development config unchanged except for twice the training steps (Dominick's 12,000 instead of 6,000, inside the average of three fits; Frat 6,000 instead of 3,000). Same seeds 1 to 3 as the runs compared against. Overall score, lower is better.

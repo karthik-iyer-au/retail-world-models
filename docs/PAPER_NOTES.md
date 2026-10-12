@@ -695,7 +695,9 @@ Final tests (settings fixed beforehand, reported once):
 | Frat final | LightGBM, all levers | 0.549 | Best |
 | Frat final | World model | 0.681 | Lost; no total bias (forecast / actual 1.000) |
 | Frat final | Lift model | 0.714 | Lost |
+| Frat final | TimesFM 2.5 zero-shot, mean output | 0.965 | Lost; 29% to 63% of promoted-week sales on Dominick's, error on promoted weeks 1.284 on Frat |
 | Dominick's final | World model (switching, normalised, 3-fit average) | 2 wins, 1 level, 3 losses of 6 | Wins soft drinks and analgesics |
+| Dominick's final | TimesFM 2.5 zero-shot, mean output | best in 1 of 6 (bottled juice 0.940) | Behind both item by store in 5 of 6 |
 
 Benchmarks on development windows that lost to LightGBM: seasonal naive (M5 0.870, Frat 0.832), average of last 8 weeks (Frat 0.756), LightGBM with price only (Frat 0.554 against 0.447 with all levers), our item encoder and readout alone (M5 practice 0.708).
 
@@ -750,6 +752,11 @@ Changes that did not become defaults (window, seeds, result):
 
 - HOUSEHOLD_1_146 (four stores) sold 120 units over the 28 days, which held its first price cut in a year (25%, one week); history-only models forecast 3 (LightGBM) and 8 (TimesFM); the world model 121, 243 and 600 by seed; lift 79 and 316 on its working seeds; graph 45 to 59. FOODS_3_443 in WI_1 (68% cut) sold 4; plan-reading models over-forecast.
 - For the paper: this is the case for a plan-aware model at item-week grain (supplier funding, price decisions): it responds to a price change history has never shown; history-only models cannot. The size of the response is not identified by the data (seeds differ up to five times), which is the honest limit.
+
+## TimesFM on Frat and Dominick's (12 October 2026)
+
+- Behind both plan-aware models item by store on Frat (0.827 against 0.608 and 0.665) and in five of six Dominick's categories; it forecasts 29% to 63% of promoted-week sales. Best overall only in bottled juice (0.940).
+- For the paper, the clearest grain-and-data result so far: a plan-blind model is best item by store where the plan rarely moves sales (M5 daily, few price changes) and worst where promotions drive the weeks (Dominick's, Frat). The value of a plan-aware model depends on how much of the variance the plan explains, and at which grain the user plans.
 
 ## Graph model over product attributes on M5 (12 October 2026)
 
