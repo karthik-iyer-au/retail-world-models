@@ -9,6 +9,9 @@ forecast files are.
    (three seeds each), with scripts/compare_forecasts.py.
 3. World model against LightGBM on the Frat final test (three seeds each),
    to explain the drop from the development windows.
+4. The plan read-back probe (scripts/plan_readback.py) on seed 1 of the world
+   model on the March, April and test windows, and on the lift model
+   (no roll-forward) for comparison.
 
 Writes tables to <results>/analysis/ and prints them.
 """
@@ -67,6 +70,19 @@ def compare(a: list[str], b: list[str], names: list[str], out: Path) -> None:
                     "--names", *names, "--out", str(out)], check=False)
 
 
+def readback(results: Path, out: Path) -> None:
+    configs = HERE.parent / "configs" / "experiments"
+    out.mkdir(parents=True, exist_ok=True)
+    for config in ("m5_confirm_mar_world_model_v1", "m5_confirm_apr_world_model_v1",
+                   "m5_test_world_model_roll_norm", "m5_confirm_apr_lift"):
+        found = runs(results, config, (1,))
+        if not found:
+            continue
+        print(f"\n== Plan read-back: {config} ==", flush=True)
+        subprocess.run([sys.executable, str(HERE / "plan_readback.py"), "--config", str(configs / f"{config}.yaml"),
+                        "--run", found[0], "--out", str(out / f"{config}.json")], check=False)
+
+
 def main(argv=None):
     p = argparse.ArgumentParser()
     p.add_argument("--results", required=True)
@@ -79,6 +95,7 @@ def main(argv=None):
                 ["World model", "LightGBM"], analysis / f"m5_confirm_{w}_wm_vs_lgb")
     compare(runs(results, "frat_final_world_model"), runs(results, "frat_final_lightgbm"),
             ["World model", "LightGBM"], analysis / "frat_final_wm_vs_lgb")
+    readback(results, analysis / "plan_readback")
 
 
 if __name__ == "__main__":
