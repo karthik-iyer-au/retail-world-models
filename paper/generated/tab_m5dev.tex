@@ -1,0 +1,26 @@
+\begin{table}[t]
+\centering
+\caption{\textbf{On the M5 practice window, only the normalised roll-forward separated the world model from
+LightGBM; no later change beat it.} WRMSSE over all 12 levels, 25 April to 22 May 2016. A screened change
+was kept only if it lowered the score, and a change that doubles the cost only if by more than the seed
+range (0.029).}
+\label{tab:m5dev}
+\footnotesize
+\begin{tabular}{p{0.58\columnwidth}rr}
+\toprule
+\textbf{Model or change} & \textbf{Mean} & \textbf{Seed range} \\
+\midrule
+Seasonal naive & 0.870 &  \\
+LightGBM, one model per store & 0.715 &  \\
+Lift model (3 seeds) & 0.713 & 0.683 to 0.734 \\
+Item encoder and readout (5 seeds) & 0.699 & 0.669 to 0.725 \\
+World model (3 seeds) & 0.707 & 0.680 to 0.750 \\
+World model + normalised roll-forward (3 seeds) & 0.656 & 0.646 to 0.675 \\
++ average of three fits (1 run) & 0.665 &  \\
++ weekday as seven inputs (seed 1) & 0.653 &  \\
++ weekday and event kinds (seed 1) & 0.646 &  \\
++ 60,000 training steps (seed 1) & 0.642 &  \\
++ item level against past-year level (seed 1) & 0.680 &  \\
+\bottomrule
+\end{tabular}
+\end{table}

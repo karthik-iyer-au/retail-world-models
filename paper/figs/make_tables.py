@@ -246,11 +246,152 @@ the final 8 weeks. Practice: the M5 window 25 April to 22 May 2016. Each row is 
     (GEN / "tab_ledger.tex").write_text(tex)
 
 
+def tab_dom28():
+    rows = sorted(D.DOM28.items(), key=lambda kv: D.DOM28_NAME[kv[0]])
+    lines = []
+    for code, vals in rows:
+        cells = bold_min(list(vals))
+        lines.append(f"{D.DOM28_NAME[code]} & " + " & ".join(cells) + " \\\\")
+    means = [mean(v[i] for v in D.DOM28.values()) for i in range(4)]
+    tex = f"""\\begin{{table}}[t]
+\\centering
+\\caption{{\\textbf{{Across all 28 Dominick's categories LightGBM is more accurate on average; the world model
+wins in 14 with its first level and 10 with the 8-week level.}} Development windows, one seed (analgesics:
+five), settings set on analgesics and not tuned per category. World model with the item's level from its
+last 26 weeks or last 8 weeks. Lowest in each row in bold.}}
+\\label{{tab:dom28}}
+\\footnotesize
+\\setlength{{\\tabcolsep}}{{4pt}}
+\\renewcommand{{\\arraystretch}}{{1.05}}
+\\begin{{tabular}}{{lrrrr}}
+\\toprule
+\\textbf{{Category}} & \\textbf{{LightGBM}} & \\textbf{{Lift}} & \\textbf{{World, 26 wk}} & \\textbf{{World, 8 wk}} \\\\
+\\midrule
+{chr(10).join(lines)}
+\\midrule
+Mean & {" & ".join(f3(m) for m in means)} \\\\
+\\bottomrule
+\\end{{tabular}}
+\\end{{table}}
+"""
+    (GEN / "tab_dom28.tex").write_text(tex)
+
+
+def tab_settings():
+    import json
+    pick = {"M5": "m5_test_world_model_roll_norm", "Dominick's": "dominicks_che_final_world_model_switching_avg3_roll_norm",
+            "Frat": "frat_final_world_model"}
+    out = {}
+    for name, cfg in pick.items():
+        d = sorted(x for x in D.PROMOTED.iterdir() if f"_{cfg}_seed1_" in x.name)[0]
+        m = json.load(open(d / "manifest.json"))["config"]["model"]
+        p = m["params"].get("params", m["params"])
+        out[name] = (p, m["name"] == "seed_average", m["params"].get("members"))
+    keys = [("Periods of history read", "history"), ("Periods of training data", "train_periods"),
+            ("State size", "d_model"), ("Encoder layers", "layers"), ("Attention heads", "heads"),
+            ("Training steps", "steps"), ("Batch size", "batch"), ("Learning rate", "lr")]
+    lines = []
+    for label, k in keys:
+        lines.append(f"{label} & " + " & ".join(str(out[n][0].get(k, "--")) for n in pick) + " \\\\")
+    yesno = lambda b: "yes" if b else "no"
+    lines.append("Normalised roll-forward & " + " & ".join(yesno(out[n][0].get("roll_norm")) for n in pick) + " \\\\")
+    lines.append("Level from the last 8 weeks & " + " & ".join(yesno(out[n][0].get("scale_window") == 8) for n in pick) + " \\\\")
+    lines.append("Brand switching & " + " & ".join(yesno(out[n][0].get("switching")) for n in pick) + " \\\\")
+    lines.append("Fits averaged per run & " + " & ".join(str(out[n][2] or 1) for n in pick) + " \\\\")
+    tex = f"""\\begin{{table}}[t]
+\\centering
+\\caption{{\\textbf{{The world model as run in the final tests.}} Read from the run manifests in
+\\texttt{{results/promoted/}}. Periods are days on M5 and weeks on Dominick's and Frat.}}
+\\label{{tab:settings}}
+\\footnotesize
+\\begin{{tabular}}{{lrrr}}
+\\toprule
+\\textbf{{Setting}} & \\textbf{{M5}} & \\textbf{{Dominick's}} & \\textbf{{Frat}} \\\\
+\\midrule
+{chr(10).join(lines)}
+\\bottomrule
+\\end{{tabular}}
+\\end{{table}}
+"""
+    (GEN / "tab_settings.tex").write_text(tex)
+
+
+def tab_m5dev():
+    lines = []
+    for label, mu, lo, hi in D.M5_DEV:
+        rng = f"{lo:.3f} to {hi:.3f}" if lo is not None else ""
+        lines.append(f"{label} & {mu:.3f} & {rng} \\\\")
+    tex = f"""\\begin{{table}}[t]
+\\centering
+\\caption{{\\textbf{{On the M5 practice window, only the normalised roll-forward separated the world model from
+LightGBM; no later change beat it.}} WRMSSE over all 12 levels, 25 April to 22 May 2016. A screened change
+was kept only if it lowered the score, and a change that doubles the cost only if by more than the seed
+range (0.029).}}
+\\label{{tab:m5dev}}
+\\footnotesize
+\\begin{{tabular}}{{p{{0.58\\columnwidth}}rr}}
+\\toprule
+\\textbf{{Model or change}} & \\textbf{{Mean}} & \\textbf{{Seed range}} \\\\
+\\midrule
+{chr(10).join(lines)}
+\\bottomrule
+\\end{{tabular}}
+\\end{{table}}
+"""
+    (GEN / "tab_m5dev.tex").write_text(tex)
+
+
+def tab_tests():
+    n, c = D.NEW_ITEMS, D.COMBO
+    rows = [
+        "\\multicolumn{3}{l}{\\itshape New items: one product in ten never seen in training (item by store)} \\\\",
+        f"Frat & LightGBM, new item from labels, price and plan & {n['frat']['lgb']:.3f} \\\\",
+        f"Frat & Lift model, borrowing from similar items & \\textbf{{{n['frat']['borrow']:.3f}}} \\\\",
+        f"Frat & Forecast of zero & {n['frat']['zero']:.3f} \\\\",
+        f"Analgesics & LightGBM, from labels, price and plan & \\textbf{{{n['ana']['lgb']:.3f}}} \\\\",
+        f"Analgesics & Lift model, borrowing (no attribute labels) & {n['ana']['borrow']:.3f} \\\\",
+        "\\addlinespace[2pt]\\multicolumn{3}{l}{\\itshape Combination with LightGBM, weights set on a validation window (all levels)} \\\\",
+        f"Frat & Lift model + LightGBM & \\textbf{{{c['frat']['lift_lgb']:.3f}}} \\\\",
+        f"Frat & World model + LightGBM & {c['frat']['world_lgb']:.3f} \\\\",
+        f"Frat & LightGBM; lift model; world model & {c['frat']['lgb']:.3f}; {c['frat']['lift']:.3f}; {c['frat']['world']:.3f} \\\\",
+        f"Analgesics & Lift + LightGBM; world + LightGBM & {c['ana']['lift_lgb']:.3f}; {c['ana']['world_lgb']:.3f} \\\\",
+        "\\addlinespace[2pt]\\multicolumn{3}{l}{\\itshape Plan A against plan B: same item and store, two weeks with different plans (Frat)} \\\\",
+    ]
+    for name, pick, miss in D.PLAN_PAIRS:
+        rows.append(f"Frat & {name} & {pick:.1f}\\% right; miss {miss:.3f} \\\\")
+    rows.append("\\addlinespace[2pt]\\multicolumn{3}{l}{\\itshape Unusual plans: a lever mix the item had in under 2\\% of its weeks (item by store)} \\\\")
+    for name, un, us in D.UNUSUAL:
+        rows.append(f"Frat & {name} & {un:.3f} unusual; {us:.3f} usual \\\\")
+    tex = f"""\\begin{{table*}}[t]
+\\centering
+\\caption{{\\textbf{{What the plan-aware models were also tested on during development: new items, combination
+with LightGBM, choosing between two plans, and plans an item had rarely run.}} Development windows, three
+seeds (Frat combination: five). WRMSSE, lower is better, unless stated. Plan A against plan B: share of
+week pairs where the forecast picks the week that sold more, and the average miss on the size of the change
+(log scale).}}
+\\label{{tab:tests}}
+\\footnotesize
+\\begin{{tabular}}{{p{{0.12\\textwidth}}p{{0.50\\textwidth}}p{{0.28\\textwidth}}}}
+\\toprule
+\\textbf{{Data}} & \\textbf{{Model}} & \\textbf{{Result}} \\\\
+\\midrule
+{chr(10).join(rows)}
+\\bottomrule
+\\end{{tabular}}
+\\end{{table*}}
+"""
+    (GEN / "tab_tests.tex").write_text(tex)
+
+
 def main():
     build_macros()
     tab_m5()
     tab_finals()
     tab_ledger()
+    tab_dom28()
+    tab_settings()
+    tab_m5dev()
+    tab_tests()
     print(f"  wrote tables to {GEN}")
 
 

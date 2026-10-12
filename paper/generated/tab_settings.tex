@@ -1,0 +1,25 @@
+\begin{table}[t]
+\centering
+\caption{\textbf{The world model as run in the final tests.} Read from the run manifests in
+\texttt{results/promoted/}. Periods are days on M5 and weeks on Dominick's and Frat.}
+\label{tab:settings}
+\footnotesize
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Setting} & \textbf{M5} & \textbf{Dominick's} & \textbf{Frat} \\
+\midrule
+Periods of history read & 112 & 26 & 26 \\
+Periods of training data & 730 & 156 & 90 \\
+State size & 128 & 64 & 64 \\
+Encoder layers & 3 & 2 & 2 \\
+Attention heads & 4 & 4 & 4 \\
+Training steps & 30000 & 6000 & 3000 \\
+Batch size & 1024 & 512 & 256 \\
+Learning rate & 0.001 & 0.001 & 0.001 \\
+Normalised roll-forward & yes & yes & no \\
+Level from the last 8 weeks & no & yes & no \\
+Brand switching & no & yes & no \\
+Fits averaged per run & 1 & 3 & 1 \\
+\bottomrule
+\end{tabular}
+\end{table}
