@@ -1036,6 +1036,30 @@ Findings.
 - The world model's misses are the holiday weeks: it is 16% over in the week before the early-December rise, 15% to 17% under in the two December peak weeks, and 24% over in the week after Christmas, when sales dropped to 50,941. LightGBM, with week-of-year and month inputs and 90 weeks of training that include the previous holiday season, follows the holiday shape more closely.
 - This is the development-to-final drop on Frat: the two development windows (the 16 weeks before 16 November 2011) held no holiday weeks.
 
+## Graph model over product attributes on the four M5 windows
+
+Job `configs/jobs/m5_graph.yaml`, commit 1983692, run 12 October 2026 on one Tesla T4, about 7.5 minutes per run. Each item-store is a node, joined to the same item in other stores and to the same department in the same store; one round of GraphSAGE-style message passing; inputs exactly LightGBM's; Tweedie loss; 6,000 steps. Settings fixed before any run. Three seeds per window. Lower is better; other models are three-seed means (world model on the practice window: three seeds with the normalised roll-forward).
+
+| Window | Graph overall (range) | Total | Item by store | Forecast / actual | Overall: world model / LightGBM / TimesFM mean |
+|---|---|---|---|---|---|
+| 29 Feb to 27 Mar 2016 | 0.779 (0.756 to 0.815) | 0.622 | 0.878 | 1.058 | 0.642 / 0.709 / 0.854 |
+| 28 Mar to 24 Apr 2016 | 0.644 (0.628 to 0.656) | 0.493 | 0.845 | 1.057 | 0.555 / 0.557 / 0.819 |
+| 25 Apr to 22 May 2016 (practice) | **0.641** (0.633 to 0.654) | 0.455 | 0.851 | 0.962 | 0.656 / 0.715 (1 seed) / 0.896 |
+| 23 May to 19 Jun 2016 (official test) | 0.673 (0.669 to 0.680) | 0.412 | 0.909 | 1.010 | 0.638 / 0.547 / 0.729 |
+
+Findings.
+
+- Item by store the graph model is level with LightGBM, whose inputs it shares (0.845 to 0.909 against 0.846 to 0.905), and behind TimesFM and the world model in every window.
+- Overall it is lowest on the practice window (0.641) and behind the world model and LightGBM in the other three; it over-forecasts by 5% to 7% in both confirmation windows.
+- Sharing information across the same item in other stores and the same department adds nothing item by store over LightGBM's per-store trees on these inputs.
+
+| Run | Folders (seeds 1, 2, 3) |
+|---|---|
+| Practice window | `20261012T132723_m5_validation_graph_seed1_b5f38f18`, `..._seed2_5fcfdfcc`, `..._seed3_b29dad5a` |
+| 29 Feb to 27 Mar | `20261012T134945_m5_confirm_mar_graph_seed1_1acc0cee`, `..._seed2_bbca759c`, `..._seed3_4eaf0faf` |
+| 28 Mar to 24 Apr | `20261012T141142_m5_confirm_apr_graph_seed1_6f076d89`, `..._seed2_58c7d4a7`, `..._seed3_f566f33c` |
+| Official test | `..._m5_test_graph_seed1_c4f753b4`, `..._seed2_c7d3d616`, `..._seed3_c870d546` |
+
 ## Change C on the Dominick's and Frat development windows (twice the training steps, three seeds)
 
 Job `configs/jobs/dev_steps2x.yaml`, commit 6a98e67, run 11 to 12 October 2026. Each config is the development config unchanged except for twice the training steps (Dominick's 12,000 instead of 6,000, inside the average of three fits; Frat 6,000 instead of 3,000). Same seeds 1 to 3 as the runs compared against. Overall score, lower is better.

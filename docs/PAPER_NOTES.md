@@ -690,6 +690,8 @@ Final tests (settings fixed beforehand, reported once):
 | M5 test | World model, normalised roll-forward | 0.638 | Lost overall; best item by store |
 | M5 test | Lift model | 0.663 | Lost; seeds spread 0.10. Confirmation windows: March 0.665, April 1.246 (one seed failed on first-ever price cuts) |
 | M5 test | Seasonal naive | 0.847 | Floor |
+| M5 test | Graph model over product attributes | 0.673 | Lost; item by store level with LightGBM |
+| M5 test | TimesFM 2.5 zero-shot, mean output | 0.729 | Lost overall; best item by store in all four windows (0.885 on test) |
 | Frat final | LightGBM, all levers | 0.549 | Best |
 | Frat final | World model | 0.681 | Lost; no total bias (forecast / actual 1.000) |
 | Frat final | Lift model | 0.714 | Lost |
@@ -743,6 +745,10 @@ Changes that did not become defaults (window, seeds, result):
 - TimesFM 2.5 zero-shot with its mean output is the lowest of every model item by store in all four M5 windows (0.828 to 0.885), with no plan inputs, and 5% to 10% under on the total, so worse overall (0.73 to 0.90). For the paper: at item by store, history read by a large pretrained model beats every plan-aware model; the plan inputs earn their keep in the level of the totals. This sharpens the grain claim and must be stated plainly.
 - Plan read-back: the world model's carried state holds the day's discount (R squared 0.58 to 0.83, control 0.00 to 0.02), events and SNAP days (0.98 to 0.99), and about half the discount a week later (0.46 to 0.59). Evidence that the roll-forward takes the plan in; not evidence that its use of it is right.
 - Frat drop explained: the final 8 weeks are the holiday period, absent from the development windows. The world model gets the 8-week total right (1.000; LightGBM 0.937) but misses the holiday shape (16% over the week of 30 Nov, 15% to 17% under the two December peak weeks, 24% over the week after Christmas). LightGBM, with week-of-year and month inputs, tracks it better. For the paper: a holiday-shape failure at weekly category grain, not a level failure.
+
+## Graph model over product attributes on M5 (12 October 2026)
+
+- Three seeds, four windows, settings fixed beforehand. Item by store level with LightGBM (same inputs), behind TimesFM and the world model everywhere. Overall: best on the practice window (0.641), behind the world model and LightGBM in March (0.779), April (0.644) and the test period (0.673). Another losing comparison to report: linking items by attribute does not beat per-store trees here.
 
 ## Change C on Dominick's and Frat development windows (12 October 2026)
 
