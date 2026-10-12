@@ -688,7 +688,7 @@ Final tests (settings fixed beforehand, reported once):
 |---|---|---|---|
 | M5 test | LightGBM | 0.547 | Best of ours; equal to 10th-ranked entry |
 | M5 test | World model, normalised roll-forward | 0.638 | Lost overall; best item by store |
-| M5 test | Lift model | 0.663 | Lost; seeds spread 0.10 |
+| M5 test | Lift model | 0.663 | Lost; seeds spread 0.10. Confirmation windows: March 0.665, April 1.246 (one seed failed on first-ever price cuts) |
 | M5 test | Seasonal naive | 0.847 | Floor |
 | Frat final | LightGBM, all levers | 0.549 | Best |
 | Frat final | World model | 0.681 | Lost; no total bias (forecast / actual 1.000) |
@@ -719,6 +719,14 @@ Changes that did not become defaults (window, seeds, result):
 - Four M5 windows now run. Item by store the world model is lower in all four (0.851 / 0.873, 0.833 / 0.846, 0.835 / 0.847, 0.897 / 0.905). Overall: world model wins March and the practice window, level in April, LightGBM wins only the official test period.
 - The totals follow the level: LightGBM is 3% to 6% under in the three earlier windows; the world model is within 1% in both confirmation windows. The official test period is the one month where the world model over-forecasts and LightGBM is closer.
 - For the paper: a ranking from the single official M5 window would have read "LightGBM is better"; over four windows the item-by-store result is consistent and the overall result is one win each way plus a tie and a single-seed win. This is the evidence for grain-first and multi-window evaluation.
+
+## Lift model and seasonal naive on the M5 confirmation windows (12 October 2026)
+
+- March: lift 0.665 overall (seeds 0.642 to 0.680), between the world model (0.642) and LightGBM (0.709); lowest item by store (0.846 against 0.851). Seasonal naive 0.889.
+- April: lift seeds 1 and 3 level with the world model and LightGBM overall (0.566, 0.570 against 0.555, 0.557) and lowest at the total (0.270, 0.271 against 0.283). Seed 2 failed: 2.603 overall, forecast 19% over. Seasonal naive 0.923.
+- Seed 2's failure is five series, holding all of the excess units: HOUSEHOLD_1_146 in four stores and FOODS_3_443 in WI_1. Each had its first price cut in a year inside the window (5.98 to 4.50 for one week; 2.50 to 0.79 for three weeks). Seed 2 read the cuts as lifts up to the model's ceiling (about 22,000 times the item's level per day); seeds 1 and 3 did not.
+- For the paper: the direct lift readout can extrapolate a price cut it has not seen for an item without limit, and whether it does depends on the seed. The failure is invisible item by store weighted by dollar sales (0.833) and dominates the totals. A grain-specific failure: an item-level price planner would see a few absurd forecasts; a category planner would see the month's total 19% too high. Worth checking what the world model forecast for the same five series (from its saved forecasts).
+- Every model is now reported on all four M5 windows (practice window: lift 0.713 over three seeds, seasonal naive 0.870, from the earlier runs).
 
 ## Change C on Dominick's and Frat development windows (12 October 2026)
 

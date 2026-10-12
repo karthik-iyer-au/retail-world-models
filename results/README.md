@@ -888,6 +888,39 @@ Findings.
 | World model, 29 Feb to 27 Mar, seeds 1 to 3 | `20261011T054856_m5_confirm_mar_world_model_v1_seed1_a9de76b0`, `20261011T062606_..._seed2_053690e4`, `20261011T080921_..._seed3_5de29ca7` |
 | LightGBM, 29 Feb to 27 Mar, seeds 1 to 3 | `20261011T095159_m5_confirm_mar_lightgbm_seed1_57949c3e`, `20261011T111108_..._seed2_3703521c`, `20261011T123106_..._seed3_526f9b6b` |
 
+## Lift model and seasonal naive on the M5 confirmation windows
+
+Job `configs/jobs/m5_confirm_other_models.yaml`, commit 4519146, run 12 October 2026 on one Tesla T4. Settings unchanged from the practice-window configs. Lift model three seeds per window, seasonal naive one run (it has no randomness). Lower is better; the world model and LightGBM rows are the three-seed means from the section above.
+
+| Window | Model | Overall (per seed) | Total | Item by store | Forecast / actual |
+|---|---|---|---|---|---|
+| 29 Feb to 27 Mar 2016 | World model | **0.642** | **0.398** | 0.851 | 0.991 |
+| 29 Feb to 27 Mar 2016 | Lift model | 0.665 (0.672, 0.680, 0.642) | 0.427 | **0.846** | 0.966 |
+| 29 Feb to 27 Mar 2016 | LightGBM | 0.709 | 0.578 | 0.873 | 0.943 |
+| 29 Feb to 27 Mar 2016 | Seasonal naive | 0.889 | 0.658 | 1.121 | 0.940 |
+| 28 Mar to 24 Apr 2016 | World model | **0.555** | 0.283 | 0.833 | 1.003 |
+| 28 Mar to 24 Apr 2016 | Lift model | 1.246 (0.566, **2.603**, 0.570) | 0.964 (0.270, 2.351, 0.271) | 0.834 | 1.060 (0.998, 1.194, 0.987) |
+| 28 Mar to 24 Apr 2016 | LightGBM | 0.557 | 0.351 | 0.846 | 0.969 |
+| 28 Mar to 24 Apr 2016 | Seasonal naive | 0.923 | 0.668 | 1.126 | 0.971 |
+
+Findings.
+
+- March: the world model is lowest overall and at the total. The lift model is lowest item by store (0.846 against 0.851; all three lift seeds 0.844 to 0.847), and its best seed (0.642) is inside the world model's range (0.632 to 0.648).
+- April: two lift seeds are level with the world model and LightGBM overall (0.566 and 0.570 against 0.555 and 0.557) and lowest at the total (0.270 and 0.271 against 0.283). Seed 2 failed: overall 2.603, total 2.351, forecast 19% over.
+- Seed 2's failure is five series. Seed 2 forecast 1,413,724 units against 1,183,626 sold; the five series with the largest excess hold all of it (101%). Four are HOUSEHOLD_1_146 (stores WI_2, CA_3, TX_3, CA_2), forecast 20,000 to 110,000 units each against 20 to 38 sold. The fifth is FOODS_3_443 in WI_1, 25,348 against 4. Ten series are over 10 times seed 1's forecast.
+- All five had their first price cut in a year inside the window: HOUSEHOLD_1_146 from 5.98 to 4.50 for one week in exactly those four stores (held at 5.98 in CA_1), FOODS_3_443 in WI_1 from 2.50 to 0.79 for three weeks. Seed 2 read these cuts as lifts large enough to reach the model's ceiling (e to the 10th, about 22,000 times the item's level, per day). Seeds 1 and 3 did not.
+- Item by store, weighted by dollar sales, seed 2 is normal (0.833), because these items sell little. The failure shows at the totals, where the excess units add up.
+- Seasonal naive is far behind every model in both windows and at every level.
+
+| Run | Folder |
+|---|---|
+| Seasonal naive, 29 Feb to 27 Mar | `20261012T014741_m5_confirm_mar_seasonal_naive_seed1_5678b8b3` |
+| Seasonal naive, 28 Mar to 24 Apr | `20261012T014858_m5_confirm_apr_seasonal_naive_seed1_e971255e` |
+| Lift model, 29 Feb to 27 Mar, seeds 1 to 3 | `20261012T015015_m5_confirm_mar_lift_seed1_98dbf42b`, `20261012T051925_..._seed2_7d34c46d`, `20261012T052939_..._seed3_bb27a089` |
+| Lift model, 28 Mar to 24 Apr, seeds 1 to 3 | `20261012T065820_m5_confirm_apr_lift_seed1_78848e2a`, `20261012T082704_..._seed2_72bc47b1`, `20261012T095553_..._seed3_2717ac52` |
+
+Series-level table for seed 2 against seed 1: `analysis/lift_apr_seed2/lift_apr_seed2_vs_seed1_by_series.csv` in the results folder on Drive (from `scripts/after_confirm.py`).
+
 ## Change C on the Dominick's and Frat development windows (twice the training steps, three seeds)
 
 Job `configs/jobs/dev_steps2x.yaml`, commit 6a98e67, run 11 to 12 October 2026. Each config is the development config unchanged except for twice the training steps (Dominick's 12,000 instead of 6,000, inside the average of three fits; Frat 6,000 instead of 3,000). Same seeds 1 to 3 as the runs compared against. Overall score, lower is better.
