@@ -1,0 +1,29 @@
+\begin{table*}[t]
+\centering
+\caption{\textbf{Every change and comparison model that did not become a default.} Overall WRMSSE unless
+stated; ``against'' gives the default it was compared with on the same window. dev.: development windows before
+the final 8 weeks. Practice: the M5 window 25 April to 22 May 2016. Each row is a section of
+\texttt{results/README.md} with its run folders.}
+\label{tab:ledger}
+\footnotesize
+\begin{tabular}{p{0.30\textwidth}p{0.28\textwidth}p{0.34\textwidth}}
+\toprule
+\textbf{Change or model} & \textbf{Where tested} & \textbf{Result} \\
+\midrule
+Twice the training steps & Dominick's (6) and Frat, dev., 3 seeds & Better in 2, worse in 3, level or mixed in 2 \\
+Weekday as seven inputs & M5 practice, seed 1 & 0.653 against 0.646 \\
+Event kinds (with weekday) & M5 practice, seed 1 & 0.646 against 0.646 \\
+60,000 training steps & M5 practice, seed 1 & 0.642 against 0.646; gain below seed range 0.029 \\
+Item level against past-year level & M5 practice, seed 1 & 0.680 against 0.646 \\
+Totals term in the loss & Dominick's analgesics, dev. & 0.819 against 0.683; total 9\% under \\
+Negative binomial likelihood & Frat, analgesics, dev. & Level \\
+Plan split, latent check, near-week weighting & Frat, dev., 5 seeds & 0.417 to 0.427 against 0.408 \\
+Own forecast fed into the roll-forward & Dominick's (6), dev. & Worse overall in 4 of 6 \\
+Item role labels & Dominick's (6), dev. & No effect on LightGBM; snack crackers 2.422 for the world model \\
+Averaging three fits & M5 practice, seed 1 & 0.665 against 0.656 (kept on Dominick's) \\
+Graph model over product attributes & M5, four windows, 3 seeds & Level with LightGBM item by store \\
+TimesFM, median output & M5, four windows & Overall 1.71 to 1.88; totals 27\% to 31\% under \\
+Lift model (no roll-forward) & M5, four windows, 3 seeds & One seed failed in April (2.603) \\
+\bottomrule
+\end{tabular}
+\end{table*}

@@ -1,0 +1,725 @@
+\section{Introduction}
+\label{sec:intro}
+
+A retailer uses one sales forecast for several decisions, and they are made at
+different levels. Price changes, promotions, supplier funding and store orders
+are decided for one item in one store, week by week. Sales, unit and margin
+plans are set and reviewed for a category or a whole chain, by month. A
+forecast can be accurate item by store and still miss the month's category
+total by several percent, and the reverse.
+
+Forecasting competitions and most published comparisons rank models on one
+combined score over one test period. The M5 competition~\cite{m5accuracy}
+already weights its score across twelve levels of the Walmart hierarchy, but
+reports one number per entry, for one 28-day month. This paper asks three
+questions that a single number hides: which model is most accurate at each
+level, whether that answer holds from one month to the next, and how much it
+depends on whether the model sees the plan.
+
+We answer them with seven models on three public data sets and eleven final
+windows, scoring every model at every level of each data set's hierarchy.
+The models range from seasonal naive to a pretrained time-series foundation
+model (TimesFM~2.5~\cite{timesfm}) used without training on our data, and
+include a world model of our own: each item's recent history is turned into a
+state, and that state is carried forward one period at a time under the plan,
+so that what is planned for one week can change the forecast for the weeks
+after it (Figure~\ref{fig:overview}).
+
+The paper finds and contributes the following.
+\begin{enumerate}\setlength{\itemsep}{2pt}
+\item \textbf{The most accurate model depends on the level.} On M5, TimesFM
+  given only sales history is the most accurate item by store in all four
+  months, by \tfmIxsGapWorldLo{} to \tfmIxsGapWorldHi{} against the world model
+  and \tfmIxsGapLgbLo{} to \tfmIxsGapLgbHi{} against LightGBM, while models
+  that see the plan are more accurate at every level from store by department
+  up to the chain total (\S\ref{sec:grain}).
+\item \textbf{One test month is not enough.} The official M5 test month is the
+  only one of four in which LightGBM is the most accurate over all levels. The
+  world model is lowest in March and, by 0.002, in April, and the graph model on
+  the practice window (\S\ref{sec:onemonth}).
+\item \textbf{The value of the plan depends on how much of the sales it moves.}
+  Where prices rarely change (M5), giving TimesFM the plan changes its
+  item-by-store error by at most 0.002. Where promotions carry
+  \promoShareLo\% to \promoShareHi\% of a category's units (Dominick's),
+  TimesFM without the plan forecasts \promoTfmLo\% to \promoTfmHi\% of
+  promoted-week sales (\S\ref{sec:plan}).
+\item \textbf{Plan-aware models respond to price changes that history has not
+  shown, with a size the data do not fix.} For an item's first price cut in a
+  year the world model forecast \cutWorld{} units across seeds against
+  \cutSold{} sold, where models working from history forecast under 10
+  (\S\ref{sec:pricecut}).
+\item \textbf{Every model and change that lost is reported}, with its cause
+  where one was measured (\S\ref{sec:failures}, Table~\ref{tab:ledger}).
+\end{enumerate}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_overview.pdf}
+\caption{\textbf{The world model carries each item's state forward under the
+plan, and every final window was run once with settings fixed beforehand.}
+\textbf{(a)} An encoder turns the recent history of one item in one store into
+a state $s_t$. A transition step takes the state and one period's plan and
+gives the state one period later; each period's sales are read from the state
+as it stands after the plan so far. The lift model shares the encoder and
+inputs and reads every period from $s_t$. \textbf{(b)} On M5, settings were
+chosen on the practice window (25 April to 22 May 2016); the two earlier months
+were not used for any choice. On Dominick's and Frat, settings were chosen on
+two development windows before the final 8 weeks.}
+\label{fig:overview}
+\end{figure*}
+
+\section{Related work}
+\label{sec:related}
+
+\paragraph{Retail forecasting and promotions}
+Fildes, Ma and Kolassa~\cite{fildes2022} review retail forecasting and note
+that most studies evaluate at one level of aggregation, usually the item.
+Promotion effects have long been modelled from store scanner data: PromoCast
+forecast promoted-week sales from the planned event~\cite{promocast}, van
+Heerde, Leeflang and Wittink measured the dips before and after a
+promotion~\cite{vanheerde2000}, and Ma, Fildes and Huang showed that
+promotional information from within and across categories improves item
+forecasts~\cite{ma2016}. Dominick's, used here, is the data set behind much of
+this work~\cite{dominicks}.
+
+\paragraph{Hierarchies and evaluation}
+Forecasts that must add up across a hierarchy are studied as hierarchical
+forecasting~\cite{athanasopoulos2009,mint}. The M5 competition scored entries
+with a weighted, scaled error averaged over twelve levels~\cite{m5accuracy},
+the measure we use. Its leading entries were ensembles of gradient-boosted
+trees~\cite{lightgbm,januschowski2022}; our LightGBM follows their design
+without the ensembles. Tashman~\cite{tashman2000} sets out why a comparison
+should use several forecast origins rather than one test period, which
+\S\ref{sec:onemonth} confirms on M5.
+
+\paragraph{Neural and pretrained forecasters}
+Global neural models trained across many series, such as
+DeepAR~\cite{deepar} and the Temporal Fusion Transformer~\cite{tft}, take known
+future inputs such as price. Pretrained foundation models, among them
+TimesFM~\cite{timesfm} and Chronos~\cite{chronos}, forecast series they were
+not trained on from their history alone. TimesFM~2.5 also offers a
+covariate method that fits a linear model on future inputs and forecasts the
+remainder with the pretrained model~\cite{timesfm25}, which we use to give it
+the plan. Graph neural networks share information between related
+series; our graph model uses GraphSAGE-style message passing~\cite{graphsage}.
+
+\paragraph{World models}
+A world model learns a state of its environment and how that state moves
+under actions, so that the effect of a planned action can be rolled forward
+before it is taken~\cite{worldmodels,lecun2022,dreamerv3}. In retail the
+actions are the plan: prices, promotions, displays. Our world model applies
+that structure to sales forecasting with a recurrent transition~\cite{gru} on
+top of a transformer encoder~\cite{transformer}. We compare it with the same
+model without the roll-forward, so that the effect of carrying the state is
+measured separately from the rest of the design.
+
+\section{Models}
+\label{sec:models}
+
+Seven models are compared (Table~\ref{tab:models}). Five see the plan for the
+forecast periods and two do not.
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Seven models: five see the plan, two forecast from history
+alone.} Trained: fitted on the data set; the TimesFM variants are used as
+published.}
+\label{tab:models}
+\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{p{0.30\columnwidth}ccp{0.36\columnwidth}}
+\toprule
+\textbf{Model} & \textbf{Plan} & \textbf{Trained} & \textbf{What it is} \\
+\midrule
+World model & yes & yes & Item state rolled forward under the plan \\
+Lift model & yes & yes & Same encoder; baseline times plan lift; no roll-forward \\
+LightGBM & yes & yes & One tree model per store, Tweedie loss \\
+Graph model & yes & yes & LightGBM's inputs; message passing between related series \\
+TimesFM with the plan & yes & no & TimesFM~2.5 with its covariate method \\
+TimesFM & no & no & TimesFM~2.5, 512 periods of units \\
+Seasonal naive & no & no & Sales one season earlier \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{World model}
+For item $i$ in one store, an encoder (a transformer over the last $L$
+periods: 112 days on M5, 26 weeks on Dominick's and Frat) reads sales and price,
+each scaled by the item's recent level $\ell_i$, together with the calendar,
+and gives a state $s_t$. A gated recurrent transition $f$ carries the state
+forward under the plan $p_{t+h}$ for each future period,
+\begin{equation}
+s_{t+h}(p) = \mathrm{LN}\big(f(p_{t+h},\, s_{t+h-1}(p))\big), \quad s_t(p) = s_t,
+\end{equation}
+where LN is layer normalisation. The plan holds the period's price as a share
+of the item's regular price (its highest price in the last 12 periods) and the
+recorded levers: event and SNAP days on M5; promotion on Dominick's;
+promotion, display, feature and price-reduction-only on Frat. Expected sales
+are a baseline under the ``nothing planned'' plan $p^0$ (regular price, no
+lever) times a lift,
+\begin{equation}
+\begin{split}
+\log \mu_{i,t+h} = {} & \log \ell_i + b\big(s_{t+h}(p^0), p^0_{t+h}\big) \\
+ & + g\big(s_{t+h}(p), p_{t+h}\big) - g\big(s_{t+h}(p^0), p^0_{t+h}\big),
+\end{split}
+\end{equation}
+with $b$ and $g$ small networks that also take the item's labels and the
+horizon step, and the log forecast bounded to $[-10, 10]$. The lift is exactly
+zero when nothing is planned. Training minimises a Tweedie loss on sales
+relative to $\ell_i$. On Dominick's, store-week groups of items are rescaled so
+the group total rises by a learned share of the summed lift (the rest is
+switching between items), and three fits are averaged. Model sizes, training
+steps and every other setting are in the run records
+(\S\ref{sec:repro}).
+
+\paragraph{Lift model}
+The same model without the roll-forward: $s_{t+h}(p) = s_t$ for every $h$. The
+two share inputs and training, so the difference between them is the
+roll-forward.
+
+\paragraph{Comparison models}
+\emph{LightGBM}~\cite{lightgbm}: one direct model per store, Tweedie loss,
+lagged and rolling sales, price against its recent highest, calendar and plan
+inputs. \emph{Graph model}: LightGBM's inputs, with one round of
+GraphSAGE-style message passing~\cite{graphsage} between the same item in other
+stores and items of the same department in the same store, Tweedie loss.
+\emph{TimesFM}~\cite{timesfm,timesfm25}: the 200M-parameter TimesFM~2.5
+checkpoint given each series' last 512 periods of units; we use its mean
+output, because its default median forecasts 27\% to 31\% below M5 totals
+(Table~\ref{tab:ledger}). \emph{TimesFM with the plan}: the same model through
+its covariate method, a linear model on the plan inputs fitted over groups of
+2,048 series, then TimesFM on what that model leaves. \emph{Seasonal naive}:
+sales one season earlier (a week on M5).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figs/fig_readback.pdf}
+\caption{\textbf{The rolled state holds the plan, and still holds most of it a
+week later.} $R^2$ of a ridge read-out of the day's discount (price against
+regular price) from the frozen world model's state, fitted on half of 6,000
+item-store pairs and scored on the other half. Blue: the state after rolling
+through the window's plan. Grey: the state before the window, which has not
+seen the plan. Seed 1 in three M5 windows.}
+\label{fig:readback}
+\end{figure}
+
+\paragraph{What the state holds}
+A probe on the frozen world model shows that the carried state takes in the
+plan (Figure~\ref{fig:readback}). The day's discount can be read back from the
+rolled state with $R^2$ 0.58 to 0.83 across three M5 windows, against 0.00 to
+0.02 from the state before the window, and with 0.46 to 0.59 seven days later.
+This shows that the plan is in the state; it does not show that the forecast
+uses it well, which the results test.
+
+\section{Experimental setup}
+\label{sec:setup}
+
+\paragraph{Data}
+All three data sets are public (Table~\ref{tab:data}). M5 holds daily Walmart
+sales of 3,049 items in 10 stores~\cite{m5accuracy}. Dominick's Finer Foods
+holds weekly scanner data by store; we use six categories chosen before any
+final run~\cite{dominicks}. Breakfast at the Frat holds weekly sales of 55
+breakfast items in 77 stores with the promotion, display and feature for each
+week~\cite{frat}. No raw data is redistributed.
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Three public data sets, all scored item by store and at every
+level above it.}}
+\label{tab:data}
+\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{p{0.17\columnwidth}p{0.13\columnwidth}p{0.27\columnwidth}p{0.29\columnwidth}}
+\toprule
+\textbf{Data} & \textbf{Series} & \textbf{Plan inputs} & \textbf{Final windows} \\
+\midrule
+M5 (daily) & 30,490 & Price, event days, SNAP days & Four 28-day windows, 29 Feb to 19 Jun 2016 \\
+Dominick's (weekly) & Six categories & Price, promotion & Last 8 weeks of each \\
+Frat (weekly) & 3,909 & Price, promotion, display, feature, price reduction only & Last 8 weeks, 16 Nov 2011 to 4 Jan 2012 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Measure}
+We use the weighted root mean squared scaled error (WRMSSE) of
+M5~\cite{m5accuracy} at each level of the hierarchy: 12 levels on M5 (from the
+chain total to item by store) and six on Dominick's and Frat (total, category,
+store, category by store, item, item by store). Each series' error is scaled by
+its own in-sample one-step error, and series are weighted by their dollar sales
+over the last weeks of training. We report the score over all levels, the
+chain total and item by store, and the ratio of total forecast to total sales.
+Lower error is better.
+
+\paragraph{Protocol}
+Settings of the world model, the lift model and LightGBM were chosen on the M5
+practice window (25 April to 22 May 2016) and on two development windows before
+the final 8 weeks of Dominick's and Frat, then fixed and run once on the final
+windows (Figure~\ref{fig:overview}b). Two earlier M5 months, 29 February to 27
+March and 28 March to 24 April 2016, were not used for any choice; each is
+forecast from data up to the day before it starts. Trained models were run with
+three seeds and we report the mean and the range. TimesFM, TimesFM with the
+plan and the graph model were added after the final tests as comparisons,
+with settings fixed before their first run and no development windows of their
+own.
+
+\section{Results}
+\label{sec:results}
+
+The results follow the order of the contributions: the level at which a model
+is judged (\S\ref{sec:grain}), the number of months it is judged on
+(\S\ref{sec:onemonth}), the plan (\S\ref{sec:plan}, \S\ref{sec:pricecut}),
+and the failures (\S\ref{sec:failures}). Table~\ref{tab:m5} and
+Table~\ref{tab:finals} hold every final score.
+
+\input{generated/tab_m5}
+\input{generated/tab_finals}
+
+\subsection{The most accurate model depends on the level}
+\label{sec:grain}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_m5_windows.pdf}
+\caption{\textbf{Item by store, TimesFM from history alone is the most accurate
+model in every month; at the total and over all levels, the plan-aware models
+are, and which one changes by month.} WRMSSE on four M5 windows, lower is better.
+Large markers: mean over seeds; small open markers: each seed; bar: seed range.
+Values beyond the axis are drawn at its edge with their value. One lift-model
+seed failed in April (\S\ref{sec:failures}). \textbf{(a)} Item by store
+(30,490 series). \textbf{(b)} Chain total. \textbf{(c)} All 12 levels, the M5
+score.}
+\label{fig:m5windows}
+\end{figure*}
+
+On M5, TimesFM given only each item's sales history is the most accurate model
+item by store in all four months (Figure~\ref{fig:m5windows}a): \mTfmMarIxs{},
+\mTfmAprIxs{}, \mTfmPracIxs{} and \mTfmTestIxs{}, against \mWorldMarIxs{},
+\mWorldAprIxs{}, \mWorldPracIxs{} and \mWorldTestIxs{} for the world model and
+\mLgbMarIxs{}, \mLgbAprIxs{}, \mLgbPracIxs{} and \mLgbTestIxs{} for LightGBM.
+Among the trained models, the world model and the lift model are ahead of
+LightGBM and the graph model item by store in every month, and in both
+confirmation months every world-model seed is ahead of every LightGBM seed.
+
+At the total the order reverses (Figure~\ref{fig:m5windows}b). TimesFM
+forecasts \tfmUnderLo\% to \tfmUnderHi\% below total sales in every month, so
+its total error is higher than seasonal naive's in three of the four months
+(\mTfmMarTotal{} against \mNaiveMarTotal{} in March) and level with it on the
+test month (\mTfmTestTotal{} against \mNaiveTestTotal). The world model has the lowest total error in March
+(\mWorldMarTotal{}) and April (\mWorldAprTotal{}), the graph model on the
+practice window (\mGraphPracTotal{}) and LightGBM on the test month
+(\mLgbTestTotal{}).
+
+Figure~\ref{fig:levels} shows where the order changes. From the chain total
+down to store by department, the plan-aware models are ahead of TimesFM in
+every month. At the three item levels (item, item by state, item by store)
+TimesFM is the most accurate model in three of the four months, and item by
+store in all four. A model that is best for store orders on M5 is therefore not the
+model to use for a category plan. The combined M5 score weights the twelve
+levels equally, and nine of them are above the item, so a ranking on it mostly
+reflects the upper levels.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_levels.pdf}
+\caption{\textbf{The order of the models reverses between the upper levels and
+item by store.} WRMSSE at each of the 12 M5 levels, from the chain total (left)
+to item by store (right), one panel per window. Lines: mean over seeds; bands:
+seed range. Shaded columns: the two levels the decisions in \S\ref{sec:discussion}
+are made at.}
+\label{fig:levels}
+\end{figure*}
+
+\subsection{One test month misleads}
+\label{sec:onemonth}
+
+Over all twelve levels, the official M5 test month (23 May to 19 June 2016) is
+the only one of the four in which LightGBM is the most accurate model
+(Figure~\ref{fig:m5windows}c): \mLgbTestOverall{} against \mWorldTestOverall{}
+for the world model, level with the 10th-ranked entry of the
+competition (\mPublishedTenth). In March the world model is ahead,
+\mWorldMarOverall{} (seeds \mWorldMarOverallLo{} to \mWorldMarOverallHi) against
+\mLgbMarOverall{} (\mLgbMarOverallLo{} to \mLgbMarOverallHi); in April the two
+are level, \mWorldAprOverall{} against \mLgbAprOverall; and on the practice
+window the graph model is lowest (\mGraphPracOverall), with the world model at
+\mWorldPracOverall{} and LightGBM at \mLgbPracOverall.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_level_bias.pdf}
+\caption{\textbf{Whichever model gets the month's level closer wins the totals,
+and that changes by month.} \textbf{(a)} Total forecast against total sales on
+each M5 window (1.0 is right); markers as in Figure~\ref{fig:m5windows}.
+Seasonal naive's ratio was not recorded on the two later windows.
+\textbf{(b)} April, with each item-store pair grouped by its average daily
+sales in March (units sold in April in brackets), so that the grouping does not
+depend on the sales being scored: forecast against sales by group, world model
+and LightGBM, three seeds averaged.}
+\label{fig:levelbias}
+\end{figure*}
+
+Between the world model and LightGBM, the ranking follows the level of the
+total forecast (Figure~\ref{fig:levelbias}a). LightGBM forecasts 3\% to 6\%
+below total sales in March and April and 2\% below on the test month; the
+world model is within 1\% in March and April and 2.6\% above on the test
+month. In each of these three months, the one of the two whose total is closer
+to sales has the lower total error and the lower error over all levels. Grouping April's item-store pairs by their March sales rate
+(Figure~\ref{fig:levelbias}b), both models are within 6\% of sales in every
+group that sold in March; LightGBM is under in every group and the world model
+is closer to sales on 50.6\% to 54.2\% of pairs in each. The world model's weak
+spot is pairs that sold nothing in March, where it forecasts 62\% above April
+sales.
+
+A comparison on the official test month alone would have ranked LightGBM first.
+On three of the four months it is not.
+
+\subsection{How much the plan matters}
+\label{sec:plan}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_finals.pdf}
+\caption{\textbf{On the promotion-driven weekly data, TimesFM from history
+alone is behind both plan-aware trained models item by store in six of seven
+data sets; given the plan, it closes most of the gap.} WRMSSE on the final 8
+weeks, lower is better. World model, LightGBM and (Frat only) lift model:
+three seeds, markers as in Figure~\ref{fig:m5windows}; TimesFM and TimesFM with
+the plan: one run. \textbf{(a)} All six levels. \textbf{(b)} Item by store.}
+\label{fig:finals}
+\end{figure*}
+
+The plan matters in proportion to how much of the sales it moves. On M5, where
+prices change rarely, giving TimesFM the plan changes its item-by-store error by
+at most 0.002 in any month (\mTfmPlanMarIxs{} against \mTfmMarIxs{} in March).
+On Dominick's and Frat, where promotions drive the weeks, it changes a great
+deal (Figure~\ref{fig:finals}).
+
+Without the plan, TimesFM is behind both the world model and LightGBM item by
+store on Frat and in five of six Dominick's categories; in bottled juice it is
+between them (Figure~\ref{fig:finals}b). This is the reverse of M5. The reason
+shows in the promoted weeks (Figure~\ref{fig:plan}a): TimesFM forecasts
+\promoTfmLo\% to \promoTfmHi\% of what sold in a promoted week, because nothing
+in its input says the promotion is coming.
+
+Given the plan, TimesFM forecasts \promoTfmPlanLo\% to \promoTfmPlanHi\% of
+promoted-week sales, and its overall error improves on Frat (\fTfmFratOverall{}
+to \fTfmPlanFratOverall) and in three of six categories (cheese, soft drinks,
+analgesics). It becomes the most
+accurate model in cheese (\fTfmPlanCheOverall{} against \fLgbCheOverall{} for
+LightGBM) and is level with the world model on Frat (\fTfmPlanFratOverall{}
+against \fWorldFratOverall), but stays behind a model trained on the plan in
+the other categories. In bottled juice the plan made it slightly worse
+(\fTfmBjcOverall{} to \fTfmPlanBjcOverall).
+
+The trained plan-aware models also fall short in promoted weeks: the world
+model forecasts \promoWorldLo\% to \promoWorldHi\% of promoted-week sales and
+LightGBM \promoLgbLo\% to \promoLgbHi\%. Among the trained models, which one is
+more accurate depends on the category (Table~\ref{tab:finals}): over all levels
+the world model is ahead in soft drinks (\fWorldSdrOverall{} against
+\fLgbSdrOverall) and analgesics (\fWorldAnaOverall{} against
+\fLgbAnaOverall), level in bottled juice, slightly behind in frozen entrees
+(\fWorldFreOverall{} against \fLgbFreOverall), and behind in cheese, snack
+crackers and on Frat; item by store LightGBM is level or ahead in every category. On
+Dominick's the world model's gains are at the totals, the opposite pattern to
+M5.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_plan.pdf}
+\caption{\textbf{Without the plan a model cannot see a promotion or a price cut
+coming; with it, the direction is right and the size is uncertain.}
+\textbf{(a)} Forecast against sales in promoted weeks of the final 8 weeks,
+by Dominick's category (promoted weeks' share of the category's units in
+brackets); 1.0 is right. \textbf{(b)} HOUSEHOLD\_1\_146 in the four M5 stores
+where it had its first price cut in a year (5.98 to 4.50 for one week) inside
+the April window: units forecast over the 28 days by each model, one point per
+seed, log scale; it sold \cutSold.}
+\label{fig:plan}
+\end{figure*}
+
+\subsection{First-time price cuts}
+\label{sec:pricecut}
+
+In the April M5 window, HOUSEHOLD\_1\_146 had sold almost nothing for a year at
+5.98, then sold \cutSold{} units in four stores over a window that held a
+one-week cut to 4.50 (Figure~\ref{fig:plan}b). Models working from history
+forecast almost nothing: LightGBM \cutLgb{} units across seeds, TimesFM
+\cutTfm. The world model, which reads the cut through its plan, forecast
+\cutWorld; the graph model \cutGraph; the lift model \cutLift.
+
+Models that read the plan respond to a price change that history has not
+shown, and LightGBM, which sees price only against its own recent highest,
+responds little. How large the response should be is not fixed by the data:
+the world-model seeds differ by a factor of five, and one lift-model seed
+forecast over 200,000 units. For the same window, FOODS\_3\_443 in one store had
+a 68\% cut and sold 4 units; every plan-reading model forecast more (the world
+model up to 26).
+
+\subsection{Negative and degenerate results}
+\label{sec:failures}
+
+We report the failures at the same length as the results above. Two had a
+measured cause; the other changes and comparison models are in
+Table~\ref{tab:ledger}.
+
+\paragraph{A lift-model seed that broke on five series}
+In April, lift-model seed 2 scored \mLiftAprSeedBOverall{} over all levels
+against \mLiftAprSeedAOverall{} and \mLiftAprSeedCOverall{} for seeds 1 and 3,
+and forecast \liftSeedTwoForecast{} units against \liftSeedTwoSold{} sold. Five
+item-store series hold all of the excess. Each had its first price cut in a
+year inside the window (the four HOUSEHOLD\_1\_146 stores above, and
+FOODS\_3\_443 in one store, 2.50 to 0.79 for three weeks). Seed 2 read the cuts
+as lifts up to the model's bound, about 22,000 times the item's level per day.
+Item by store, weighted by dollar sales, the failure is invisible
+(\mLiftAprIxs); at the totals it dominates. The world model, with the same
+readout and the roll-forward, did not fail on these series in any seed.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figs/fig_frat.pdf}
+\caption{\textbf{On Frat the world model gets the 8-week total right and misses
+the holiday weeks.} \textbf{(a)} Units sold each week of the final window,
+all item-stores. \textbf{(b)} Forecast against sales each week, three seeds
+averaged. Shaded: the December weeks, absent from the development windows.}
+\label{fig:frat}
+\end{figure}
+
+\paragraph{Frat holiday weeks}
+On the Frat development windows the world model, lift model and LightGBM were
+level (0.406 to 0.421). On the final 8 weeks the world model fell to
+\fWorldFratOverall{} against \fLgbFratOverall{} for LightGBM, and every LightGBM
+seed beats every world-model seed. The final weeks are the holiday period,
+which the development windows did not contain (Figure~\ref{fig:frat}). The
+world model's 8-week total is right (forecast against sales \fWorldFratFa,
+LightGBM \fLgbFratFa), but it is 15\% to 17\% under in the two December peak
+weeks and 24\% over in the week after Christmas. LightGBM, with week-of-year
+and month inputs and training data that include the previous holiday season,
+follows that shape more closely.
+
+\paragraph{A withdrawn claim}
+An earlier reading that the world model was more accurate than LightGBM on
+fast-selling items came from grouping pairs by their sales in the scored
+window, which pulls forecasts in high groups towards under and in low groups
+towards over for both models. Grouped by an earlier window
+(Figure~\ref{fig:levelbias}b), the advantage is small and the same in every
+group. We do not make the claim.
+
+\input{generated/tab_ledger}
+
+\paragraph{Changes that did not become defaults}
+Table~\ref{tab:ledger} lists every change screened and every comparison model
+that lost. Longer training, weekday and event inputs, a long-run level, a
+totals term in the loss, a count likelihood, a separate plan path in the state,
+feeding the model's own forecast into the roll-forward and item role labels
+either made no difference beyond seed noise or made the model worse. The graph
+model is level with LightGBM item by store, whose inputs it shares, so sharing
+information between related series added nothing on these inputs. TimesFM's
+default median output forecasts 27\% to 31\% below M5 totals, which makes its
+upper-level error worse than seasonal naive; its mean output, used above, does
+not have that problem.
+
+\section{Discussion}
+\label{sec:discussion}
+
+A retailer should choose a forecasting model by the decision it feeds, scored
+at that decision's level and over several periods (Table~\ref{tab:decisions}).
+
+\begin{table*}[t]
+\centering
+\caption{\textbf{Each decision has its own level, and the results point to a
+different model for each.}}
+\label{tab:decisions}
+\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{p{0.26\textwidth}p{0.20\textwidth}p{0.48\textwidth}}
+\toprule
+\textbf{Decision} & \textbf{Level} & \textbf{What the results say} \\
+\midrule
+Store orders and inventory for items whose price rarely moves & Item by store, day or week & A pretrained model from history alone is as accurate as or more accurate than plan-aware models (M5: most accurate in all four months) \\
+Promotion, price change, supplier funding & Item by week, under a planned change & A model that reads the plan is needed; history alone forecasts \promoTfmLo\% to \promoTfmHi\% of promoted-week sales and does not respond to a first price cut \\
+Category sales, units and margin plans & Category or chain, week or month & Judge on the level of the total; the world model was within 1\% of total M5 sales in both confirmation months \\
+Choosing a model & Any & Score at least three or four periods; one period reversed the ranking on M5 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+Two cautions follow from the failures. A direct lift readout can extrapolate a
+price cut it has never seen for an item far beyond any sale, and whether it
+does depends on the seed; a plan-driven forecast needs a bound and a check on
+series whose plan falls outside their own history. And a forecast that is
+accurate item by store can be several percent off the category total, which is
+the number a merchant plans against.
+
+The comparison also says what the world model's roll-forward adds and what it
+does not. Against the lift model, which differs only in the roll-forward, it is
+level or better over all levels in every M5 month and on Frat, and it did not
+fail on the first-time price cuts that broke a lift-model seed. Item by store it
+is not more accurate than the lift model, and on M5 neither is more accurate
+than a pretrained model that sees no plan at all.
+
+\section{Limitations and threats to validity}
+\label{sec:limitations}
+
+\paragraph{Windows and seeds}
+M5 has four final windows; Dominick's and Frat one each. On the M5 practice
+window LightGBM was run with one seed. Three seeds per trained model show the
+spread of training, not of the data.
+
+\paragraph{Comparison models added later}
+TimesFM, TimesFM with the plan and the graph model were added after the final
+tests, with settings fixed before their first run but without development
+windows of their own. Each TimesFM variant is one run, since it has no
+training randomness. TimesFM with the plan fits its linear plan model within
+groups of 2,048 series, a memory limit, so the fit is shared within each group.
+
+\paragraph{The size of a plan response}
+The world model's response to a first-time price cut varied by a factor of five
+across seeds. The data do not identify it, and a deployed system would need a
+bound or a prior.
+
+\paragraph{What the read-back shows}
+A high read-back $R^2$ shows the plan is in the world model's state, not that
+the forecast uses it correctly.
+
+\paragraph{Public data only}
+The three data sets are public and were collected between 1989 and 2016. Promotion
+records differ between them (Dominick's records a promotion flag; Frat records
+display and feature separately), so the plan inputs are not the same across
+data sets.
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+Which forecasting model is most accurate depends on the level it is judged at,
+the month, and how much of the sales the plan moves. On M5 a pretrained model
+reading history alone is the most accurate item by store in every month, while
+plan-aware models are more accurate at the totals, and the official test month
+is the only one of four in which LightGBM wins overall. On promotion-driven
+data a model without the plan forecasts well under half of promoted-week sales
+in most categories. A world model that carries each item's state forward under
+the plan responds to price changes history has not shown, in the right
+direction and with an uncertain size. Retail forecasts should be chosen and
+reported by the decision they feed, at that decision's level, over several
+periods, with the losing models stated.
+
+\section{Reproducibility and compute}
+\label{sec:repro}
+
+All code, configuration files and tests are in the repository. Every run
+records its code commit, configuration, data checksums and seeds in a manifest;
+the manifest and scores of the \nPromotedRuns{} runs read by this manuscript
+are committed under \texttt{results/promoted/}, and the manuscript's figures,
+tables and quoted numbers are generated from them by
+\texttt{paper/figs/make\_figures.py} and \texttt{paper/figs/make\_tables.py}.
+Numbers from runs not in that folder (TimesFM on Dominick's and Frat, TimesFM
+with the plan, and the analyses of saved forecasts) are copied into
+\texttt{paper/figs/rwdata.py} from \texttt{results/README.md}, which names each
+run folder. Forecast files and model checkpoints are kept outside the
+repository, with their checksums recorded in each run's scores. Runs used one
+NVIDIA Tesla T4 GPU on Google Colab: about 100 minutes per seed for the world
+model on M5, 78 for LightGBM, 7.5 for the graph model and 4 for TimesFM.
+
+\section{Data and code availability}
+
+M5 is available from the competition's Kaggle page~\cite{m5accuracy};
+Dominick's from the Kilts Center for Marketing, University of Chicago Booth
+School of Business~\cite{dominicks}; Breakfast at the Frat from
+dunnhumby~\cite{frat}. Code: \url{https://github.com/Kar488/retail-world-models}.
+
+\begin{thebibliography}{99}
+\footnotesize
+\setlength{\itemsep}{1.5pt}\setlength{\parskip}{0pt}
+
+\bibitem{m5accuracy} S.~Makridakis, E.~Spiliotis, and V.~Assimakopoulos. M5
+accuracy competition: Results, findings, and conclusions. \emph{International
+Journal of Forecasting}, 38(4):1346--1364, 2022.
+
+\bibitem{fildes2022} R.~Fildes, S.~Ma, and S.~Kolassa. Retail forecasting:
+Research and practice. \emph{International Journal of Forecasting},
+38(4):1283--1318, 2022.
+
+\bibitem{promocast} L.~G. Cooper, P.~Baron, W.~Levy, M.~Swisher, and P.~Gogos.
+PromoCast: A new forecasting method for promotion planning. \emph{Marketing
+Science}, 18(3):301--316, 1999.
+
+\bibitem{vanheerde2000} H.~J. van~Heerde, P.~S.~H. Leeflang, and D.~R. Wittink.
+The estimation of pre- and postpromotion dips with store-level scanner data.
+\emph{Journal of Marketing Research}, 37(3):383--395, 2000.
+
+\bibitem{ma2016} S.~Ma, R.~Fildes, and T.~Huang. Demand forecasting with high
+dimensional data: The case of SKU retail sales forecasting with intra- and
+inter-category promotional information. \emph{European Journal of Operational
+Research}, 249(1):245--257, 2016.
+
+\bibitem{dominicks} James M. Kilts Center for Marketing. Dominick's data
+manual and data files. University of Chicago Booth School of Business.
+
+\bibitem{frat} dunnhumby. Breakfast at the Frat data set. dunnhumby source
+files.
+
+\bibitem{athanasopoulos2009} G.~Athanasopoulos, R.~A. Ahmed, and R.~J. Hyndman.
+Hierarchical forecasts for Australian domestic tourism. \emph{International
+Journal of Forecasting}, 25(1):146--166, 2009.
+
+\bibitem{mint} S.~L. Wickramasuriya, G.~Athanasopoulos, and R.~J. Hyndman.
+Optimal forecast reconciliation for hierarchical and grouped time series
+through trace minimization. \emph{Journal of the American Statistical
+Association}, 114(526):804--819, 2019.
+
+\bibitem{lightgbm} G.~Ke, Q.~Meng, T.~Finley, T.~Wang, W.~Chen, W.~Ma, Q.~Ye,
+and T.-Y. Liu. LightGBM: A highly efficient gradient boosting decision tree.
+\emph{Advances in Neural Information Processing Systems 30}, 2017.
+
+\bibitem{januschowski2022} T.~Januschowski, Y.~Wang, K.~Torkkola, T.~Erkkil\"a,
+H.~Hasson, and J.~Gasthaus. Forecasting with trees. \emph{International Journal
+of Forecasting}, 38(4):1473--1481, 2022.
+
+\bibitem{tashman2000} L.~J. Tashman. Out-of-sample tests of forecasting
+accuracy: An analysis and review. \emph{International Journal of Forecasting},
+16(4):437--450, 2000.
+
+\bibitem{deepar} D.~Salinas, V.~Flunkert, J.~Gasthaus, and T.~Januschowski.
+DeepAR: Probabilistic forecasting with autoregressive recurrent networks.
+\emph{International Journal of Forecasting}, 36(3):1181--1191, 2020.
+
+\bibitem{tft} B.~Lim, S.~\"O. Ar{\i}k, N.~Loeff, and T.~Pfister. Temporal
+fusion transformers for interpretable multi-horizon time series forecasting.
+\emph{International Journal of Forecasting}, 37(4):1748--1764, 2021.
+
+\bibitem{timesfm} A.~Das, W.~Kong, R.~Sen, and Y.~Zhou. A decoder-only
+foundation model for time-series forecasting. \emph{Proceedings of the 41st
+International Conference on Machine Learning (ICML)}, 2024.
+
+\bibitem{timesfm25} Google Research. TimesFM 2.5 (200M, PyTorch) checkpoint
+\texttt{google/timesfm-2.5-200m-pytorch} and the \texttt{timesfm} Python
+package, version 2.0.2.
+
+\bibitem{chronos} A.~F. Ansari, L.~Stella, C.~Turkmen, X.~Zhang, P.~Mercado,
+H.~Shen, O.~Shchur, S.~S. Rangapuram, S.~Pineda~Arango, S.~Kapoor, J.~Zschiegner,
+D.~C. Maddix, H.~Wang, M.~W. Mahoney, K.~Torkkola, A.~G. Wilson,
+M.~Bohlke-Schneider, and Y.~Wang. Chronos: Learning the language of time
+series. \emph{Transactions on Machine Learning Research}, 2024.
+
+\bibitem{graphsage} W.~L. Hamilton, R.~Ying, and J.~Leskovec. Inductive
+representation learning on large graphs. \emph{Advances in Neural Information
+Processing Systems 30}, 2017.
+
+\bibitem{worldmodels} D.~Ha and J.~Schmidhuber. Recurrent world models
+facilitate policy evolution. \emph{Advances in Neural Information Processing
+Systems 31}, 2018.
+
+\bibitem{lecun2022} Y.~LeCun. A path towards autonomous machine intelligence.
+OpenReview preprint, 2022.
+
+\bibitem{dreamerv3} D.~Hafner, J.~Pasukonis, J.~Ba, and T.~Lillicrap. Mastering
+diverse domains through world models. arXiv:2301.04104, 2023.
+
+\bibitem{gru} K.~Cho, B.~van~Merri\"enboer, C.~Gulcehre, D.~Bahdanau,
+F.~Bougares, H.~Schwenk, and Y.~Bengio. Learning phrase representations using
+RNN encoder--decoder for statistical machine translation. \emph{Proceedings of
+EMNLP}, 2014.
+
+\bibitem{transformer} A.~Vaswani, N.~Shazeer, N.~Parmar, J.~Uszkoreit, L.~Jones,
+A.~N. Gomez, {\L}.~Kaiser, and I.~Polosukhin. Attention is all you need.
+\emph{Advances in Neural Information Processing Systems 30}, 2017.
+
+\end{thebibliography}

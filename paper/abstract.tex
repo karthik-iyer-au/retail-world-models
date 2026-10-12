@@ -1,0 +1,31 @@
+\small
+\textbf{Abstract.}
+Which forecasting model is best depends on the level of the product and store
+hierarchy at which the forecast is judged, and on how much of the sales the
+plan (price, promotion, events) moves. We compare a world model, which carries
+each item's state forward one period at a time under the plan, with a direct
+lift model, LightGBM, a graph model, seasonal naive, and the pretrained
+TimesFM~2.5 with and without the plan, on three public data sets: M5 (four
+28-day windows), six Dominick's categories and Breakfast at the Frat. Every
+model is scored at every level of the hierarchy, and every model and change
+that lost is reported. On M5, TimesFM given only each item's sales history is
+the most accurate model item by store in all four months
+(\mTfmMarIxs{} to \mTfmTestIxs{}), but forecasts \tfmUnderLo\% to
+\tfmUnderHi\% below total sales; the world model is the most accurate at the
+chain total in two of the four months and LightGBM in one. The official M5 test
+month is the only one of the four in which LightGBM is the most accurate over
+all levels, so a single test month would have given the wrong ranking. On the
+weekly, promotion-driven data, TimesFM without the plan forecasts
+\promoTfmLo\% to \promoTfmHi\% of promoted-week sales and is behind both
+plan-aware trained models item by store in six of seven data sets; given the
+plan, it forecasts \promoTfmPlanLo\% to \promoTfmPlanHi\% and becomes the most
+accurate model in one category. For an item whose first price cut in a year
+sold \cutSold{} units, the world model forecast \cutWorld{} across three seeds,
+against about 3 for LightGBM and 8 for TimesFM: plan-aware models respond in
+the right direction, and the data do not fix the size. A retailer should
+choose its forecasting model by the decision the forecast feeds, scored at
+that decision's level and over several periods.
+
+\vspace{4pt}
+\textbf{Keywords:} retail forecasting; hierarchical evaluation; promotions;
+world models; foundation models; M5.
