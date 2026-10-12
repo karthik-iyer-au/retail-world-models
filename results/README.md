@@ -966,7 +966,7 @@ Units over the 28 days, each seed separately (`analysis/lift_apr_seed2/april_fai
 
 | Series | Sold | World model (seeds 1, 2, 3) | LightGBM | Lift | TimesFM mean | Graph |
 |---|---|---|---|---|---|---|
-| HOUSEHOLD_1_146, four stores together | 120 | 121, 600, 243 | 3.1, 2.9, 3.3 | 79, 113,885, 316 | 7.8 | 59, 45, 55 |
+| HOUSEHOLD_1_146, four stores together | 120 | 121, 600, 243 | 3.1, 2.9, 3.3 | 79, 206,886, 316 | 7.8 | 59, 45, 55 |
 | FOODS_3_443 in WI_1 | 4 | 26, 1, 18 | 3.4, 3.4, 3.2 | 346, 25,348, 366 | 0.4 | 10, 10, 10 |
 
 - HOUSEHOLD_1_146 had sold almost nothing before (LightGBM and TimesFM, working from history, forecast about 3 and 8 units) and sold 120 in the week of its 25% price cut. The world model, which reads the cut through its plan, forecast 121 on seed 1 and 243 and 600 on the others: the right direction, with the size varying by seed. The lift model's seeds 1 and 3 were 79 and 316; seed 2 reached its ceiling.
