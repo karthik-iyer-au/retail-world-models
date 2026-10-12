@@ -967,6 +967,75 @@ Findings.
 | Practice window | `20261012T113751_m5_validation_timesfm_seed1_78ba30e4` |
 | Official test | `20261012T114149_m5_test_timesfm_seed1_9f023a55` |
 
+## TimesFM 2.5 zero-shot on the four M5 windows (mean output)
+
+Job `configs/jobs/m5_timesfm_mean.yaml`, commit e08d20e, run 12 October 2026. Same as the median run above except the forecast is TimesFM's mean output. Lower is better; item by store for the other models is the three-seed mean.
+
+| Window | Overall | Total | Item by store | Forecast / actual | Item by store: world model / LightGBM |
+|---|---|---|---|---|---|
+| 29 Feb to 27 Mar 2016 | 0.854 | 0.830 | **0.836** | 0.920 | 0.851 / 0.873 (lift 0.846) |
+| 28 Mar to 24 Apr 2016 | 0.819 | 0.786 | **0.828** | 0.936 | 0.833 / 0.846 (lift 0.834) |
+| 25 Apr to 22 May 2016 (practice) | 0.896 | 0.930 | **0.828** | 0.904 | 0.835 / 0.847 |
+| 23 May to 19 Jun 2016 (official test) | 0.729 | 0.558 | **0.885** | 0.947 | 0.897 / 0.905 |
+
+Findings.
+
+- Item by store, TimesFM with its mean output is the lowest of every model in all four windows (by 0.005 to 0.015 against the world model, 0.018 to 0.037 against LightGBM), without seeing any price, promotion, event or SNAP day.
+- It forecasts 5% to 10% under in every window, so the totals and overall are worse than the world model and LightGBM in every window (overall 0.73 to 0.90 against 0.55 to 0.71) and level with or worse than seasonal naive except on the test period.
+- So at item by store, history alone, read by a large pretrained model, goes further than any of our plan-aware models. The plan inputs pay off in the level of the totals, not in the item-by-store detail.
+
+| Run | Folder |
+|---|---|
+| 29 Feb to 27 Mar | `20261012T123457_m5_confirm_mar_timesfm_mean_seed1_16487c92` |
+| 28 Mar to 24 Apr | `..._m5_confirm_apr_timesfm_mean_seed1_309defa4` |
+| Practice window | `..._m5_validation_timesfm_mean_seed1_264dfda6` |
+| Official test | `..._m5_test_timesfm_mean_seed1_d66e1588` |
+
+## Plan read-back: does the world model's state take in the plan
+
+`scripts/plan_readback.py` (commit 7046cb4), run by `scripts/after_confirm.py` on 12 October 2026, on seed 1 of the world model in three M5 windows. The saved model is frozen. For 6,000 item-store pairs and the 28 days of the window, a ridge read-out is fitted from the model's state after each day to that day's plan input (or the input 1 or 7 days earlier), on half the pairs, and scored on the other half (R squared, 1 is perfect). The control is the same read-out from the state before the window, which has not seen the window's plan.
+
+| Plan input | Days back | March: control / rolled state | April | Test period |
+|---|---|---|---|---|
+| Price against the item's regular price (the discount) | 0 | 0.00 / 0.83 | 0.02 / 0.58 | 0.00 / 0.80 |
+| | 1 | 0.00 / 0.81 | 0.02 / 0.65 | 0.00 / 0.79 |
+| | 7 | 0.00 / 0.59 | 0.02 / 0.48 | 0.00 / 0.46 |
+| Price against the item's usual price | 0 | 0.12 / 0.90 | 0.55 / 0.87 | 0.17 / 0.89 |
+| | 7 | 0.14 / 0.68 | 0.55 / 0.73 | 0.18 / 0.67 |
+| Event day | 0 | 0.00 / 0.99 | no event in the window | 0.00 / 0.99 |
+| | 7 | 0.00 / 0.84 | | 0.00 / 0.60 |
+| SNAP day | 0 | 0.00 / 0.99 | 0.00 / 0.99 | 0.00 / 0.98 |
+| | 7 | 0.00 / 0.60 | 0.00 / 0.57 | 0.00 / 0.69 |
+
+Findings.
+
+- The state the world model carries forward holds the plan: the day's discount is read back with R squared 0.58 to 0.83 against 0.00 to 0.02 from the state before the window; events and SNAP days at 0.98 to 0.99.
+- It still holds most of it a week later (discount 0.46 to 0.59), which is what a model needs to forecast the week after a promotion.
+- The lift model has no state carried forward; its read-out from history alone is the control (April: discount 0.01).
+- This shows the plan is in the state, not that the forecast uses it correctly; plan A against plan B and the after-promotion checks test that.
+
+## Frat final test: where the world model loses to LightGBM
+
+`scripts/compare_forecasts.py` on the Frat final runs (three seeds each, averaged), run 12 October 2026. Weekly totals over all item-stores, 16 November 2011 to 4 January 2012.
+
+| Week starting | Actual units | World model bias | LightGBM bias |
+|---|---|---|---|
+| 16 Nov | 53,725 | +2.3% | -4.4% |
+| 23 Nov | 73,950 | -0.6% | -11.6% |
+| 30 Nov | 60,048 | +15.8% | +1.8% |
+| 7 Dec | 82,656 | -17.0% | -10.9% |
+| 14 Dec | 76,231 | -15.3% | -11.9% |
+| 21 Dec | 66,469 | -1.4% | -11.5% |
+| 28 Dec | 50,941 | +23.9% | -3.1% |
+| 4 Jan | 64,489 | +6.1% | +6.2% |
+| All 8 weeks | 528,509 | 0.0% | -6.3% |
+
+Findings.
+
+- Over the 8 weeks the world model's total is right (forecast / actual 1.000) and LightGBM is 6.3% under. The world model loses on the week-to-week shape: its weekly totals are off by 10.2% on average against LightGBM's 8.2%, and LightGBM is closer on 58.6% of item-store pairs.
+- The world model's misses are the holiday weeks: it is 16% over in the week before the early-December rise, 15% to 17% under in the two December peak weeks, and 24% over in the week after Christmas, when sales dropped to 50,941. LightGBM, with the calendar and year-ago sales as inputs, follows the holiday shape more closely.
+- This is the development-to-final drop on Frat: the development windows held no holiday weeks.
+
 ## Change C on the Dominick's and Frat development windows (twice the training steps, three seeds)
 
 Job `configs/jobs/dev_steps2x.yaml`, commit 6a98e67, run 11 to 12 October 2026. Each config is the development config unchanged except for twice the training steps (Dominick's 12,000 instead of 6,000, inside the average of three fits; Frat 6,000 instead of 3,000). Same seeds 1 to 3 as the runs compared against. Overall score, lower is better.
