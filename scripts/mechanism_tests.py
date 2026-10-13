@@ -88,6 +88,7 @@ def main(argv=None):
     p.add_argument("--pattern", nargs="+", required=True)
     a = p.parse_args(argv)
     res = Path(a.results)
+    Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     rows = []
     done = pd.read_csv(a.out) if Path(a.out).exists() else pd.DataFrame(columns=["run", "origin"])
     seen = set(zip(done["run"], done["origin"]))
