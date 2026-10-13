@@ -1,0 +1,59 @@
+\section{Related work}
+\label{sec:related}
+
+\paragraph{What an explanation should satisfy}
+Interpretability lacks a single definition~\cite{lipton2018,doshivelez2017}.
+Jacovi and Goldberg~\cite{jacovi2020} separate faithfulness, whether an
+explanation reflects the model's reasoning, from plausibility, whether it
+convinces a person, and warn that evaluations often measure the second. Chen et
+al.~\cite{chen2020} draw the related line between explanations true to the
+model and true to the data, and Janzing et al.~\cite{janzing2020} argue that
+feature relevance is a causal question about interventions on the model's
+inputs. Our on/off contributions are interventions of exactly that kind, made
+on the plan inputs the merchant controls.
+
+\paragraph{Feature attributions and their failures}
+LIME~\cite{ribeiro2016} and SHAP~\cite{lundberg2017}, with its exact form for
+trees~\cite{lundberg2020}, are the most used attributions~\cite{adadi2018}.
+Saliency maps can barely change when a network's weights are
+randomised~\cite{adebayo2018}, move with input shifts the model
+ignores~\cite{kindermans2019}, differ for near-identical
+inputs~\cite{alvarezmelis2018}, and rank features whose removal does not hurt
+the model~\cite{hooker2019}. Rudin~\cite{rudin2019} argues for models that are
+interpretable by construction. The world model and the lift model are of that
+kind for the plan, which lets this audit compare a built-in explanation with
+post-hoc ones on the same forecasts.
+
+\paragraph{Explanations of time series and forecasts}
+Rojat et al.~\cite{rojat2021} survey explanation methods for time series.
+Ismail et al.~\cite{ismail2020} and Tonekaboni et
+al.~\cite{tonekaboni2020} show on generated data with known important time steps
+that saliency methods designed for images often fail on temporal data, the
+approach our known-answer study takes for retail plans. Among forecasting
+models, the Temporal Fusion Transformer~\cite{tft} reports attention weights
+as explanations. We know of no study that checks the explanation of a demand
+forecast against a measured promotional or price effect.
+
+\paragraph{Promotion and price effects}
+Marketing science has measured promotional effects for decades: the split of a
+promotion's sales into brand switching, timing and quantity~\cite{gupta1988,
+vanheerde2003}, the dip after a promotion~\cite{mace2004,vanheerde2000}, and
+the size of price elasticities and what drives it~\cite{bijmolt2005}. Promotion forecasting systems built on these
+effects include PromoCast~\cite{promocast}; Ma, Fildes and Huang~\cite{ma2016}
+and Fildes et al.~\cite{fildes2022} review the forecasting side. These
+elasticities describe temporary cuts. Regular price changes move far fewer
+units: in Dominick's store-level pricing experiments~\cite{hoch1994}, stores
+were assigned to higher, lower or unchanged regular prices for 16 weeks in each
+of 19 categories, and category units moved about 3\% for a 10\% price change,
+an elasticity near $-0.4$. Hoch et al.~\cite{hoch1995} and
+Montgomery~\cite{montgomery1997} model store-level price response on the same
+data.
+
+\paragraph{Quasi-experiments in scanner data}
+The public Dominick's files do not mark the experimental stores or weeks.
+Abrams, Gui and Horta\c{c}su~\cite{abrams} reconstructed them with the
+original documentation and found that some published price changes did not
+replicate. We therefore treat the price deviations visible in the public data
+as a quasi-experiment, never as the experiments, and estimate their effect by
+difference in differences~\cite{angrist2009} with standard errors clustered by
+store~\cite{bertrand2004,cameron2015}.

@@ -1,0 +1,31 @@
+\section{Data, model versions and protocol}
+\label{sec:versions}
+
+\paragraph{Data}
+The three public data sets of the companion paper~\cite{rwm}: M5, daily
+Walmart sales of 3,049 items in 10 stores from 2011 to 2016, with prices, event
+days and SNAP days~\cite{m5accuracy}; Dominick's Finer Foods, weekly scanner
+data by store for a Chicago chain from 1989 to 1997, with price, a promotion
+code and cost~\cite{dominicks}, of which the companion paper's six final
+categories are audited (cheese, snack crackers, soft drinks, bottled juice,
+analgesics, frozen entrees); and Breakfast at the Frat, weekly sales of 55
+breakfast items in 77 stores from 2009 to 2012, with display, feature and
+tag-only price reduction flags~\cite{frat}. No raw data is redistributed.
+
+\paragraph{Model versions}
+Every saved world-model and lift-model checkpoint from the companion paper is
+audited: the development and final windows of Frat, the development versions on
+Dominick's, and the M5 practice, confirmation and test windows. The Dominick's
+final world models, each an average of three fits, were not saved in the
+companion paper; they are refitted with settings unchanged for the audit,
+three seeds each, and the companion paper keeps the scores of its original
+runs. Each version's accuracy is read from its own run record. LightGBM is
+refitted on the Dominick's and Frat final windows and the M5 test month for
+C6, with the settings of the companion paper.
+
+\paragraph{Protocol}
+The audit reads models and never tunes them. Every check runs on every version
+it applies to and every result is reported, including failures. The plan, its
+thresholds and every amendment are dated in
+\texttt{docs/PAPER2\_PLAN.md}; each amendment was made before the results it
+affects were read.

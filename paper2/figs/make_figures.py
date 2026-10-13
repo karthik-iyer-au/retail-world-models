@@ -127,10 +127,159 @@ def fig_zones():
     save(fig, OUT / "fig_zones.pdf")
 
 
+def ols_slope(y, x):
+    """Slope of y on x with an intercept, and its heteroskedasticity-robust (HC1) standard error."""
+    y, x = np.asarray(y, float), np.asarray(x, float)
+    n = len(y)
+    X = np.c_[np.ones(n), x]
+    b = np.linalg.lstsq(X, y, rcond=None)[0]
+    r = y - X @ b
+    XtXi = np.linalg.inv(X.T @ X)
+    V = XtXi @ (X.T * r ** 2) @ X @ XtXi * n / (n - 2)
+    return float(b[1]), float(np.sqrt(V[1, 1]))
+
+
+def fig_zone_checks():
+    """Price path, event study, placebo and pooled slopes (results/paper2/, data only)."""
+    R = ROOT / "results" / "paper2"
+    ev, pl, pp = pd.read_csv(R / "event_study.csv"), pd.read_csv(R / "placebo.csv"), pd.read_csv(R / "price_path.csv")
+    ep = pd.read_csv(EP)
+    ep = ep[ep["scored"]]
+    fig, axes = plt.subplots(2, 2, figsize=(FULL, 4.6), gridspec_kw={"wspace": 0.42, "hspace": 0.55})
+    a, b, c, dd = axes.ravel()
+    # (a) price path
+    pp["signed"] = pp["ratio"] * np.sign(pp["price_log_ratio"])
+    g = pp.groupby("rel_week")["signed"]
+    q = pd.DataFrame({"med": g.median(), "lo": g.quantile(0.25), "hi": g.quantile(0.75)}).reindex(range(-52, 8))
+    a.fill_between(q.index, q["lo"] * 100, q["hi"] * 100, color=ACCENT, alpha=0.15, lw=0)
+    a.plot(q.index, q["med"] * 100, color=ACCENT, lw=1.3)
+    a.axvspan(-26, -1, color=FILL, zorder=0)
+    a.axvline(-0.5, color=INK, lw=0.7, ls=(0, (3, 2)))
+    a.axhline(0, color=GRID, lw=0.8)
+    a.text(-13.5, 10.8, "comparison\nweeks", ha="center", fontsize=5.8, color=MUTED)
+    a.set_ylim(-4, 13)
+    a.set_xlabel("Weeks from the detected start")
+    a.set_ylabel("Price against zone peers, %\n(signed by the episode)")
+    a.set_title("Prices move early")
+    despine(a)
+    panel_label(a, "a")
+    # (b) event study
+    ev["signed"] = ev["coef"] * np.sign(ev["price_log_ratio"])
+    g = ev.groupby("rel_week")["signed"]
+    q2 = pd.DataFrame({"med": g.median(), "lo": g.quantile(0.25), "hi": g.quantile(0.75)}).reindex(range(-26, 8))
+    b.fill_between(q2.index, q2["lo"] * 100, q2["hi"] * 100, color=ACCENT, alpha=0.15, lw=0)
+    b.plot(q2.index, q2["med"] * 100, color=ACCENT, lw=1.3, marker="o", ms=1.8)
+    b.axvline(-0.5, color=INK, lw=0.7, ls=(0, (3, 2)))
+    b.axhline(0, color=GRID, lw=0.8)
+    b.set_ylim(-25, 25)
+    b.set_xlabel("Weeks from the detected start")
+    b.set_ylabel("Units against controls, %\n(signed, week $-1$ = 0)")
+    b.set_title("Event study")
+    despine(b)
+    panel_label(b, "b")
+    # (c) placebo against real
+    m = pl.merge(ep[["category", "store", "first_week", "estimate_8wk"]], on=["category", "store", "first_week"])
+    for _, r in m.iterrows():
+        col = UP if r["price_log_ratio"] > 0 else DOWN
+        c.scatter(r["estimate_8wk"] * 100, r["placebo_estimate"] * 100, s=10, color=col, edgecolor="white", lw=0.4, zorder=3)
+    lim = 1.08 * max(m["estimate_8wk"].abs().max(), m["placebo_estimate"].abs().max()) * 100
+    c.plot([-lim, lim], [-lim, lim], color=GRID, lw=0.8)
+    c.axhline(0, color=INK, lw=0.5)
+    c.axvline(0, color=INK, lw=0.5)
+    c.set_xlim(-lim, lim)
+    c.set_ylim(-lim, lim)
+    c.set_xlabel("Real start, units %")
+    c.set_ylabel("Start 26 weeks earlier, units %")
+    c.set_title("Placebo")
+    despine(c)
+    panel_label(c, "c")
+    # (d) pooled slopes with intervals
+    rows = [("8 weeks (plan)", *ols_slope(ep["estimate_8wk"], ep["price_log_ratio"]), len(ep)),
+            ("Full episode", *ols_slope(ep["estimate"], ep["price_log_ratio"]), len(ep)),
+            ("Placebo", *ols_slope(pl["placebo_estimate"], pl["price_log_ratio"]), len(pl))]
+    for cat, d in ep.groupby("category"):
+        if len(d) >= 5:
+            rows.append((CAT[cat], *ols_slope(d["estimate_8wk"], d["price_log_ratio"]), len(d)))
+    XL = (-2.0, 1.5)
+    for k, (name, sl, se, n) in enumerate(rows):
+        col = INK if k < 2 else (MUTED if k == 2 else ACCENT)
+        lo, hi = sl - 1.96 * se, sl + 1.96 * se
+        dd.plot([max(lo, XL[0]), min(hi, XL[1])], [k, k], color=col, lw=1.0)
+        if hi > XL[1]:
+            dd.annotate("", xy=(XL[1], k), xytext=(XL[1] - 0.15, k), arrowprops=dict(arrowstyle="->", color=col, lw=0.8))
+        if lo < XL[0]:
+            dd.annotate("", xy=(XL[0], k), xytext=(XL[0] + 0.15, k), arrowprops=dict(arrowstyle="->", color=col, lw=0.8))
+        if XL[0] <= sl <= XL[1]:
+            dd.scatter([sl], [k], s=14, color=col, zorder=3)
+    dd.set_xlim(*XL)
+    dd.text(-0.36, -0.75, "Hoch et al. $-0.4$", fontsize=5.8, color=MUTED, ha="left", va="bottom")
+    dd.axvline(-0.4, color=MUTED, lw=0.8, ls=(0, (4, 3)))
+    dd.axvline(0, color=INK, lw=0.5)
+    dd.axhline(2.5, color=GRID, lw=0.6)
+    dd.set_yticks(range(len(rows)))
+    dd.set_yticklabels([f"{r[0]} ({r[3]})" for r in rows], fontsize=6.2)
+    dd.set_ylim(len(rows) - 0.4, -1.0)
+    dd.set_xlabel("Pooled slope, 95% interval")
+    dd.set_title("Response to price")
+    dd.tick_params(axis="y", length=0)
+    despine(dd, keep=("bottom",))
+    panel_label(dd, "d")
+    s8, se8 = rows[0][1], rows[0][2]
+    sf, sef = rows[1][1], rows[1][2]
+    sp, sep = rows[2][1], rows[2][2]
+    pre8 = pp[pp["rel_week"].between(-8, -1)]
+    early = (pre8["signed"] >= 0.03).mean()
+    sig = ((pl["placebo_lo"] > 0) | (pl["placebo_hi"] < 0)).mean()
+    neg = lambda v: f"{v:.2f}"
+    macros = {
+        "zSlopeLo": neg(s8 - 1.96 * se8), "zSlopeHi": neg(s8 + 1.96 * se8),
+        "zFullSlope": neg(sf), "zFullLo": neg(sf - 1.96 * sef), "zFullHi": neg(sf + 1.96 * sef),
+        "zPlaceboSlope": neg(sp), "zPlaceboLo": neg(sp - 1.96 * sep), "zPlaceboHi": neg(sp + 1.96 * sep),
+        "zPlaceboSig": f"{sig * 100:.0f}", "zPlaceboN": f"{len(pl)}",
+        "zEarlyShare": f"{early * 100:.0f}",
+        "zEpisodeSE": f"{ep['se_8wk'].median():.2f}", "zPlaceboSD": f"{pl['placebo_estimate'].std():.2f}",
+        "zCatNeg": f"{sum(r[1] < 0 for r in rows[3:])}", "zCatN": f"{len(rows) - 3}",
+    }
+    sens = pd.read_csv(R / "sensitivity.csv")
+    macros.update({"zSensLo": f"{int(sens['scored'].min())}", "zSensHi": f"{int(sens['scored'].max())}",
+                   "zSensSlopeLo": neg(sens["slope_8wk"].min()), "zSensSlopeHi": neg(sens["slope_8wk"].max())})
+    gen = OUT.parent / "generated"
+    (gen / "zone_check_macros.tex").write_text("\n".join(f"\\newcommand{{\\{k}}}{{{v}}}" for k, v in macros.items()) + "\n")
+    lines = ["\\begin{tabular}{@{}rrrrr@{}}", "\\toprule",
+             "Each week & Episode median & Episodes & Scored & Slope \\\\", "\\midrule"]
+    for _, r in sens.iterrows():
+        cells = [f"{r['week_size'] * 100:.0f}\\%", f"{r['min_size'] * 100:.0f}\\%", f"{int(r['episodes'])}",
+                 f"{int(r['scored'])}", f"${r['slope_8wk']:.2f}$"]
+        if abs(r["week_size"] - 0.03) < 1e-9 and abs(r["min_size"] - 0.05) < 1e-9:
+            cells = [f"\\textbf{{{x}}}" for x in cells]
+        lines.append(" & ".join(cells) + " \\\\")
+    lines += ["\\bottomrule", "\\end{tabular}"]
+    (gen / "tab_sensitivity.tex").write_text("\n".join(lines) + "\n")
+    save(fig, OUT / "fig_zone_checks.pdf")
+
+
+def tab_episodes():
+    """Every episode found, for the appendix."""
+    d = pd.read_csv(EP).sort_values(["category", "first_week", "store"])
+    m = lambda v: f"{v * 100:.1f}".replace("-", "\u2212")
+    lines = ["\\begin{tabular}{@{}llrrrrrrl@{}}", "\\toprule",
+             "Category & Zone & Store & Weeks & Price & Controls & 8 weeks & 95\\% interval & Full \\\\", "\\midrule"]
+    for _, r in d.iterrows():
+        lines.append(" & ".join([CAT[r["category"]], str(r["zone"]), str(r["store"]),
+                                 f"{r['first_week']}--{r['last_week']}", m(r["price_log_ratio"]), str(r["n_controls"]),
+                                 m(r["estimate_8wk"]), f"{m(r['lo_8wk'])} to {m(r['hi_8wk'])}", m(r["estimate"])])
+                     + ("" if r["scored"] else " \\textsuperscript{*}") + " \\\\")
+    lines += ["\\bottomrule", "\\end{tabular}"]
+    (OUT.parent / "generated" / "tab_episodes.tex").write_text("\n".join(lines) + "\n")
+
+
 def main():
     use_style()
+    tab_episodes()
     fig_audit()
     fig_zones()
+    if (ROOT / "results" / "paper2" / "sensitivity.csv").exists():
+        fig_zone_checks()
 
 
 if __name__ == "__main__":

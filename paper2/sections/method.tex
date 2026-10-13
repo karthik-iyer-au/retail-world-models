@@ -1,0 +1,125 @@
+\section{The explanation and the checks}
+\label{sec:checks}
+
+\subsection{Notation}
+
+A data set has series $i$ (an item in a store) observed in periods $t$. The
+plan for series $i$ in period $t$ is $x_{it} = (p_{it}, \ell^{1}_{it}, \dots,
+\ell^{L}_{it})$: the shelf price and $L$ lever indicators (a deal flag on
+Dominick's; promotion, display, feature and a tag-only price reduction
+flag on Frat; event and SNAP days on M5).
+A model fitted on the periods before an origin forecasts the next $H$ periods
+from the history and the plan for those periods, $\hat y_{it} = f_{it}(x)$.
+
+The \emph{regular price} $r_i$ is the series' highest price over the last 12
+training periods, the rule the models themselves use. The plan with
+\emph{nothing planned}, $x^{0}$, sets every price to $r_i$ and every lever to
+zero for all $H$ periods. The explanation of a forecast has four parts:
+\begin{align}
+  b_{it} &= f_{it}(x^{0}) && \text{baseline}\\
+  \Lambda_{it} &= f_{it}(x) - b_{it} && \text{total lift}\\
+  c^{k}_{it} &= f_{it}(x) - f_{it}(x \mid \ell^{k} = 0) && \text{contribution of lever } k\\
+  c^{p}_{it} &= f_{it}(x) - f_{it}(x \mid p = r) && \text{contribution of the price}
+\end{align}
+and the interaction $\iota_{it} = \Lambda_{it} - c^{p}_{it} - \sum_k c^{k}_{it}$,
+which is zero only when the levers act separately. Switching a lever off
+switches it off for all $H$ periods, so the dip after a promotion is part of
+that promotion's contribution. For the world model and the lift model the
+forecast is built as $\hat y = B + \lambda$, a baseline readout and a lift
+readout~\cite{rwm}; for LightGBM~\cite{lightgbm} the same on/off quantities are
+computed from its forecasts, together with TreeSHAP values
+$\phi^{k}_{it}$~\cite{lundberg2020} on its lever and price inputs. Unlike
+Shapley values, on/off contributions answer the merchant's question (what would
+sell without this lever) directly, and are defined for any model.
+
+Rank agreement $\rho(a, b)$ below is the Spearman correlation over item-weeks
+where either $a$ or $b$ is non-zero, so that the many weeks with nothing planned
+do not inflate it.
+
+\subsection{The eight checks}
+
+\paragraph{C1 By construction.} With $\hat y = B + \lambda$,
+three violations, each relative to the largest forecast: the lift with nothing
+planned, $\max|\lambda(x^{0})|$; the movement of the baseline with the plan,
+$\max|B(x) - B(x^{0})|$; and $\max|B + \lambda - \hat y|$. These hold by design
+and are checked because a design can be broken by an implementation.
+
+\paragraph{C2 Randomisation.} Following Adebayo et al.~\cite{adebayo2018}, the
+network's parts are re-initialised in turn from the output back to the input:
+lift readout, baseline readout, transition, encoder. After each step, the rank
+agreement of the total lift with the original, $\rho(\Lambda, \Lambda^{(k)})$,
+should fall. An explanation that survives randomisation does not depend on what
+the model learned.
+
+\paragraph{C3 Seed stability.} Fits of the same configuration that differ only
+in their seed should explain a forecast alike. The score is the mean over seed
+pairs of $\rho(\Lambda^{s}, \Lambda^{s'})$, shown against the same agreement for
+the forecasts themselves.
+
+\paragraph{C4 Price direction.} For depths $0 < 5\% < 10\% < 20\% < 30\%$ applied
+to the planned price, the share of item-weeks and steps in which the deeper cut
+gives a lower forecast than the shallower one by more than 0.1\% of the forecast.
+
+\paragraph{C5 Against what sold.} On item-weeks with a lever on or a price at
+least 5\% below regular, the bias $\sum \hat y / \sum y$ and the rank agreement
+of predicted lift $\hat y/b$ with observed lift $y/b$. Merchants plan
+promotions for weeks they expect to sell well, so $y/b$ overstates what the plan
+caused; this check measures agreement with the data, not with a cause.
+
+\paragraph{C6 Against LightGBM.} For each lever, $\rho(c^{k}, c^{k}_{\mathrm{LGB}})$ and
+$\rho(c^{k}, \phi^{k})$, on the same window. Two models fitted to the same data
+can agree and both be wrong; agreement is evidence of a shared signal, not of
+correctness.
+
+\paragraph{C7 Against a measured cause.} For a spell $e$ in which store $s$'s
+regular prices sat at a log ratio $\delta_e$ from its zone peers, the model's
+stated response is
+\begin{equation}
+  \hat R_e = \log \frac{\sum_{t \in E} \sum_{i \in s} f_{it}(x)}
+                      {\sum_{t \in E} \sum_{i \in s} f_{it}(x \mid p_{s} = p_{s} e^{-\delta_e})},
+\end{equation}
+the change in the store's forecast category units if its prices had stayed with
+its zone, over the spell's first eight weeks $E$. It is compared with the
+measured response $\tau_e$ from difference in differences
+(\S\ref{sec:zones}): whether $\hat R_e$ falls inside $\tau_e$'s 95\% interval,
+whether its sign agrees, and the pooled slope of each on $\delta_e$.
+
+\paragraph{C8 Plan read-back.} For the world model only (paper~1): the $R^2$ of a
+ridge probe that reads the day's discount back from the frozen model's state
+after it has rolled through the plan, against the same probe on the state
+before the window, which has not seen the plan.
+
+\subsection{Pass thresholds and the main test}
+\label{sec:test}
+
+Thresholds were fixed in the plan before any audit result was read
+(Table~\ref{tab:thresholds}). For the main question, each model version
+(a configuration, seed and window) gets the number of checks it passes among
+C1 to C6, counting only those that apply to it. Within each data set the
+Spearman correlation across versions between that count and item-by-store
+WRMSSE (lower is better) is computed, and the same for each check's continuous
+score. A negative correlation means versions that pass more checks forecast
+better. The data sets are pooled by a permutation test that shuffles the
+scores within each data set, 10{,}000 times. C7 and C8 apply to a few models
+each and are reported per model.
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Every check has a pass rule fixed before any result.} Scores as
+defined in \S\ref{sec:checks}; a check that does not apply to a model (C1 and C2
+for LightGBM) is not counted for it.}
+\label{tab:thresholds}
+\footnotesize
+\begin{tabular}{@{}llp{3.2cm}@{}}
+\toprule
+Check & Passes when & Applies to\\
+\midrule
+C1 & every violation $< 0.001$ & lift readout models\\
+C2 & $\rho$ after the lift readout $< 0.5$ & neural models\\
+C3 & mean seed $\rho \ge 0.7$ & configurations with $\ge 2$ seeds\\
+C4 & share $< 1\%$ & all\\
+C5 & bias in $[0.8, 1.25]$ and rank $\ge 0.3$ & all\\
+C6 & $\rho(\Lambda, \Lambda_{\mathrm{LGB}}) \ge 0.5$ & non-LightGBM\\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -147,3 +147,28 @@ def did(units: pd.DataFrame, e: Episode, last_week: int | None = None) -> dict:
     q = tdist.ppf(0.975, max(c - 1, 1))
     est = float(beta[1])
     return {"estimate": est, "se": se, "lo": est - q * se, "hi": est + q * se, "stores": c, "rows": n}
+
+
+def event_study(units: pd.DataFrame, e: Episode, after: int = SCORED_WEEKS) -> pd.Series:
+    """Week-by-week difference in differences on log category units: one
+    coefficient per week relative to the episode start (PRE_WEEKS before to
+    `after` - 1 after), the week before the start as reference, store and week
+    fixed effects. Pre-start coefficients near zero mean the treated store
+    tracked its controls before its prices moved."""
+    stores = [e.store] + e.controls
+    w0, w1 = e.first_week - PRE_WEEKS, e.first_week + after - 1
+    u = units[units["store"].isin(stores) & units["week"].between(w0, w1)]
+    tot = u.groupby(["store", "week"])["units"].sum().reset_index()
+    tot = tot[tot["units"] > 0]
+    y = np.log(tot["units"].to_numpy())
+    rel = (tot["week"] - e.first_week).to_numpy()
+    treated = (tot["store"] == e.store).to_numpy()
+    rels = [r for r in range(-PRE_WEEKS, after) if r != -1]
+    D = np.column_stack([(treated & (rel == r)).astype(float) for r in rels])
+    S = pd.get_dummies(tot["store"], drop_first=True, dtype=float).to_numpy()
+    W = pd.get_dummies(tot["week"], drop_first=True, dtype=float).to_numpy()
+    X = np.column_stack([np.ones(len(y)), D, S, W])
+    beta, *_ = np.linalg.lstsq(X, y, rcond=None)
+    present = D.sum(axis=0) > 0
+    out = pd.Series(beta[1:1 + len(rels)], index=rels)
+    return out[present]

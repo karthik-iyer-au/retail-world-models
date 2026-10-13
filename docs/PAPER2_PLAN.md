@@ -162,3 +162,21 @@ between the number of checks passed (C1 to C6, those that apply) and
 item-by-store WRMSSE, and between each check's continuous score and WRMSSE;
 pooled by a permutation test that shuffles scores within data set (10,000
 permutations). C7 and C8 are reported per model, not per version.
+
+**13 October 2026, after the C7 robustness results and before any model lift
+for C7.** The event study shows signed sales drifting in the weeks before the
+detected start, and the placebo is not clean: its pooled slope is -0.26
+(95% interval -0.72 to 0.19, heteroskedasticity-robust across episodes)
+against -0.35 (-0.69 to -0.02) for the real starts, and 42% of placebo
+intervals exclude zero. Two exploratory analyses, added after seeing this and
+labelled as such in the paper: (1) the price path of each episode store from
+52 weeks before the start to 8 after (`scripts/zone_price_path.py`), which
+shows prices already moving in the episode's direction in about half of the
+store-weeks of the 8 weeks before the start, so the comparison weeks of the
+8-week estimator are partly treated; (2) the pooled slope with a
+heteroskedasticity-robust interval across episodes, for the 8-week estimate,
+the full-episode estimate and the placebo. Per-episode intervals clustered by
+store are too narrow (median standard error 0.02 against a placebo spread of
+0.12), so the pre-registered per-episode score (inside the interval) is still
+reported but the comparison of models with the measured response is made on
+the pooled slope and its interval. Nothing else changes.

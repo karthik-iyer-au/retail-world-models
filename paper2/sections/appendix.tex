@@ -1,0 +1,36 @@
+\section{Every zone price episode}
+\label{app:episodes}
+
+\begin{table*}[h]
+\centering
+\caption{\textbf{All \zEpisodes{} episodes the detector finds, with their measured
+response.} Weeks: Dominick's week numbers of the episode. Price: the store's
+median log price against its zone peers over the episode, \%. Controls: same-zone
+stores within 1\% of their zone. 8 weeks: difference-in-differences estimate on
+log category units over the first eight weeks, \%, with its interval clustered
+by store (too narrow, \S\ref{sec:zones}); Full: over the whole episode.
+\textsuperscript{*} Fewer than three controls: listed, not scored.}
+\label{tab:episodes}
+\scriptsize
+\input{generated/tab_episodes}
+\end{table*}
+
+\clearpage
+\section{The plan and its amendments}
+\label{app:plan}
+
+The plan (\texttt{docs/PAPER2\_PLAN.md}) was committed before any audit result
+on 13 October 2026. Four dated amendments followed, each made before the results
+it affects were read:
+\begin{enumerate}\setlength{\itemsep}{1pt}
+\item Before any model lift: the episode detector measures each store against
+its zone peers rather than the zone's most common price.
+\item After the episode list, before any model lift: at least three controls to
+score an episode; models scored on an episode's first eight weeks, against an
+8-week difference in differences.
+\item Before any audit result: the known-answer study, the C7 robustness
+analyses, the pass thresholds and the main test.
+\item After the C7 robustness results, before any model lift for C7: the price
+path and the pooled slope intervals, labelled exploratory, and the comparison of
+models with the measured response made on the pooled slope.
+\end{enumerate}

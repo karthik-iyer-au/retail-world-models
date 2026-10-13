@@ -109,7 +109,7 @@ def load_synthetic_levers(
             level = it["size"] * season * np.exp(u) * (regular / it["list_price"]) ** t.regular_elasticity
             frame = pd.DataFrame({
                 SERIES: f"S{s:02d}_I{i:02d}", STORE: f"S{s:02d}", ITEM: f"I{i:02d}", DATE: dates,
-                PRICE: price.round(4), "promo": promo.astype(int), "display": display.astype(int),
+                PRICE: price, "promo": promo.astype(int), "display": display.astype(int),
                 "true_level": level, "true_regular": regular, "true_zone": s // stores_per_zone,
             })
             frame["true_prev_planned"] = 0

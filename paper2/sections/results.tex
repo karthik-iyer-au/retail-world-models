@@ -1,0 +1,29 @@
+\section{The audit of the saved model versions}
+\label{sec:results}
+
+\emph{This section is filled from \texttt{results/paper2/summary/} when the
+audit of the saved versions finishes on Colab: the pass counts by check and data
+set, every check across versions, the models' stated response to the zone price
+deviations against the measured one, and the main test. The figure and
+table code is in \texttt{paper2/figs/real.py} and has been run end to end.}
+
+\IfFileExists{generated/tab_real_pass.tex}{%
+\begin{table}[t]\centering
+\caption{\textbf{Pass counts by check and data set.}}\label{tab:realpass}
+\footnotesize\input{generated/tab_real_pass}\end{table}
+\begin{table}[t]\centering
+\caption{\textbf{The main test.}}\label{tab:realmain}
+\footnotesize\input{generated/tab_real_main}\end{table}
+\begin{figure*}[t]\centering
+\includegraphics[width=\textwidth]{figs/fig_real_checks.pdf}
+\caption{\textbf{Every check across every audited version.}}\label{fig:realchecks}
+\end{figure*}
+\begin{figure*}[t]\centering
+\includegraphics[width=\textwidth]{figs/fig_real_c7.pdf}
+\caption{\textbf{Stated against measured response to zone price deviations.}}\label{fig:realc7}
+\end{figure*}
+\begin{figure*}[t]\centering
+\includegraphics[width=\textwidth]{figs/fig_real_main.pdf}
+\caption{\textbf{Checks passed against accuracy.}}\label{fig:realmain}
+\end{figure*}
+}{}

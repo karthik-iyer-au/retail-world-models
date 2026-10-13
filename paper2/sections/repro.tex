@@ -1,0 +1,35 @@
+\section{Reproducibility, compute and licence}
+\label{sec:repro}
+
+Every number, table and figure in this paper is generated from committed
+records by \texttt{make -C paper2}, and a continuous integration job rebuilds
+the paper from a fresh checkout on every change and fails on any LaTeX error,
+undefined reference or missing font. The checks are in
+\texttt{src/rwm/audit/}; the zone detector and estimators in
+\texttt{src/rwm/audit/zones.py}; the generated data in
+\texttt{src/rwm/data/synthetic\_levers.py}. The runs:
+\begin{description}\setlength{\itemsep}{1pt}
+\item[\texttt{scripts/zone\_episodes.py}] lists the episodes and their
+responses (\texttt{results/paper2/zone\_episodes.csv});
+\item[\texttt{scripts/zone\_robustness.py}] the event study, placebo and
+sensitivity;
+\item[\texttt{scripts/known\_answer.py}] the known-answer study;
+\item[\texttt{scripts/audit\_runs.py}] and \texttt{scripts/paper2\_colab.sh}
+the audit of the saved versions, C6 and C7;
+\item[\texttt{scripts/audit\_summary.py}] the tables committed under
+\texttt{results/paper2/}.
+\end{description}
+
+\paragraph{Compute}
+\input{generated/compute}
+
+\paragraph{Licence}
+Code under the PolyForm Noncommercial License~1.0.0; text, figures and tables
+under CC~BY-NC~4.0. Commercial use requires a separate licence from the author.
+
+\paragraph{Data availability}
+M5 is available from Kaggle~\cite{m5accuracy}, Dominick's from the Kilts Center
+for Marketing at the University of Chicago Booth School of
+Business~\cite{dominicks}, and Breakfast at the Frat from
+dunnhumby~\cite{frat}, each under its own terms; the repository fetches them and
+redistributes none.
