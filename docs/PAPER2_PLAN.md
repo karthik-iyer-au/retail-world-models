@@ -95,3 +95,27 @@ not experiments, and the model was trained on data that include them.
    write one record per version.
 4. C7 on the Dominick's versions.
 5. Tables, figures, manuscript.
+
+## Amendments
+
+**13 October 2026, before any model lift was computed.** On analgesics the
+first detector (each store against the zone's modal price) found one episode.
+Looking at store prices showed why: in the chain's experiments about a third of
+a zone's stores moved up, a third down and a third stayed, so the zone's mode
+is often itself a moved price. The detector now measures each store against
+its zone peers: for each store and item, the log of the week's regular price
+over that item's median regular price in that store over all weeks, minus the
+median of the same across the zone's stores that week. An episode needs at
+least 12 consecutive weeks each at least 3% away in the same direction with at
+least 60% of items moved that way, and a median of at least 5% over the
+episode. Controls, the DiD and every other rule are unchanged.
+
+**13 October 2026, after the episode list and before any model lift.** The
+detector found 54 episodes in the six categories (`results/paper2/zone_episodes.csv`),
+most in Dominick's weeks 190 to 240, where the chain's experiments ran. Two
+rules are added. An episode needs at least three control stores for its
+interval to be estimated; episodes with fewer are listed but not scored. The
+models forecast at most 8 weeks ahead, so the model is fitted on data up to the
+week before an episode and scored on the episode's first 8 weeks, against a
+difference-in-differences restricted to the same 8 weeks (26 weeks before
+against those 8). The full-episode estimate stays in the list.
