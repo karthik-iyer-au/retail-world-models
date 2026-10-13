@@ -1,0 +1,23 @@
+\small
+\textbf{Abstract (draft; the audit results are running).}
+Retail forecasting models that see the price and promotion plan can explain
+each forecast as a baseline, what would sell with nothing planned, times the
+lift each part of the plan adds. Merchants read that split as fact ("the
+promotion added 40 units") and plan on it. We audit these explanations for a
+world model and a direct lift model on M5, Dominick's and Breakfast at the
+Frat, every saved model version, with eight checks: properties that should
+hold by construction, sensitivity to randomised weights, stability across
+seeds, a price-direction check, agreement with what sold, agreement with
+LightGBM's on/off contributions and TreeSHAP, a plan read-back from the model's
+state, and agreement with a measured cause. For the cause we find
+\zEpisodes{} spells in six Dominick's categories in which one store's regular
+prices sat \zSizeLo\% to \zSizeHi\% off its zone peers for 12 weeks or more,
+most of them in 1992 and 1993, when the chain ran pricing experiments. Their
+measured effect on category units, by difference in differences against
+same-zone stores, gives a pooled response of \zSlope{} to a price change,
+close to the $-0.4$ the chain's own experiments reported. We then ask whether
+model versions whose explanations pass more checks also forecast better.
+
+\vspace{4pt}
+\textbf{Keywords:} retail forecasting; explanation; faithfulness; promotions;
+price response; world models.

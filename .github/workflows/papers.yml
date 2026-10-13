@@ -1,0 +1,57 @@
+name: papers
+# Each paper's claim about itself is that every figure, table and inline number
+# regenerates from the committed run records. This job is that claim, tested.
+on:
+  push:
+  pull_request:
+jobs:
+  paper:
+    name: ${{ matrix.paper }} rebuilds from committed results
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        paper: [paper, paper2]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install figure and table dependencies
+        run: pip install numpy scipy pandas matplotlib pikepdf
+      - name: Install XeLaTeX and TeX Gyre Pagella
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            texlive-xetex texlive-fonts-recommended texlive-fonts-extra \
+            texlive-latex-extra fonts-texgyre
+      - name: Rebuild figures, tables and the PDF
+        run: make -C ${{ matrix.paper }} XELATEX=xelatex
+      - name: No LaTeX errors, no missing glyphs, no undefined references
+        run: |
+          python - "${{ matrix.paper }}/main.log" <<'PY'
+          import re, sys
+          from pathlib import Path
+          log = Path(sys.argv[1]).read_text(errors="ignore")
+          problems = []
+          errors = [l for l in log.splitlines() if l.startswith("!")]
+          if errors:
+              problems.append(f"{len(errors)} LaTeX error(s): {errors[:3]}")
+          if re.search(r"[Mm]issing character", log):
+              problems.append("missing glyphs in the output")
+          if "There were undefined references" in log or "Citation `" in log:
+              problems.append("undefined references or citations")
+          if problems:
+              sys.exit("; ".join(problems))
+          print("paper build clean")
+          PY
+      - name: Fonts embedded, no Type 3
+        run: python ${{ matrix.paper }}/figs/check_fonts.py ${{ matrix.paper }}/main.pdf
+      - name: Upload the PDF
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.paper }}
+          path: ${{ matrix.paper }}/main.pdf
+          if-no-files-found: ignore

@@ -1,0 +1,189 @@
+\section{Introduction}
+\label{sec:intro}
+
+A retail forecast is used for more than its number. When a merchant plans a
+promotion, the question is not only how much will sell but how much of it the
+promotion will add, and whether a deeper price cut would add more. Forecasting
+models that see the plan can answer that directly: they forecast the item with
+the plan as made, and again with nothing planned, and the difference is the lift
+the plan adds. Our world model and lift model (paper~1) are built this way: each
+forecast is a baseline under the nothing-planned plan times a lift, and the lift
+is exactly zero when nothing is planned.
+
+Such an explanation is useful only if it can be trusted, and being built into
+the model does not make it right. The explanation literature separates two
+properties~\cite{jacovi2020}: an explanation is \emph{faithful} if it reflects
+what the model does, and \emph{correct} if it reflects what happens in the
+world. In molecular property prediction, MolSanity found the two come apart:
+attributions faithful to the model were often anti-aligned with the
+substructure that determines the property~\cite{molsanity}. Retail has a
+property chemistry lacks: some causes can be measured. Dominick's Finer Foods
+moved store prices on purpose in the early 1990s~\cite{hoch1994}, so the
+response of sales to a price change can be estimated from the data and the
+model's stated response compared with it.
+
+This paper audits the plan-lift explanations of every saved world-model and
+lift-model version from paper~1 with eight checks (Figure~\ref{fig:audit}) and
+asks whether versions whose explanations pass more checks also forecast
+better.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_audit.pdf}
+\caption{\textbf{Each forecast's explanation is checked against the model
+itself, common sense, what sold, another model and a measured cause.} The eight
+checks are fixed in \texttt{docs/PAPER2\_PLAN.md} before any result; every
+model version and every check is reported.}
+\label{fig:audit}
+\end{figure*}
+
+\section{Related work}
+\label{sec:related}
+
+\paragraph{Explanations and their evaluation}
+Feature attributions such as LIME~\cite{ribeiro2016} and SHAP~\cite{lundberg2017},
+with its exact form for trees~\cite{lundberg2020}, are the most used way to
+explain a model's output~\cite{adadi2018}. Several studies show that they can
+fail quietly: saliency maps that barely change when a network's weights are
+randomised~\cite{adebayo2018}, attributions that move with input shifts the
+model ignores~\cite{kindermans2019}, unstable explanations for near-identical
+inputs~\cite{alvarezmelis2018}, and attribution rankings that do not survive
+removing the features they rank highest~\cite{hooker2019}. Jacovi and
+Goldberg~\cite{jacovi2020} set out faithfulness as a separate property from
+plausibility; Rudin~\cite{rudin2019} argues for models that are interpretable
+by construction instead of explained after the fact. Our models are of the
+second kind for the plan, which lets the audit ask whether built-in
+explanations behave better than post-hoc ones. For time series, explanation
+methods and their benchmarks are reviewed by Rojat et al.~\cite{rojat2021};
+Ismail et al.~\cite{ismail2020} and Tonekaboni et al.~\cite{tonekaboni2020}
+show that saliency methods designed for images often fail on temporal data.
+
+\paragraph{Price response as a measured cause}
+Hoch, Dr\`eze and Purk~\cite{hoch1994} report Dominick's store-level pricing
+experiments: in each of 19 categories, stores were assigned to higher, lower or
+unchanged regular prices for 16 weeks, and category units moved by about 3\%
+for a 10\% price change, an elasticity near $-0.4$. Montgomery~\cite{montgomery1997}
+and Hoch et al.~\cite{hoch1995} model store-level price response on the same
+data. The public files do not record which stores or weeks were in the
+experiments; Abrams, Gui and Horta\c{c}su~\cite{abrams} reconstructed them with
+the original documentation and found that some published price changes did not
+replicate. We therefore use the price deviations visible in the public data as a
+quasi-experiment and estimate their effect by difference in
+differences~\cite{angrist2009}, with standard errors clustered by
+store~\cite{bertrand2004,cameron2015}.
+
+\section{What is explained, and the checks}
+\label{sec:checks}
+
+For each item, store and forecast period the audit records the forecast with the
+plan as made; the forecast with nothing planned (each item at its regular price,
+its highest over the last 12 periods, and every lever off); and each lever's
+contribution, the forecast minus the forecast with that lever off and the rest of
+the plan as made. Contributions need not add up to the total lift; the
+shortfall is the interaction between levers, reported as such. For LightGBM the
+same on/off contributions are computed, together with TreeSHAP values on its
+lever inputs~\cite{lundberg2020}.
+
+\begin{description}\setlength{\itemsep}{1pt}
+\item[C1 By construction.] Zero lift with nothing planned; a baseline that does not
+move when the plan changes; baseline plus lift equal to the forecast. Largest
+violation relative to the largest forecast.
+\item[C2 Randomisation.] The lift readout, then the baseline readout, the
+transition and the encoder are re-initialised in turn~\cite{adebayo2018}; rank
+agreement between the original and randomised lifts should fall towards zero.
+\item[C3 Seed stability.] Rank agreement of item-week lifts between seeds of the
+same configuration, set against the agreement of their forecasts.
+\item[C4 Price direction.] The share of item-weeks where a deeper price cut
+gives a lower forecast than a shallower one.
+\item[C5 Against what sold.] On promoted and price-cut item-weeks, the forecast
+against sales, and the rank agreement of the predicted lift with sales over the
+model's own baseline. Merchants promote in weeks they expect to sell well, so
+this measures agreement, not cause.
+\item[C6 Against LightGBM.] Rank agreement of each lever's contribution with
+LightGBM's, on/off and TreeSHAP, on the same window.
+\item[C7 Against a measured cause.] Described in \S\ref{sec:zones}.
+\item[C8 Plan read-back.] From paper~1: the plan read back from the world
+model's rolled state.
+\end{description}
+
+\section{Ground truth: zone price deviations on Dominick's}
+\label{sec:zones}
+
+
+
+Dominick's set regular prices by zone: within a zone every store was meant to
+carry the same regular price~\cite{dominicks}. For each store and item we take
+the log of the week's regular price (no deal code, not a temporary cut) over
+that item's usual regular price in that store, and subtract the median of the
+same across the zone's stores that week, so moves made zone-wide cancel. An
+episode is at least 12 consecutive weeks in which this is at least 3\% in the
+same direction for most of the store's items, with a median of at least 5\%;
+controls are same-zone stores within 1\% of their zone over those weeks. The
+detector was written, and its episodes listed, before any model was scored
+against them. A first version that measured stores against the zone's most
+common price found one episode in analgesics: in the experiments a third of a
+zone's stores moved up and a third down, so the most common price was often a
+moved one. The change is recorded, with its date, in the plan.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_zones.pdf}
+\caption{\textbf{The price deviations cluster in 1992 and 1993, when the chain
+ran its pricing experiments, and their measured effect on sales matches the
+experiments' reported response.} \textbf{(a)} Every episode found in the six
+categories (count in brackets); faint: fewer than three control stores, listed
+but not scored. \textbf{(b)} For the \zScored{} scored episodes, the store's
+price against its zone peers and the measured change in its category units over
+the episode's first 8 weeks (difference in differences against same-zone
+stores, store and week fixed effects, 95\% interval clustered by store). Solid
+line: fitted slope; dashed: the $-0.4$ elasticity reported for the
+experiments~\cite{hoch1994}.}
+\label{fig:zones}
+\end{figure*}
+
+The detector finds \zEpisodes{} episodes in the six categories, \zScored{} with at
+least three control stores (Figure~\ref{fig:zones}). Most lie between Dominick's
+weeks 190 and 240, mid 1992 to mid 1993, the period of the chain's experiments;
+the store prices sit \zSizeLo\% to \zSizeHi\% off their zone peers, in line with
+the 6\% to 24\% changes the experiments made. Over the first 8 weeks of each
+scored episode, category units move against price in \zSignShare\% of episodes,
+and \zSigShare\% have an interval that excludes zero. The pooled slope of the
+measured response on the price change is \zSlope{}, and the median episode
+elasticity \zMedianElasticity, close to the $-0.4$ Hoch, Dr\`eze and Purk
+report. Single episodes are noisy, and some move with price, as Abrams, Gui and
+Horta\c{c}su found when they replicated the experiments.
+
+For each scored episode the world model and LightGBM are fitted on the data up to
+the week before it and forecast its first 8 weeks twice: with the store's prices
+as they were, and with them moved back to its zone peers. The log ratio of the
+two forecasts of category units is the model's stated response, compared with
+the measured one.
+
+\section{Model versions}
+\label{sec:versions}
+
+Every saved world-model and lift-model checkpoint from paper~1 is audited: the
+development and final windows of Frat, the development versions on Dominick's,
+and the M5 practice, confirmation and test windows. The Dominick's final world
+models, an average of three fits, were not saved in paper~1; they are refitted
+with settings unchanged for the audit, three seeds each, while paper~1 keeps the
+scores of its original runs. Each version's accuracy is read from its own run
+record. LightGBM is refitted on the Dominick's and Frat final windows and the M5
+test month for C6.
+
+\section{Results}
+\label{sec:results}
+
+\emph{The audit of the model versions (C1 to C6, C8) and the models' stated
+responses for C7 are running on Colab at the time of this draft; this section is
+written when they finish.}
+
+\section{Reproducibility and licence}
+
+The checks are in \texttt{src/rwm/audit/}, the runs in
+\texttt{scripts/audit\_runs.py} and \texttt{scripts/paper2\_colab.sh}, the plan
+and its dated amendments in \texttt{docs/PAPER2\_PLAN.md}, and the episode list
+in \texttt{results/paper2/zone\_episodes.csv}. Code under the PolyForm
+Noncommercial License~1.0.0; text and figures under CC~BY-NC~4.0.
+
+\input{references}
