@@ -63,3 +63,15 @@ def test_reconciliation_is_coherent_and_ols_keeps_a_coherent_forecast(fr):
     y = S @ b  # already coherent: every method must give it back
     assert np.allclose(gls_bottom(S, y, np.ones(S.shape[0])), b, atol=1e-5)
     assert np.allclose(gls_bottom(S, y, np.asarray(S.sum(axis=1)).ravel()), b, atol=1e-5)
+
+
+def test_reconcile_all_runs_and_returns_bottom_forecasts(fr):
+    pytest.importorskip("statsforecast")
+    from rwm.evaluation.reconcile import reconcile_all
+    # make one item start late, so nodes have different history lengths
+    fr.units[0, :30] = 0
+    out = reconcile_all(fr, 2, season=1, bottoms={"m": fr.units[:, -8:]})
+    for name, b in out.items():
+        assert b.shape == (len(fr.attrs), 8), name
+        assert np.isfinite(b).all() and (b >= 0).all(), name
+    assert "ets_mint_shrink" in out and "m_with_ets_wls_var" in out

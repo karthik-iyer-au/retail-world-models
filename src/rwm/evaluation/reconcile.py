@@ -64,7 +64,10 @@ def ets_base(history: np.ndarray, horizon: int, season: int, keep: int = 104):
         parts_fc.append(sf.forecast(df=part, h=horizon, fitted=True))
         parts_fit.append(sf.forecast_fitted_values())
     fc, fit = pd.concat(parts_fc), pd.concat(parts_fit)
-    f = fc.pivot(index="unique_id", columns="ds", values="AutoETS").reindex(range(len(history))).to_numpy()
+    # each node's own time index differs (nodes start at different periods): number the forecast steps 0..h-1
+    fc = fc.reset_index() if "unique_id" not in fc.columns else fc
+    fc = fc.assign(step=fc.groupby("unique_id").cumcount())
+    f = fc.pivot(index="unique_id", columns="step", values="AutoETS").reindex(range(len(history))).to_numpy()
     resid = (fit["y"] - fit["AutoETS"]).groupby(fit["unique_id"]).var().reindex(range(len(history))).to_numpy()
     f = np.nan_to_num(np.clip(f, 0, None))
     resid = np.where(np.isfinite(resid) & (resid > 0), resid, np.nanmedian(resid[resid > 0]) if (resid > 0).any() else 1.0)
