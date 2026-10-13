@@ -1,0 +1,16 @@
+# Paper 1 revision, rolling windows before the development windows; settings from the companion paper's final config for m5 (docs/PAPER1_REVISION_PLAN.md).
+name: rev_m5_rolling_chronos
+seed: 0
+dataset:
+  name: m5
+model:
+  name: chronos
+  params:
+    context: 512
+evaluation:
+  horizon: 28
+  n_origins: 4
+  scale_lag: 1
+  weight_window: 28
+  holdout_periods: 84
+  step: 28

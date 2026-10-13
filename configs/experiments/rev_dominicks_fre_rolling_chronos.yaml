@@ -1,0 +1,25 @@
+# Paper 1 revision, rolling windows before the development windows; settings from the companion paper's final config for dominicks_fre (docs/PAPER1_REVISION_PLAN.md).
+name: rev_dominicks_fre_rolling_chronos
+seed: 0
+dataset:
+  name: dominicks
+  params:
+    categories:
+    - fre
+model:
+  name: chronos
+  params:
+    context: 512
+evaluation:
+  horizon: 8
+  n_origins: 6
+  holdout_periods: 24
+  scale_lag: 1
+  weight_window: 13
+  conditions:
+  - promo
+  after_promo:
+    levers:
+    - promo
+    periods: 2
+  step: 8

@@ -1,0 +1,21 @@
+# Paper 1 revision, rolling windows before the development windows; settings from the companion paper's final config for frat (docs/PAPER1_REVISION_PLAN.md).
+name: rev_frat_rolling_chronos
+seed: 0
+dataset:
+  name: breakfast_at_the_frat
+model:
+  name: chronos
+  params:
+    context: 512
+evaluation:
+  horizon: 8
+  n_origins: 4
+  holdout_periods: 24
+  scale_lag: 1
+  weight_window: 13
+  conditions:
+  - promo
+  - display
+  - feature
+  - tpr_only
+  step: 8

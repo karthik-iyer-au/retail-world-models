@@ -1,0 +1,24 @@
+# Paper 1 revision, the final window, a model not run there before; settings as dominicks_che's rolling config.
+name: rev_dominicks_che_finalwindow_chronos
+seed: 0
+dataset:
+  name: dominicks
+  params:
+    categories:
+    - che
+model:
+  name: chronos
+  params:
+    context: 512
+evaluation:
+  horizon: 8
+  n_origins: 1
+  holdout_periods: 0
+  scale_lag: 1
+  weight_window: 13
+  conditions:
+  - promo
+  after_promo:
+    levers:
+    - promo
+    periods: 2

@@ -154,6 +154,9 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
             raise RuntimeError("model returned the wrong number of forecasts")
         out = test[[SERIES, DATE, UNITS]].copy()
         out["forecast"] = pred
+        # quantiles a model gives of its own (Chronos-Bolt, TFT), for interval scoring
+        for q, v in sorted(getattr(model, "last_quantiles", {}).items()):
+            out[f"q{q:g}"] = np.asarray(v, dtype=float)
         out["origin"] = sp.origin
         forecasts.append(out)
 

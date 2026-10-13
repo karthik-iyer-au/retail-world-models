@@ -1,0 +1,16 @@
+# Paper 1 revision: M5, final window for new models, then four earlier months.
+datasets:
+- name: m5
+runs:
+- config: configs/experiments/rev_m5_finalwindow_chronos.yaml
+- config: configs/experiments/rev_m5_rolling_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_m5_rolling_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_m5_rolling_lightgbm.yaml
+- config: configs/experiments/rev_m5_rolling_seasonal_naive.yaml
+- config: configs/experiments/rev_m5_rolling_timesfm_mean.yaml
+- config: configs/experiments/rev_m5_rolling_timesfm_plan.yaml
+- config: configs/experiments/rev_m5_rolling_chronos.yaml

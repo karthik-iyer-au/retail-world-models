@@ -10,3 +10,5 @@ try:  # needs the optional `trees` dependencies
     from rwm.prior_work import graph_direct  # noqa: F401  (also needs torch, imported only when used)
 except ImportError:
     pass
+from rwm.prior_work import chronos_zero_shot  # noqa: F401  (imports chronos only when used)
+from rwm.prior_work import tft  # noqa: F401  (imports neuralforecast only when used)

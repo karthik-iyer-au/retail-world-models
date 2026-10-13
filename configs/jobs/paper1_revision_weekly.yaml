@@ -1,0 +1,157 @@
+# Paper 1 revision: Dominick's and Frat, final window for new models, then rolling windows.
+datasets:
+- name: breakfast_at_the_frat
+  from: /content/drive/MyDrive/retail-world-model/data
+- name: dominicks
+  codes:
+  - che
+  - sna
+  - sdr
+  - bjc
+  - ana
+  - fre
+runs:
+- config: configs/experiments/rev_dominicks_che_finalwindow_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_che_finalwindow_chronos.yaml
+- config: configs/experiments/rev_dominicks_che_finalwindow_tft.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_sna_finalwindow_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_sna_finalwindow_chronos.yaml
+- config: configs/experiments/rev_dominicks_sna_finalwindow_tft.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_sdr_finalwindow_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_sdr_finalwindow_chronos.yaml
+- config: configs/experiments/rev_dominicks_sdr_finalwindow_tft.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_bjc_finalwindow_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_bjc_finalwindow_chronos.yaml
+- config: configs/experiments/rev_dominicks_bjc_finalwindow_tft.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_ana_finalwindow_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_ana_finalwindow_chronos.yaml
+- config: configs/experiments/rev_dominicks_ana_finalwindow_tft.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_fre_finalwindow_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_fre_finalwindow_chronos.yaml
+- config: configs/experiments/rev_dominicks_fre_finalwindow_tft.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_frat_finalwindow_chronos.yaml
+- config: configs/experiments/rev_frat_finalwindow_tft.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_che_rolling_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_che_rolling_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_che_rolling_lightgbm.yaml
+- config: configs/experiments/rev_dominicks_che_rolling_seasonal_naive.yaml
+- config: configs/experiments/rev_dominicks_che_rolling_timesfm_mean.yaml
+- config: configs/experiments/rev_dominicks_che_rolling_timesfm_plan.yaml
+- config: configs/experiments/rev_dominicks_che_rolling_chronos.yaml
+- config: configs/experiments/rev_dominicks_che_rolling_tft.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_sna_rolling_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_sna_rolling_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_sna_rolling_lightgbm.yaml
+- config: configs/experiments/rev_dominicks_sna_rolling_seasonal_naive.yaml
+- config: configs/experiments/rev_dominicks_sna_rolling_timesfm_mean.yaml
+- config: configs/experiments/rev_dominicks_sna_rolling_timesfm_plan.yaml
+- config: configs/experiments/rev_dominicks_sna_rolling_chronos.yaml
+- config: configs/experiments/rev_dominicks_sna_rolling_tft.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_sdr_rolling_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_sdr_rolling_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_sdr_rolling_lightgbm.yaml
+- config: configs/experiments/rev_dominicks_sdr_rolling_seasonal_naive.yaml
+- config: configs/experiments/rev_dominicks_sdr_rolling_timesfm_mean.yaml
+- config: configs/experiments/rev_dominicks_sdr_rolling_timesfm_plan.yaml
+- config: configs/experiments/rev_dominicks_sdr_rolling_chronos.yaml
+- config: configs/experiments/rev_dominicks_sdr_rolling_tft.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_bjc_rolling_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_bjc_rolling_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_bjc_rolling_lightgbm.yaml
+- config: configs/experiments/rev_dominicks_bjc_rolling_seasonal_naive.yaml
+- config: configs/experiments/rev_dominicks_bjc_rolling_timesfm_mean.yaml
+- config: configs/experiments/rev_dominicks_bjc_rolling_timesfm_plan.yaml
+- config: configs/experiments/rev_dominicks_bjc_rolling_chronos.yaml
+- config: configs/experiments/rev_dominicks_bjc_rolling_tft.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_ana_rolling_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_ana_rolling_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_ana_rolling_lightgbm.yaml
+- config: configs/experiments/rev_dominicks_ana_rolling_seasonal_naive.yaml
+- config: configs/experiments/rev_dominicks_ana_rolling_timesfm_mean.yaml
+- config: configs/experiments/rev_dominicks_ana_rolling_timesfm_plan.yaml
+- config: configs/experiments/rev_dominicks_ana_rolling_chronos.yaml
+- config: configs/experiments/rev_dominicks_ana_rolling_tft.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_fre_rolling_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_fre_rolling_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_fre_rolling_lightgbm.yaml
+- config: configs/experiments/rev_dominicks_fre_rolling_seasonal_naive.yaml
+- config: configs/experiments/rev_dominicks_fre_rolling_timesfm_mean.yaml
+- config: configs/experiments/rev_dominicks_fre_rolling_timesfm_plan.yaml
+- config: configs/experiments/rev_dominicks_fre_rolling_chronos.yaml
+- config: configs/experiments/rev_dominicks_fre_rolling_tft.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_frat_rolling_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_frat_rolling_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_frat_rolling_lightgbm.yaml
+- config: configs/experiments/rev_frat_rolling_seasonal_naive.yaml
+- config: configs/experiments/rev_frat_rolling_timesfm_mean.yaml
+- config: configs/experiments/rev_frat_rolling_timesfm_plan.yaml
+- config: configs/experiments/rev_frat_rolling_chronos.yaml
+- config: configs/experiments/rev_frat_rolling_tft.yaml
+  seeds:
+  - 1

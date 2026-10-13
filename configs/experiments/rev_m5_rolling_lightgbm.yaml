@@ -1,0 +1,28 @@
+# Paper 1 revision, rolling windows before the development windows; settings from the companion paper's final config for m5 (docs/PAPER1_REVISION_PLAN.md).
+name: rev_m5_rolling_lightgbm
+seed: 0
+dataset:
+  name: m5
+model:
+  name: lightgbm_direct
+  params:
+    horizon: 28
+    train_periods: 730
+    group_by: store_id
+    categorical:
+    - item_id
+    - dept_id
+    - cat_id
+    extra:
+    - event
+    - snap
+    rounds: 800
+    seed: 0
+    threads: 2
+evaluation:
+  horizon: 28
+  n_origins: 4
+  scale_lag: 1
+  weight_window: 28
+  holdout_periods: 84
+  step: 28

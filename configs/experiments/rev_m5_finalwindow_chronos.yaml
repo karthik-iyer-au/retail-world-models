@@ -1,0 +1,16 @@
+# Paper 1 revision, the final window, a model not run there before; settings as m5's rolling config.
+name: rev_m5_finalwindow_chronos
+seed: 0
+dataset:
+  name: m5
+  params:
+    include_test: true
+model:
+  name: chronos
+  params:
+    context: 512
+evaluation:
+  horizon: 28
+  n_origins: 1
+  scale_lag: 1
+  weight_window: 28

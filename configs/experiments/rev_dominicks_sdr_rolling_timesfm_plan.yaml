@@ -1,0 +1,32 @@
+# Paper 1 revision, rolling windows before the development windows; settings from the companion paper's final config for dominicks_sdr (docs/PAPER1_REVISION_PLAN.md).
+name: rev_dominicks_sdr_rolling_timesfm_plan
+seed: 0
+dataset:
+  name: dominicks
+  params:
+    categories:
+    - sdr
+model:
+  name: timesfm
+  params:
+    context: 512
+    batch_size: 256
+    point: mean
+    plan:
+    - promo
+    price_plan: true
+    ridge: 1.0
+    chunk: 2048
+evaluation:
+  horizon: 8
+  n_origins: 6
+  holdout_periods: 24
+  scale_lag: 1
+  weight_window: 13
+  conditions:
+  - promo
+  after_promo:
+    levers:
+    - promo
+    periods: 2
+  step: 8
