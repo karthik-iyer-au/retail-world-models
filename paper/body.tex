@@ -346,11 +346,14 @@ store and date drawn at random.
 \paragraph{Brand switching (Dominick's)}
 Items forecast one by one each add their own promotion lift, but in a store
 and week where several items are promoted much of each item's lift is taken
-from the others. Following attraction models~\cite{bell1975,cooper1988}, the
-world model learns on the last 8 training weeks one number per run, the share
-$\alpha$ of the summed lift that is new to the category, and in each store and
-week rescales its item forecasts so that the category total is the baseline
-total plus $\alpha$ times the summed lift. Each item keeps its share of the
+from the others. Following attraction models~\cite{bell1975,cooper1988}, the world model fits
+on the last 8 training weeks one number per run, the share $\alpha$ of the summed
+lift that the category total keeps, and in each store and week rescales its item
+forecasts so that the category total is the baseline total plus $\alpha$ times
+the summed lift. $\alpha$ is the split that makes category totals fit best: a
+forecast-implied allocation of lift, not an identified estimate of how much
+promoted sales come from other items, because promotions are not assigned at
+random. Each item keeps its share of the
 total as forecast. On Dominick's three fits with different seeds are averaged
 in each run. Table~\ref{tab:settings} gives the settings of the final runs.
 
@@ -431,262 +434,12 @@ tests as comparisons, with settings fixed before their first run and no
 development windows of their own.
 
 % =====================================================================
-\section{Development study}
-\label{sec:dev}
+\paragraph{Development study}
+How every setting of the tested models was chosen, the changes that were kept
+and those that were not, and the development scores on all three data sets are
+in the supplement (Section~\ref{sec:supplementdev}), so that the main text holds
+the hypotheses and the final evidence.
 
-This section reports what was tried before the final tests, on the
-development windows only. It shows how the final models were chosen and which
-ideas from the literature did not help on these data. Every row is a section
-of the results record, with its run folders.
-
-\subsection{Breakfast at the Frat}
-\label{sec:dev-frat}
-
-\paragraph{Benchmarks}
-On the three windows before the data set's end, seasonal naive scores 0.832,
-the average of the last 8 weeks 0.756, LightGBM with price only 0.554 and
-LightGBM with every recorded lever 0.447. The levers are worth a fifth of the
-error: display, feature and price reduction carry information price does not.
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{figs/fig_frat_dev.pdf}
-\caption{\textbf{On Frat the gain came from building the forecast as a baseline
-times a plan lift; item-to-item links, extra inputs, latent losses and the
-roll-forward did not improve on it.} Each row is one configuration on the two
-development windows, five seeds: mean (marker) and range (bar). Blue band: the
-lift model's seed range; vertical lines: the lift model (0.406) and LightGBM
-(0.421). Values below the lift model are in bold. Rows without a bar were
-recorded as a mean only.}
-\label{fig:fratdev}
-\end{figure*}
-
-\paragraph{What helped and what did not}
-Figure~\ref{fig:fratdev} shows every configuration screened on Frat. Our item
-encoder with a direct readout scored 0.424, level with LightGBM (0.421).
-Building the forecast as a baseline under the nothing-planned plan times a lift
-(the lift model) brought it to 0.406, better than LightGBM in all five runs and
-with half the spread across seeds. Letting the 55 items in a store affect each
-other, by conditional similarity, attention or both, made the forecast worse in
-every version (0.443 to 0.476) and less steady; limiting it to items in the same
-category narrowed the gap without closing it. Extra inputs did not help: the
-plan of the four weeks before (0.411), the same week last year (0.408), the US
-seasonal calendar (0.425), the count of items on promotion in the store (0.406)
-and the recorded base price used as the regular price (0.434). The recorded
-base price changes about twelve times a year per item and equals the shelf
-price in every week without a promotion, so it is not a slow-moving regular
-price.
-
-\paragraph{Latent (JEPA-style) losses}
-Following the JEPA literature~\cite{lecun2022,ijepa} and M-JEPA~\cite{mjepa}, we
-added a loss that predicts the encoder's own state for the forecast weeks from
-the state now and the plan, with a slowly updated copy of the encoder as the
-target~\cite{byol}. No recipe beat the lift model: alongside the forecast loss
-0.410 to 0.411, pretrained on the latent loss and then fine-tuned 0.407 to
-0.414. With the encoder frozen after latent-only pretraining the model still
-reached 0.428, so a state learned without any sales target carries most of the
-forecast signal. Long pretraining followed by a slowed encoder gave the best
-display-week error of any configuration (0.813 for the world model, against
-0.817 for LightGBM).
-
-\paragraph{The world model}
-Rolling the state forward week by week under the plan scored 0.408, level with
-the lift model on the overall score and on every lever. Three ideas from the
-world-model literature, each at one untuned setting, did not help: keeping the
-plan's effect apart from the no-plan state as in DWM~\cite{dwm} (0.417), a
-latent check on each rolled step with a VICReg penalty~\cite{vicreg} and near
-weeks weighted more as in TD-MPC2~\cite{tdmpc2} (0.427), and all three together
-(0.424). Training changes did not help either: stopping at the best point on the
-last 8 training weeks (0.425) took 8 of only 90 training weeks out of the
-targets, and a term on summed totals in the loss (0.414) had no bias to fix,
-since total forecasts were within 3\% of sales in every run. Readout dropout
-with weight decay (0.409) was level and steadier, and was kept for the lift
-model.
-
-\input{generated/tab_tests}
-
-\paragraph{Beyond accuracy}
-Table~\ref{tab:tests} reports four further tests. \emph{New items}: with one
-product in ten held out of training, the lift model borrowing the state and
-level of the ten known items in the same store with the most labels in common
-scored 0.890 on the new items, against 1.310 for LightGBM fitted on labels,
-price and plan, and 1.510 for a forecast of zero. On Dominick's analgesics,
-where items carry no category or maker labels, borrowing failed (2.999 against
-0.923): the method needs item attributes. \emph{Combination}: weighting the lift
-model and LightGBM on a validation window gave the best Frat result of the study
-(0.388), better than either part on display and circular weeks, because the two
-make different errors in promoted weeks; on analgesics the combination was
-level. Combinations were not carried to the final tests, which compare single
-models. \emph{Plan A against plan B}: for pairs of weeks of the same item and
-store with different plans, every model picked the week that sold more about
-78\% of the time; LightGBM was marginally ahead. \emph{Unusual plans}: on lever
-mixes an item had run in under 2\% of its weeks, no model degraded much and
-LightGBM stayed ahead. The world model's ability to roll a plan forward did not
-show as an advantage on these tests.
-
-\subsection{Dominick's}
-\label{sec:dev-dom}
-
-\paragraph{Analgesics, the category used to set the models}
-On analgesics, seasonal naive scored 1.274, the average of the last 8 weeks
-0.723 and LightGBM 0.715. The lift model scored 0.676 on three seeds, and the
-world model 0.667 once a totals term was removed from its loss: that term made
-the total worse, pulling forecasts 9\% low (0.819 for the lift model). Training
-four times longer without a stop broke the summed levels (1.473) while
-item-by-store error barely moved, so a small bias in the same direction on
-every item added up at the category total. Five seeds changed the picture: the
-world model held (0.666) and LightGBM scored 0.702, but the lift model fell to
-0.718, so a three-seed figure had flattered it.
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{figs/fig_dom28.pdf}
-\caption{\textbf{Run unchanged on all 28 Dominick's categories, the world model
-set on analgesics failed badly in a few; taking each item's level from its last
-8 weeks removed the worst failures but did not make it better than LightGBM on
-average.} Development windows, one seed. \textbf{(a)} Each category's
-WRMSSE for LightGBM (horizontal) and the world model (vertical), with the item
-level from the last 26 weeks (open) and the last 8 weeks (filled); blue: the
-world model is more accurate with the 8-week level. \textbf{(b)} Categories
-where each model is more accurate, and the mean over the 28.}
-\label{fig:dom28}
-\end{figure*}
-
-\paragraph{All 28 categories}
-Run on all 28 categories with settings from analgesics, LightGBM was the most
-accurate of the three in 14, the lift model in 5 and the world model in 9, with
-mean WRMSSE 0.688, 0.784 and 0.747; on promoted weeks LightGBM was most accurate
-in 24 of 27 (Figure~\ref{fig:dom28}, Table~\ref{tab:dom28}). Analgesics did not
-generalise, which is why the paper reports every category. The failures (snack
-crackers 1.463, bath soap 1.465, the lift model on soft drinks 1.406) sat at the
-category total: item-by-store error was close to LightGBM's. On a six-store
-sample of snack crackers the cause was in-and-out and seasonal lines: items
-recorded in 8 to 20 of the last 26 weeks were 8\% of sales and the lift model
-forecast them at 9 times their sales, because the model set each item's level from its 26-week
-average after the item had fallen away. Capping extreme weeks did little; taking
-the level from the last 8 weeks removed most of it. On all 28 categories the
-8-week level brought the world model's mean to 0.717, removed the large failures
-(snack crackers 1.463 to 0.874, bath soap 1.465 to 1.195) and gave a little back
-in categories that had been fine, so it beat LightGBM in 10 categories against
-14 before. LightGBM, which sees short recent averages directly, does not have the
-problem.
-
-\input{generated/tab_dom28}
-
-\paragraph{Peaks and dips}
-In cheese, both our model and LightGBM under-forecast promoted weeks by about a
-third in the holiday window, and cheese peaks do not sit on a fixed week
-relative to the holidays: they follow the chain's promotion timing, which event
-flags cannot place. Figure~\ref{fig:peaks} splits forecast against sales into
-promoted weeks, the weeks just after a promotion, and ordinary weeks, for six
-categories. The world model did not see the dip after a promotion where the dip
-is large: it forecast 1.33 times sales after a promotion in snack crackers and
-1.32 in soft drinks, against 0.92 and 0.90 for LightGBM. Feeding the model's own
-sales forecast into the roll-forward, so that a promotion's sales could shape the
-weeks after it, fixed the soft-drink dip (1.32 to 1.00) and made the overall
-score worse in four of six categories. Weighting the loss by dollar sales and by
-how far a week sits from the item's usual level fixed cheese promoted weeks
-(1.21 to 1.00) and was worse overall in three categories. In frozen entrees every
-model, LightGBM included, forecast about 0.7 of sales after a promotion: there the
-week after is stronger than any model expected.
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{figs/fig_peaks.pdf}
-\caption{\textbf{The world model over-forecast the weeks after a promotion where
-shoppers had stocked up; the two fixes each repaired one category and hurt
-others.} Forecast against sales (1.0 is right; orange over, blue under) in
-promoted weeks, the weeks just after a promotion and ordinary weeks, Dominick's
-development windows, one seed. Rows: LightGBM, the world model with the 8-week
-level, with its own sales forecast fed forward, and with the loss weighted by
-dollar sales and by peaks.}
-\label{fig:peaks}
-\end{figure*}
-
-\paragraph{From the first world model to the one tested}
-Figure~\ref{fig:ladder} follows the world model on the six categories through
-the changes kept, three seeds each. Across seeds the first version was unsteady:
-its range within a category was 0.04 to 0.38, against under 0.03 for LightGBM,
-and on the mean LightGBM was ahead in five of six. Brand switching fixed what it
-was built for: in snack crackers and soft drinks, where promoted weeks broke the
-total, it was better on every seed (0.813 to 0.752, 0.902 to 0.789) and
-item-by-store error improved too. The share of the summed lift that is new to
-the category, learned per run, reads as a merchant would expect
-(Figure~\ref{fig:ladder}g): in snack crackers 0.00 to 0.66, so most of a
-promotion's lift is taken from other crackers, against about 0.9 in bottled
-juice, analgesics and frozen entrees. Where it comes out at 1.0 the step changes
-nothing, a built-in check. Van Heerde, Gupta and Wittink~\cite{vanheerde2003}
-found a similar split from household data; here it is learned from store sales
-alone. Normalising the rolled state narrowed the seed range in five of six
-categories, and averaging three fits per run with normalisation gave the
-steadiest version (range 0.05 or less in five categories) and the candidate for
-the final test: better than LightGBM on the three-seed mean in analgesics (0.622
-against 0.701), frozen entrees (0.391 against 0.419) and soft drinks (0.743
-against 0.759). One snack-cracker run of the three failed (1.806): its second
-window's category total broke with promoted weeks forecast at 2.6 times sales
-while item-by-store error stayed normal, so the summed promotion lift can still
-run away on one fit in three. Twice the training steps, screened after the final
-tests were fixed, was better in two categories, worse in two, level in one and
-mixed in one, and was not kept.
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{figs/fig_ladder.pdf}
-\caption{\textbf{Brand switching, a normalised roll-forward and averaging three
-fits took the world model past LightGBM in three of six categories on the
-development windows, and the switching step learned how much of a promotion's
-lift is new to the category.} \textbf{(a--f)} Development WRMSSE of each version,
-three-seed means; shaded bars: seed range of the first version and of the one
-taken to the final test (circled); dashed: LightGBM. \textbf{(g)} The learned
-share of the summed promotion lift that is new to the category (the rest is
-switching between items), range over runs.}
-\label{fig:ladder}
-\end{figure*}
-
-\paragraph{Other changes}
-Showing the model both its 26-week and its recent levels as inputs, instead of
-setting its scale by the recent level, was the best world-model version in four
-of ten categories but did not fix snack crackers (1.515) or soft drinks (1.069):
-the model did not learn to switch to the recent level when the long level still
-set its scale. Item role labels (new line, in-and-out, volume driver, long tail,
-high-low, promotion-responsive, core), assigned from each item's own sales before
-the windows, moved LightGBM by at most 0.013, since it reads the same information
-from its history, and moved the world model in both directions; letting the role
-pick the level broke snack crackers (2.422). We did not call the volume drivers
-key value items, since a key-value-item list rests on shopper price perception,
-which these data do not record.
-
-\subsection{M5}
-\label{sec:dev-m5}
-
-\input{generated/tab_m5dev}
-
-On the M5 practice window (Table~\ref{tab:m5dev}), the item encoder with a
-direct readout scored 0.699 over five seeds against 0.715 for LightGBM, and the
-lift and world models were level with LightGBM over three seeds (0.713 and
-0.707). Normalising the rolled state was the one change that separated the world
-model: 0.656, with its worst seed (0.675) better than the best seed without it
-(0.680), all of the gain at the totals and the seed range cut from 0.070 to
-0.029. It helped on M5's 28 daily steps and not on Dominick's 8 weekly steps,
-which fits the reading that it stops the state drifting over a long roll.
-Averaging three fits did not help on M5 (0.665), where single fits were already
-steady.
-
-After the official test month, an error analysis of the world model found its
-2.6\% excess in Foods (+3.9\%), in one store (CA\_3, +7.5\%), and on Sundays and
-Mondays (+5.1\%, +6.4\%), not growing with the horizon. Grouped by sales in the
-28 days before the test, the excess came from items that had been selling fast
-(+5.4\% and +6.1\% on items selling 3 to 10 and over 10 a day). Four changes
-were screened on the practice window under rules written before screening:
-weekday as seven inputs, event kinds, twice the training steps, and the item's
-level against its past-year level. None beat the original
-(Table~\ref{tab:m5dev}), so there was no second version. On the practice window
-every version under-forecast by 4\% to 6\%, while on the test month the world
-model over-forecast by 2.6\%: the sign of the level error changed between
-adjacent months, so a fix tuned on one would not carry to the next. That
-finding is what led to the confirmation months of \S\ref{sec:onemonth}.
-
-% =====================================================================
 \section{Final results}
 \label{sec:results}
 
@@ -1001,7 +754,7 @@ different model for each.}}
 Store orders and inventory & Item by store, day or week & Where prices rarely move (M5), the world model is more accurate than LightGBM in all four months and TimesFM, from history alone, slightly more accurate than both. Where promotions drive the weeks (Dominick's, Frat), LightGBM is more accurate than the world model \\
 Promotion, price change, supplier funding & Item by week, under a planned change & A model that reads the plan is needed; history alone forecasts \promoTfmLo\% to \promoTfmHi\% of promoted-week sales and does not respond to a first price cut. The size of a response to a plan unlike history needs a bound \\
 Category sales, units and margin plans & Category or chain, week or month & Not TimesFM (5\% to 10\% short). Between the world model and LightGBM the winner changes by month and category (M5 totals: world model two months, LightGBM one, the official test month; Dominick's: world model two categories, LightGBM three and Frat), so compare over several periods \\
-Promotion planning across a category & Category by store-week & Account for switching between items: in snack crackers most of a promotion's lift came from other crackers \\
+Promotion planning across a category & Category by store-week & Forecast the category total, not a sum of item lifts: in snack crackers the summed item lifts overstated the total, and the fitted split kept under two thirds of them \\
 Choosing a model & Any & Score at least three or four periods; one period reversed the ranking on M5 \\
 \bottomrule
 \end{tabular}
@@ -1057,9 +810,15 @@ is shared within each group.
 
 \paragraph{What lift means}
 Merchants promote in weeks they expect to sell well, so part of a measured lift
-is good timing. The lift is what the forecast attributes to the plan, not proof
-of what the plan caused. Dominick's in-store pricing experiments~\cite{hoch1995}
-are the place to test it against a cause; we have not done so.
+is good timing. The lift is what the forecast attributes to the plan, not what
+the plan caused. Our companion audit~\cite{paper2} measures the gap: in
+generated store data where merchants plan into strong weeks, the world model's
+and LightGBM's lifts were a third too large while every check against the model,
+the sales and each other passed, and the world model answered a question about
+a lasting regular-price change with the response to a temporary cut. On
+Dominick's, zone price deviations give a measured but imprecise response to
+regular prices. Plan responses in this paper are forecasts, not causal
+estimates.
 
 \paragraph{The size of a plan response}
 The world model's response to a first-time price cut varied by a factor of five
@@ -1157,3 +916,8 @@ licensed under Creative Commons Attribution-NonCommercial~4.0 International
 author.
 
 \input{references}
+
+\clearpage
+\appendix
+\label{sec:supplement}
+\input{supplement_dev}
