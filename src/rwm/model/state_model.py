@@ -1220,5 +1220,23 @@ class StateModel(Forecaster):
         model._group = None if saved.get("group") is None else saved["group"].to(model._dev)
         model.new_share = saved.get("new_share")
         model._net = model._new_net()
-        model._net.load_state_dict(saved["weights"])
+        model._net.load_state_dict(_upgrade_readout_keys(saved["weights"], model._net.state_dict()))
         return model
+
+
+def _upgrade_readout_keys(weights: dict, wanted: dict) -> dict:
+    """Checkpoints saved before readout dropout existed number the readout layers
+    0, 2, 4 (Linear, activation, Linear, activation, Linear); with the dropout
+    layers in place they are 0, 3, 6. Dropout has no weights, so renumbering
+    the keys loads the same network exactly."""
+    if set(weights) == set(wanted):
+        return weights
+    move = {"2": "3", "4": "6"}
+    out = {}
+    for k, v in weights.items():
+        parts = k.split(".")
+        if len(parts) == 3 and parts[0] in ("head", "lift") and parts[1] in move:
+            k = ".".join([parts[0], move[parts[1]], parts[2]])
+        out[k] = v
+    return out
+

@@ -51,3 +51,19 @@ def test_load_checkpoint_works_in_a_fresh_process(tmp_path):
         "exec('import rwm.model, rwm.seed_average'); assert 'state_model' in _MODELS and 'seed_average' in _MODELS"
     )
     subprocess.run([sys.executable, "-c", code], check=True)
+
+
+def test_old_checkpoints_load_into_the_readout_with_dropout():
+    """Checkpoints saved before readout dropout number the readout 0, 2, 4; now 0, 3, 6."""
+    torch = pytest.importorskip("torch")
+    from torch import nn
+
+    from rwm.model.state_model import _upgrade_readout_keys
+
+    old = nn.Sequential(nn.Linear(3, 4), nn.GELU(), nn.Linear(4, 4), nn.GELU(), nn.Linear(4, 1))
+    new = nn.Sequential(nn.Linear(3, 4), nn.GELU(), nn.Dropout(0.0), nn.Linear(4, 4), nn.GELU(), nn.Dropout(0.0), nn.Linear(4, 1))
+    net_old, net_new = nn.Module(), nn.Module()
+    net_old.head, net_new.head = old, new
+    net_new.load_state_dict(_upgrade_readout_keys(net_old.state_dict(), net_new.state_dict()))
+    x = torch.randn(5, 3)
+    assert torch.allclose(old(x), new.eval()(x))
