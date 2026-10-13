@@ -119,3 +119,46 @@ models forecast at most 8 weeks ahead, so the model is fitted on data up to the
 week before an episode and scored on the episode's first 8 weeks, against a
 difference-in-differences restricted to the same 8 weeks (26 weeks before
 against those 8). The full-episode estimate stays in the list.
+
+**13 October 2026, before any audit result (C1 to C6, C8) or model lift for
+C7 has been read.** Three additions.
+
+*Known-answer study.* The checks are first run where the answer is known:
+generated weekly store data (`rwm.data.synthetic_levers`) with a temporary-cut
+elasticity of -2.5, a regular-price elasticity of -0.5, a promotion effect of
++40%, a display effect of +25%, +15% more when both run, and a 15% dip the
+week after a planned week. 3 zones of 6 stores, 20 items, 260 weeks; in each
+zone one store's regular prices go up 10% and one down 10% for 16 weeks at
+random weeks during training, and one up and one down starting at the
+forecast origin (week 253). Two worlds: plans at random (clean), and plans
+made more often in weeks with high unobserved demand (confounded, strength 1).
+In each world: the world model (3 seeds), the world model fitted with prices
+shuffled within each series (blind to price), the world model fitted with
+promotion and display shuffled within each series (blind to the levers),
+LightGBM, and LightGBM with prices shuffled. Settings are those of the
+Dominick's final models except width 32 and 2000 steps (processor only). Every
+check is run, and each model's explanations are also scored against the true
+contributions: rank agreement and summed-lift bias on planned item-weeks,
+overall and by lever, and the stated response to the origin price spells
+against the true -0.5 and the difference-in-differences estimate.
+
+*C7 additions, data only.* An event study for each scored episode (weekly
+difference-in-differences coefficients, 26 weeks before to 8 after, the week
+before as reference) to show pre-trends; a placebo: the same estimator with the
+start moved 26 weeks earlier, where no effect is expected; the episode count
+and pooled slope for WEEK_SIZE in {2, 3, 4}% and MIN_SIZE in {4, 5, 7}%; the
+pooled slope by category; and the 8-week against the full-episode estimate.
+
+*Pass thresholds and the main test, fixed now.* A version passes C1 if every
+violation is below 0.001 of the largest forecast; C2 if the rank agreement of
+its lifts after the lift readout is re-initialised is below 0.5; C3 if its
+configuration's seed agreement of lifts is at least 0.7; C4 if fewer than 1%
+of item-weeks fall after a deeper cut; C5 if, on promoted or price-cut
+item-weeks, summed forecast over summed sales is within 0.8 to 1.25 and the
+rank agreement of predicted with observed lift is at least 0.3; C6 if the rank
+agreement of its total lift with LightGBM's on the same window is at least 0.5.
+The main test: within each data set, the Spearman correlation across versions
+between the number of checks passed (C1 to C6, those that apply) and
+item-by-store WRMSSE, and between each check's continuous score and WRMSSE;
+pooled by a permutation test that shuffles scores within data set (10,000
+permutations). C7 and C8 are reported per model, not per version.
