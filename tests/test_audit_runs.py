@@ -37,3 +37,17 @@ def test_rebuilt_frames_and_checkpoints_give_the_recorded_forecasts(tmp_path, mo
         parts = m.breakdown(test.drop(columns=[UNITS]))
         np.testing.assert_allclose(parts["baseline"] + parts["lift"], parts["forecast"], rtol=1e-6)
     assert plan_levers(cfg) == ["promo"]
+
+
+def test_load_checkpoint_works_in_a_fresh_process(tmp_path):
+    """The registry is filled by load_checkpoint itself (it failed on Colab when nothing had built a model first)."""
+    import subprocess
+    import sys
+    code = (
+        "import sys; from rwm.forecaster import _MODELS; "
+        "from rwm.audit.runs import load_checkpoint; import inspect; "
+        "src = inspect.getsource(load_checkpoint); assert 'import rwm.model' in src; "
+        "import rwm.audit.runs as r; "
+        "exec('import rwm.model, rwm.seed_average'); assert 'state_model' in _MODELS and 'seed_average' in _MODELS"
+    )
+    subprocess.run([sys.executable, "-c", code], check=True)

@@ -53,6 +53,8 @@ def model_params(config: dict) -> dict:
 
 
 def load_checkpoint(run_dir: Path, origin: int, device: str | None = None):
+    import rwm.model  # noqa: F401  (fills the model registry; nothing else may have done so yet)
+    import rwm.seed_average  # noqa: F401
     config = json.loads((Path(run_dir) / "manifest.json").read_text())["config"]
     cls = _MODELS[config["model"]["name"]]
     return cls.load(Path(run_dir) / f"checkpoint_origin{origin}.pt", device=device)
