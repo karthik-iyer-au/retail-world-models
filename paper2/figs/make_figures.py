@@ -76,9 +76,10 @@ def fig_zones():
     a.set_yticks(range(len(cats)))
     a.set_yticklabels([f"{CAT[c]} ({(d['category'] == c).sum()})" for c in cats], fontsize=6.8)
     a.set_ylim(len(cats) - 0.4, -1.6)
-    weeks = [1, 69, 121, 173, 225, 277, 329]
+    # Dominick's week 1 starts 14 September 1989; ticks at the first week of each year
+    weeks = [17, 69, 121, 173, 225, 277, 329]
     a.set_xticks(weeks)
-    a.set_xticklabels([str(1989 + (w + 15) // 52) if True else "" for w in weeks], fontsize=6.5)
+    a.set_xticklabels([str(1990 + k) for k in range(len(weeks))], fontsize=6.5)
     a.set_xlabel("Year")
     a.grid(axis="x")
     a.set_axisbelow(True)
@@ -87,7 +88,7 @@ def fig_zones():
     a.set_title("Store price deviations of 12 weeks or more (count)")
     a.plot([], [], color=UP, lw=1.6, label="prices up against the zone")
     a.plot([], [], color=DOWN, lw=1.6, label="prices down")
-    a.legend(loc="upper right", fontsize=6.2)
+    a.legend(loc="upper left", fontsize=6.2)
     panel_label(a, "a")
     # (b) measured response against the price change
     s = d[d["scored"]]
@@ -98,15 +99,14 @@ def fig_zones():
                   lw=0.4, zorder=3)
     slope, icpt = np.polyfit(s["price_log_ratio"], s["estimate_8wk"], 1)
     xs = np.linspace(-11, 11, 10)
-    b.plot(xs, (icpt + slope * xs / 100) * 100, color=INK, lw=0.9)
-    b.plot(xs, -0.4 * xs, color=MUTED, lw=0.8, ls=(0, (4, 3)))
-    b.text(10.8, -0.4 * 10.8 - 2.0, "Hoch et al.\n−0.4", fontsize=6.0, color=MUTED, ha="right", va="top")
-    b.text(-10.8, (icpt - slope * 0.108) * 100 + 2.2, f"fitted slope {slope:.2f}", fontsize=6.2, color=INK)
+    b.plot(xs, (icpt + slope * xs / 100) * 100, color=INK, lw=0.9, label=f"fitted slope {slope:.2f}".replace("-", "−"))
+    b.plot(xs, -0.3 * xs, color=MUTED, lw=0.8, ls=(0, (4, 3)), label="Hoch et al., about −0.3")
+    b.legend(loc="lower left", fontsize=6)
     b.axhline(0, color=GRID, lw=0.8)
     b.axvline(0, color=GRID, lw=0.8)
     b.set_xlabel("Price against zone peers, %")
     b.set_ylabel("Change in category units, %\n(difference in differences, 8 weeks)")
-    b.set_title("Measured response: the ground truth")
+    b.set_title("Measured response")
     b.grid(True)
     b.set_axisbelow(True)
     despine(b)
@@ -212,8 +212,8 @@ def fig_zone_checks():
         if XL[0] <= sl <= XL[1]:
             dd.scatter([sl], [k], s=14, color=col, zorder=3)
     dd.set_xlim(*XL)
-    dd.text(-0.36, -0.75, "Hoch et al. $-0.4$", fontsize=5.8, color=MUTED, ha="left", va="bottom")
-    dd.axvline(-0.4, color=MUTED, lw=0.8, ls=(0, (4, 3)))
+    dd.text(-0.26, -0.75, "Hoch et al. $-0.3$", fontsize=5.8, color=MUTED, ha="left", va="bottom")
+    dd.axvline(-0.3, color=MUTED, lw=0.8, ls=(0, (4, 3)))
     dd.axvline(0, color=INK, lw=0.5)
     dd.axhline(2.5, color=GRID, lw=0.6)
     dd.set_yticks(range(len(rows)))
@@ -239,6 +239,8 @@ def fig_zone_checks():
         "zEarlyShare": f"{early * 100:.0f}",
         "zEpisodeSE": f"{ep['se_8wk'].median():.2f}", "zPlaceboSD": f"{pl['placebo_estimate'].std():.2f}",
         "zCatNeg": f"{sum(r[1] < 0 for r in rows[3:])}", "zCatN": f"{len(rows) - 3}",
+        "zStoresLo": f"{int(ep['n_controls'].min()) + 1}", "zStoresHi": f"{int(ep['n_controls'].max()) + 1}",
+        "zControlsLo": f"{int(ep['n_controls'].min())}", "zControlsHi": f"{int(ep['n_controls'].max())}",
     }
     sens = pd.read_csv(R / "sensitivity.csv")
     macros.update({"zSensLo": f"{int(sens['scored'].min())}", "zSensHi": f"{int(sens['scored'].max())}",

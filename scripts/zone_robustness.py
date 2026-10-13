@@ -58,7 +58,7 @@ def main(argv=None):
                 Z.WEEK_SIZE, Z.MIN_SIZE = ws, ms
                 found = Z.find_episodes(ratios)
                 for e in found:
-                    scored = len(e.controls) >= Z.MIN_CONTROLS
+                    scored = Z.scorable(e)
                     est = Z.did(units, e, last_week=e.first_week + Z.SCORED_WEEKS - 1)["estimate"] if scored else np.nan
                     sens_rows.append({"category": code, "week_size": ws, "min_size": ms, "store": e.store,
                                       "first_week": e.first_week, "price_log_ratio": e.log_ratio,

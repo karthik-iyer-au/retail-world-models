@@ -294,7 +294,7 @@ def write_tables(sc: pd.DataFrame, rec, worlds, gen: Path):
     M["kaPassBiasRho"] = f"{spearmanr(sub['passed'] / sub['applicable'], -np.abs(np.log(sub['truth_bias'].clip(lower=1e-3)))).statistic:.2f}"
     M["kaRmsseTruthRho"] = f"{spearmanr(sub['rmsse'], sub['truth_rank']).statistic:.2f}"
     seeds = [m for m in MODELS if m.startswith("world_seed")]
-    enc = [rec[(w, m)]["randomisation"]["encoder"] for w in WORLDS for m in seeds]
+    enc = [rec[(w, m)]["randomisation"]["encoder"] for w in WORLDS for m in MODELS if "randomisation" in rec[(w, m)]]
     M["kaEncLo"], M["kaEncHi"] = f"{min(enc):.2f}", f"{max(enc):.2f}"
     lr = [rec[(w, m)]["randomisation"]["lift readout"] for w in WORLDS for m in MODELS if "randomisation" in rec[(w, m)]]
     M["kaLiftReadLo"], M["kaLiftReadHi"] = f"{min(lr):.2f}", f"{max(lr):.2f}"
@@ -311,6 +311,9 @@ def write_tables(sc: pd.DataFrame, rec, worlds, gen: Path):
         M[f"ka{tag}WmCsixPromo"] = f"{row['C6_promo']:.2f}"
         M[f"ka{tag}WmCsix"] = f"{row['C6']:.2f}"
         M[f"ka{tag}WmCsevenSlope"] = f"{ws['C7'].median():.2f}"
+        M[f"ka{tag}WmCsevenLo"], M[f"ka{tag}WmCsevenHi"] = f"{ws['C7'].min():.2f}", f"{ws['C7'].max():.2f}"
+        M[f"ka{tag}WmTimesLo"] = f"{(ws['C7'] / -0.5).min():.1f}"
+        M[f"ka{tag}WmTimesHi"] = f"{(ws['C7'] / -0.5).max():.1f}"
         nl = sc[(sc["world"] == w) & (sc["model"] == "world_lever_blind")].iloc[0]
         M[f"ka{tag}NlCsixPromo"], M[f"ka{tag}NlCsixDisplay"] = f"{nl['C6_promo']:.2f}", f"{nl['C6_display']:.2f}"
         M[f"ka{tag}NlCsix"] = f"{nl['C6']:.2f}"

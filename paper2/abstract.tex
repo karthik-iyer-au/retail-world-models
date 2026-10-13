@@ -7,25 +7,31 @@ it. We set out eight checks on such explanations, fixed in advance: properties
 that hold by construction, sensitivity to randomised weights, stability across
 seeds, price direction, agreement with what sold, agreement with LightGBM, a
 plan read-back, and agreement with a measured cause. In generated store data
-with known effects, a world model whose explanation is built in passes every
-check that compares the explanation with the model, the data or another model,
-and its lifts match the truth (rank agreement \kaClWmTruth) when plans are made
-at random. When merchants plan into high-demand weeks, it passes the same
-checks, forecasts more accurately, and overstates every lift by a third
-(\kaCoWmBiasLo{} to \kaCoWmBiasHi{} times); LightGBM overstates them too, and
-the two agree. Asked about a lasting change in the regular price, the world
-model answers with the temporary-cut response, $\kaClWmCsevenSlope$ against a
-true $-0.5$, and only the measured cause finds it. The price-direction check
-catches every model blind to price; only a lever-by-lever comparison catches
+with known effects, a world model whose explanation is built in passes C1 and
+C3 to C6, and its lifts match the truth
+(rank agreement \kaClWmTruth) when plans are made at random. When merchants plan
+into high-demand weeks, it still passes them, forecasts more accurately,
+and overstates the total lift by a third (\kaCoWmBiasLo{} to \kaCoWmBiasHi{}
+times) and the display's by \kaCoWmDispLo{} to \kaCoWmDispHi{} times; LightGBM
+overstates them too, and the two agree. Asked about a lasting change in the
+regular price, the world model answers with the temporary-cut response,
+$\kaClWmCsevenLo$ to $\kaClWmCsevenHi$ against a true $-0.5$, and only the
+measured cause finds it. The price-direction check catches every model blind to
+price but also flags LightGBM; an exploratory lever-by-lever comparison catches
 lifts given to the wrong lever; the randomisation check separates nothing. On
 Dominick's we find \zEpisodes{} spells in which a store's regular prices sat
-\zSizeLo\% to \zSizeHi\% off its zone peers, most during the chain's 1992--93
-pricing experiments; their pooled effect on category units, $\zSlope$ (95\%
-interval $\zSlopeLo$ to $\zSlopeHi$), is in line with the $-0.4$ the experiments
-reported, while single episodes are noise. \emph{The audit of every saved model
-version from our companion paper on M5, Dominick's and Breakfast at the Frat,
-and the test of whether versions whose explanations pass more checks forecast
-better, are running and complete this draft.}
+apart from its zone peers, most between April 1993 and April 1994. Over the
+\zScored{} scored spells, prices \zSizeLo\% to \zSizeHi\% off their peers, the
+pooled effect on category units is $\zSlope$ over eight weeks (95\% interval
+$\zSlopeLo$ to $\zSlopeHi$) and $\zFullSlope$ over the full spell ($\zFullLo$ to
+$\zFullHi$), in line with the elasticity near $-0.3$ the chain's experiments
+implied. These pooled intervals were added after a placebo at false start dates
+gave $\zPlaceboSlope$ ($\zPlaceboLo$ to $\zPlaceboHi$) and showed single
+episodes to be noise.
+\emph{The audit of every saved model version from our companion paper on M5,
+Dominick's and Breakfast at the Frat, and the test of whether versions whose
+explanations pass more checks forecast better, are running and complete this
+draft.}
 
 \vspace{4pt}
 \textbf{Keywords:} retail forecasting; explanation; faithfulness; promotions;

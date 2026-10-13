@@ -14,7 +14,8 @@ own stands out. An episode is at least 12 consecutive weeks in which this
 quantity is at least 3\% in the same direction for at least 60\% of the store's
 items, with a median of at least 5\% over the episode. Controls are stores of
 the same zone within 1\% of their zone over those weeks. An episode with fewer
-than three controls is listed but not scored.
+than three controls, or without the 26 comparison weeks before its start, is
+listed but not scored.
 
 The detector was written, and its episodes listed, before any model was scored
 against them. A first version measured stores against the zone's most common
@@ -34,9 +35,10 @@ over the 26 weeks before the episode and its first eight weeks, where $Y_{jw}$
 is store $j$'s category units in week $w$ and $D_{jw}$ marks the treated store
 in the episode weeks. Standard errors are clustered by
 store~\cite{bertrand2004,cameron2015} with the CR1 correction and $t$ critical
-values on stores minus one degrees of freedom; with four to eight stores per
-episode, single intervals are wide by construction, and the pooled slope of
-$\tau_e$ on $\delta_e$ across episodes is the main summary. The estimate over
+values on stores minus one degrees of freedom; with \zStoresLo{} to \zStoresHi{} stores per episode, single intervals are wide by construction. The plan scores each episode by its
+own interval; after the placebo showed those intervals to be too narrow, the
+pooled slope of $\tau_e$ on $\delta_e$ across episodes, with an interval robust to
+unequal variances, was added as the summary used for C7. The estimate over
 the full episode is kept in the list as well. The models forecast at most eight
 weeks ahead, so each model is fitted on the data up to the week before an
 episode and scored on its first eight weeks, the same weeks as $\tau_e$.
@@ -46,29 +48,33 @@ episode and scored on its first eight weeks, the same weeks as $\tau_e$.
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figs/fig_zones.pdf}
-\caption{\textbf{The price deviations cluster in 1992 and 1993, when the chain
-ran its pricing experiments, and on average sales move against price.}
+\caption{\textbf{The price deviations cluster between spring 1993 and spring
+1994, and on average sales move against price.}
 \textbf{(a)} Every episode found in the six categories (count in brackets);
 faint: fewer than three control stores, listed but not scored. \textbf{(b)} For
 the \zScored{} scored episodes, the store's price against its zone peers and
 the measured change in its category units over the episode's first 8 weeks
 (difference in differences against same-zone stores, store and week fixed
 effects, 95\% interval clustered by store; these intervals are too narrow, see
-Figure~\ref{fig:zonechecks}). Solid line: fitted slope; dashed: the $-0.4$
-elasticity reported for the experiments~\cite{hoch1994}.}
+Figure~\ref{fig:zonechecks}). Solid line: fitted slope; dashed: the elasticity near $-0.3$ implied by the
+experiments~\cite{hoch1994}.}
 \label{fig:zones}
 \end{figure*}
 
 The detector finds \zEpisodes{} episodes in the six categories, \zScored{} with at
 least three control stores (Figure~\ref{fig:zones}). Most lie between Dominick's
-weeks 190 and 240, mid 1992 to mid 1993, the period of the chain's experiments;
-the scored stores' prices sit \zSizeLo\% to \zSizeHi\% off their zone peers.
+weeks 190 and 240, April 1993 to April 1994. Hoch, Dr\`eze and Purk published
+their experiments in 1994, and the public files do not date them, so whether
+these spells are those experiments cannot be checked. The scored stores' prices
+sit \zSizeLo\% to \zSizeHi\% off their zone peers.
 Over the first eight weeks of each scored episode, category units move against
 price in \zSignShare\% of episodes. The pooled slope of the measured response on
 the price change is $\zSlope$, with a 95\% interval of $\zSlopeLo$ to
 $\zSlopeHi$ (heteroskedasticity-robust across episodes), and over the full
 episode $\zFullSlope$ ($\zFullLo$ to $\zFullHi$). Both are in line with the
-$-0.4$ Hoch, Dr\`eze and Purk report, and neither is precise.
+elasticity near $-0.3$ implied by Hoch, Dr\`eze and Purk's report of a 3\% volume
+change for a 10\% price change, and neither is precise. These intervals across
+episodes were added after the placebo was seen (below).
 
 \begin{figure*}[t]
 \centering
@@ -108,7 +114,7 @@ gives a pooled slope of $\zPlaceboSlope$ ($\zPlaceboLo$ to $\zPlaceboHi$), and
 \zPlaceboSig\% of the \zPlaceboN{} placebo intervals exclude zero, where 5\%
 should. The intervals clustered by store are far too narrow: their median
 standard error is \zEpisodeSE{} while placebo estimates spread with a standard
-deviation of \zPlaceboSD. With four to eight stores, weekly category sales that
+deviation of \zPlaceboSD. With few stores per episode, weekly category sales that
 move together over many weeks, and errors clustered by so few
 stores, this is the failure Bertrand, Duflo and Mullainathan~\cite{bertrand2004}
 and Cameron and Miller~\cite{cameron2015} describe. A single episode's
@@ -134,11 +140,13 @@ weekly size and episode median; the plan's setting in bold.}
 \end{table}
 
 What survives is a pooled response of store category units to a sustained
-change in regular prices of about $-0.35$ to $-0.53$ over eight weeks to the
-full spell, distinguishable from zero over eight weeks, only just, and with an interval
-that overlaps the placebo's. That is enough to tell a model that treats a regular price change
-like a temporary cut (an elasticity several times larger) from one that does
-not, which is the comparison C7 makes.
+change in regular prices of $\zSlope$ over the first eight weeks, whose interval
+just includes zero and overlaps the placebo's, and $\zFullSlope$ over the full
+spell, whose interval excludes zero. The 8-week figure is pulled towards zero by
+prices that moved before the detected start. That is enough to tell a model that treats a regular price change like a
+temporary cut, an elasticity several times larger, from one that does not; it is
+not enough to tell a model with no price response from a correct one. That is
+the comparison C7 can make on public data.
 
 \paragraph{What this ground truth is, and is not}
 These deviations may include zone moves that were not experiments, and the

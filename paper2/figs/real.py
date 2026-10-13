@@ -40,6 +40,10 @@ def load():
     st = pd.read_csv(SUM / "stability.csv") if (SUM / "stability.csv").exists() else pd.DataFrame()
     ag = pd.read_csv(SUM / "agreement.csv") if (SUM / "agreement.csv").exists() else pd.DataFrame()
     z = pd.read_csv(SUM / "zones.csv") if (SUM / "zones.csv").exists() else pd.DataFrame()
+    if len(z):  # only episodes scored under the corrected rule (docs/PAPER2_PLAN.md)
+        ep = pd.read_csv(ROOT / "results" / "paper2" / "zone_episodes.csv")
+        keep = ep.loc[ep["scored"], ["category", "store", "first_week"]]
+        z = z.merge(keep, on=["category", "store", "first_week"])
     v["dataset"] = v["config"].map(dataset_of)
     v["base"] = v["config"].map(base)
     return v, st, ag, z
@@ -213,7 +217,7 @@ def fig_real_c7(z, measured_slope, measured_lo, measured_hi, out: Path):
         a.scatter(z["price_log_ratio"] * 100, z[col] * 100, s=12, color=colr, edgecolor="white", lw=0.3, label=lab)
     a.scatter(z["price_log_ratio"] * 100, z["did_estimate"] * 100, s=10, marker="x", color=INK, lw=0.7, label="measured")
     xs = np.linspace(-12, 12, 5)
-    a.plot(xs, -0.4 * xs, color=MUTED, lw=0.8, ls=(0, (4, 3)))
+    a.plot(xs, -0.3 * xs, color=MUTED, lw=0.8, ls=(0, (4, 3)))
     a.axhline(0, color=GRID, lw=0.8)
     a.axvline(0, color=GRID, lw=0.8)
     a.set_xlabel("Price against zone peers, %")
@@ -231,7 +235,7 @@ def fig_real_c7(z, measured_slope, measured_lo, measured_hi, out: Path):
     for k, (lab, sl, se) in enumerate(rows):
         b.plot([sl - 1.96 * se, sl + 1.96 * se], [k, k], color=INK if k == 0 else ACCENT, lw=1)
         b.scatter([sl], [k], s=16, color=INK if k == 0 else ACCENT, zorder=3)
-    b.axvline(-0.4, color=MUTED, lw=0.8, ls=(0, (4, 3)))
+    b.axvline(-0.3, color=MUTED, lw=0.8, ls=(0, (4, 3)))
     b.axvline(0, color=INK, lw=0.5)
     b.set_yticks(range(len(rows)))
     b.set_yticklabels([r[0] for r in rows])

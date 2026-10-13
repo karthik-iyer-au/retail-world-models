@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from rwm.audit.zones import MIN_CONTROLS, SCORED_WEEKS, did, find_episodes, regular_prices, store_ratios, zones
+from rwm.audit.zones import SCORED_WEEKS, did, scorable, find_episodes, regular_prices, store_ratios, zones
 from rwm.utils.paths import DATA_RAW
 
 COLS = ["STORE", "UPC", "WEEK", "MOVE", "QTY", "PRICE", "SALE", "OK"]
@@ -43,7 +43,7 @@ def main(argv=None):
             r = did(allunits, e)
             r8 = did(allunits, e, last_week=e.first_week + SCORED_WEEKS - 1)
             r.update({f"{k}_8wk": v for k, v in r8.items() if k in ("estimate", "se", "lo", "hi")})
-            r["scored"] = len(e.controls) >= MIN_CONTROLS
+            r["scored"] = scorable(e)
             rows.append({"category": code, "zone": e.zone, "store": e.store, "first_week": e.first_week,
                          "last_week": e.last_week, "weeks": e.last_week - e.first_week + 1,
                          "price_log_ratio": round(e.log_ratio, 4), "controls": " ".join(map(str, e.controls)),

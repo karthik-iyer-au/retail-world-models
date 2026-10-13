@@ -149,6 +149,12 @@ def did(units: pd.DataFrame, e: Episode, last_week: int | None = None) -> dict:
     return {"estimate": est, "se": se, "lo": est - q * se, "hi": est + q * se, "stores": c, "rows": n}
 
 
+def scorable(e: Episode) -> bool:
+    """An episode is scored when it has at least MIN_CONTROLS controls and the
+    PRE_WEEKS comparison weeks before its start exist in the data."""
+    return len(e.controls) >= MIN_CONTROLS and e.first_week > PRE_WEEKS
+
+
 def event_study(units: pd.DataFrame, e: Episode, after: int = SCORED_WEEKS) -> pd.Series:
     """Week-by-week difference in differences on log category units: one
     coefficient per week relative to the episode start (PRE_WEEKS before to

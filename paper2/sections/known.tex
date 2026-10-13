@@ -117,18 +117,21 @@ Table~\ref{tab:known} in the appendix every score. Six results stand out.
 
 \paragraph{Correct models pass, and their explanations are right}
 With plans at random, the three world-model seeds pass every check that applies
-except C2 for one seed, and their lifts match the truth: rank agreement
+except C7 and, for one seed, C2, and their lifts match the truth: rank agreement
 \kaClWmTruth{} and summed lift \kaClWmBias{} times the true lift for seed 1,
 with the price, promotion and display parts each within 13\% of the truth.
 Seeds agree on their lifts as closely as on their forecasts (C3, \kaClSeedRank).
 LightGBM's lifts rank \kaClLgbTruth{} with the truth at \kaClLgbBias{} times.
 
-\paragraph{The price check catches a model blind to price; the check against
-sales does not}
+\paragraph{The price check catches a model blind to price, and flags LightGBM
+too; the check against sales does not}
 All four models fitted without a usable price fail C4: \kaClWmNpCfour\% and
 \kaCoWmNpCfour\% of item-weeks for the world model, \kaClLgbNpCfour\% and
-\kaCoLgbNpCfour\% for LightGBM, against 0\% for the world models fitted on real
-prices. All four pass C5: their forecasts on planned weeks sum to 0.88 to 0.93
+\kaCoLgbNpCfour\% for LightGBM, against 0\% for the world models fitted on real prices. It also fails both
+LightGBM models fitted on real prices (\kaClLgbCfour\% and \kaCoLgbCfour\%),
+whose lifts are close to the truth and whose regular-price response passes C7:
+trees respond to price in steps, so a deeper cut sometimes lowers the forecast.
+C4 is sensitive to a model ignoring price but not specific to it. All four pass C5: their forecasts on planned weeks sum to 0.88 to 0.93
 of sales, with rank agreement 0.40 to 0.59. Their explanations are wrong in a
 way a merchant would act on: the price part is zero, and the promotion, which
 usually comes with a cut, takes its place, at 1.95 to 2.37 times its true lift
@@ -139,6 +142,8 @@ shuffled one; that is a property of how the failure was planted, not a sign
 that C1 detects it.
 
 \paragraph{Only a per-lever comparison catches lifts given to the wrong lever}
+The per-lever comparison was added after the first results, without a pass rule
+fixed in advance, and is exploratory.
 The world model fitted without usable promotion and display flags passes C1,
 C4 and C5, and its total lift agrees with LightGBM's (C6, \kaClNlCsix{} and
 \kaCoNlCsix) and ranks \kaClWmNlTruth{} with the truth. Its explanation gives
@@ -164,23 +169,25 @@ bias that the data themselves carry.
 
 \paragraph{The world model treats a regular price change like a temporary cut}
 For the price spells that start at the origin, the world model's stated
-response is $\kaClWmCsevenSlope$ per unit of log price with plans at random
-and $\kaCoWmCsevenSlope$ when plans follow demand, in every seed; the truth is
-$-0.5$, and $-2.5$ is the temporary-cut elasticity
+response is $\kaClWmCsevenLo$ to $\kaClWmCsevenHi$ per unit of log price across
+seeds with plans at random and $\kaCoWmCsevenLo$ to $\kaCoWmCsevenHi$ when plans
+follow demand, \kaClWmTimesLo{} to \kaCoWmTimesHi{} times the true $-0.5$; and $-2.5$ is the temporary-cut elasticity
 (Figure~\ref{fig:knownc7}). It has learned how sales answer a cut and applies
 it to a change in the regular price. LightGBM, whose inputs include the item's recent prices, states $\kaClLgbCsevenSlope$ and $\kaCoLgbCsevenSlope$. The measured
 response from difference in differences on the generated sales is
 $\kaClMeasSlope$ ($\kaClMeasLo$ to $\kaClMeasHi$) and $\kaCoMeasSlope$
 ($\kaCoMeasLo$ to $\kaCoMeasHi$): imprecise with six spells and three or four
 controls each, as on Dominick's, but enough to reject the world model's answer
-in both worlds and not LightGBM's. Apart from C2 for one seed, C7 is the only
+in both worlds and not LightGBM's. In the second world the measured interval
+also contains zero, so there C7 passes the price-blind models too: with six
+spells it can reject a response five times too large, not one that is absent. Apart from C2 for one seed, C7 is the only
 check the world model fails in the first world, and the only one that finds this
 error.
 
 \paragraph{Randomisation does not separate working models from broken ones}
 After the lift readout is re-initialised, the rank agreement of the lifts with
-the original is \kaLiftReadLo{} to \kaLiftReadHi{} across world models, and it
-stays at \kaEncLo{} to \kaEncHi{} with every part re-initialised
+the original is \kaLiftReadLo{} to \kaLiftReadHi{} across world models, and with
+every part re-initialised it is \kaEncLo{} to \kaEncHi{}
 (Figure~\ref{fig:knowncascade}). The construction itself ties the lifts to the
 weeks with something planned and to the size of the item, so a network with
 random weights still ranks them much as the trained one does. C2 fails correct
@@ -217,7 +224,8 @@ size (\kaPassBiasRho{} with the negative absolute log ratio): the models that
 pass the most checks include the confounded ones whose lifts are a third too
 large. Accuracy tracks the gross failures, the price-blind models being the
 least accurate, and misses the subtle ones. The checks earn their place as
-follows. C4 finds a model that ignores price. Per-lever agreement with another
+follows. C4 finds a model that ignores price, and also flags one whose price
+response is merely uneven. Per-lever agreement with another
 model finds lifts given to the wrong lever. C1 and C3 confirm construction and
 stability. C5 and C6 confirm agreement but cannot find a bias the data carry,
 and C2 as specified finds nothing. Only a measured cause, C7, finds that a

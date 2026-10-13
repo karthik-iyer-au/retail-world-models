@@ -180,3 +180,12 @@ store are too narrow (median standard error 0.02 against a placebo spread of
 0.12), so the pre-registered per-episode score (inside the interval) is still
 reported but the comparison of models with the measured response is made on
 the pooled slope and its interval. Nothing else changes.
+
+**13 October 2026, correction, before any model lift for C7.** An episode is
+scored only if the 26 comparison weeks before its start exist in the data, as
+the estimator specifies. Four scored episodes started within the first 26
+weeks: one soft-drink episode starting in week 1 had no comparison weeks at all
+(its interval had zero width) and three bottled-juice episodes had
+only some. They are now listed but not scored, leaving 38. The robustness analyses are rerun. Also corrected: the chain's experiments
+reported a 10% regular price change moving category volume about 3% over 16
+weeks, an elasticity near -0.3, not -0.4 as first written here.
