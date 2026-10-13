@@ -17,6 +17,7 @@ computed afterwards by `scripts/audit_summary.py`.
 """
 import argparse
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -70,6 +71,7 @@ def cmd_checkpoints(a):
     results = Path(a.results)
     folders = sorted({d for pat in a.pattern for d in results.glob(pat) if (d / "manifest.json").exists()
                       and not any(x in d.name for x in a.exclude)})
+    fetched = set()
     for d in folders:
         cfg = json.loads((d / "manifest.json").read_text())["config"]
         if cfg["model"]["name"] not in KEEP or not list(d.glob("checkpoint_origin*.pt")):
@@ -82,7 +84,20 @@ def cmd_checkpoints(a):
         out.mkdir(exist_ok=True)
         print(f"== {d.name}", flush=True)
         try:
-            audit_folder(d, cfg, out)
+            try:
+                audit_folder(d, cfg, out)
+            except FileNotFoundError as err:
+                # a Dominick's category the runtime has not downloaded: fetch it once and try again
+                m = re.search(r"category '(\w+)'", str(err))
+                if not m or m.group(1) in fetched:
+                    raise
+                fetched.add(m.group(1))
+                from rwm.data import fetch
+                try:
+                    fetch.main(["dominicks", m.group(1)])
+                except BaseException:  # a download that fails (or exits) leaves this run skipped, not the job stopped
+                    raise err
+                audit_folder(d, cfg, out)
         except Exception as err:  # one unreadable run must not stop the others; recorded and reported
             (out / "error.txt").write_text(repr(err))
             print(f"   skipped: {err!r}", flush=True)
