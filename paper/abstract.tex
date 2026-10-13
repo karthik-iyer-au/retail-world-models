@@ -1,34 +1,34 @@
 \small
 \textbf{Abstract.}
-No single forecasting model is best for a retailer: which one is most accurate
-depends on the level of the product and store hierarchy at which the decision is
-made, and the decision should choose the model. We compare seven models,
-including a world model that carries each item's state forward under the price
-and promotion plan, LightGBM, and the pretrained TimesFM~2.5 with and without
-the plan, on M5, Dominick's and Breakfast at the Frat. Every model is scored at
-every level of the hierarchy, on four M5 months and the final eight weeks of
-the weekly data, with settings locked beforehand. The answer by decision is as
-follows. \emph{Store orders (item by store):} where prices rarely change (M5),
-TimesFM reading sales history alone is the most accurate in all four months
-(WRMSSE \mTfmAprIxs{} to \mTfmTestIxs, against \mWorldAprIxs{} to
-\mWorldTestIxs{} for the world model and \mLgbAprIxs{} to \mLgbTestIxs{} for
-LightGBM); where promotions drive the weeks (Dominick's, Frat) it cannot see the
-promotion, forecasting \promoTfmLo\% to \promoTfmHi\% of promoted-week sales, and
-LightGBM is the most accurate item by store, or within 0.003 of it, in all
-seven data sets. \emph{Promotions and price
-changes (item by week, plan changed):} a model that reads the plan is needed.
-For an item's first price cut in a year, which sold \cutSold{} units, the world
-model forecast \cutWorld{} across seeds, LightGBM about 3 and TimesFM 8; the
-direction is right and the size is not fixed by the data. \emph{Category and
-chain plans (totals):} models that read the plan are far more accurate than
-TimesFM (the world model's error is \worldVsTfmUpperLo\% to
-\worldVsTfmUpperHi\% lower), but no one of them wins consistently: on M5 the
-world model has the lowest total error in two of four months, the graph model
-in one and LightGBM in one, the official test month, which is the only month a
-single-window comparison would have used; on Dominick's the world model is
-ahead overall in two categories and LightGBM in three, and LightGBM on Frat. For
-totals, models must be compared over several periods. Every model and change
-that lost is reported.
+Which forecasting model is most accurate for a retailer depends on the level of
+the hierarchy the forecast is judged at, and the answer is different again on
+data where promotions drive sales. We compare a world model, which carries each
+item's state forward one period at a time under the price and promotion plan,
+with LightGBM, a lift model, a graph model, seasonal naive, and the pretrained
+TimesFM~2.5, which reads only past sales. Every model is scored at every level
+of the hierarchy on M5 (four months), Dominick's (six categories) and Breakfast
+at the Frat, with settings locked beforehand. \emph{On M5, item by store,} the
+world model is more accurate than LightGBM in all four months (WRMSSE
+\mWorldMarIxs{} against \mLgbMarIxs{} in March, \mWorldTestIxs{} against
+\mLgbTestIxs{} in the official test month), and TimesFM is slightly more
+accurate than both (\tfmIxsGapWorldLo{} to \tfmIxsGapWorldHi{} below the world
+model). \emph{On M5, at the totals,} the world model has the lowest error in
+two of the four months, LightGBM in one, the official test month, and the graph
+model in one; a comparison on the test month alone would have ranked LightGBM
+first. TimesFM forecasts \tfmUnderLo\% to \tfmUnderHi\% below total sales, and
+from store by department up to the chain total the world model's error is
+\worldVsTfmUpperLo\% to \worldVsTfmUpperHi\% lower than TimesFM's. \emph{On Dominick's and Frat}, where promoted weeks
+carry \promoShareLo\% to \promoShareHi\% of units, the pattern reverses:
+LightGBM is more accurate than the world model item by store in six of the
+seven data sets and level in the seventh, the world model is more accurate over
+all levels in two of six categories (soft drinks, analgesics) and LightGBM in
+three and on Frat,
+and TimesFM, which cannot see a promotion coming, forecasts \promoTfmLo\% to
+\promoTfmHi\% of promoted-week sales. \emph{For an item's first price cut in a
+year,} which sold \cutSold{} units, the world model forecast \cutWorld{} across
+seeds, LightGBM about 3 and TimesFM 8. A retailer should therefore choose the
+model by the decision it feeds, at that decision's level, compared over several
+periods. Every model and change that lost is reported.
 
 \vspace{4pt}
 \textbf{Keywords:} retail forecasting; hierarchical evaluation; promotions;
