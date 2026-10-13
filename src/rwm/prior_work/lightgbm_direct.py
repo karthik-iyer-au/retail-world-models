@@ -215,6 +215,29 @@ class LightGBMDirect(Forecaster):
             self._groups[key] = {"booster": booster, "names": names, **state}
         return self
 
+    def shap(self, future: pd.DataFrame) -> pd.DataFrame:
+        """TreeSHAP contribution of each input to each forecast, on the model's
+        raw (log) scale, one row per row of `future`; `bias` is the expected
+        value. Rows of series not seen in training are left at zero."""
+        fut_dates = np.sort(future[DATE].unique())
+        series = future[SERIES].astype(str).to_numpy()
+        col = pd.Index(fut_dates).get_indexer(future[DATE])
+        keys = future[self.group_by].to_numpy() if self.group_by else np.full(len(future), "all")
+        cols = list(self.feature_names) + ["bias"]
+        out = np.zeros((len(future), len(cols)))
+        for key, g in self._groups.items():
+            rows = np.flatnonzero(keys == key)
+            if len(rows) == 0:
+                continue
+            part = future.iloc[rows].assign(**{SERIES: series[rows]})
+            n, h = len(g["names"]), len(fut_dates)
+            contrib = g["booster"].predict(self._predict_table(g, part, fut_dates), pred_contrib=True)
+            contrib = contrib.reshape(n, h, -1)
+            r = g["names"].get_indexer(series[rows])
+            ok = r >= 0
+            out[rows[ok]] = contrib[r[ok], col[rows[ok]]]
+        return pd.DataFrame(out, columns=cols, index=future.index)
+
     def predict(self, future: pd.DataFrame) -> np.ndarray:
         out = np.zeros(len(future), dtype=np.float64)
         fut_dates = np.sort(future[DATE].unique())
