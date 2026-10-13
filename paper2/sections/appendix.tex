@@ -1,7 +1,7 @@
 \section{Every zone price episode}
 \label{app:episodes}
 
-\begin{table*}[h]
+\begin{table}[H]
 \centering
 \caption{\textbf{All \zEpisodes{} episodes the detector finds, with their measured
 response.} Weeks: Dominick's week numbers of the episode. Price: the store's
@@ -11,11 +11,10 @@ log category units over the first eight weeks, \%, with its interval clustered
 by store (too narrow, \S\ref{sec:zones}); Full: over the whole episode.
 \textsuperscript{*} Fewer than three controls: listed, not scored.}
 \label{tab:episodes}
-\scriptsize
+\scriptsize\renewcommand{\arraystretch}{0.86}
 \input{generated/tab_episodes}
-\end{table*}
+\end{table}
 
-\clearpage
 \section{The plan and its amendments}
 \label{app:plan}
 
@@ -34,3 +33,19 @@ analyses, the pass thresholds and the main test.
 path and the pooled slope intervals, labelled exploratory, and the comparison of
 models with the measured response made on the pooled slope.
 \end{enumerate}
+
+\section{Every known-answer model}
+\label{app:known}
+
+\begin{table}[H]
+\centering
+\caption{\textbf{Every model in the known-answer study, with its explanation
+scored against the truth.} Lift against truth: rank agreement and ratio of
+summed lifts on item-weeks with something planned, overall, and the ratio for
+the price part. C4: item-weeks lower after a deeper cut. C5: summed forecast over
+summed sales on planned weeks. Passed: checks passed of those that apply (C1 to
+C6). RMSSE: item by store, weeks 253 to 260.}
+\label{tab:known}
+\footnotesize
+\input{generated/tab_known}
+\end{table}

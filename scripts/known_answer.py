@@ -146,7 +146,19 @@ def origin_episodes(panel, test, model, t: Truth) -> list[dict]:
     return out
 
 
+def example(world_name: str, out: Path, series: str = "S04_I03", weeks: int = 60):
+    """One series' last weeks with its expected sales under the plan and with nothing planned."""
+    panel, _, _ = world(WORLDS[world_name])
+    t = Truth(**panel.attrs["truth"])
+    d = panel[panel[SERIES] == series].sort_values(DATE).tail(weeks).reset_index(drop=True)
+    d["expected"] = expected_units(d, t)
+    d["expected_nothing_planned"] = expected_units(d.assign(**{PRICE: d["true_regular"], "promo": 0, "display": 0}), t)
+    d[[DATE, UNITS, PRICE, "true_regular", "promo", "display", "expected", "expected_nothing_planned"]].to_csv(
+        out / f"{world_name}_example.csv", index=False)
+
+
 def run(world_name: str, out: Path):
+    example(world_name, out)
     panel, train, test = world(WORLDS[world_name])
     t = Truth(**panel.attrs["truth"])
     regular = regular_prices(train, 12)

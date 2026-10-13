@@ -1,0 +1,24 @@
+\begin{tabular}{@{}lrrrrrrr@{}}
+\toprule
+ & \multicolumn{3}{c}{Lift against truth} & & & & \\
+\cmidrule(lr){2-4}
+Model & rank & sum & price & C4 & C5 & Passed & RMSSE \\
+\midrule
+\multicolumn{8}{@{}l}{\emph{Plans at random}} \\
+World model, seed 1 & 0.99 & 1.14 & 1.13 & 0.0\% & 1.08 & 6/6 & 0.401 \\
+World model, seed 2 & 0.99 & 1.10 & 1.09 & 0.0\% & 1.06 & 6/6 & 0.401 \\
+World model, seed 3 & 0.99 & 1.11 & 1.11 & 0.0\% & 1.05 & 5/6 & 0.398 \\
+World model, blind to price & 0.59 & 0.73 & 0.01 & 31.5\% & 0.90 & 3/5 & 0.510 \\
+World model, blind to levers & 0.89 & 1.10 & 1.35 & 0.0\% & 1.09 & 4/5 & 0.450 \\
+LightGBM & 0.85 & 1.09 & 1.03 & 7.6\% & 0.99 & 1/2 & 0.389 \\
+LightGBM, blind to price & 0.43 & 0.73 & −0.00 & 49.5\% & 0.88 & 1/2 & 0.515 \\
+\multicolumn{8}{@{}l}{\emph{Plans in high-demand weeks}} \\
+World model, seed 1 & 0.96 & 1.33 & 1.22 & 0.0\% & 1.06 & 5/6 & 0.345 \\
+World model, seed 2 & 0.95 & 1.35 & 1.24 & 0.0\% & 1.07 & 6/6 & 0.349 \\
+World model, seed 3 & 0.95 & 1.40 & 1.27 & 0.0\% & 1.09 & 5/6 & 0.344 \\
+World model, blind to price & 0.51 & 1.09 & −0.00 & 27.2\% & 0.93 & 2/5 & 0.489 \\
+World model, blind to levers & 0.82 & 1.23 & 1.63 & 0.0\% & 1.07 & 4/5 & 0.480 \\
+LightGBM & 0.82 & 1.26 & 1.13 & 9.9\% & 1.01 & 1/2 & 0.322 \\
+LightGBM, blind to price & 0.54 & 0.94 & −0.02 & 43.4\% & 0.90 & 1/2 & 0.497 \\
+\bottomrule
+\end{tabular}

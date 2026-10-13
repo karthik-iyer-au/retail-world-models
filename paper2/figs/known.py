@@ -76,10 +76,19 @@ def scores(rec, lifts) -> pd.DataFrame:
             else:
                 c6 = rank(L["total_lift"], lgb["total_lift"])
                 row["C6"], row["C6_pass"] = c6, c6 >= 0.5
+                for lv in ("price", "promo", "display"):
+                    row[f"C6_{lv}"] = rank(L[f"lift_{lv}"], lgb[f"lift_{lv}"])
+                    row[f"C6_{lv}_shap"] = rank(L[f"lift_{lv}"], lgb[f"shap_{lv}"])
+                row["C6_lever_min"] = min(row[f"C6_{lv}"] for lv in ("price", "promo", "display"))
             eps = r["origin_episodes"]
-            inside = [e["did"]["lo"] <= e["stated"] <= e["did"]["hi"] for e in eps]
-            row["C7"] = float(np.mean(inside))
-            row["C7_pass"] = row["C7"] >= 0.5
+            from make_figures import ols_slope
+            x = [e["log_ratio"] for e in eps]
+            ms, mse = ols_slope([e["did"]["estimate"] for e in eps], x)
+            ss, _ = ols_slope([e["stated"] for e in eps], x)
+            row["C7_episode_inside"] = float(np.mean([e["did"]["lo"] <= e["stated"] <= e["did"]["hi"] for e in eps]))
+            row["C7_measured_slope"], row["C7_measured_lo"], row["C7_measured_hi"] = ms, ms - 1.96 * mse, ms + 1.96 * mse
+            row["C7"] = ss
+            row["C7_pass"] = ms - 1.96 * mse <= ss <= ms + 1.96 * mse
             row["C7_err_vs_truth"] = float(np.mean([e["stated"] - e["true"] for e in eps]))
             row["C7_stated_elasticity"] = float(np.median([e["stated"] / e["log_ratio"] for e in eps]))
             t = r["truth"]
@@ -99,7 +108,7 @@ def scores(rec, lifts) -> pd.DataFrame:
 def fig_known_checks(sc: pd.DataFrame, out: Path):
     """Pass/fail grid: models by checks, in each world, with the truth alongside."""
     fig, axes = plt.subplots(1, 2, figsize=(FULL, 2.75), gridspec_kw={"wspace": 0.05})
-    cols = CHECKS + ["truth"]
+    cols = CHECKS[:6] + ["C6L", "C7", "truth"]
     for k, (ax, w) in enumerate(zip(axes, WORLDS)):
         d = sc[sc["world"] == w].set_index("model").loc[MODELS]
         for i, m in enumerate(MODELS):
@@ -108,6 +117,12 @@ def fig_known_checks(sc: pd.DataFrame, out: Path):
                     v = d.loc[m, "truth_rank"]
                     ok = v >= 0.7 and 0.8 <= d.loc[m, "truth_bias"] <= 1.25
                     face, txt = (PASS if ok else FAIL), f"{v:.2f}\n×{d.loc[m, 'truth_bias']:.2f}"
+                elif c == "C6L":
+                    v = d.loc[m, "C6_lever_min"] if "C6_lever_min" in d else np.nan
+                    if pd.isna(v):
+                        face, txt = NA, "n/a"
+                    else:
+                        face, txt = (PASS if v >= 0.5 else FAIL), f"{v:.2f}"
                 else:
                     p, v = d.loc[m, f"{c}_pass"], d.loc[m, c]
                     if p is None or (isinstance(p, float) and np.isnan(p)):
@@ -115,6 +130,7 @@ def fig_known_checks(sc: pd.DataFrame, out: Path):
                     else:
                         face = PASS if p else FAIL
                         txt = f"{v:.0e}" if c == "C1" else (f"{v * 100:.1f}%" if c == "C4" else f"{v:.2f}")
+                        txt = txt.replace("-", "\u2212")
                         if c == "C5":
                             txt = f"{d.loc[m, 'C5_rank']:.2f}\n×{d.loc[m, 'C5_bias']:.2f}"
                 x = j + (0.35 if c == "truth" else 0)
@@ -125,7 +141,7 @@ def fig_known_checks(sc: pd.DataFrame, out: Path):
         ax.set_xlim(0, len(cols) + 0.35)
         ax.set_ylim(len(MODELS), 0)
         ax.set_xticks([j + 0.5 + (0.35 if c == "truth" else 0) for j, c in enumerate(cols)])
-        ax.set_xticklabels(cols[:-1] + ["Truth"], fontsize=6.6)
+        ax.set_xticklabels(["C1", "C2", "C3", "C4", "C5", "C6", "C6\nlevers", "C7", "Truth"], fontsize=6.4)
         ax.xaxis.tick_top()
         ax.set_yticks([i + 0.5 for i in range(len(MODELS))])
         ax.set_yticklabels([LABEL[m] for m in MODELS] if k == 0 else [], fontsize=6.6)
@@ -226,17 +242,8 @@ def fig_known_cascade(rec, out: Path):
 
 def fig_known_series(out: Path, world: str = "confounded"):
     """What the data look like: one item in one store, its plan, sales and the true baseline."""
-    import sys
-    sys.path.insert(0, str(ROOT / "scripts"))
-    from known_answer import DATA, WORLDS as W
-    from rwm.data import load_dataset
-    from rwm.data.synthetic_levers import Truth, expected_units
-    p = load_dataset("synthetic_levers", confounding=W[world], **DATA).panel
-    d = p[p["series_id"] == "S04_I03"].sort_values("date").tail(60).reset_index(drop=True)
-    t = Truth(**p.attrs["truth"])
-    nothing = d.assign(price=d["true_regular"], promo=0, display=0)
-    base = expected_units(nothing, t)
-    full = expected_units(d, t)
+    d = pd.read_csv(KA / f"{world}_example.csv")
+    base, full = d["expected_nothing_planned"].to_numpy(), d["expected"].to_numpy()
     fig, (a, b) = plt.subplots(2, 1, figsize=(3.3, 2.7), sharex=True, gridspec_kw={"height_ratios": [2.2, 1], "hspace": 0.12})
     x = np.arange(len(d))
     a.bar(x, d["units"], color="#D9D4CB", width=0.85, label="sales")
@@ -284,6 +291,31 @@ def write_tables(sc: pd.DataFrame, rec, worlds, gen: Path):
     sub = sc[sc["model"].isin(MODELS)]
     rho = spearmanr(sub["passed"] / sub["applicable"], sub["truth_rank"]).statistic
     M["kaPassTruthRho"] = f"{rho:.2f}"
+    M["kaPassBiasRho"] = f"{spearmanr(sub['passed'] / sub['applicable'], -np.abs(np.log(sub['truth_bias'].clip(lower=1e-3)))).statistic:.2f}"
+    M["kaRmsseTruthRho"] = f"{spearmanr(sub['rmsse'], sub['truth_rank']).statistic:.2f}"
+    seeds = [m for m in MODELS if m.startswith("world_seed")]
+    enc = [rec[(w, m)]["randomisation"]["encoder"] for w in WORLDS for m in seeds]
+    M["kaEncLo"], M["kaEncHi"] = f"{min(enc):.2f}", f"{max(enc):.2f}"
+    lr = [rec[(w, m)]["randomisation"]["lift readout"] for w in WORLDS for m in MODELS if "randomisation" in rec[(w, m)]]
+    M["kaLiftReadLo"], M["kaLiftReadHi"] = f"{min(lr):.2f}", f"{max(lr):.2f}"
+    for w, tag in (("clean", "Cl"), ("confounded", "Co")):
+        eps = rec[(w, "world_seed1")]["origin_episodes"]
+        M[f"ka{tag}DidCover"] = f"{sum(e['did']['lo'] <= e['true'] <= e['did']['hi'] for e in eps)}"
+        row = sc[(sc["world"] == w) & (sc["model"] == "world_seed1")].iloc[0]
+        M[f"ka{tag}MeasSlope"] = f"{row['C7_measured_slope']:.2f}"
+        M[f"ka{tag}MeasLo"] = f"{row['C7_measured_lo']:.2f}"
+        M[f"ka{tag}MeasHi"] = f"{row['C7_measured_hi']:.2f}"
+        ws = sc[(sc["world"] == w) & sc["model"].isin(seeds)]
+        M[f"ka{tag}WmBiasLo"], M[f"ka{tag}WmBiasHi"] = f"{ws['truth_bias'].min():.2f}", f"{ws['truth_bias'].max():.2f}"
+        M[f"ka{tag}WmDispLo"], M[f"ka{tag}WmDispHi"] = f"{ws['truth_display_bias'].min():.2f}", f"{ws['truth_display_bias'].max():.2f}"
+        M[f"ka{tag}WmCsixPromo"] = f"{row['C6_promo']:.2f}"
+        M[f"ka{tag}WmCsix"] = f"{row['C6']:.2f}"
+        M[f"ka{tag}WmCsevenSlope"] = f"{ws['C7'].median():.2f}"
+        nl = sc[(sc["world"] == w) & (sc["model"] == "world_lever_blind")].iloc[0]
+        M[f"ka{tag}NlCsixPromo"], M[f"ka{tag}NlCsixDisplay"] = f"{nl['C6_promo']:.2f}", f"{nl['C6_display']:.2f}"
+        M[f"ka{tag}NlCsix"] = f"{nl['C6']:.2f}"
+        lg = sc[(sc["world"] == w) & (sc["model"] == "lightgbm")].iloc[0]
+        M[f"ka{tag}LgbCsevenSlope"] = f"{lg['C7']:.2f}"
     M["kaFitMinutes"] = f"{sc['fit_seconds'].sum() / 60:.0f}"
     M["kaPlanned"] = f"{worlds['clean']['planned_item_weeks']:,}"
     M["kaRows"] = f"{worlds['clean']['rows']:,}"

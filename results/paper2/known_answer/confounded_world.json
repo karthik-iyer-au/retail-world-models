@@ -1,0 +1,112 @@
+{
+ "truth": {
+  "cut_elasticity": -2.5,
+  "regular_elasticity": -0.5,
+  "promo_effect": 0.4,
+  "display_effect": 0.25,
+  "both_effect": 0.15,
+  "dip": 0.15
+ },
+ "planned_item_weeks": 1831,
+ "rows": 2880,
+ "observed_over_true_nothing_planned": 1.5703738834222476,
+ "true_forecast_over_true_nothing_planned": 1.581240297489422,
+ "episodes": [
+  {
+   "zone": 0,
+   "store": 0,
+   "first_week": 132,
+   "last_week": 147,
+   "log_ratio": 0.09531017980432493,
+   "at_origin": false
+  },
+  {
+   "zone": 0,
+   "store": 5,
+   "first_week": 253,
+   "last_week": 260,
+   "log_ratio": 0.09531017980432493,
+   "at_origin": true
+  },
+  {
+   "zone": 0,
+   "store": 1,
+   "first_week": 222,
+   "last_week": 237,
+   "log_ratio": -0.09531017980432493,
+   "at_origin": false
+  },
+  {
+   "zone": 0,
+   "store": 3,
+   "first_week": 253,
+   "last_week": 260,
+   "log_ratio": -0.09531017980432493,
+   "at_origin": true
+  },
+  {
+   "zone": 1,
+   "store": 8,
+   "first_week": 201,
+   "last_week": 216,
+   "log_ratio": 0.09531017980432493,
+   "at_origin": false
+  },
+  {
+   "zone": 1,
+   "store": 10,
+   "first_week": 253,
+   "last_week": 260,
+   "log_ratio": 0.09531017980432493,
+   "at_origin": true
+  },
+  {
+   "zone": 1,
+   "store": 7,
+   "first_week": 172,
+   "last_week": 187,
+   "log_ratio": -0.09531017980432493,
+   "at_origin": false
+  },
+  {
+   "zone": 1,
+   "store": 6,
+   "first_week": 253,
+   "last_week": 260,
+   "log_ratio": -0.09531017980432493,
+   "at_origin": true
+  },
+  {
+   "zone": 2,
+   "store": 16,
+   "first_week": 228,
+   "last_week": 243,
+   "log_ratio": 0.09531017980432493,
+   "at_origin": false
+  },
+  {
+   "zone": 2,
+   "store": 13,
+   "first_week": 253,
+   "last_week": 260,
+   "log_ratio": 0.09531017980432493,
+   "at_origin": true
+  },
+  {
+   "zone": 2,
+   "store": 14,
+   "first_week": 63,
+   "last_week": 78,
+   "log_ratio": -0.09531017980432493,
+   "at_origin": false
+  },
+  {
+   "zone": 2,
+   "store": 17,
+   "first_week": 253,
+   "last_week": 260,
+   "log_ratio": -0.09531017980432493,
+   "at_origin": true
+  }
+ ]
+}

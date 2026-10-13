@@ -47,6 +47,18 @@ companion paper on M5, Dominick's and Frat, against LightGBM, and the test of
 whether faithful explanations go with accurate forecasts.
 \end{enumerate}
 
+\paragraph{Findings}
+In generated data with known effects, explanations that pass every check
+against the model, the data and another model can still be wrong in size, when
+merchants plan into strong weeks, and wrong in kind, when a model answers a
+question about the regular price with what it learned from temporary cuts.
+The cheap price-direction check and a lever-by-lever comparison with a second
+model catch the cruder failures; the randomisation check does not test an
+explanation built into the model; and only a measured cause finds the error in
+kind (\S\ref{sec:known}). On Dominick's, zone price deviations give a pooled
+measured response in line with the chain's own experiments, but single
+episodes are noise (\S\ref{sec:zones}).
+
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figs/fig_audit.pdf}

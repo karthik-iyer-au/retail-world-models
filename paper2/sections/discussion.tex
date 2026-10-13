@@ -1,0 +1,72 @@
+\section{Discussion}
+\label{sec:discussion}
+
+\paragraph{Faithful is not correct, in retail too}
+The world model's explanation is faithful by construction: the baseline does not
+move with the plan, the lift is zero when nothing is planned, and the two add up
+to the forecast. In the known-answer study that explanation was right about what
+each lever adds when plans were made at random, and wrong in two ways that no
+check against the model could see. When merchants plan into strong weeks, the
+lifts are a third too large, because the data tie the plan to demand the model
+cannot see. And asked about a change in the regular price, the model answers
+with the response to a temporary cut, five to six times the truth. Molecular
+attributions in MolSanity~\cite{molsanity} came apart from the truth for a
+similar reason: a model can be faithful to what it learned and what it learned
+can be wrong.
+
+\paragraph{What this means for a merchant reading a lift}
+A lift read from a model fitted to a retailer's own history inherits that
+retailer's planning habits. If promotions go into weeks that would sell well
+anyway, the model's promotion lift overstates what the promotion adds, and an
+accurate forecast is no protection: in the known-answer study the confounded
+models forecast better than the clean ones. The check against what sold, the
+one most often run in practice, agrees with the overstated lift for the same
+reason. Two things help. Agreement between models fitted to the same data
+should not be read as confirmation. And a model's answer to a question it was
+not trained on, here a lasting change in the regular price from a model that
+mostly saw temporary cuts, should be checked against a measured response before
+it is used to set prices.
+
+\paragraph{Which checks to run}
+The known-answer study ranks the checks. The price-direction check (C4) is cheap
+and caught every model blind to price. Per-lever agreement with a second model
+caught lifts given to the wrong lever, which every check on the total lift
+missed. Construction (C1) and seed stability (C3) are worth confirming once.
+The check against what sold (C5) and agreement with LightGBM on the total lift
+(C6) confirm agreement, not correctness. Randomisation (C2), the standard sanity
+check for attributions~\cite{adebayo2018}, does not test an explanation built
+into the model: re-initialising every part left the lifts' ranking largely in
+place. A version on the lift as a share of the baseline, or within planned weeks
+only, may work; we did not test it. A measured cause (C7) is the only check that
+found the regular-price error, and the only one that could find the bias from
+planning into strong weeks if the measured cause were a promotion rather than a
+price; on public data none is.
+
+\paragraph{Ground truth on public data is scarce and noisy}
+Dominick's zone price deviations give a pooled response close to the one the
+chain's own experiments reported, but single episodes are noise, intervals
+clustered by a handful of stores are far too narrow, and prices start moving
+before the detector sees them. A retailer running its own tests would do better
+with the design under its control: stores assigned at random, a known start
+date, and enough stores per arm for honest intervals.
+
+\paragraph{The audit of the saved versions}
+\emph{To be written with the results of \S\ref{sec:results}: whether the real
+versions behave like the known-answer models, and whether versions that pass
+more checks forecast better.}
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+Plan-lift explanations built into a forecasting model can be faithful, stable
+and in agreement with sales and with another model, and still be wrong about
+what a plan causes. In generated store data with known effects, the checks that
+compare an explanation with the model, the data or another model caught a model
+blind to price and, compared lever by lever, lifts given to the wrong lever.
+They did not catch lifts inflated by planning into strong weeks, or a model that
+answers a question about the regular price with the response to a temporary
+cut. Only a measured cause found the second. On public retail data the one such
+cause we could measure, Dominick's zone price deviations, is real but imprecise.
+\emph{The audit of the companion paper's saved versions, and the test of whether
+faithful explanations go with accurate forecasts on real data, complete this
+section when the Colab run finishes.}

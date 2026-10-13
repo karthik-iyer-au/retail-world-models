@@ -280,6 +280,24 @@ def main():
     fig_zones()
     if (ROOT / "results" / "paper2" / "sensitivity.csv").exists():
         fig_zone_checks()
+    import known
+    lines = []
+    if known.available():
+        sc = known.make(OUT)
+        wm = sc[sc["model"].str.startswith("world")]["fit_seconds"]
+        lines.append(f"The known-answer study fits {len(sc)} models on a two-core processor: each world model in "
+                     f"{wm.min() / 60:.0f} to {wm.max() / 60:.0f} minutes ({sc['fit_seconds'].sum() / 60:.0f} minutes in all, "
+                     "the longest while another job shared the processor), each LightGBM in seconds.")
+    lines.append("The zone episode list, event study, placebo, sensitivity and price path read only the data and take "
+                 "minutes on the same processor.")
+    lines.append("The audit of the saved versions runs on a Colab GPU; its run times are recorded with its results.")
+    (OUT.parent / "generated" / "compute.tex").write_text(" ".join(lines) + "\n")
+    import real
+    if real.available():
+        ep = pd.read_csv(EP)
+        ep = ep[ep["scored"]]
+        sl, se = ols_slope(ep["estimate_8wk"], ep["price_log_ratio"])
+        real.make(OUT, (sl, sl - 1.96 * se, sl + 1.96 * se))
 
 
 if __name__ == "__main__":
