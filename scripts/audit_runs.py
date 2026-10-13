@@ -68,7 +68,8 @@ def audit_model(model, train, test, cfg, randomise=True) -> tuple[dict, pd.DataF
 
 def cmd_checkpoints(a):
     results = Path(a.results)
-    folders = sorted({d for pat in a.pattern for d in results.glob(pat) if (d / "manifest.json").exists()})
+    folders = sorted({d for pat in a.pattern for d in results.glob(pat) if (d / "manifest.json").exists()
+                      and not any(x in d.name for x in a.exclude)})
     for d in folders:
         cfg = json.loads((d / "manifest.json").read_text())["config"]
         if cfg["model"]["name"] not in KEEP or not list(d.glob("checkpoint_origin*.pt")):
@@ -200,6 +201,7 @@ def main(argv=None):
     c = sub.add_parser("checkpoints")
     c.add_argument("--results", required=True)
     c.add_argument("--pattern", nargs="*", default=["*"])
+    c.add_argument("--exclude", nargs="*", default=["_rev_"])  # the paper 1 revision runs are not companion-paper versions
     l = sub.add_parser("lightgbm")
     l.add_argument("--config", required=True)
     l.add_argument("--results", required=True)
