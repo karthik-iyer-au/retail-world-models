@@ -41,3 +41,36 @@ class SeedAverage(Forecaster):
 
     def predict(self, future: pd.DataFrame) -> np.ndarray:
         return np.mean([m.predict(future) for m in self.models], axis=0)
+
+    def breakdown(self, future: pd.DataFrame) -> pd.DataFrame:
+        """Baseline and lift averaged over the members, as the forecast is."""
+        parts = [m.breakdown(future) for m in self.models]
+        return sum(parts) / len(parts)
+
+    def save(self, path) -> None:
+        """All members in one file, each as its own model would save it."""
+        import io
+
+        import torch
+
+        if not all(hasattr(m, "save") for m in self.models):
+            raise TypeError("members cannot be saved")
+        blobs = []
+        for m in self.models:
+            buf = io.BytesIO()
+            m.save(buf)
+            blobs.append(buf.getvalue())
+        name = next(k for k, v in _MODELS.items() if isinstance(self.models[0], v))
+        torch.save({"model": name, "members": blobs}, path)
+
+    @classmethod
+    def load(cls, path, device: str | None = None) -> "SeedAverage":
+        import io
+
+        import torch
+
+        saved = torch.load(path, map_location="cpu", weights_only=False)
+        member = _MODELS[saved["model"]]
+        out = cls.__new__(cls)
+        out.models = [member.load(io.BytesIO(b), device=device) for b in saved["members"]]
+        return out

@@ -1,0 +1,20 @@
+# Paper 2: data for the audit, and the Dominick's final world models rerun unchanged so their fitted models are saved.
+datasets:
+- name: m5
+- name: breakfast_at_the_frat
+  from: /content/drive/MyDrive/retail-world-model/data
+- name: dominicks
+  codes: [che, sna, sdr, bjc, ana, fre]
+runs:
+- config: configs/experiments/paper2_refit_dominicks_che_final_world_model.yaml
+  seeds: [1, 2, 3]
+- config: configs/experiments/paper2_refit_dominicks_sna_final_world_model.yaml
+  seeds: [1, 2, 3]
+- config: configs/experiments/paper2_refit_dominicks_sdr_final_world_model.yaml
+  seeds: [1, 2, 3]
+- config: configs/experiments/paper2_refit_dominicks_bjc_final_world_model.yaml
+  seeds: [1, 2, 3]
+- config: configs/experiments/paper2_refit_dominicks_ana_final_world_model.yaml
+  seeds: [1, 2, 3]
+- config: configs/experiments/paper2_refit_dominicks_fre_final_world_model.yaml
+  seeds: [1, 2, 3]
