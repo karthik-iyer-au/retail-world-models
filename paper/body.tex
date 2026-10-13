@@ -998,9 +998,9 @@ different model for each.}}
 \toprule
 \textbf{Decision} & \textbf{Level} & \textbf{What the results say} \\
 \midrule
-Store orders and inventory for items whose price rarely moves & Item by store, day or week & A pretrained model from history alone is as accurate as or more accurate than plan-aware models (M5: most accurate in all four months) \\
+Store orders and inventory & Item by store, day or week & Where prices rarely move (M5), a pretrained model from history alone is the most accurate (all four months). Where promotions drive the weeks (Dominick's, Frat), LightGBM is the most accurate item by store, or within 0.003 of it \\
 Promotion, price change, supplier funding & Item by week, under a planned change & A model that reads the plan is needed; history alone forecasts \promoTfmLo\% to \promoTfmHi\% of promoted-week sales and does not respond to a first price cut. The size of a response to a plan unlike history needs a bound \\
-Category sales, units and margin plans & Category or chain, week or month & Judge on the level of the total; the world model was within 1\% of total M5 sales in both confirmation months, and on Dominick's its gains were at the totals \\
+Category sales, units and margin plans & Category or chain, week or month & A model that reads the plan; between the world model and LightGBM the winner changes by month and category (M5: world model two months, LightGBM one; Dominick's: world model two categories, LightGBM three), so compare over several periods \\
 Promotion planning across a category & Category by store-week & Account for switching between items: in snack crackers most of a promotion's lift came from other crackers \\
 Choosing a model & Any & Score at least three or four periods; one period reversed the ranking on M5 \\
 \bottomrule

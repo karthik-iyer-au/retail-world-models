@@ -940,7 +940,7 @@ def fig_solution():
         ys = [np.mean(D.m5(m, w)["ixs"]) for w in D.M5_WINDOWS]
         ax.plot(x, ys, color=COLOR[m], marker=MARKER[m], ms=3.6, lw=1.3 if m == "tfm" else 0.9,
                 markeredgecolor="white", markeredgewidth=0.4, label=LABEL[m])
-    ax.set_title("Store orders: history alone\nis most accurate item by store", fontsize=6.8)
+    ax.set_title("Store orders (M5): history alone\nis most accurate item by store", fontsize=6.8)
     ax.set_ylabel("WRMSSE, item by store", fontsize=6.2)
     # (f) totals
     ax = bots[1]
@@ -948,7 +948,7 @@ def fig_solution():
     for k, m in enumerate(("tfm", "world", "lgb")):
         ys = [np.mean(D.m5(m, w)["total"]) for w in D.M5_WINDOWS]
         ax.bar(x + (k - 1) * wdt, ys, width=wdt, color=COLOR[m], label=LABEL[m])
-    ax.set_title("Category plans: models that\nsee the plan win the totals", fontsize=6.8)
+    ax.set_title("Category plans: plan-aware models\nwin the totals, winner varies", fontsize=6.8)
     ax.set_ylabel("WRMSSE, chain total", fontsize=6.2)
     # (g) promoted weeks
     ax = bots[2]
