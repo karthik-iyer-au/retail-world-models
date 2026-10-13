@@ -80,28 +80,36 @@ def cmd_checkpoints(a):
             continue
         out.mkdir(exist_ok=True)
         print(f"== {d.name}", flush=True)
-        for origin, train, test in windows(cfg):
-            ck = d / f"checkpoint_origin{origin}.pt"
-            if not ck.exists():
-                continue
-            model = load_checkpoint(d, origin)
-            if cfg["model"]["name"] == "seed_average":
-                rec, lifts = audit_model(model, train, test, cfg, randomise=False)
-                # randomisation on the first member: averaging would hide a member that ignores its weights
-                regular = regular_prices(train, model_params(cfg).get("regular_window", 12))
-                base = lever_contributions(model.models[0], test, regular, rec["levers"])["total_lift"]
-                rec["randomisation"] = {
-                    name: rank_agreement(base, lever_contributions(m, test, regular, rec["levers"])["total_lift"])
-                    for name, m in randomised_copies(model.models[0], seed=0)
-                }
-            else:
-                rec, lifts = audit_model(model, train, test, cfg)
-            rec.update({"run": d.name, "config": cfg["name"], "seed": cfg.get("seed"), "origin": origin})
-            (out / f"audit_origin{origin}.json").write_text(json.dumps(rec, indent=1, default=float))
-            lifts.to_csv(out / f"lifts_origin{origin}.csv.gz", index=False)
-            print(json.dumps({k: rec[k] for k in ("origin", "seconds")}), flush=True)
-            del model
-        (out / "done").write_text("")
+        try:
+            audit_folder(d, cfg, out)
+        except Exception as err:  # one unreadable run must not stop the others; recorded and reported
+            (out / "error.txt").write_text(repr(err))
+            print(f"   skipped: {err!r}", flush=True)
+
+
+def audit_folder(d, cfg, out):
+    for origin, train, test in windows(cfg):
+        ck = d / f"checkpoint_origin{origin}.pt"
+        if not ck.exists():
+            continue
+        model = load_checkpoint(d, origin)
+        if cfg["model"]["name"] == "seed_average":
+            rec, lifts = audit_model(model, train, test, cfg, randomise=False)
+            # randomisation on the first member: averaging would hide a member that ignores its weights
+            regular = regular_prices(train, model_params(cfg).get("regular_window", 12))
+            base = lever_contributions(model.models[0], test, regular, rec["levers"])["total_lift"]
+            rec["randomisation"] = {
+                name: rank_agreement(base, lever_contributions(m, test, regular, rec["levers"])["total_lift"])
+                for name, m in randomised_copies(model.models[0], seed=0)
+            }
+        else:
+            rec, lifts = audit_model(model, train, test, cfg)
+        rec.update({"run": d.name, "config": cfg["name"], "seed": cfg.get("seed"), "origin": origin})
+        (out / f"audit_origin{origin}.json").write_text(json.dumps(rec, indent=1, default=float))
+        lifts.to_csv(out / f"lifts_origin{origin}.csv.gz", index=False)
+        print(json.dumps({k: rec[k] for k in ("origin", "seconds")}), flush=True)
+        del model
+    (out / "done").write_text("")
 
 
 def cmd_lightgbm(a):
