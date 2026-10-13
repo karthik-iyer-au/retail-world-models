@@ -14,3 +14,5 @@ data/processed/
 results/*
 !results/README.md
 !results/promoted/
+# The snapshot of recorded numbers the paper reads (scripts/records_snapshot.py).
+!results/records/

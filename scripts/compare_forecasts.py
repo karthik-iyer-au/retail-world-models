@@ -74,6 +74,31 @@ def table(df: pd.DataFrame, key: str, names: list[str]) -> pd.DataFrame:
     return out.round(1)
 
 
+def frame(a: list[str], b: list[str], band_from: str | None = None) -> pd.DataFrame:
+    """One row per series and date: actual units, model a's forecast (fa) and
+    model b's (fb), each averaged over its runs, with the keys the tables group by."""
+    A, B = load(a), load(b)
+    df = pd.DataFrame({"units": A["units"], "fa": A["forecast"], "fb": B["forecast"].reindex(A.index)}).reset_index()
+    df["date"] = pd.to_datetime(df["date"])
+    df = pd.concat([df, describe(df["series_id"])], axis=1)
+    df["all"] = "all"
+    df["weekday"] = df["date"].dt.day_name()
+    first = df["date"].min()
+    df["week ahead"] = "week " + (1 + (df["date"] - first).dt.days // 7).astype(str)
+    # Sales band: each pair's average daily sales over the window it was scored on,
+    # or, with band_from, over an earlier window (free of the pull towards
+    # under-forecasting that bands set by the scored sales themselves carry).
+    if band_from:
+        before = pd.read_csv(Path(band_from) / "forecasts.csv", usecols=["series_id", "units"])
+        rate = df["series_id"].map(before.groupby("series_id")["units"].mean()).fillna(0)
+    else:
+        rate = df.groupby("series_id")["units"].transform("mean")
+    df["sales band"] = pd.cut(rate, [-0.1, 0, 0.5, 1, 3, 10, np.inf],
+                              labels=["no sales", "under 0.5 a day", "0.5 to 1", "1 to 3", "3 to 10", "over 10"])
+    df["day had sales"] = np.where(df["units"] > 0, "sold", "sold nothing")
+    return df
+
+
 def main(argv=None):
     p = argparse.ArgumentParser()
     p.add_argument("--a", nargs="+", required=True)
@@ -85,25 +110,7 @@ def main(argv=None):
                         "pairs are put in sales bands by those sales instead of by sales in this window")
     args = p.parse_args(argv)
 
-    A, B = load(args.a), load(args.b)
-    df = pd.DataFrame({"units": A["units"], "fa": A["forecast"], "fb": B["forecast"].reindex(A.index)}).reset_index()
-    df["date"] = pd.to_datetime(df["date"])
-    df = pd.concat([df, describe(df["series_id"])], axis=1)
-    df["all"] = "all"
-    df["weekday"] = df["date"].dt.day_name()
-    first = df["date"].min()
-    df["week ahead"] = "week " + (1 + (df["date"] - first).dt.days // 7).astype(str)
-    # Sales band: each pair's average daily sales over the window it was scored on,
-    # or, with --band-from, over an earlier window (free of the pull towards
-    # under-forecasting that bands set by the scored sales themselves carry).
-    if args.band_from:
-        before = pd.read_csv(Path(args.band_from) / "forecasts.csv", usecols=["series_id", "units"])
-        rate = df["series_id"].map(before.groupby("series_id")["units"].mean()).fillna(0)
-    else:
-        rate = df.groupby("series_id")["units"].transform("mean")
-    df["sales band"] = pd.cut(rate, [-0.1, 0, 0.5, 1, 3, 10, np.inf],
-                              labels=["no sales", "under 0.5 a day", "0.5 to 1", "1 to 3", "3 to 10", "over 10"])
-    df["day had sales"] = np.where(df["units"] > 0, "sold", "sold nothing")
+    df = frame(args.a, args.b, args.band_from)
 
     keys = ["all", "state", "store", "category", "department", "sales band", "day had sales", "weekday", "week ahead"]
     out = Path(args.out) if args.out else None

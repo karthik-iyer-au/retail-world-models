@@ -42,17 +42,29 @@ def runs(results: Path, config: str, seeds=(1, 2, 3)) -> list[str]:
     return out
 
 
-def lift_blowup(results: Path, out: Path) -> None:
-    s1, s2 = runs(results, "m5_confirm_apr_lift", (1,)), runs(results, "m5_confirm_apr_lift", (2,))
-    if not (s1 and s2):
-        return
-    a = pd.read_csv(Path(s2[0]) / "forecasts.csv", usecols=["series_id", "date", "units", "forecast"])
-    b = pd.read_csv(Path(s1[0]) / "forecasts.csv", usecols=["series_id", "date", "forecast"])
+def seed_excess(seed2: str, seed1: str) -> pd.DataFrame:
+    """Per series: units sold, each seed's summed forecast and seed 2's excess
+    over sales, largest excess first."""
+    a = pd.read_csv(Path(seed2) / "forecasts.csv", usecols=["series_id", "date", "units", "forecast"])
+    b = pd.read_csv(Path(seed1) / "forecasts.csv", usecols=["series_id", "date", "forecast"])
     d = a.merge(b, on=["series_id", "date"], suffixes=("_seed2", "_seed1"))
     g = d.groupby("series_id").agg(units=("units", "sum"), seed2=("forecast_seed2", "sum"),
                                    seed1=("forecast_seed1", "sum"), seed2_max_day=("forecast_seed2", "max"))
     g["excess_seed2"] = g["seed2"] - g["units"]
-    g = g.sort_values("excess_seed2", ascending=False)
+    return g.sort_values("excess_seed2", ascending=False)
+
+
+def series_sums(folder: str, series: list[str]) -> pd.DataFrame:
+    """Units sold and forecast over the window, summed per series, for the named series of one run."""
+    d = pd.read_csv(Path(folder) / "forecasts.csv", usecols=["series_id", "units", "forecast"])
+    return d[d["series_id"].isin(series)].groupby("series_id")[["units", "forecast"]].sum()
+
+
+def lift_blowup(results: Path, out: Path) -> None:
+    s1, s2 = runs(results, "m5_confirm_apr_lift", (1,)), runs(results, "m5_confirm_apr_lift", (2,))
+    if not (s1 and s2):
+        return
+    g = seed_excess(s2[0], s1[0])
     total_excess = g["seed2"].sum() - g["units"].sum()
     print("\n== Lift model, April window: seed 2 against seed 1 ==")
     print(f"series: {len(g)}; units {g['units'].sum():,.0f}; seed 2 {g['seed2'].sum():,.0f}; seed 1 {g['seed1'].sum():,.0f}")
@@ -99,8 +111,7 @@ def failed_series(results: Path, out: Path) -> None:
         found = runs(results, config, (1, 2, 3)) or runs(results, config, (1,))
         sums = []
         for f in found:
-            d = pd.read_csv(Path(f) / "forecasts.csv", usecols=["series_id", "units", "forecast"])
-            d = d[d["series_id"].isin(FAILED)].groupby("series_id")[["units", "forecast"]].sum()
+            d = series_sums(f, FAILED)
             sums.append(d)
             rows.setdefault("sold", d["units"])
         if sums:
