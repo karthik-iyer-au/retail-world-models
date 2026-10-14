@@ -1,0 +1,82 @@
+% Draft for the revision (docs/PAPER1_REVISION_PLAN.md): new comparison models
+% and the evaluation added after the first submission. Not yet \input in
+% main.tex; it reads the same under any framing of the results.
+
+\paragraph{Comparison models added in the revision}
+\emph{Lift model}: the world model with the roll-forward switched off, so the
+same encoder, readout, size and training steps, and the plan enters only
+through the readout of each period. It is the transition ablation: any
+difference between the two models comes from the carried state.
+\emph{Chronos-Bolt}~\cite{chronos}: the base checkpoint, zero-shot, given each
+series' history of units; we use the mean of its quantiles as the point
+forecast. \emph{Temporal Fusion Transformer}~\cite{tft}: one model per data
+set on Dominick's and Frat, fitted on the last 156 weeks with the plan as
+known future inputs and a negative binomial likelihood, 1,500 steps; on M5 its
+training cost is beyond the compute available, and it is not run there.
+\emph{Equal-weight ensemble}: the mean of the world model, LightGBM and
+TimesFM with the plan, fixed before any revision result, with no weights
+fitted. Neural models are one fit (seed 1) in the rolling windows; the final
+windows keep the three-seed results reported before.
+
+\paragraph{Rolling-origin windows}
+To test whether the final-window results hold, each data set gains windows
+taken before the development windows, so none was used for any choice:
+six 8-week windows on each Dominick's category, four on Frat, and four 28-day
+windows on M5 (November 2015 to February 2016), each forecast from everything
+earlier. Every model runs in every window with the settings of its final
+configuration, unchanged. These windows and every analysis below were written
+down before any of them ran.
+
+\paragraph{Comparing two models}
+For a window and a level, the difference in WRMSSE between two models gets a
+95\% interval from 1,000 resamples of items: an item drawn twice counts twice
+in every series and aggregate it feeds, and the revenue weights are recomputed,
+so the interval reflects how much the comparison depends on which items are
+in the data. Across windows, the mean difference gets a 95\% interval from
+5,000 resamples of windows. A model is said to beat another only when that
+interval excludes zero. For each data set and level we also report the 90\%
+model confidence set of Hansen, Lunde and Nason~\cite{hansen2011}: the models
+that cannot be told apart from the best, by the range statistic with a
+bootstrap over windows.
+
+\paragraph{Intervals}
+Each model's interval forecasts come from its own errors in the earlier
+windows of the same data set: errors scaled by each series' RMSSE scale are
+pooled, and their 2.5\% to 97.5\% quantiles at each horizon are added to the
+point forecast (rolling conformal calibration). The first rolling window has no
+earlier window and is not scored. We report the scaled pinball loss averaged
+over the quantiles, weighted by revenue as in the M5 uncertainty
+competition~\cite{m5uncertainty}, and the share of actual sales inside the
+50\%, 80\% and 95\% intervals. TimesFM, Chronos-Bolt and the Temporal Fusion
+Transformer also give quantiles of their own, which are scored the same way.
+
+\paragraph{Decisions}
+Two simulations turn forecasts into costs. \emph{Replenishment}: for each
+item-store-period, order the model's interval quantile at a critical ratio of
+0.5, 0.8 or 0.95; each unit over costs 1 and each unit short costs
+$r/(1-r)$, summed over the window. \emph{Category planning}: the absolute error
+of each category-store total over the window as a share of its sales, weighted
+by dollar sales. Both are reported against seasonal naive. They are
+simulations under stated costs, not business results.
+
+\paragraph{Reconciliation}
+Base forecasts at every node of the hierarchy come from AutoETS fitted on the
+history before each window (seasonal at the aggregate nodes, non-seasonal at
+item by store). They are reconciled bottom-up, top-down by historical
+proportions, and by the MinT family~\cite{mint}: ordinary least
+squares, weighted least squares with structural weights and with in-sample
+error variances, and MinT with a shrunk covariance where the hierarchy has at
+most 6,000 nodes. Each model's own item-by-store forecasts are also combined
+with ETS above them by weighted least squares, to see whether reconciliation
+improves the upper levels without losing the bottom.
+
+\paragraph{Mechanism tests}
+Three tests on the saved world models, with no refitting. \emph{Timing}: the
+plan of the forecast periods is shuffled within each series, keeping its total
+promotion exposure; a model that uses the timing of the plan loses accuracy.
+\emph{Persistence}: for series with nothing planned in the window, a
+promotion and a 20\% price cut are added in the first period, and the change
+in the forecast is read in every later period; the lift model has no carried
+state, so its later change is zero by construction. \emph{State}: a ridge
+read-out from the rolled state to sales in the periods after the window,
+against the same read-out from the state before the window.
