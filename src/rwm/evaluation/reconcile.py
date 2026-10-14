@@ -89,11 +89,17 @@ def ets_base(history: np.ndarray, horizon: int, season: int, keep: int = 104, se
 
 def gls_bottom(S: sp.csr_matrix, y: np.ndarray, wdiag: np.ndarray) -> np.ndarray:
     """Bottom-level forecasts from all-node forecasts y (node x horizon) with a
-    diagonal W, by conjugate gradients."""
-    Winv = sp.diags(1.0 / wdiag)
-    A = (S.T @ Winv @ S).tocsr()
-    rhs = S.T @ (Winv @ y)
-    out = np.zeros((S.shape[1], y.shape[1]))
+    diagonal W, by conjugate gradients. S' W^-1 S is applied as an operator and
+    never formed: the total node links every pair of series, so the formed
+    matrix would be dense in the number of series."""
+    from scipy.sparse.linalg import LinearOperator
+
+    winv = 1.0 / wdiag
+    St = S.T.tocsr()
+    n = S.shape[1]
+    A = LinearOperator((n, n), matvec=lambda x: St @ (winv * (S @ x)), dtype=float)
+    rhs = St @ (winv[:, None] * y)
+    out = np.zeros((n, y.shape[1]))
     for h in range(y.shape[1]):
         x, _ = cg(A, rhs[:, h], rtol=1e-8, maxiter=2000)
         out[:, h] = x
