@@ -598,7 +598,7 @@ Changes, each a single switch:
 - A. Day of the week as seven separate inputs (`weekday_flags`). Version 1 gives the day as a smooth weekly cycle, on which Sunday sits next to Monday, which fits the Sunday-into-Monday over-forecast. LightGBM takes the day as a number its trees can split anywhere.
 - B. M5 events by kind (national, religious, cultural, sporting) as inputs next to the single event flag. Version 1 sees Memorial Day and a sporting final as the same signal.
 - C. Twice the training steps (60,000), the training-length check.
-- Not taken up: the totals term in the loss. On Dominick's it made the total worse (9% under) and it hurt on Frat.
+- Not taken up: the totals term in the loss. On Dominick's it made the total worse (8% under) and it hurt on Frat.
 
 Order of work:
 

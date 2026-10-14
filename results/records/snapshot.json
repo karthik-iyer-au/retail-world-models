@@ -1,0 +1,3430 @@
+{
+ "kind": "records",
+ "generated_utc": "2026-10-14T09:26:03+00:00",
+ "script": "scripts/records_snapshot.py",
+ "results": [
+  "/content/drive/MyDrive/retail-world-models/results",
+  "/content/retail-world-models/results/promoted"
+ ],
+ "selection": "per config and seed, the run that finished last (manifest finished_utc)",
+ "blocks": {
+  "TFM_FINAL": {
+   "value": {
+    "frat": {
+     "overall": 0.9650482921584048,
+     "ixs": 0.8265673232823753,
+     "fa": 0.8473615272080955
+    },
+    "che": {
+     "overall": 0.8292280459441526,
+     "ixs": 0.7922219044130936,
+     "fa": 0.8552239802626417,
+     "promo_fa": 0.3430383503437042
+    },
+    "sna": {
+     "overall": 0.46842822869147177,
+     "ixs": 0.6403247250151406,
+     "fa": 0.9267579684623602,
+     "promo_fa": 0.6295586824417114
+    },
+    "sdr": {
+     "overall": 1.069593100177731,
+     "ixs": 0.8951261116149762,
+     "fa": 0.7310479067104194,
+     "promo_fa": 0.4616181254386902
+    },
+    "bjc": {
+     "overall": 0.9394762204621533,
+     "ixs": 0.7821539350163267,
+     "fa": 0.8661897317903576,
+     "promo_fa": 0.32680246233940125
+    },
+    "ana": {
+     "overall": 1.0084608353016133,
+     "ixs": 0.7901541356703962,
+     "fa": 0.9732819500587646,
+     "promo_fa": 0.3058125078678131
+    },
+    "fre": {
+     "overall": 0.5626153537628387,
+     "ixs": 0.681563848477822,
+     "fa": 0.8688156753882904,
+     "promo_fa": 0.29033657908439636
+    }
+   },
+   "computation": "<data>_final_timesfm_mean seed 1: overall WRMSSE, item-by-store WRMSSE, forecast/actual, promoted-week forecast/actual (peaks.promoted)",
+   "sources": {
+    "frat.overall": [
+     "20261012T152106_frat_final_timesfm_mean_seed1_aa60fa3e"
+    ],
+    "frat.ixs": [
+     "20261012T152106_frat_final_timesfm_mean_seed1_aa60fa3e"
+    ],
+    "frat.fa": [
+     "20261012T152106_frat_final_timesfm_mean_seed1_aa60fa3e"
+    ],
+    "che.overall": [
+     "20261012T152156_dominicks_che_final_timesfm_mean_seed1_d9208b19"
+    ],
+    "che.ixs": [
+     "20261012T152156_dominicks_che_final_timesfm_mean_seed1_d9208b19"
+    ],
+    "che.fa": [
+     "20261012T152156_dominicks_che_final_timesfm_mean_seed1_d9208b19"
+    ],
+    "che.promo_fa": [
+     "20261012T152156_dominicks_che_final_timesfm_mean_seed1_d9208b19"
+    ],
+    "sna.overall": [
+     "20261012T152615_dominicks_sna_final_timesfm_mean_seed1_128f0d21"
+    ],
+    "sna.ixs": [
+     "20261012T152615_dominicks_sna_final_timesfm_mean_seed1_128f0d21"
+    ],
+    "sna.fa": [
+     "20261012T152615_dominicks_sna_final_timesfm_mean_seed1_128f0d21"
+    ],
+    "sna.promo_fa": [
+     "20261012T152615_dominicks_sna_final_timesfm_mean_seed1_128f0d21"
+    ],
+    "sdr.overall": [
+     "20261012T152942_dominicks_sdr_final_timesfm_mean_seed1_56dccef1"
+    ],
+    "sdr.ixs": [
+     "20261012T152942_dominicks_sdr_final_timesfm_mean_seed1_56dccef1"
+    ],
+    "sdr.fa": [
+     "20261012T152942_dominicks_sdr_final_timesfm_mean_seed1_56dccef1"
+    ],
+    "sdr.promo_fa": [
+     "20261012T152942_dominicks_sdr_final_timesfm_mean_seed1_56dccef1"
+    ],
+    "bjc.overall": [
+     "20261012T153948_dominicks_bjc_final_timesfm_mean_seed1_2ecac335"
+    ],
+    "bjc.ixs": [
+     "20261012T153948_dominicks_bjc_final_timesfm_mean_seed1_2ecac335"
+    ],
+    "bjc.fa": [
+     "20261012T153948_dominicks_bjc_final_timesfm_mean_seed1_2ecac335"
+    ],
+    "bjc.promo_fa": [
+     "20261012T153948_dominicks_bjc_final_timesfm_mean_seed1_2ecac335"
+    ],
+    "ana.overall": [
+     "20261012T154319_dominicks_ana_final_timesfm_mean_seed1_c0694fb5"
+    ],
+    "ana.ixs": [
+     "20261012T154319_dominicks_ana_final_timesfm_mean_seed1_c0694fb5"
+    ],
+    "ana.fa": [
+     "20261012T154319_dominicks_ana_final_timesfm_mean_seed1_c0694fb5"
+    ],
+    "ana.promo_fa": [
+     "20261012T154319_dominicks_ana_final_timesfm_mean_seed1_c0694fb5"
+    ],
+    "fre.overall": [
+     "20261012T154727_dominicks_fre_final_timesfm_mean_seed1_38dabd86"
+    ],
+    "fre.ixs": [
+     "20261012T154727_dominicks_fre_final_timesfm_mean_seed1_38dabd86"
+    ],
+    "fre.fa": [
+     "20261012T154727_dominicks_fre_final_timesfm_mean_seed1_38dabd86"
+    ],
+    "fre.promo_fa": [
+     "20261012T154727_dominicks_fre_final_timesfm_mean_seed1_38dabd86"
+    ]
+   }
+  },
+  "TFM_PLAN_FINAL": {
+   "value": {
+    "frat": {
+     "overall": 0.6859577564173467,
+     "ixs": 0.6410350461954513,
+     "fa": 0.9772481657322694
+    },
+    "che": {
+     "overall": 0.544684873870909,
+     "ixs": 0.6988010480117832,
+     "promo_fa": 0.6850870847702026
+    },
+    "sna": {
+     "overall": 0.4745755011612356,
+     "ixs": 0.6137143311913339,
+     "promo_fa": 1.1294742822647095
+    },
+    "sdr": {
+     "overall": 0.9735891430883346,
+     "ixs": 0.7798369646212644,
+     "promo_fa": 0.9316059947013855
+    },
+    "bjc": {
+     "overall": 0.9898345120194384,
+     "ixs": 0.7540697970801746,
+     "promo_fa": 0.6032690405845642
+    },
+    "ana": {
+     "overall": 0.8891363837436382,
+     "ixs": 0.741790667375672,
+     "promo_fa": 0.7788507342338562
+    },
+    "fre": {
+     "overall": 0.5661203714751962,
+     "ixs": 0.5987280370401002,
+     "promo_fa": 0.9419625401496887
+    }
+   },
+   "computation": "<data>_final_timesfm_plan seed 1, measures as TFM_FINAL",
+   "sources": {
+    "frat.overall": [
+     "20261012T212808_frat_final_timesfm_plan_seed1_b2ff46c9"
+    ],
+    "frat.ixs": [
+     "20261012T212808_frat_final_timesfm_plan_seed1_b2ff46c9"
+    ],
+    "frat.fa": [
+     "20261012T212808_frat_final_timesfm_plan_seed1_b2ff46c9"
+    ],
+    "che.overall": [
+     "20261012T212918_dominicks_che_final_timesfm_plan_seed1_2e0c6e95"
+    ],
+    "che.ixs": [
+     "20261012T212918_dominicks_che_final_timesfm_plan_seed1_2e0c6e95"
+    ],
+    "che.promo_fa": [
+     "20261012T212918_dominicks_che_final_timesfm_plan_seed1_2e0c6e95"
+    ],
+    "sna.overall": [
+     "20261012T213553_dominicks_sna_final_timesfm_plan_seed1_baf6301b"
+    ],
+    "sna.ixs": [
+     "20261012T213553_dominicks_sna_final_timesfm_plan_seed1_baf6301b"
+    ],
+    "sna.promo_fa": [
+     "20261012T213553_dominicks_sna_final_timesfm_plan_seed1_baf6301b"
+    ],
+    "sdr.overall": [
+     "20261012T214045_dominicks_sdr_final_timesfm_plan_seed1_48856580"
+    ],
+    "sdr.ixs": [
+     "20261012T214045_dominicks_sdr_final_timesfm_plan_seed1_48856580"
+    ],
+    "sdr.promo_fa": [
+     "20261012T214045_dominicks_sdr_final_timesfm_plan_seed1_48856580"
+    ],
+    "bjc.overall": [
+     "20261012T215530_dominicks_bjc_final_timesfm_plan_seed1_138b1f69"
+    ],
+    "bjc.ixs": [
+     "20261012T215530_dominicks_bjc_final_timesfm_plan_seed1_138b1f69"
+    ],
+    "bjc.promo_fa": [
+     "20261012T215530_dominicks_bjc_final_timesfm_plan_seed1_138b1f69"
+    ],
+    "ana.overall": [
+     "20261012T220034_dominicks_ana_final_timesfm_plan_seed1_15af2754"
+    ],
+    "ana.ixs": [
+     "20261012T220034_dominicks_ana_final_timesfm_plan_seed1_15af2754"
+    ],
+    "ana.promo_fa": [
+     "20261012T220034_dominicks_ana_final_timesfm_plan_seed1_15af2754"
+    ],
+    "fre.overall": [
+     "20261012T220625_dominicks_fre_final_timesfm_plan_seed1_6c07c8c2"
+    ],
+    "fre.ixs": [
+     "20261012T220625_dominicks_fre_final_timesfm_plan_seed1_6c07c8c2"
+    ],
+    "fre.promo_fa": [
+     "20261012T220625_dominicks_fre_final_timesfm_plan_seed1_6c07c8c2"
+    ]
+   }
+  },
+  "TFM_PLAN_M5": {
+   "value": {
+    "mar": {
+     "overall": 0.8581315806392142,
+     "ixs": 0.8371819969769697
+    },
+    "apr": {
+     "overall": 0.7722977611376137,
+     "ixs": 0.8289405434580137
+    },
+    "practice": {
+     "overall": 0.928684357600122,
+     "ixs": 0.8298002941186821
+    },
+    "test": {
+     "overall": 0.7190719378614762,
+     "ixs": 0.8834376913263876
+    }
+   },
+   "computation": "m5_<window>_timesfm_plan seed 1: overall and item-by-store WRMSSE",
+   "sources": {
+    "mar.overall": [
+     "20261012T221543_m5_confirm_mar_timesfm_plan_seed1_833cbd38"
+    ],
+    "mar.ixs": [
+     "20261012T221543_m5_confirm_mar_timesfm_plan_seed1_833cbd38"
+    ],
+    "apr.overall": [
+     "20261012T222135_m5_confirm_apr_timesfm_plan_seed1_2b1ef5e7"
+    ],
+    "apr.ixs": [
+     "20261012T222135_m5_confirm_apr_timesfm_plan_seed1_2b1ef5e7"
+    ],
+    "practice.overall": [
+     "20261012T222726_m5_validation_timesfm_plan_seed1_0122d676"
+    ],
+    "practice.ixs": [
+     "20261012T222726_m5_validation_timesfm_plan_seed1_0122d676"
+    ],
+    "test.overall": [
+     "20261012T223308_m5_test_timesfm_plan_seed1_b53cc129"
+    ],
+    "test.ixs": [
+     "20261012T223308_m5_test_timesfm_plan_seed1_b53cc129"
+    ]
+   }
+  },
+  "TFM_FRAT_PROMO_ON": {
+   "value": {
+    "history": 1.283687122382175,
+    "plan": 0.8687993938074704
+   },
+   "computation": "frat_final_timesfm_mean / _plan seed 1: by_condition.promo.on WRMSSE",
+   "sources": {
+    "history": [
+     "20261012T152106_frat_final_timesfm_mean_seed1_aa60fa3e"
+    ],
+    "plan": [
+     "20261012T212808_frat_final_timesfm_plan_seed1_b2ff46c9"
+    ]
+   }
+  },
+  "PRICE_CUT": {
+   "value": {
+    "sold": 120,
+    "world": [
+     120.99704009620473,
+     599.9363088314567,
+     243.1121151659172
+    ],
+    "lift": [
+     78.91462293313816,
+     206885.57143426276,
+     316.2857389510609
+    ],
+    "graph": [
+     59.15680742263794,
+     44.65530115365982,
+     54.93098698556423
+    ],
+    "tfm": [
+     7.753386721014971
+    ],
+    "lgb": [
+     3.0102105691115764,
+     2.9947836611912084,
+     3.1973495788559214
+    ]
+   },
+   "computation": "forecasts.csv of the April confirmation runs (each seed): units and forecast summed over the 28 days and over HOUSEHOLD_1_146 in WI_2, CA_3, TX_3, CA_2 (scripts/after_confirm.py series_sums)",
+   "sources": {
+    "world": [
+     "20261010T183629_m5_confirm_apr_world_model_v1_seed1_5e2ec5e1",
+     "20261010T201424_m5_confirm_apr_world_model_v1_seed2_1e68e9cc",
+     "20261010T215217_m5_confirm_apr_world_model_v1_seed3_8d3b1ded"
+    ],
+    "lift": [
+     "20261012T065820_m5_confirm_apr_lift_seed1_78848e2a",
+     "20261012T082704_m5_confirm_apr_lift_seed2_72bc47b1",
+     "20261012T095553_m5_confirm_apr_lift_seed3_2717ac52"
+    ],
+    "graph": [
+     "20261012T141142_m5_confirm_apr_graph_seed1_6f076d89",
+     "20261012T141902_m5_confirm_apr_graph_seed2_58c7d4a7",
+     "20261012T142624_m5_confirm_apr_graph_seed3_f566f33c"
+    ],
+    "tfm": [
+     "20261012T123847_m5_confirm_apr_timesfm_mean_seed1_309defa4"
+    ],
+    "lgb": [
+     "20261010T233010_m5_confirm_apr_lightgbm_seed1_6ec54dd4",
+     "20261011T004642_m5_confirm_apr_lightgbm_seed2_e4e92596",
+     "20261011T020455_m5_confirm_apr_lightgbm_seed3_3cfaf1a9"
+    ],
+    "sold": [
+     "20261010T183629_m5_confirm_apr_world_model_v1_seed1_5e2ec5e1"
+    ]
+   }
+  },
+  "PRICE_CUT_FOODS": {
+   "value": {
+    "sold": 4,
+    "world": [
+     25.79171753814444,
+     0.7359162094508052,
+     18.43112674355507
+    ],
+    "lift": [
+     346.40423059719615,
+     25347.800744997337,
+     366.0728580681607
+    ],
+    "graph": [
+     9.584194004535675,
+     9.797118090093136,
+     10.299806792289019
+    ],
+    "tfm": [
+     0.42489539086818573
+    ],
+    "lgb": [
+     3.364114351416105,
+     3.425883292102221,
+     3.2424291354959847
+    ]
+   },
+   "computation": "forecasts.csv of the April confirmation runs (each seed): units and forecast summed over the 28 days and over FOODS_3_443_WI_1 (scripts/after_confirm.py series_sums)",
+   "sources": {
+    "world": [
+     "20261010T183629_m5_confirm_apr_world_model_v1_seed1_5e2ec5e1",
+     "20261010T201424_m5_confirm_apr_world_model_v1_seed2_1e68e9cc",
+     "20261010T215217_m5_confirm_apr_world_model_v1_seed3_8d3b1ded"
+    ],
+    "lift": [
+     "20261012T065820_m5_confirm_apr_lift_seed1_78848e2a",
+     "20261012T082704_m5_confirm_apr_lift_seed2_72bc47b1",
+     "20261012T095553_m5_confirm_apr_lift_seed3_2717ac52"
+    ],
+    "graph": [
+     "20261012T141142_m5_confirm_apr_graph_seed1_6f076d89",
+     "20261012T141902_m5_confirm_apr_graph_seed2_58c7d4a7",
+     "20261012T142624_m5_confirm_apr_graph_seed3_f566f33c"
+    ],
+    "tfm": [
+     "20261012T123847_m5_confirm_apr_timesfm_mean_seed1_309defa4"
+    ],
+    "lgb": [
+     "20261010T233010_m5_confirm_apr_lightgbm_seed1_6ec54dd4",
+     "20261011T004642_m5_confirm_apr_lightgbm_seed2_e4e92596",
+     "20261011T020455_m5_confirm_apr_lightgbm_seed3_3cfaf1a9"
+    ],
+    "sold": [
+     "20261010T183629_m5_confirm_apr_world_model_v1_seed1_5e2ec5e1"
+    ]
+   }
+  },
+  "LIFT_APR_SEED2": {
+   "value": {
+    "forecast": 1413724,
+    "sold": 1183626,
+    "top5_share": 1.0087429372977599
+   },
+   "computation": "m5_confirm_apr_lift seed 2 against seed 1 (scripts/after_confirm.py seed_excess): summed forecast, summed units, share of the excess held by the five series with most excess",
+   "sources": {
+    "forecast": [
+     "20261012T082704_m5_confirm_apr_lift_seed2_72bc47b1",
+     "20261012T065820_m5_confirm_apr_lift_seed1_78848e2a"
+    ],
+    "sold": [
+     "20261012T082704_m5_confirm_apr_lift_seed2_72bc47b1",
+     "20261012T065820_m5_confirm_apr_lift_seed1_78848e2a"
+    ],
+    "top5_share": [
+     "20261012T082704_m5_confirm_apr_lift_seed2_72bc47b1",
+     "20261012T065820_m5_confirm_apr_lift_seed1_78848e2a"
+    ]
+   }
+  },
+  "FRAT_WEEKS": {
+   "value": [
+    "16 Nov",
+    "23 Nov",
+    "30 Nov",
+    "7 Dec",
+    "14 Dec",
+    "21 Dec",
+    "28 Dec",
+    "4 Jan"
+   ],
+   "computation": "scripts/compare_forecasts.py frame() on frat_final_world_model (a) and frat_final_lightgbm (b), seeds 1-3 averaged: weekly totals over all item-stores, bias = 100 (forecast / actual - 1); week label is the date in forecasts.csv",
+   "sources": {
+    "world": [
+     "20261010T050158_frat_final_world_model_seed1_b8d962b7",
+     "20261010T050412_frat_final_world_model_seed2_625b5483",
+     "20261010T050624_frat_final_world_model_seed3_c6d076ef"
+    ],
+    "lgb": [
+     "20261010T045130_frat_final_lightgbm_seed1_0ae11c20",
+     "20261010T045307_frat_final_lightgbm_seed2_af4d0223",
+     "20261010T045435_frat_final_lightgbm_seed3_4ce9a34b"
+    ]
+   }
+  },
+  "FRAT_ACTUAL": {
+   "value": [
+    53725,
+    73950,
+    60048,
+    82656,
+    76231,
+    66469,
+    50941,
+    64489
+   ],
+   "computation": "scripts/compare_forecasts.py frame() on frat_final_world_model (a) and frat_final_lightgbm (b), seeds 1-3 averaged: weekly totals over all item-stores, bias = 100 (forecast / actual - 1); week label is the date in forecasts.csv",
+   "sources": {
+    "world": [
+     "20261010T050158_frat_final_world_model_seed1_b8d962b7",
+     "20261010T050412_frat_final_world_model_seed2_625b5483",
+     "20261010T050624_frat_final_world_model_seed3_c6d076ef"
+    ],
+    "lgb": [
+     "20261010T045130_frat_final_lightgbm_seed1_0ae11c20",
+     "20261010T045307_frat_final_lightgbm_seed2_af4d0223",
+     "20261010T045435_frat_final_lightgbm_seed3_4ce9a34b"
+    ]
+   }
+  },
+  "FRAT_BIAS": {
+   "value": {
+    "world": [
+     2.3308617823994293,
+     -0.5965727632422313,
+     15.82382254511614,
+     -17.021683294021763,
+     -15.258713327567975,
+     -1.3745642240672096,
+     23.874787360124184,
+     6.109176448242981
+    ],
+    "lgb": [
+     -4.442476008281804,
+     -11.608510564677577,
+     1.8282105037313423,
+     -10.860996991932604,
+     -11.929057793807086,
+     -11.525269516140657,
+     -3.058967965762527,
+     6.232469311515354
+    ]
+   },
+   "computation": "scripts/compare_forecasts.py frame() on frat_final_world_model (a) and frat_final_lightgbm (b), seeds 1-3 averaged: weekly totals over all item-stores, bias = 100 (forecast / actual - 1); week label is the date in forecasts.csv",
+   "sources": {
+    "world": [
+     "20261010T050158_frat_final_world_model_seed1_b8d962b7",
+     "20261010T050412_frat_final_world_model_seed2_625b5483",
+     "20261010T050624_frat_final_world_model_seed3_c6d076ef"
+    ],
+    "lgb": [
+     "20261010T045130_frat_final_lightgbm_seed1_0ae11c20",
+     "20261010T045307_frat_final_lightgbm_seed2_af4d0223",
+     "20261010T045435_frat_final_lightgbm_seed3_4ce9a34b"
+    ]
+   }
+  },
+  "FRAT_DEV_REF": {
+   "value": {
+    "world": 0.40810419791341973,
+    "lgb": 0.4208046105306896,
+    "lift": 0.4064367185858502
+   },
+   "computation": "Frat development windows, seeds 1-5, mean overall WRMSSE",
+   "sources": {
+    "world": [
+     "20261005T133632_frat_dev_world_model_plain_seed1_e7487a23",
+     "20261005T133946_frat_dev_world_model_plain_seed2_6e17347e",
+     "20261005T134301_frat_dev_world_model_plain_seed3_042fccea",
+     "20261005T134616_frat_dev_world_model_plain_seed4_62ceef3e",
+     "20261005T134931_frat_dev_world_model_plain_seed5_f688a24f"
+    ],
+    "lgb": [
+     "20261004T110059_frat_dev_lightgbm_seed1_a60b8955",
+     "20261004T110230_frat_dev_lightgbm_seed2_ecc23667",
+     "20261004T110355_frat_dev_lightgbm_seed3_aa247e60",
+     "20261004T110520_frat_dev_lightgbm_seed4_3419f434",
+     "20261004T110646_frat_dev_lightgbm_seed5_bd7275d5"
+    ],
+    "lift": [
+     "20261004T221423_frat_dev_state_model_lift_seed1_ed8c49aa",
+     "20261004T221708_frat_dev_state_model_lift_seed2_f55d9105",
+     "20261004T221951_frat_dev_state_model_lift_seed3_8797fd21",
+     "20261004T222233_frat_dev_state_model_lift_seed4_538d3d31",
+     "20261004T222516_frat_dev_state_model_lift_seed5_7e5fa560"
+    ]
+   }
+  },
+  "BAND_UNITS": {
+   "value": [
+    14102,
+    106500,
+    133684,
+    332022,
+    358060,
+    239258
+   ],
+   "computation": "scripts/compare_forecasts.py frame(band_from=March world model seed 1) and table(by 'sales band') on the April world model and LightGBM, seeds 1-3 averaged",
+   "sources": {
+    "world": [
+     "20261010T183629_m5_confirm_apr_world_model_v1_seed1_5e2ec5e1",
+     "20261010T201424_m5_confirm_apr_world_model_v1_seed2_1e68e9cc",
+     "20261010T215217_m5_confirm_apr_world_model_v1_seed3_8d3b1ded"
+    ],
+    "lgb": [
+     "20261010T233010_m5_confirm_apr_lightgbm_seed1_6ec54dd4",
+     "20261011T004642_m5_confirm_apr_lightgbm_seed2_e4e92596",
+     "20261011T020455_m5_confirm_apr_lightgbm_seed3_3cfaf1a9"
+    ],
+    "band_from": [
+     "20261011T054856_m5_confirm_mar_world_model_v1_seed1_a9de76b0"
+    ]
+   }
+  },
+  "BAND_BIAS": {
+   "value": {
+    "world": [
+     62.1,
+     -4.5,
+     -3.1,
+     -1.3,
+     1.5,
+     1.3
+    ],
+    "lgb": [
+     -5.4,
+     -5.6,
+     -3.3,
+     -3.3,
+     -1.7,
+     -3.4
+    ]
+   },
+   "computation": "scripts/compare_forecasts.py frame(band_from=March world model seed 1) and table(by 'sales band') on the April world model and LightGBM, seeds 1-3 averaged",
+   "sources": {
+    "world": [
+     "20261010T183629_m5_confirm_apr_world_model_v1_seed1_5e2ec5e1",
+     "20261010T201424_m5_confirm_apr_world_model_v1_seed2_1e68e9cc",
+     "20261010T215217_m5_confirm_apr_world_model_v1_seed3_8d3b1ded"
+    ],
+    "lgb": [
+     "20261010T233010_m5_confirm_apr_lightgbm_seed1_6ec54dd4",
+     "20261011T004642_m5_confirm_apr_lightgbm_seed2_e4e92596",
+     "20261011T020455_m5_confirm_apr_lightgbm_seed3_3cfaf1a9"
+    ],
+    "band_from": [
+     "20261011T054856_m5_confirm_mar_world_model_v1_seed1_a9de76b0"
+    ]
+   }
+  },
+  "BAND_CLOSER": {
+   "value": [
+    65.9,
+    50.6,
+    52.1,
+    53.8,
+    53.7,
+    54.2
+   ],
+   "computation": "scripts/compare_forecasts.py frame(band_from=March world model seed 1) and table(by 'sales band') on the April world model and LightGBM, seeds 1-3 averaged",
+   "sources": {
+    "world": [
+     "20261010T183629_m5_confirm_apr_world_model_v1_seed1_5e2ec5e1",
+     "20261010T201424_m5_confirm_apr_world_model_v1_seed2_1e68e9cc",
+     "20261010T215217_m5_confirm_apr_world_model_v1_seed3_8d3b1ded"
+    ],
+    "lgb": [
+     "20261010T233010_m5_confirm_apr_lightgbm_seed1_6ec54dd4",
+     "20261011T004642_m5_confirm_apr_lightgbm_seed2_e4e92596",
+     "20261011T020455_m5_confirm_apr_lightgbm_seed3_3cfaf1a9"
+    ],
+    "band_from": [
+     "20261011T054856_m5_confirm_mar_world_model_v1_seed1_a9de76b0"
+    ]
+   }
+  },
+  "READBACK": {
+   "value": {
+    "mar": {
+     "0": [
+      -0.007734416651431264,
+      0.8279421022122627
+     ],
+     "1": [
+      -0.007856172355289459,
+      0.8110339316267619
+     ],
+     "7": [
+      -0.008939309345509239,
+      0.5912773021877671
+     ]
+    },
+    "apr": {
+     "0": [
+      0.019828369796685008,
+      0.5819128711297443
+     ],
+     "1": [
+      0.018907627390721715,
+      0.6489578017492623
+     ],
+     "7": [
+      0.0168574734370891,
+      0.47542485548996216
+     ]
+    },
+    "test": {
+     "0": [
+      0.003458644252250731,
+      0.7992600382338557
+     ],
+     "1": [
+      0.0034236695937471806,
+      0.787078798421874
+     ],
+     "7": [
+      0.002480150501495859,
+      0.45860976553005617
+     ]
+    }
+   },
+   "computation": "scripts/plan_readback.py (6,000 pairs, seed 0) on seed 1 of the world model: R squared of the discount (price / regular price) at 0, 1, 7 days back, (control, rolled state)",
+   "sources": {
+    "mar": [
+     "20261011T054856_m5_confirm_mar_world_model_v1_seed1_a9de76b0"
+    ],
+    "apr": [
+     "20261010T183629_m5_confirm_apr_world_model_v1_seed1_5e2ec5e1"
+    ],
+    "test": [
+     "20261009T144236_m5_test_world_model_roll_norm_seed1_2d0e0f5e"
+    ]
+   }
+  },
+  "LEDGER": {
+   "value": [
+    [
+     "Twice the training steps",
+     "Dominick's (6) and Frat, dev., 3 seeds",
+     "Better in 2, worse in 3, level or mixed in 2"
+    ],
+    [
+     "Weekday as seven inputs",
+     "M5 practice, seed 1",
+     "0.653 against 0.646"
+    ],
+    [
+     "Event kinds (with weekday)",
+     "M5 practice, seed 1",
+     "0.646 against 0.646"
+    ],
+    [
+     "60,000 training steps",
+     "M5 practice, seed 1",
+     "0.642 against 0.646; gain below seed range 0.029"
+    ],
+    [
+     "Item level against past-year level",
+     "M5 practice, seed 1",
+     "0.680 against 0.646"
+    ],
+    [
+     "Totals term in the loss",
+     "Dominick's analgesics, dev.",
+     "0.819 against 0.683; total 8\\% under"
+    ],
+    [
+     "Negative binomial likelihood",
+     "Frat, analgesics, dev.",
+     "Level"
+    ],
+    [
+     "Plan split, latent check, near-week weighting",
+     "Frat, dev., 5 seeds",
+     "0.417 to 0.427 against 0.408"
+    ],
+    [
+     "Own forecast fed into the roll-forward",
+     "Dominick's (6), dev.",
+     "Worse overall in 4 of 6"
+    ],
+    [
+     "Item role labels",
+     "Dominick's (6), dev.",
+     "No effect on LightGBM; snack crackers 2.422 for the world model"
+    ],
+    [
+     "Averaging three fits",
+     "M5 practice, seed 1",
+     "0.665 against 0.656 (kept on Dominick's)"
+    ],
+    [
+     "Graph model over product attributes",
+     "M5, four windows, 3 seeds",
+     "Level with LightGBM item by store"
+    ],
+    [
+     "TimesFM, median output",
+     "M5, four windows",
+     "Overall 1.71 to 1.88; totals 27\\% to 31\\% under"
+    ],
+    [
+     "Lift model (no roll-forward)",
+     "M5, four windows, 3 seeds",
+     "One seed failed in April (2.603)"
+    ]
+   ],
+   "computation": "rows of the 'what did not work' table: numbers from the runs named in sources; the wording of the verdicts ('Level', the Change C count, see STEPS2X) is editorial",
+   "sources": {
+    "v1": [
+     "20261007T153614_m5_validation_world_model_roll_norm_seed1_59a9247d"
+    ],
+    "totals": [
+     "20261005T215219_dominicks_ana_dev_lift_totals_loss_seed1_f1267ffb",
+     "20261005T215711_dominicks_ana_dev_lift_totals_loss_seed2_b755e843",
+     "20261005T220202_dominicks_ana_dev_lift_totals_loss_seed3_df2b3cc5",
+     "20261005T213756_dominicks_ana_dev_lift_validation_stop_seed1_d77cfce6",
+     "20261005T214247_dominicks_ana_dev_lift_validation_stop_seed2_b8b6ec4f",
+     "20261005T214734_dominicks_ana_dev_lift_validation_stop_seed3_cfa4ba92"
+    ],
+    "tricks": [
+     "20261006T044702_frat_dev_world_model_plan_split_seed1_c935dbf9",
+     "20261006T045046_frat_dev_world_model_plan_split_seed2_7cb89861",
+     "20261006T045429_frat_dev_world_model_plan_split_seed3_df3c9208",
+     "20261006T045809_frat_dev_world_model_plan_split_seed4_d06a2144",
+     "20261006T050149_frat_dev_world_model_plan_split_seed5_1818c2db",
+     "20261006T053305_frat_dev_world_model_checked_seed1_f528bb87",
+     "20261006T053809_frat_dev_world_model_checked_seed2_1e39b8a8",
+     "20261006T054315_frat_dev_world_model_checked_seed3_3c6f600b",
+     "20261006T054828_frat_dev_world_model_checked_seed4_5d92a1dd",
+     "20261006T055346_frat_dev_world_model_checked_seed5_656259c9",
+     "20261006T050529_frat_dev_world_model_plan_split_checked_seed1_07a6902a",
+     "20261006T051100_frat_dev_world_model_plan_split_checked_seed2_5bbe5686",
+     "20261006T051631_frat_dev_world_model_plan_split_checked_seed3_6d2c8e6a",
+     "20261006T052201_frat_dev_world_model_plan_split_checked_seed4_1bd48423",
+     "20261006T052734_frat_dev_world_model_plan_split_checked_seed5_3e44d38a",
+     "20261005T133632_frat_dev_world_model_plain_seed1_e7487a23",
+     "20261005T133946_frat_dev_world_model_plain_seed2_6e17347e",
+     "20261005T134301_frat_dev_world_model_plain_seed3_042fccea",
+     "20261005T134616_frat_dev_world_model_plain_seed4_62ceef3e",
+     "20261005T134931_frat_dev_world_model_plain_seed5_f688a24f"
+    ],
+    "timesfm": [
+     "20261012T112939_m5_confirm_mar_timesfm_seed1_8ef3eccc",
+     "20261012T113347_m5_confirm_apr_timesfm_seed1_66f5f3d8",
+     "20261012T113751_m5_validation_timesfm_seed1_78ba30e4",
+     "20261012T114149_m5_test_timesfm_seed1_9f023a55"
+    ],
+    "lift": [
+     "20261012T082704_m5_confirm_apr_lift_seed2_72bc47b1"
+    ],
+    "M5_DEV": [
+     "20261004T045330_m5_validation_seasonal_naive_a67817a2",
+     "20261004T034345_m5_validation_lightgbm_11b5432b",
+     "20261006T220902_m5_validation_lift_seed1_785c6634",
+     "20261008T192743_m5_validation_lift_seed2_47e5a527",
+     "20261008T205734_m5_validation_lift_seed3_d6ae65f3",
+     "20261004T112112_m5_validation_state_model_mixed_precision_7f291533",
+     "20261004T114223_m5_validation_state_model_mixed_precision_seed1_7a380533",
+     "20261004T115943_m5_validation_state_model_mixed_precision_seed2_ae7c1f2a",
+     "20261004T121703_m5_validation_state_model_mixed_precision_seed3_30c2fd80",
+     "20261004T123419_m5_validation_state_model_mixed_precision_seed4_1c67bafa",
+     "20261006T233936_m5_validation_world_model_seed1_77b92134",
+     "20261008T055942_m5_validation_world_model_seed2_e0fa8b6c",
+     "20261008T073415_m5_validation_world_model_seed3_bcd4ab19",
+     "20261007T153614_m5_validation_world_model_roll_norm_seed1_59a9247d",
+     "20261007T181004_m5_validation_world_model_roll_norm_seed2_6d95884b",
+     "20261008T042212_m5_validation_world_model_roll_norm_seed3_fa33f062",
+     "20261009T092711_m5_validation_world_model_roll_norm_avg3_seed1_5d0e4807",
+     "20261010T095828_m5_validation_world_model_v2_weekday_seed1_226e681f",
+     "20261010T113553_m5_validation_world_model_v2_weekday_events_seed1_54d33a04",
+     "20261010T131417_m5_validation_world_model_v2_weekday_events_60k_seed1_bf138688",
+     "20261010T164659_m5_validation_world_model_v2_long_level_seed1_e7a60a7e"
+    ],
+    "PEAKS": [
+     "20261007T072612_dominicks_che_dev_peaks_lightgbm_seed1_91a298df",
+     "20261007T073528_dominicks_che_dev_peaks_world_model_seed1_ebc5beb9",
+     "20261007T074141_dominicks_che_dev_peaks_feedback_seed1_89f1f427",
+     "20261007T075211_dominicks_che_dev_peaks_weighted_seed1_8a603fda",
+     "20261007T080920_dominicks_sna_dev_peaks_lightgbm_seed1_d6f45330",
+     "20261007T081532_dominicks_sna_dev_peaks_world_model_seed1_98c76e94",
+     "20261007T082126_dominicks_sna_dev_peaks_feedback_seed1_bf80b0da",
+     "20261007T083149_dominicks_sna_dev_peaks_weighted_seed1_89026a84",
+     "20261007T084843_dominicks_sdr_dev_peaks_lightgbm_seed1_98b470b3",
+     "20261007T091013_dominicks_sdr_dev_peaks_world_model_seed1_83492df7",
+     "20261007T091744_dominicks_sdr_dev_peaks_feedback_seed1_a61bd95b",
+     "20261007T092939_dominicks_sdr_dev_peaks_weighted_seed1_db6041ff",
+     "20261007T094847_dominicks_bjc_dev_peaks_lightgbm_seed1_a2dcd6b1",
+     "20261007T095551_dominicks_bjc_dev_peaks_world_model_seed1_293f1e5d",
+     "20261007T100139_dominicks_bjc_dev_peaks_feedback_seed1_9ebefc12",
+     "20261007T101159_dominicks_bjc_dev_peaks_weighted_seed1_23a747d9",
+     "20261007T102821_dominicks_ana_dev_peaks_lightgbm_seed1_a834ac24",
+     "20261007T103654_dominicks_ana_dev_peaks_world_model_seed1_5c677c99",
+     "20261007T104254_dominicks_ana_dev_peaks_feedback_seed1_d883492b",
+     "20261007T105320_dominicks_ana_dev_peaks_weighted_seed1_8e77ba38",
+     "20261007T111004_dominicks_fre_dev_peaks_lightgbm_seed1_d28e6e44",
+     "20261007T112251_dominicks_fre_dev_peaks_world_model_seed1_f453b5ad",
+     "20261007T112921_dominicks_fre_dev_peaks_feedback_seed1_bba5a3b3",
+     "20261007T114014_dominicks_fre_dev_peaks_weighted_seed1_f2d635e8"
+    ],
+    "ROLES": [
+     "20261007T072612_dominicks_che_dev_peaks_lightgbm_seed1_91a298df",
+     "20261008T015721_dominicks_che_dev_peaks_lightgbm_roles_seed1_a200af07",
+     "20261007T073528_dominicks_che_dev_peaks_world_model_seed1_ebc5beb9",
+     "20261008T020715_dominicks_che_dev_peaks_world_model_roles_seed1_977596b9",
+     "20261008T021334_dominicks_che_dev_peaks_world_model_role_level_seed1_5349c725",
+     "20261007T080920_dominicks_sna_dev_peaks_lightgbm_seed1_d6f45330",
+     "20261008T021949_dominicks_sna_dev_peaks_lightgbm_roles_seed1_54a74fdd",
+     "20261007T081532_dominicks_sna_dev_peaks_world_model_seed1_98c76e94",
+     "20261008T022606_dominicks_sna_dev_peaks_world_model_roles_seed1_db4a7e9a",
+     "20261008T023154_dominicks_sna_dev_peaks_world_model_role_level_seed1_602b5bef",
+     "20261007T084843_dominicks_sdr_dev_peaks_lightgbm_seed1_98b470b3",
+     "20261008T023814_dominicks_sdr_dev_peaks_lightgbm_roles_seed1_c5769960",
+     "20261007T091013_dominicks_sdr_dev_peaks_world_model_seed1_83492df7",
+     "20261008T030047_dominicks_sdr_dev_peaks_world_model_roles_seed1_74d0fd36",
+     "20261008T030831_dominicks_sdr_dev_peaks_world_model_role_level_seed1_ad2fe66a",
+     "20261007T094847_dominicks_bjc_dev_peaks_lightgbm_seed1_a2dcd6b1",
+     "20261008T031551_dominicks_bjc_dev_peaks_lightgbm_roles_seed1_18b6152a",
+     "20261007T095551_dominicks_bjc_dev_peaks_world_model_seed1_293f1e5d",
+     "20261008T032313_dominicks_bjc_dev_peaks_world_model_roles_seed1_d7d3afdd",
+     "20261008T032907_dominicks_bjc_dev_peaks_world_model_role_level_seed1_545e70e5",
+     "20261007T102821_dominicks_ana_dev_peaks_lightgbm_seed1_a834ac24",
+     "20261008T033509_dominicks_ana_dev_peaks_lightgbm_roles_seed1_d0c5df69",
+     "20261007T103654_dominicks_ana_dev_peaks_world_model_seed1_5c677c99",
+     "20261008T034412_dominicks_ana_dev_peaks_world_model_roles_seed1_af317af2",
+     "20261008T035016_dominicks_ana_dev_peaks_world_model_role_level_seed1_94c695b9",
+     "20261007T111004_dominicks_fre_dev_peaks_lightgbm_seed1_d28e6e44",
+     "20261008T035630_dominicks_fre_dev_peaks_lightgbm_roles_seed1_682b2fc9",
+     "20261007T112251_dominicks_fre_dev_peaks_world_model_seed1_f453b5ad",
+     "20261008T040900_dominicks_fre_dev_peaks_world_model_roles_seed1_567bfab1",
+     "20261008T041537_dominicks_fre_dev_peaks_world_model_role_level_seed1_ffe1bba5"
+    ],
+    "STEPS2X": [
+     "20261008T233826_dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm_seed1_65737059",
+     "20261009T044012_dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm_seed2_9b5e717e",
+     "20261009T045821_dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm_seed3_dc217d77",
+     "20261011T144626_dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed1_93f22448",
+     "20261011T152140_dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed2_80b9bda5",
+     "20261011T155646_dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed3_874d2101",
+     "20261008T235626_dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm_seed1_027298bc",
+     "20261009T051636_dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm_seed2_a67ae514",
+     "20261009T053419_dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm_seed3_49e32754",
+     "20261011T163204_dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed1_9c93c1f5",
+     "20261011T170635_dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed2_abeb87fe",
+     "20261011T174106_dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed3_01f29081",
+     "20261009T001423_dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm_seed1_3f2c6bf0",
+     "20261009T055227_dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm_seed2_591ccf7b",
+     "20261009T061311_dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm_seed3_6b221263",
+     "20261011T181612_dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed1_f41d6824",
+     "20261011T185417_dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed2_12c59aaf",
+     "20261011T193222_dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed3_83f9a31a",
+     "20261009T003425_dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm_seed1_4f650f2f",
+     "20261009T063339_dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm_seed2_1ab2781a",
+     "20261009T065147_dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm_seed3_ab9c1b2d",
+     "20261011T200943_dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed1_43fdb35a",
+     "20261011T204424_dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed2_1d5f34c0",
+     "20261011T211903_dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed3_5c9de9d0",
+     "20261009T005205_dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm_seed1_050f495d",
+     "20261009T071002_dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm_seed2_2f2b0121",
+     "20261009T072824_dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm_seed3_fd519212",
+     "20261011T215337_dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed1_01766a0f",
+     "20261011T222842_dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed2_ac60cb82",
+     "20261011T230424_dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed3_ff344063",
+     "20261009T041818_dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm_seed1_96596a28",
+     "20261009T074654_dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm_seed2_70b9fa89",
+     "20261009T080603_dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm_seed3_5e2f8946",
+     "20261011T234058_dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed1_4e9b45d8",
+     "20261012T001801_dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed2_e4245d80",
+     "20261012T005440_dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed3_26ca83bf",
+     "20261005T133632_frat_dev_world_model_plain_seed1_e7487a23",
+     "20261005T133946_frat_dev_world_model_plain_seed2_6e17347e",
+     "20261005T134301_frat_dev_world_model_plain_seed3_042fccea",
+     "20261011T141020_frat_dev_world_model_plain_steps2x_seed1_9629e03f",
+     "20261011T141558_frat_dev_world_model_plain_steps2x_seed2_6b6c269c",
+     "20261011T142134_frat_dev_world_model_plain_steps2x_seed3_6c0817b3"
+    ]
+   }
+  },
+  "FRAT_BENCH": {
+   "value": [
+    [
+     "Seasonal naive",
+     0.8324869719823189
+    ],
+    [
+     "Average of last 8 weeks",
+     0.7560085846117678
+    ],
+    [
+     "LightGBM, price only",
+     0.5542364632453929
+    ],
+    [
+     "LightGBM, all recorded levers",
+     0.4465994013738819
+    ]
+   ],
+   "computation": "single run (no seed) of each config: overall WRMSSE, mean of three windows",
+   "sources": {
+    "Seasonal naive": [
+     "20261004T070636_frat_seasonal_naive_02ce19d4"
+    ],
+    "Average of last 8 weeks": [
+     "20261004T070720_frat_recent_average_d9fdc7b6"
+    ],
+    "LightGBM, price only": [
+     "20261004T070804_frat_lightgbm_price_only_78aebb07"
+    ],
+    "LightGBM, all recorded levers": [
+     "20261004T070912_frat_lightgbm_0dbcdc4c"
+    ]
+   }
+  },
+  "FRAT_DEV": {
+   "value": [
+    [
+     "LightGBM, all recorded levers",
+     "ref",
+     0.4208046105306896,
+     0.41578319161469823,
+     0.42727655741964055
+    ],
+    [
+     "Item encoder and readout",
+     "base",
+     0.42369925255104096,
+     0.4070011927433079,
+     0.43800705995786327
+    ],
+    [
+     "+ item-to-item, conditional similarity",
+     "neighbours",
+     0.4756030538461235,
+     0.4304566229512314,
+     0.5078591046284403
+    ],
+    [
+     "+ item-to-item, attention",
+     "neighbours",
+     0.4645359771702847,
+     0.41595139498575445,
+     0.5047014640781995
+    ],
+    [
+     "+ item-to-item, both",
+     "neighbours",
+     0.4533248506786843,
+     0.41894526972542023,
+     0.4978376990691335
+    ],
+    [
+     "+ item-to-item, same category only",
+     "neighbours",
+     0.4426220481807324,
+     0.4121810343669027,
+     0.46971301739052235
+    ],
+    [
+     "+ regular price",
+     "lever",
+     0.42926945625702967,
+     0.4188998440107227,
+     0.4422341459081979
+    ],
+    [
+     "Lift model: regular price, baseline times lift",
+     "ref",
+     0.4064367185858502,
+     0.4005129044544987,
+     0.41425680906686124
+    ],
+    [
+     "Lift + plan of the four weeks before",
+     "inputs",
+     0.41105032609192355,
+     0.40595943492175846,
+     0.41798853901216154
+    ],
+    [
+     "Lift + same week last year",
+     "inputs",
+     0.40755236997816063,
+     0.3940162800444077,
+     0.4199639259037155
+    ],
+    [
+     "Lift + recorded base price as regular price",
+     "inputs",
+     0.4340962375165057,
+     0.41851913193318213,
+     0.46000558136330316
+    ],
+    [
+     "Lift + US seasonal calendar",
+     "inputs",
+     0.42478942443238654,
+     0.4157161712505809,
+     0.4338585067180184
+    ],
+    [
+     "Lift + promotion crowding",
+     "inputs",
+     0.406449902326126,
+     0.3998657942313605,
+     0.41379950445636204
+    ],
+    [
+     "Lift + base price, calendar and crowding",
+     "inputs",
+     0.4455050535584717,
+     0.42466818325055544,
+     0.459138366101441
+    ],
+    [
+     "Lift + latent loss alongside, weight 0.1",
+     "jepa",
+     0.4110046650236952,
+     0.406354245140177,
+     0.41679885806436523
+    ],
+    [
+     "Lift + latent loss alongside, weight 2",
+     "jepa",
+     0.4104408843886681,
+     0.40679985855191575,
+     0.41479086594326825
+    ],
+    [
+     "Lift, latent pretraining, then all trained",
+     "jepa",
+     0.4068406301237985,
+     0.3999297305472319,
+     0.411861516666267
+    ],
+    [
+     "Lift, pretraining, encoder at a tenth of the rate",
+     "jepa",
+     0.4135602627382209,
+     0.401643346724762,
+     0.4249762907347393
+    ],
+    [
+     "Lift, pretraining, encoder frozen",
+     "jepa",
+     0.42760728052075836,
+     0.41633173902229803,
+     0.4406649298051907
+    ],
+    [
+     "Lift, long pretraining, encoder at a tenth",
+     "jepa",
+     0.40804345796546565,
+     0.3996736540659728,
+     0.4216272010179809
+    ],
+    [
+     "Lift, stopped on validation weeks",
+     "training",
+     0.424736130763704,
+     0.4136904756204146,
+     0.4373959987727113
+    ],
+    [
+     "Lift + totals term in the loss",
+     "training",
+     0.41364030475902,
+     0.3946649449469637,
+     0.432826534741789
+    ],
+    [
+     "Lift + readout dropout and weight decay",
+     "training",
+     0.4087843508294043,
+     0.4052963988386826,
+     0.4117900079330927
+    ],
+    [
+     "World model, baseline and lift",
+     "world",
+     0.40810419791341973,
+     0.3957601718136125,
+     0.41849025312821775
+    ],
+    [
+     "World model + latent check alongside",
+     "world",
+     0.41728103744591505,
+     0.4013839853051941,
+     0.42625779017279186
+    ],
+    [
+     "World model, long latent pretraining",
+     "world",
+     0.41081265092255836,
+     0.39198822627427854,
+     0.42278614706655315
+    ],
+    [
+     "World model + plan split (after DWM)",
+     "world",
+     0.417069528416391,
+     null,
+     null
+    ],
+    [
+     "World model + latent check, VICReg, near-week weighting",
+     "world",
+     0.4271551697244307,
+     null,
+     null
+    ],
+    [
+     "World model + all three",
+     "world",
+     0.42367461421945507,
+     null,
+     null
+    ]
+   ],
+   "computation": "Frat development windows, seeds 1-5: mean, lowest and highest overall WRMSSE",
+   "sources": {
+    "LightGBM, all recorded levers": [
+     "20261004T110059_frat_dev_lightgbm_seed1_a60b8955",
+     "20261004T110230_frat_dev_lightgbm_seed2_ecc23667",
+     "20261004T110355_frat_dev_lightgbm_seed3_aa247e60",
+     "20261004T110520_frat_dev_lightgbm_seed4_3419f434",
+     "20261004T110646_frat_dev_lightgbm_seed5_bd7275d5"
+    ],
+    "Item encoder and readout": [
+     "20261004T110811_frat_dev_state_model_seed1_99c33b1a",
+     "20261004T111028_frat_dev_state_model_seed2_29b7f522",
+     "20261004T111240_frat_dev_state_model_seed3_f8f344b7",
+     "20261004T111453_frat_dev_state_model_seed4_7c6d2a29",
+     "20261004T111706_frat_dev_state_model_seed5_1a0c7685"
+    ],
+    "+ item-to-item, conditional similarity": [
+     "20261004T132438_frat_dev_state_model_similarity_seed1_ace4a6cf",
+     "20261004T132712_frat_dev_state_model_similarity_seed2_13dfa59b",
+     "20261004T132946_frat_dev_state_model_similarity_seed3_34c85ae3",
+     "20261004T133219_frat_dev_state_model_similarity_seed4_6b47c4af",
+     "20261004T133455_frat_dev_state_model_similarity_seed5_dca4f718"
+    ],
+    "+ item-to-item, attention": [
+     "20261004T133732_frat_dev_state_model_attention_seed1_df49435c",
+     "20261004T134004_frat_dev_state_model_attention_seed2_a41d9e7c",
+     "20261004T134236_frat_dev_state_model_attention_seed3_0b91f791",
+     "20261004T134507_frat_dev_state_model_attention_seed4_bc5f9d38",
+     "20261004T134739_frat_dev_state_model_attention_seed5_467849d6"
+    ],
+    "+ item-to-item, both": [
+     "20261004T135015_frat_dev_state_model_both_seed1_e91bdac7",
+     "20261004T135259_frat_dev_state_model_both_seed2_6b828cf4",
+     "20261004T135539_frat_dev_state_model_both_seed3_b860f603",
+     "20261004T135819_frat_dev_state_model_both_seed4_1ac16bf5",
+     "20261004T140100_frat_dev_state_model_both_seed5_1c5852ef"
+    ],
+    "+ item-to-item, same category only": [
+     "20261004T141529_frat_dev_state_model_both_within_category_seed1_50e1f249",
+     "20261004T141810_frat_dev_state_model_both_within_category_seed2_c5a40947",
+     "20261004T142049_frat_dev_state_model_both_within_category_seed3_8d601292",
+     "20261004T142328_frat_dev_state_model_both_within_category_seed4_a581a301",
+     "20261004T142605_frat_dev_state_model_both_within_category_seed5_dee46702"
+    ],
+    "+ regular price": [
+     "20261004T220144_frat_dev_state_model_regular_price_seed1_6f1c5bff",
+     "20261004T220419_frat_dev_state_model_regular_price_seed2_8771ed70",
+     "20261004T220651_frat_dev_state_model_regular_price_seed3_02f0c4c4",
+     "20261004T220923_frat_dev_state_model_regular_price_seed4_5b9c74a6",
+     "20261004T221154_frat_dev_state_model_regular_price_seed5_69fdbe5f"
+    ],
+    "Lift model: regular price, baseline times lift": [
+     "20261004T221423_frat_dev_state_model_lift_seed1_ed8c49aa",
+     "20261004T221708_frat_dev_state_model_lift_seed2_f55d9105",
+     "20261004T221951_frat_dev_state_model_lift_seed3_8797fd21",
+     "20261004T222233_frat_dev_state_model_lift_seed4_538d3d31",
+     "20261004T222516_frat_dev_state_model_lift_seed5_7e5fa560"
+    ],
+    "Lift + plan of the four weeks before": [
+     "20261005T045554_frat_dev_state_model_lift_earlier_weeks_seed1_9c29eb92",
+     "20261005T045955_frat_dev_state_model_lift_earlier_weeks_seed2_de3d335d",
+     "20261005T050358_frat_dev_state_model_lift_earlier_weeks_seed3_d791538d",
+     "20261005T050756_frat_dev_state_model_lift_earlier_weeks_seed4_85730064",
+     "20261005T051157_frat_dev_state_model_lift_earlier_weeks_seed5_0a3d5993"
+    ],
+    "Lift + same week last year": [
+     "20261005T051554_frat_dev_state_model_lift_year_ago_seed1_748a7db1",
+     "20261005T051905_frat_dev_state_model_lift_year_ago_seed2_1b62e0fb",
+     "20261005T052215_frat_dev_state_model_lift_year_ago_seed3_ae5061d7",
+     "20261005T052524_frat_dev_state_model_lift_year_ago_seed4_e6dfc435",
+     "20261005T052834_frat_dev_state_model_lift_year_ago_seed5_c6e5fa44"
+    ],
+    "Lift + recorded base price as regular price": [
+     "20261005T062458_frat_dev_state_model_lift_base_price_seed1_4d7962e4",
+     "20261005T062743_frat_dev_state_model_lift_base_price_seed2_c7eacc0e",
+     "20261005T063027_frat_dev_state_model_lift_base_price_seed3_23cf68d6",
+     "20261005T063308_frat_dev_state_model_lift_base_price_seed4_1fad4429",
+     "20261005T063549_frat_dev_state_model_lift_base_price_seed5_5a0ac2aa"
+    ],
+    "Lift + US seasonal calendar": [
+     "20261005T063830_frat_dev_state_model_lift_calendar_seed1_ff5d4b4e",
+     "20261005T064149_frat_dev_state_model_lift_calendar_seed2_72d058d4",
+     "20261005T064512_frat_dev_state_model_lift_calendar_seed3_443affc4",
+     "20261005T064835_frat_dev_state_model_lift_calendar_seed4_3ed890c4",
+     "20261005T065154_frat_dev_state_model_lift_calendar_seed5_da6e7dde"
+    ],
+    "Lift + promotion crowding": [
+     "20261005T065514_frat_dev_state_model_lift_crowding_seed1_be6d8db1",
+     "20261005T065803_frat_dev_state_model_lift_crowding_seed2_4921c11d",
+     "20261005T070053_frat_dev_state_model_lift_crowding_seed3_7250301a",
+     "20261005T070343_frat_dev_state_model_lift_crowding_seed4_642a3f1b",
+     "20261005T070633_frat_dev_state_model_lift_crowding_seed5_6a6fd4b7"
+    ],
+    "Lift + base price, calendar and crowding": [
+     "20261005T070924_frat_dev_state_model_lift_merchant_inputs_seed1_767b00cf",
+     "20261005T071256_frat_dev_state_model_lift_merchant_inputs_seed2_6633aeec",
+     "20261005T071628_frat_dev_state_model_lift_merchant_inputs_seed3_997fd9ba",
+     "20261005T072002_frat_dev_state_model_lift_merchant_inputs_seed4_946cd41d",
+     "20261005T072333_frat_dev_state_model_lift_merchant_inputs_seed5_e98966c2"
+    ],
+    "Lift + latent loss alongside, weight 0.1": [
+     "20261005T094911_frat_dev_state_model_lift_jepa_joint_light_seed1_46cf9021",
+     "20261005T095228_frat_dev_state_model_lift_jepa_joint_light_seed2_5bdb0067",
+     "20261005T095546_frat_dev_state_model_lift_jepa_joint_light_seed3_c01557b8",
+     "20261005T095903_frat_dev_state_model_lift_jepa_joint_light_seed4_91989034",
+     "20261005T100220_frat_dev_state_model_lift_jepa_joint_light_seed5_d28303f0"
+    ],
+    "Lift + latent loss alongside, weight 2": [
+     "20261005T100543_frat_dev_state_model_lift_jepa_joint_heavy_seed1_9aeb10f6",
+     "20261005T100901_frat_dev_state_model_lift_jepa_joint_heavy_seed2_2c78194d",
+     "20261005T101217_frat_dev_state_model_lift_jepa_joint_heavy_seed3_64b65457",
+     "20261005T101535_frat_dev_state_model_lift_jepa_joint_heavy_seed4_3063bf26",
+     "20261005T101852_frat_dev_state_model_lift_jepa_joint_heavy_seed5_40dd86b9"
+    ],
+    "Lift, latent pretraining, then all trained": [
+     "20261005T102206_frat_dev_state_model_lift_jepa_pretrain_full_seed1_52a2dcb5",
+     "20261005T102637_frat_dev_state_model_lift_jepa_pretrain_full_seed2_36d7cfaa",
+     "20261005T103109_frat_dev_state_model_lift_jepa_pretrain_full_seed3_fa09bbaa",
+     "20261005T103542_frat_dev_state_model_lift_jepa_pretrain_full_seed4_e1425302",
+     "20261005T104014_frat_dev_state_model_lift_jepa_pretrain_full_seed5_6b760a77"
+    ],
+    "Lift, pretraining, encoder at a tenth of the rate": [
+     "20261005T104445_frat_dev_state_model_lift_jepa_pretrain_low_lr_seed1_d5e96aff",
+     "20261005T104917_frat_dev_state_model_lift_jepa_pretrain_low_lr_seed2_374fcfbc",
+     "20261005T105350_frat_dev_state_model_lift_jepa_pretrain_low_lr_seed3_51b010f6",
+     "20261005T105826_frat_dev_state_model_lift_jepa_pretrain_low_lr_seed4_7a214895",
+     "20261005T110301_frat_dev_state_model_lift_jepa_pretrain_low_lr_seed5_db04b3dd"
+    ],
+    "Lift, pretraining, encoder frozen": [
+     "20261005T110738_frat_dev_state_model_lift_jepa_pretrain_frozen_seed1_9b68cc27",
+     "20261005T111149_frat_dev_state_model_lift_jepa_pretrain_frozen_seed2_4429c63f",
+     "20261005T111557_frat_dev_state_model_lift_jepa_pretrain_frozen_seed3_f5512733",
+     "20261005T112009_frat_dev_state_model_lift_jepa_pretrain_frozen_seed4_ad2fc749",
+     "20261005T112419_frat_dev_state_model_lift_jepa_pretrain_frozen_seed5_91238798"
+    ],
+    "Lift, long pretraining, encoder at a tenth": [
+     "20261005T115430_frat_dev_state_model_lift_jepa_pretrain_long_low_lr_seed1_cc5b087a",
+     "20261005T120326_frat_dev_state_model_lift_jepa_pretrain_long_low_lr_seed2_156acb15",
+     "20261005T121215_frat_dev_state_model_lift_jepa_pretrain_long_low_lr_seed3_0bdd6418",
+     "20261005T122102_frat_dev_state_model_lift_jepa_pretrain_long_low_lr_seed4_7ecb26cd",
+     "20261005T122951_frat_dev_state_model_lift_jepa_pretrain_long_low_lr_seed5_78718359"
+    ],
+    "Lift, stopped on validation weeks": [
+     "20261005T124141_frat_dev_lift_validation_stop_seed1_8b848997",
+     "20261005T124424_frat_dev_lift_validation_stop_seed2_6d413866",
+     "20261005T124706_frat_dev_lift_validation_stop_seed3_f2b463b1",
+     "20261005T124945_frat_dev_lift_validation_stop_seed4_f9573cf5",
+     "20261005T125227_frat_dev_lift_validation_stop_seed5_1ac286f6"
+    ],
+    "Lift + totals term in the loss": [
+     "20261005T125509_frat_dev_lift_totals_loss_seed1_32ef63af",
+     "20261005T125753_frat_dev_lift_totals_loss_seed2_27789354",
+     "20261005T130036_frat_dev_lift_totals_loss_seed3_79a3d0ae",
+     "20261005T130322_frat_dev_lift_totals_loss_seed4_1b8e7407",
+     "20261005T130607_frat_dev_lift_totals_loss_seed5_15c83696"
+    ],
+    "Lift + readout dropout and weight decay": [
+     "20261005T130852_frat_dev_lift_dropout_decay_seed1_717e3f0c",
+     "20261005T131134_frat_dev_lift_dropout_decay_seed2_37584527",
+     "20261005T131417_frat_dev_lift_dropout_decay_seed3_04a17e2d",
+     "20261005T131700_frat_dev_lift_dropout_decay_seed4_7232e166",
+     "20261005T131942_frat_dev_lift_dropout_decay_seed5_cacde43a"
+    ],
+    "World model, baseline and lift": [
+     "20261005T133632_frat_dev_world_model_plain_seed1_e7487a23",
+     "20261005T133946_frat_dev_world_model_plain_seed2_6e17347e",
+     "20261005T134301_frat_dev_world_model_plain_seed3_042fccea",
+     "20261005T134616_frat_dev_world_model_plain_seed4_62ceef3e",
+     "20261005T134931_frat_dev_world_model_plain_seed5_f688a24f"
+    ],
+    "World model + latent check alongside": [
+     "20261005T135246_frat_dev_world_model_latent_seed1_7de275a7",
+     "20261005T135747_frat_dev_world_model_latent_seed2_5b0daa6e",
+     "20261005T140247_frat_dev_world_model_latent_seed3_14c2c612",
+     "20261005T140752_frat_dev_world_model_latent_seed4_b6d36edc",
+     "20261005T141300_frat_dev_world_model_latent_seed5_4103d8fd"
+    ],
+    "World model, long latent pretraining": [
+     "20261005T141809_frat_dev_world_model_best_recipe_seed1_eaea4073",
+     "20261005T143313_frat_dev_world_model_best_recipe_seed2_8e08b8b6",
+     "20261005T144820_frat_dev_world_model_best_recipe_seed3_f0fb07e6",
+     "20261005T150306_frat_dev_world_model_best_recipe_seed4_a5e95bc0",
+     "20261005T151752_frat_dev_world_model_best_recipe_seed5_f5c4de69"
+    ],
+    "World model + plan split (after DWM)": [
+     "20261006T044702_frat_dev_world_model_plan_split_seed1_c935dbf9",
+     "20261006T045046_frat_dev_world_model_plan_split_seed2_7cb89861",
+     "20261006T045429_frat_dev_world_model_plan_split_seed3_df3c9208",
+     "20261006T045809_frat_dev_world_model_plan_split_seed4_d06a2144",
+     "20261006T050149_frat_dev_world_model_plan_split_seed5_1818c2db"
+    ],
+    "World model + latent check, VICReg, near-week weighting": [
+     "20261006T053305_frat_dev_world_model_checked_seed1_f528bb87",
+     "20261006T053809_frat_dev_world_model_checked_seed2_1e39b8a8",
+     "20261006T054315_frat_dev_world_model_checked_seed3_3c6f600b",
+     "20261006T054828_frat_dev_world_model_checked_seed4_5d92a1dd",
+     "20261006T055346_frat_dev_world_model_checked_seed5_656259c9"
+    ],
+    "World model + all three": [
+     "20261006T050529_frat_dev_world_model_plan_split_checked_seed1_07a6902a",
+     "20261006T051100_frat_dev_world_model_plan_split_checked_seed2_5bbe5686",
+     "20261006T051631_frat_dev_world_model_plan_split_checked_seed3_6d2c8e6a",
+     "20261006T052201_frat_dev_world_model_plan_split_checked_seed4_1bd48423",
+     "20261006T052734_frat_dev_world_model_plan_split_checked_seed5_3e44d38a"
+    ]
+   }
+  },
+  "COMBO": {
+   "value": {
+    "frat": {
+     "lgb": 0.4208046105306896,
+     "lift": 0.4064367185858502,
+     "world": 0.40810419791341973,
+     "lift_lgb": 0.3877026984882857,
+     "world_lgb": 0.3901135380710278,
+     "negbin": 0.4095309622604866
+    },
+    "ana": {
+     "lgb": 0.7150051129791645,
+     "lift": 0.6760871059489364,
+     "lift_lgb": 0.670099093398249,
+     "world_lgb": 0.6676846162841482,
+     "negbin": 0.6650698556734816
+    }
+   },
+   "computation": "mean overall WRMSSE over seeds (Frat 1-5; analgesics 1-3, LightGBM the single unseeded run)",
+   "sources": {
+    "frat.lgb": [
+     "20261004T110059_frat_dev_lightgbm_seed1_a60b8955",
+     "20261004T110230_frat_dev_lightgbm_seed2_ecc23667",
+     "20261004T110355_frat_dev_lightgbm_seed3_aa247e60",
+     "20261004T110520_frat_dev_lightgbm_seed4_3419f434",
+     "20261004T110646_frat_dev_lightgbm_seed5_bd7275d5"
+    ],
+    "frat.lift": [
+     "20261004T221423_frat_dev_state_model_lift_seed1_ed8c49aa",
+     "20261004T221708_frat_dev_state_model_lift_seed2_f55d9105",
+     "20261004T221951_frat_dev_state_model_lift_seed3_8797fd21",
+     "20261004T222233_frat_dev_state_model_lift_seed4_538d3d31",
+     "20261004T222516_frat_dev_state_model_lift_seed5_7e5fa560"
+    ],
+    "frat.world": [
+     "20261005T133632_frat_dev_world_model_plain_seed1_e7487a23",
+     "20261005T133946_frat_dev_world_model_plain_seed2_6e17347e",
+     "20261005T134301_frat_dev_world_model_plain_seed3_042fccea",
+     "20261005T134616_frat_dev_world_model_plain_seed4_62ceef3e",
+     "20261005T134931_frat_dev_world_model_plain_seed5_f688a24f"
+    ],
+    "frat.lift_lgb": [
+     "20261006T001438_frat_dev_combination_lift_lightgbm_seed1_b141a030",
+     "20261006T002037_frat_dev_combination_lift_lightgbm_seed2_d0235a9b",
+     "20261006T002626_frat_dev_combination_lift_lightgbm_seed3_cf509253",
+     "20261006T003214_frat_dev_combination_lift_lightgbm_seed4_3285abfb",
+     "20261006T003802_frat_dev_combination_lift_lightgbm_seed5_fec3d495"
+    ],
+    "frat.world_lgb": [
+     "20261006T083904_frat_dev_combination_world_model_lightgbm_seed1_cfc01b16",
+     "20261006T084627_frat_dev_combination_world_model_lightgbm_seed2_6cc6edd7",
+     "20261006T085341_frat_dev_combination_world_model_lightgbm_seed3_b7ecf1a1",
+     "20261006T090053_frat_dev_combination_world_model_lightgbm_seed4_bfb77de7",
+     "20261006T090807_frat_dev_combination_world_model_lightgbm_seed5_61d4ad6b"
+    ],
+    "frat.negbin": [
+     "20261006T015747_frat_dev_lift_negative_binomial_seed1_d9b2c81c",
+     "20261006T020035_frat_dev_lift_negative_binomial_seed2_f9523368",
+     "20261006T020325_frat_dev_lift_negative_binomial_seed3_da2989ae",
+     "20261006T020613_frat_dev_lift_negative_binomial_seed4_478ac976",
+     "20261006T020901_frat_dev_lift_negative_binomial_seed5_d7a0cb7a"
+    ],
+    "ana.lgb": [
+     "20261004T151923_dominicks_ana_dev_lightgbm_170ec9d5"
+    ],
+    "ana.lift": [
+     "20261005T013749_dominicks_ana_dev_state_model_lift_seed1_c87a8e56",
+     "20261005T014217_dominicks_ana_dev_state_model_lift_seed2_6cfab0f6",
+     "20261005T014645_dominicks_ana_dev_state_model_lift_seed3_b6b2dff2"
+    ],
+    "ana.lift_lgb": [
+     "20261006T004305_dominicks_ana_dev_combination_lift_lightgbm_seed1_31cc985f",
+     "20261006T010723_dominicks_ana_dev_combination_lift_lightgbm_seed2_11885e0b",
+     "20261006T013158_dominicks_ana_dev_combination_lift_lightgbm_seed3_d0ba71d0"
+    ],
+    "ana.world_lgb": [
+     "20261006T091427_dominicks_ana_dev_combination_world_model_lightgbm_seed1_3dd2566c",
+     "20261006T094132_dominicks_ana_dev_combination_world_model_lightgbm_seed2_5046309a",
+     "20261006T100903_dominicks_ana_dev_combination_world_model_lightgbm_seed3_ce795be7"
+    ],
+    "ana.negbin": [
+     "20261006T021059_dominicks_ana_dev_lift_negative_binomial_seed1_eb3723fe",
+     "20261006T021541_dominicks_ana_dev_lift_negative_binomial_seed2_462d4afa",
+     "20261006T022021_dominicks_ana_dev_lift_negative_binomial_seed3_246fa376"
+    ]
+   }
+  },
+  "NEW_ITEMS": {
+   "value": {
+    "frat": {
+     "zero": 1.5095142524153837,
+     "lgb": 1.3098691368099435,
+     "borrow": 0.8898693752702469,
+     "borrow_hidden": 0.8791442029326061
+    },
+    "ana": {
+     "lgb": 0.9227677474801992,
+     "borrow": 2.9992833202908535
+    }
+   },
+   "computation": "splits[].new_items (item-by-store WRMSSE on held-out products), mean over windows and seeds 1-3",
+   "sources": {
+    "frat.zero": [
+     "20261006T031959_frat_dev_new_items_lift_no_cold_start_seed1_100c50e4",
+     "20261006T032238_frat_dev_new_items_lift_no_cold_start_seed2_0efc8664",
+     "20261006T032518_frat_dev_new_items_lift_no_cold_start_seed3_271c639d"
+    ],
+    "frat.lgb": [
+     "20261006T043912_frat_dev_new_items_lightgbm_cold_start_seed1_e2055c75",
+     "20261006T044107_frat_dev_new_items_lightgbm_cold_start_seed2_fdf3979b",
+     "20261006T044259_frat_dev_new_items_lightgbm_cold_start_seed3_cea3a92c"
+    ],
+    "frat.borrow": [
+     "20261006T032758_frat_dev_new_items_lift_borrow_seed1_865998d1",
+     "20261006T033038_frat_dev_new_items_lift_borrow_seed2_1dcbe027",
+     "20261006T033320_frat_dev_new_items_lift_borrow_seed3_d19b382a"
+    ],
+    "frat.borrow_hidden": [
+     "20261006T033602_frat_dev_new_items_lift_borrow_hidden_label_seed1_e4712ee2",
+     "20261006T033846_frat_dev_new_items_lift_borrow_hidden_label_seed2_d0763739",
+     "20261006T034127_frat_dev_new_items_lift_borrow_hidden_label_seed3_2f2f6837"
+    ],
+    "ana.lgb": [
+     "20261006T114131_dominicks_ana_dev_new_items_lightgbm_cold_start_seed1_afcf8cba",
+     "20261006T114937_dominicks_ana_dev_new_items_lightgbm_cold_start_seed2_3c13d612",
+     "20261006T115746_dominicks_ana_dev_new_items_lightgbm_cold_start_seed3_7b079146"
+    ],
+    "ana.borrow": [
+     "20261006T120547_dominicks_ana_dev_new_items_lift_borrow_seed1_3d1e8fe5",
+     "20261006T121031_dominicks_ana_dev_new_items_lift_borrow_seed2_04b7a76c",
+     "20261006T121510_dominicks_ana_dev_new_items_lift_borrow_seed3_c982ffbc"
+    ]
+   }
+  },
+  "PLAN_PAIRS": {
+   "value": [
+    [
+     "LightGBM",
+     78.13845445842512,
+     0.44810364558389226
+    ],
+    [
+     "Lift model",
+     77.3872405307018,
+     0.46040355145215356
+    ],
+    [
+     "World model",
+     77.54386480958686,
+     0.4592176673738237
+    ],
+    [
+     "World model + plan split",
+     77.50674028269378,
+     0.4579683224543123
+    ]
+   ],
+   "computation": "splits[].plan_pair_order (as %) and plan_pair_change_error, mean over windows and seeds 1-3",
+   "sources": {
+    "LightGBM": [
+     "20261006T075139_frat_dev_plan_pairs_lightgbm_seed1_cf38b33b",
+     "20261006T075341_frat_dev_plan_pairs_lightgbm_seed2_4e1fa2bb",
+     "20261006T075536_frat_dev_plan_pairs_lightgbm_seed3_38894178"
+    ],
+    "Lift model": [
+     "20261006T075736_frat_dev_plan_pairs_lift_seed1_e007b136",
+     "20261006T080022_frat_dev_plan_pairs_lift_seed2_43035430",
+     "20261006T080307_frat_dev_plan_pairs_lift_seed3_94cd6318"
+    ],
+    "World model": [
+     "20261006T080552_frat_dev_plan_pairs_world_model_seed1_99941e8c",
+     "20261006T080914_frat_dev_plan_pairs_world_model_seed2_cfa40d09",
+     "20261006T081238_frat_dev_plan_pairs_world_model_seed3_89d04e17"
+    ],
+    "World model + plan split": [
+     "20261006T081605_frat_dev_plan_pairs_world_model_plan_split_seed1_bb20b7d3",
+     "20261006T081957_frat_dev_plan_pairs_world_model_plan_split_seed2_6b65afaa",
+     "20261006T082349_frat_dev_plan_pairs_world_model_plan_split_seed3_0d2176bf"
+    ]
+   }
+  },
+  "UNUSUAL": {
+   "value": [
+    [
+     "LightGBM",
+     0.696412307396533,
+     0.6973136771001002
+    ],
+    [
+     "Lift model",
+     0.7422480589830597,
+     0.7247831934776143
+    ],
+    [
+     "World model",
+     0.729552584123936,
+     0.7295000681499539
+    ]
+   ],
+   "computation": "splits[].rare_plans and usual_plans (lever mix under 2% of the item's training weeks), mean over windows and seeds 1-3",
+   "sources": {
+    "LightGBM": [
+     "20261006T041432_frat_dev_rare_for_item_lightgbm_seed1_a5b1e131",
+     "20261006T041635_frat_dev_rare_for_item_lightgbm_seed2_0dabb8ff",
+     "20261006T041837_frat_dev_rare_for_item_lightgbm_seed3_d70a8af1"
+    ],
+    "Lift model": [
+     "20261006T042034_frat_dev_rare_for_item_lift_seed1_5075d010",
+     "20261006T042322_frat_dev_rare_for_item_lift_seed2_f2813fe7",
+     "20261006T042610_frat_dev_rare_for_item_lift_seed3_534c3b37"
+    ],
+    "World model": [
+     "20261006T042857_frat_dev_rare_for_item_world_model_seed1_1d80ead2",
+     "20261006T043222_frat_dev_rare_for_item_world_model_seed2_43c414ac",
+     "20261006T043547_frat_dev_rare_for_item_world_model_seed3_f4ceea0f"
+    ]
+   }
+  },
+  "ANA_DEV": {
+   "value": [
+    [
+     "Seasonal naive",
+     1.2737706440755274
+    ],
+    [
+     "Average of last 8 weeks",
+     0.7232118748299607
+    ],
+    [
+     "LightGBM",
+     0.7150051129791645
+    ],
+    [
+     "Item encoder and readout",
+     0.6922206207535326
+    ],
+    [
+     "Lift model",
+     0.6760871059489364
+    ],
+    [
+     "Lift + item-to-item",
+     0.6971080626020766
+    ],
+    [
+     "Lift, held price as regular",
+     0.6735359417195423
+    ],
+    [
+     "Lift + held price, calendar, crowding",
+     0.9187468091321467
+    ],
+    [
+     "Lift, 24,000 steps",
+     1.4729861981800052
+    ],
+    [
+     "Lift, stop on validation",
+     0.6831813201666679
+    ],
+    [
+     "Lift, totals in the loss",
+     0.8190013657617735
+    ],
+    [
+     "World model, totals in the loss",
+     0.7323565683582846
+    ],
+    [
+     "World model, no totals loss",
+     0.6668228121144296
+    ],
+    [
+     "World model + plan split",
+     0.703653849348336
+    ],
+    [
+     "World model + latent check, VICReg, near weeks",
+     0.6850390547201545
+    ]
+   ],
+   "computation": "Dominick's analgesics development windows: mean overall WRMSSE over seeds 1-3 (benchmarks: the single unseeded run)",
+   "sources": {
+    "Seasonal naive": [
+     "20261004T151831_dominicks_ana_dev_seasonal_naive_14b410ab"
+    ],
+    "Average of last 8 weeks": [
+     "20261004T151857_dominicks_ana_dev_recent_average_a7e691e7"
+    ],
+    "LightGBM": [
+     "20261004T151923_dominicks_ana_dev_lightgbm_170ec9d5"
+    ],
+    "Item encoder and readout": [
+     "20261005T012508_dominicks_ana_dev_state_model_seed1_568ad251",
+     "20261005T012919_dominicks_ana_dev_state_model_seed2_ce7773a6",
+     "20261005T013333_dominicks_ana_dev_state_model_seed3_60d37c74"
+    ],
+    "Lift model": [
+     "20261005T013749_dominicks_ana_dev_state_model_lift_seed1_c87a8e56",
+     "20261005T014217_dominicks_ana_dev_state_model_lift_seed2_6cfab0f6",
+     "20261005T014645_dominicks_ana_dev_state_model_lift_seed3_b6b2dff2"
+    ],
+    "Lift + item-to-item": [
+     "20261005T024247_dominicks_ana_dev_state_model_item_to_item_seed1_bc4aac9b",
+     "20261005T025035_dominicks_ana_dev_state_model_item_to_item_seed2_7d59805e",
+     "20261005T025823_dominicks_ana_dev_state_model_item_to_item_seed3_57539aec"
+    ],
+    "Lift, held price as regular": [
+     "20261005T091220_dominicks_ana_dev_state_model_lift_held_price_seed1_5b65f435",
+     "20261005T091733_dominicks_ana_dev_state_model_lift_held_price_seed2_ac5950f8",
+     "20261005T092245_dominicks_ana_dev_state_model_lift_held_price_seed3_e526c8b0"
+    ],
+    "Lift + held price, calendar, crowding": [
+     "20261005T092756_dominicks_ana_dev_state_model_lift_merchant_inputs_seed1_ee7c68a9",
+     "20261005T093444_dominicks_ana_dev_state_model_lift_merchant_inputs_seed2_27929698",
+     "20261005T094134_dominicks_ana_dev_state_model_lift_merchant_inputs_seed3_77bd2423"
+    ],
+    "Lift, 24,000 steps": [
+     "20261005T082312_dominicks_ana_dev_state_model_lift_longer_seed1_109fbe74",
+     "20261005T083932_dominicks_ana_dev_state_model_lift_longer_seed2_6e989573",
+     "20261005T085556_dominicks_ana_dev_state_model_lift_longer_seed3_ad5bfead"
+    ],
+    "Lift, stop on validation": [
+     "20261005T213756_dominicks_ana_dev_lift_validation_stop_seed1_d77cfce6",
+     "20261005T214247_dominicks_ana_dev_lift_validation_stop_seed2_b8b6ec4f",
+     "20261005T214734_dominicks_ana_dev_lift_validation_stop_seed3_cfa4ba92"
+    ],
+    "Lift, totals in the loss": [
+     "20261005T215219_dominicks_ana_dev_lift_totals_loss_seed1_f1267ffb",
+     "20261005T215711_dominicks_ana_dev_lift_totals_loss_seed2_b755e843",
+     "20261005T220202_dominicks_ana_dev_lift_totals_loss_seed3_df2b3cc5"
+    ],
+    "World model, totals in the loss": [
+     "20261005T230018_dominicks_ana_dev_world_model_fixes_seed1_e21dc64c",
+     "20261005T230618_dominicks_ana_dev_world_model_fixes_seed2_821ffae3",
+     "20261005T231219_dominicks_ana_dev_world_model_fixes_seed3_1d5252a6"
+    ],
+    "World model, no totals loss": [
+     "20261006T055838_dominicks_ana_dev_world_model_plain_seed1_35f29976",
+     "20261006T060442_dominicks_ana_dev_world_model_plain_seed2_ba299cb6",
+     "20261006T061035_dominicks_ana_dev_world_model_plain_seed3_a40f96ac"
+    ],
+    "World model + plan split": [
+     "20261006T061630_dominicks_ana_dev_world_model_plan_split_seed1_545ffd23",
+     "20261006T062304_dominicks_ana_dev_world_model_plan_split_seed2_b172b0ff",
+     "20261006T062938_dominicks_ana_dev_world_model_plan_split_seed3_7c83ddcb"
+    ],
+    "World model + latent check, VICReg, near weeks": [
+     "20261006T070756_dominicks_ana_dev_world_model_checked_seed1_3a925255",
+     "20261006T071701_dominicks_ana_dev_world_model_checked_seed2_4575aafd",
+     "20261006T072603_dominicks_ana_dev_world_model_checked_seed3_79086bc2"
+    ]
+   }
+  },
+  "DOM28": {
+   "value": {
+    "bat": [
+     1.188161631450247,
+     1.5680292429628588,
+     1.464881493369743,
+     1.1954054006795864
+    ],
+    "oat": [
+     1.0840449918563908,
+     1.0262294454901626,
+     1.0604187862690468,
+     1.036349627857731
+    ],
+    "ptw": [
+     0.48587221505173506,
+     0.444756938365521,
+     0.48485732001818127,
+     0.42500015236844657
+    ],
+    "tti": [
+     0.39383899723317073,
+     0.41304614913641924,
+     0.46465699138326144,
+     0.4272205744117987
+    ],
+    "ber": [
+     0.45351111055688387,
+     0.4598911994078385,
+     0.470405483675859,
+     0.505239779857632
+    ],
+    "frd": [
+     0.9302657506973309,
+     0.9052331864406917,
+     0.8733717626486186,
+     0.8840466192064121
+    ],
+    "soa": [
+     0.5171279481749032,
+     0.5211990672545306,
+     0.5164469853767372,
+     0.5177814087766806
+    ],
+    "cra": [
+     0.7088152581707466,
+     0.967033654570912,
+     0.6869311734348318,
+     0.7493918276746355
+    ],
+    "did": [
+     0.34417583856226974,
+     0.43610604565361943,
+     0.39293342884338167,
+     0.40548100781301233
+    ],
+    "tbr": [
+     0.6465681240181045,
+     0.6706328076565659,
+     0.6988087463197166,
+     0.6860211814478909
+    ],
+    "fsf": [
+     0.6500071760036997,
+     0.7477473736066971,
+     0.8318357667139589,
+     0.7416733628247363
+    ],
+    "tna": [
+     1.162744531707545,
+     1.0303482513685671,
+     0.958736246370794,
+     1.0036361424132547
+    ],
+    "cig": [
+     0.5337855965114295,
+     0.918088133439914,
+     0.6903407742483441,
+     0.6429208580484916
+    ],
+    "frj": [
+     0.3137237481759115,
+     0.3604554920748353,
+     0.37582706537613875,
+     0.34154686039941906
+    ],
+    "sna": [
+     0.5870853571439619,
+     0.9588745048486222,
+     1.4631099144316295,
+     0.8742507644459101
+    ],
+    "tpa": [
+     0.7307350286756791,
+     0.8018555555215017,
+     0.77875622428374,
+     0.8571939072337285
+    ],
+    "lnd": [
+     0.767715329610442,
+     0.7347796647299483,
+     0.687423553116965,
+     0.7287371206570756
+    ],
+    "fec": [
+     0.41445959771963525,
+     0.35815125401848963,
+     0.39693728134706674,
+     0.4167181585456422
+    ],
+    "bjc": [
+     0.991970117272157,
+     1.2474615999182417,
+     1.2294264607858487,
+     1.0997616189811987
+    ],
+    "cer": [
+     0.7527157908795172,
+     0.795215413822351,
+     0.6732584408814868,
+     0.8053535060476251
+    ],
+    "cso": [
+     0.6127826847160114,
+     0.5315533029576651,
+     0.5828426262464953,
+     0.5002652178257354
+    ],
+    "gro": [
+     0.9007066845256265,
+     1.2080121482775612,
+     0.8089837652011438,
+     0.8737054136059094
+    ],
+    "sha": [
+     0.9939097334917473,
+     0.9381273378675675,
+     0.905903627608688,
+     0.9210606113151953
+    ],
+    "coo": [
+     0.48657261324965484,
+     0.5026678790330574,
+     0.521880798301819,
+     0.49091296648197114
+    ],
+    "che": [
+     0.7420809796173635,
+     0.9003128705794068,
+     0.996086402746477,
+     1.1163140326153436
+    ],
+    "fre": [
+     0.41671284154849886,
+     0.37401813241408294,
+     0.3821354552738671,
+     0.3932173836854568
+    ],
+    "sdr": [
+     0.746946743346323,
+     1.4061329567123138,
+     0.8638053502889452,
+     0.7466753321701018
+    ],
+    "ana": [
+     0.7019407326185994,
+     0.7183917324621745,
+     0.6662878809183812,
+     0.6792826045384621
+    ]
+   },
+   "computation": "Dominick's development windows, seed 1, overall WRMSSE: (LightGBM, lift, world model 26-week level, world model 8-week level); analgesics first three: seeds 1-5 mean",
+   "sources": {
+    "bat.lgb": [
+     "20261006T122936_dominicks_bat_dev_lightgbm_seed1_1124f6c7"
+    ],
+    "bat.lift": [
+     "20261006T123225_dominicks_bat_dev_lift_seed1_31418d7d"
+    ],
+    "bat.world26": [
+     "20261006T123631_dominicks_bat_dev_world_model_seed1_d7f3af5e"
+    ],
+    "bat.world8": [
+     "20261007T023936_dominicks_bat_dev_world_model_level8_seed1_b013e00b"
+    ],
+    "oat.lgb": [
+     "20261006T124145_dominicks_oat_dev_lightgbm_seed1_c8e0eaa4"
+    ],
+    "oat.lift": [
+     "20261006T124322_dominicks_oat_dev_lift_seed1_4225f82a"
+    ],
+    "oat.world26": [
+     "20261006T124724_dominicks_oat_dev_world_model_seed1_aa21df72"
+    ],
+    "oat.world8": [
+     "20261007T044716_dominicks_oat_dev_world_model_level8_seed1_b89a00ef"
+    ],
+    "ptw.lgb": [
+     "20261006T125240_dominicks_ptw_dev_lightgbm_seed1_badfd64d"
+    ],
+    "ptw.lift": [
+     "20261006T125443_dominicks_ptw_dev_lift_seed1_e0b57ce6"
+    ],
+    "ptw.world26": [
+     "20261006T125848_dominicks_ptw_dev_world_model_seed1_7c30f528"
+    ],
+    "ptw.world8": [
+     "20261007T045225_dominicks_ptw_dev_world_model_level8_seed1_7b6bf815"
+    ],
+    "tti.lgb": [
+     "20261006T130408_dominicks_tti_dev_lightgbm_seed1_59fe333c"
+    ],
+    "tti.lift": [
+     "20261006T130600_dominicks_tti_dev_lift_seed1_0ae8c395"
+    ],
+    "tti.world26": [
+     "20261006T131006_dominicks_tti_dev_world_model_seed1_604b2699"
+    ],
+    "tti.world8": [
+     "20261007T045737_dominicks_tti_dev_world_model_level8_seed1_fb26dc87"
+    ],
+    "ber.lgb": [
+     "20261006T131530_dominicks_ber_dev_lightgbm_seed1_9b92e2b0"
+    ],
+    "ber.lift": [
+     "20261006T132117_dominicks_ber_dev_lift_seed1_6f2e1696"
+    ],
+    "ber.world26": [
+     "20261006T132535_dominicks_ber_dev_world_model_seed1_b24ddb73"
+    ],
+    "ber.world8": [
+     "20261007T050253_dominicks_ber_dev_world_model_level8_seed1_6b44d804"
+    ],
+    "frd.lgb": [
+     "20261006T133113_dominicks_frd_dev_lightgbm_seed1_51e9c1cb"
+    ],
+    "frd.lift": [
+     "20261006T133543_dominicks_frd_dev_lift_seed1_db3fda71"
+    ],
+    "frd.world26": [
+     "20261006T133955_dominicks_frd_dev_world_model_seed1_a751838a"
+    ],
+    "frd.world8": [
+     "20261007T050818_dominicks_frd_dev_world_model_level8_seed1_645d1805"
+    ],
+    "soa.lgb": [
+     "20261006T134528_dominicks_soa_dev_lightgbm_seed1_8026075f"
+    ],
+    "soa.lift": [
+     "20261006T135018_dominicks_soa_dev_lift_seed1_6aebd80b"
+    ],
+    "soa.world26": [
+     "20261006T135433_dominicks_soa_dev_world_model_seed1_da381210"
+    ],
+    "soa.world8": [
+     "20261007T051341_dominicks_soa_dev_world_model_level8_seed1_039b4174"
+    ],
+    "cra.lgb": [
+     "20261006T140008_dominicks_cra_dev_lightgbm_seed1_5d8833db"
+    ],
+    "cra.lift": [
+     "20261006T140417_dominicks_cra_dev_lift_seed1_2a19c550"
+    ],
+    "cra.world26": [
+     "20261006T140833_dominicks_cra_dev_world_model_seed1_d8c378cc"
+    ],
+    "cra.world8": [
+     "20261007T051908_dominicks_cra_dev_world_model_level8_seed1_c578dba9"
+    ],
+    "did.lgb": [
+     "20261006T141404_dominicks_did_dev_lightgbm_seed1_c36aa318"
+    ],
+    "did.lift": [
+     "20261006T141742_dominicks_did_dev_lift_seed1_2b3995f7"
+    ],
+    "did.world26": [
+     "20261006T142158_dominicks_did_dev_world_model_seed1_a6125d55"
+    ],
+    "did.world8": [
+     "20261007T052433_dominicks_did_dev_world_model_level8_seed1_4f95487a"
+    ],
+    "tbr.lgb": [
+     "20261006T142728_dominicks_tbr_dev_lightgbm_seed1_d95f9a35"
+    ],
+    "tbr.lift": [
+     "20261006T143227_dominicks_tbr_dev_lift_seed1_43380e38"
+    ],
+    "tbr.world26": [
+     "20261006T143647_dominicks_tbr_dev_world_model_seed1_d084e820"
+    ],
+    "tbr.world8": [
+     "20261007T052958_dominicks_tbr_dev_world_model_level8_seed1_fdd3f68b"
+    ],
+    "fsf.lgb": [
+     "20261006T144220_dominicks_fsf_dev_lightgbm_seed1_c0f0f201"
+    ],
+    "fsf.lift": [
+     "20261006T144637_dominicks_fsf_dev_lift_seed1_d241af46"
+    ],
+    "fsf.world26": [
+     "20261006T145057_dominicks_fsf_dev_world_model_seed1_98b568f5"
+    ],
+    "fsf.world8": [
+     "20261007T053527_dominicks_fsf_dev_world_model_level8_seed1_70cb4a84"
+    ],
+    "tna.lgb": [
+     "20261006T145634_dominicks_tna_dev_lightgbm_seed1_89100536"
+    ],
+    "tna.lift": [
+     "20261006T150022_dominicks_tna_dev_lift_seed1_babbe51b"
+    ],
+    "tna.world26": [
+     "20261006T150435_dominicks_tna_dev_world_model_seed1_0fbf6cac"
+    ],
+    "tna.world8": [
+     "20261007T054056_dominicks_tna_dev_world_model_level8_seed1_3f776e3f"
+    ],
+    "cig.lgb": [
+     "20261006T151005_dominicks_cig_dev_lightgbm_seed1_cc7f09bc"
+    ],
+    "cig.lift": [
+     "20261006T151645_dominicks_cig_dev_lift_seed1_afa16910"
+    ],
+    "cig.world26": [
+     "20261006T152115_dominicks_cig_dev_world_model_seed1_71bac930"
+    ],
+    "cig.world8": [
+     "20261007T031924_dominicks_cig_dev_world_model_level8_seed1_b3d7e424"
+    ],
+    "frj.lgb": [
+     "20261006T152702_dominicks_frj_dev_lightgbm_seed1_ab6fc166"
+    ],
+    "frj.lift": [
+     "20261006T153026_dominicks_frj_dev_lift_seed1_cd0eaaea"
+    ],
+    "frj.world26": [
+     "20261006T153437_dominicks_frj_dev_world_model_seed1_1df41a6d"
+    ],
+    "frj.world8": [
+     "20261007T054617_dominicks_frj_dev_world_model_level8_seed1_7d61acc1"
+    ],
+    "sna.lgb": [
+     "20261006T154005_dominicks_sna_dev_lightgbm_seed1_5543857b"
+    ],
+    "sna.lift": [
+     "20261006T154608_dominicks_sna_dev_lift_seed1_9ac72d2f"
+    ],
+    "sna.world26": [
+     "20261006T155035_dominicks_sna_dev_world_model_seed1_c03b73d4"
+    ],
+    "sna.world8": [
+     "20261007T015529_dominicks_sna_dev_world_model_level8_seed1_c322e0e0"
+    ],
+    "tpa.lgb": [
+     "20261006T155622_dominicks_tpa_dev_lightgbm_seed1_d1f7a7ac"
+    ],
+    "tpa.lift": [
+     "20261006T160331_dominicks_tpa_dev_lift_seed1_ab0c6513"
+    ],
+    "tpa.world26": [
+     "20261006T160805_dominicks_tpa_dev_world_model_seed1_8d81b9b0"
+    ],
+    "tpa.world8": [
+     "20261007T055141_dominicks_tpa_dev_world_model_level8_seed1_29bdee5a"
+    ],
+    "lnd.lgb": [
+     "20261006T161402_dominicks_lnd_dev_lightgbm_seed1_6addc3fe"
+    ],
+    "lnd.lift": [
+     "20261006T162106_dominicks_lnd_dev_lift_seed1_441a2c40"
+    ],
+    "lnd.world26": [
+     "20261006T162541_dominicks_lnd_dev_world_model_seed1_6e332674"
+    ],
+    "lnd.world8": [
+     "20261007T055725_dominicks_lnd_dev_world_model_level8_seed1_f795c124"
+    ],
+    "fec.lgb": [
+     "20261006T163136_dominicks_fec_dev_lightgbm_seed1_02b7b01f"
+    ],
+    "fec.lift": [
+     "20261006T163752_dominicks_fec_dev_lift_seed1_c31fb340"
+    ],
+    "fec.world26": [
+     "20261006T164223_dominicks_fec_dev_world_model_seed1_9a8c4aaf"
+    ],
+    "fec.world8": [
+     "20261007T060310_dominicks_fec_dev_world_model_level8_seed1_f6e7f2b2"
+    ],
+    "bjc.lgb": [
+     "20261006T164806_dominicks_bjc_dev_lightgbm_seed1_a46e6a0b"
+    ],
+    "bjc.lift": [
+     "20261006T165514_dominicks_bjc_dev_lift_seed1_2391fb1d"
+    ],
+    "bjc.world26": [
+     "20261006T165942_dominicks_bjc_dev_world_model_seed1_28d085a0"
+    ],
+    "bjc.world8": [
+     "20261007T025923_dominicks_bjc_dev_world_model_level8_seed1_3c5823c8"
+    ],
+    "cer.lgb": [
+     "20261006T170529_dominicks_cer_dev_lightgbm_seed1_51f97354"
+    ],
+    "cer.lift": [
+     "20261006T171212_dominicks_cer_dev_lift_seed1_2de88bb6"
+    ],
+    "cer.world26": [
+     "20261006T171643_dominicks_cer_dev_world_model_seed1_45b26c0c"
+    ],
+    "cer.world8": [
+     "20261007T060855_dominicks_cer_dev_world_model_level8_seed1_224c76eb"
+    ],
+    "cso.lgb": [
+     "20261006T172235_dominicks_cso_dev_lightgbm_seed1_1bf9fd28"
+    ],
+    "cso.lift": [
+     "20261006T172944_dominicks_cso_dev_lift_seed1_300793e1"
+    ],
+    "cso.world26": [
+     "20261006T173413_dominicks_cso_dev_world_model_seed1_4a91adfb"
+    ],
+    "cso.world8": [
+     "20261007T061440_dominicks_cso_dev_world_model_level8_seed1_72e66b14"
+    ],
+    "gro.lgb": [
+     "20261006T174011_dominicks_gro_dev_lightgbm_seed1_3dfef3c8"
+    ],
+    "gro.lift": [
+     "20261006T175743_dominicks_gro_dev_lift_seed1_30264aad"
+    ],
+    "gro.world26": [
+     "20261006T180242_dominicks_gro_dev_world_model_seed1_1ef34b3c"
+    ],
+    "gro.world8": [
+     "20261007T062032_dominicks_gro_dev_world_model_level8_seed1_c6d3f67d"
+    ],
+    "sha.lgb": [
+     "20261006T180937_dominicks_sha_dev_lightgbm_seed1_3c0cad5b"
+    ],
+    "sha.lift": [
+     "20261006T184141_dominicks_sha_dev_lift_seed1_dab8636f"
+    ],
+    "sha.world26": [
+     "20261006T184710_dominicks_sha_dev_world_model_seed1_b7a5a015"
+    ],
+    "sha.world8": [
+     "20261007T062717_dominicks_sha_dev_world_model_level8_seed1_cf3a04d1"
+    ],
+    "coo.lgb": [
+     "20261006T185440_dominicks_coo_dev_lightgbm_seed1_d5c75211"
+    ],
+    "coo.lift": [
+     "20261006T190848_dominicks_coo_dev_lift_seed1_de20c20b"
+    ],
+    "coo.world26": [
+     "20261006T191355_dominicks_coo_dev_world_model_seed1_eb2f7a64"
+    ],
+    "coo.world8": [
+     "20261007T063437_dominicks_coo_dev_world_model_level8_seed1_d80b19a8"
+    ],
+    "che.lgb": [
+     "20261006T192024_dominicks_che_dev_lightgbm_seed1_cc9d97ac"
+    ],
+    "che.lift": [
+     "20261006T192935_dominicks_che_dev_lift_seed1_6364b9b3"
+    ],
+    "che.world26": [
+     "20261006T193418_dominicks_che_dev_world_model_seed1_90fa312e"
+    ],
+    "che.world8": [
+     "20261007T034029_dominicks_che_dev_world_model_level8_seed1_1f33ed7f"
+    ],
+    "fre.lgb": [
+     "20261006T194032_dominicks_fre_dev_lightgbm_seed1_c5c20b38"
+    ],
+    "fre.lift": [
+     "20261006T195319_dominicks_fre_dev_lift_seed1_a611e58e"
+    ],
+    "fre.world26": [
+     "20261006T195814_dominicks_fre_dev_world_model_seed1_09afd880"
+    ],
+    "fre.world8": [
+     "20261007T042301_dominicks_fre_dev_world_model_level8_seed1_44ddd5ca"
+    ],
+    "sdr.lgb": [
+     "20261006T213434_dominicks_sdr_dev_lightgbm_seed1_5f86329c"
+    ],
+    "sdr.lift": [
+     "20261006T215617_dominicks_sdr_dev_lift_seed1_8b74667c"
+    ],
+    "sdr.world26": [
+     "20261006T220145_dominicks_sdr_dev_world_model_seed1_56910897"
+    ],
+    "sdr.world8": [
+     "20261007T021952_dominicks_sdr_dev_world_model_level8_seed1_ca83de76"
+    ],
+    "ana.lgb": [
+     "20261006T105746_dominicks_ana_dev_lightgbm_seed1_e164225a",
+     "20261006T110626_dominicks_ana_dev_lightgbm_seed2_b3a413c9",
+     "20261006T111516_dominicks_ana_dev_lightgbm_seed3_2f7d3bed",
+     "20261006T112356_dominicks_ana_dev_lightgbm_seed4_1a7262f0",
+     "20261006T113247_dominicks_ana_dev_lightgbm_seed5_14be59cf"
+    ],
+    "ana.lift": [
+     "20261005T013749_dominicks_ana_dev_state_model_lift_seed1_c87a8e56",
+     "20261005T014217_dominicks_ana_dev_state_model_lift_seed2_6cfab0f6",
+     "20261005T014645_dominicks_ana_dev_state_model_lift_seed3_b6b2dff2",
+     "20261006T104840_dominicks_ana_dev_state_model_lift_seed4_cfb19dc3",
+     "20261006T105313_dominicks_ana_dev_state_model_lift_seed5_34734e07"
+    ],
+    "ana.world26": [
+     "20261006T055838_dominicks_ana_dev_world_model_plain_seed1_35f29976",
+     "20261006T060442_dominicks_ana_dev_world_model_plain_seed2_ba299cb6",
+     "20261006T061035_dominicks_ana_dev_world_model_plain_seed3_a40f96ac",
+     "20261006T103651_dominicks_ana_dev_world_model_plain_seed4_410201b1",
+     "20261006T104247_dominicks_ana_dev_world_model_plain_seed5_35e35d22"
+    ],
+    "ana.world8": [
+     "20261007T040109_dominicks_ana_dev_world_model_level8_seed1_2bab75df"
+    ]
+   }
+  },
+  "PEAKS": {
+   "value": {
+    "che": {
+     "lgb": [
+      0.7997967600822449,
+      0.9687401652336121,
+      0.9766524434089661,
+      0.7420809796173635
+     ],
+     "world": [
+      1.206643283367157,
+      1.0352305173873901,
+      1.0247049033641815,
+      1.1163140326153436
+     ],
+     "feedback": [
+      1.0814719796180725,
+      1.0845102071762085,
+      1.0501212775707245,
+      1.0721180970753308
+     ],
+     "weight": [
+      1.0014698505401611,
+      1.0090130269527435,
+      1.0550633668899536,
+      0.8136535254322885
+     ]
+    },
+    "sna": {
+     "lgb": [
+      0.907903641462326,
+      0.920591413974762,
+      1.0223323106765747,
+      0.5870853571439619
+     ],
+     "world": [
+      1.195148766040802,
+      1.3285695910453796,
+      1.1320195198059082,
+      0.8742507644459101
+     ],
+     "feedback": [
+      1.2768112421035767,
+      1.3484527468681335,
+      1.1731061339378357,
+      0.9409291165875895
+     ],
+     "weight": [
+      1.3165399432182312,
+      1.1791367530822754,
+      1.1114802956581116,
+      0.907901114310206
+     ]
+    },
+    "sdr": {
+     "lgb": [
+      0.7678868770599365,
+      0.9044482707977295,
+      0.8628717660903931,
+      0.746946743346323
+     ],
+     "world": [
+      1.0097448527812958,
+      1.316379964351654,
+      0.9640884101390839,
+      0.7466753321701018
+     ],
+     "feedback": [
+      0.9740230441093445,
+      0.9968248009681702,
+      0.8903891146183014,
+      1.0499040560565838
+     ],
+     "weight": [
+      1.1022037863731384,
+      1.2346100807189941,
+      1.0887289643287659,
+      0.7767188988092373
+     ]
+    },
+    "bjc": {
+     "lgb": [
+      0.7141507565975189,
+      0.9570038616657257,
+      0.9458090662956238,
+      0.991970117272157
+     ],
+     "world": [
+      0.9238826036453247,
+      1.0348379015922546,
+      0.9175820648670197,
+      1.0997616189811987
+     ],
+     "feedback": [
+      0.9363092482089996,
+      1.1531388461589813,
+      0.9584124982357025,
+      1.045703503367276
+     ],
+     "weight": [
+      1.1364527642726898,
+      1.0503248274326324,
+      0.9612041115760803,
+      1.0624983278710396
+     ]
+    },
+    "ana": {
+     "lgb": [
+      0.8873348832130432,
+      0.9268860816955566,
+      1.0279971361160278,
+      0.7006254291825148
+     ],
+     "world": [
+      0.9234353601932526,
+      0.9662347137928009,
+      1.0470257997512817,
+      0.6792826045384621
+     ],
+     "feedback": [
+      0.978332906961441,
+      0.9782045483589172,
+      1.0993565917015076,
+      0.8379080364807907
+     ],
+     "weight": [
+      1.0272789001464844,
+      0.9663075804710388,
+      1.115361213684082,
+      0.8265339898117354
+     ]
+    },
+    "fre": {
+     "lgb": [
+      0.8399412035942078,
+      0.6794804483652115,
+      0.9479919970035553,
+      0.41671284154849886
+     ],
+     "world": [
+      0.8813889920711517,
+      0.7053086161613464,
+      0.8869311511516571,
+      0.3932173836854568
+     ],
+     "feedback": [
+      0.8195306956768036,
+      0.6963433027267456,
+      0.8924960196018219,
+      0.41125277340015426
+     ],
+     "weight": [
+      0.8777304887771606,
+      0.5958542078733444,
+      0.8554428219795227,
+      0.4000971578491561
+     ]
+    }
+   },
+   "computation": "dominicks_<cat>_dev_peaks_* seed 1: forecast/actual in promoted, after-promotion and ordinary weeks (splits[].peaks, mean over windows), and overall WRMSSE",
+   "sources": {
+    "che.lgb": [
+     "20261007T072612_dominicks_che_dev_peaks_lightgbm_seed1_91a298df"
+    ],
+    "che.world": [
+     "20261007T073528_dominicks_che_dev_peaks_world_model_seed1_ebc5beb9"
+    ],
+    "che.feedback": [
+     "20261007T074141_dominicks_che_dev_peaks_feedback_seed1_89f1f427"
+    ],
+    "che.weight": [
+     "20261007T075211_dominicks_che_dev_peaks_weighted_seed1_8a603fda"
+    ],
+    "sna.lgb": [
+     "20261007T080920_dominicks_sna_dev_peaks_lightgbm_seed1_d6f45330"
+    ],
+    "sna.world": [
+     "20261007T081532_dominicks_sna_dev_peaks_world_model_seed1_98c76e94"
+    ],
+    "sna.feedback": [
+     "20261007T082126_dominicks_sna_dev_peaks_feedback_seed1_bf80b0da"
+    ],
+    "sna.weight": [
+     "20261007T083149_dominicks_sna_dev_peaks_weighted_seed1_89026a84"
+    ],
+    "sdr.lgb": [
+     "20261007T084843_dominicks_sdr_dev_peaks_lightgbm_seed1_98b470b3"
+    ],
+    "sdr.world": [
+     "20261007T091013_dominicks_sdr_dev_peaks_world_model_seed1_83492df7"
+    ],
+    "sdr.feedback": [
+     "20261007T091744_dominicks_sdr_dev_peaks_feedback_seed1_a61bd95b"
+    ],
+    "sdr.weight": [
+     "20261007T092939_dominicks_sdr_dev_peaks_weighted_seed1_db6041ff"
+    ],
+    "bjc.lgb": [
+     "20261007T094847_dominicks_bjc_dev_peaks_lightgbm_seed1_a2dcd6b1"
+    ],
+    "bjc.world": [
+     "20261007T095551_dominicks_bjc_dev_peaks_world_model_seed1_293f1e5d"
+    ],
+    "bjc.feedback": [
+     "20261007T100139_dominicks_bjc_dev_peaks_feedback_seed1_9ebefc12"
+    ],
+    "bjc.weight": [
+     "20261007T101159_dominicks_bjc_dev_peaks_weighted_seed1_23a747d9"
+    ],
+    "ana.lgb": [
+     "20261007T102821_dominicks_ana_dev_peaks_lightgbm_seed1_a834ac24"
+    ],
+    "ana.world": [
+     "20261007T103654_dominicks_ana_dev_peaks_world_model_seed1_5c677c99"
+    ],
+    "ana.feedback": [
+     "20261007T104254_dominicks_ana_dev_peaks_feedback_seed1_d883492b"
+    ],
+    "ana.weight": [
+     "20261007T105320_dominicks_ana_dev_peaks_weighted_seed1_8e77ba38"
+    ],
+    "fre.lgb": [
+     "20261007T111004_dominicks_fre_dev_peaks_lightgbm_seed1_d28e6e44"
+    ],
+    "fre.world": [
+     "20261007T112251_dominicks_fre_dev_peaks_world_model_seed1_f453b5ad"
+    ],
+    "fre.feedback": [
+     "20261007T112921_dominicks_fre_dev_peaks_feedback_seed1_bba5a3b3"
+    ],
+    "fre.weight": [
+     "20261007T114014_dominicks_fre_dev_peaks_weighted_seed1_f2d635e8"
+    ]
+   }
+  },
+  "LADDER": {
+   "value": {
+    "che": [
+     [
+      1.0882164191760098,
+      1.1105959300987258,
+      1.0282151827447887,
+      0.9712578182401036,
+      0.9012743048386113
+     ],
+     0.7488612552644772
+    ],
+    "sna": [
+     [
+      0.8130892978562874,
+      0.7516460920874619,
+      0.8303799975439037,
+      1.0919569771125999,
+      0.8098989625649766
+     ],
+     0.5857346900816826
+    ],
+    "sdr": [
+     [
+      0.9024424563010008,
+      0.7893917392739945,
+      0.8271421762565292,
+      0.7432650174513168,
+      0.76538744049624
+     ],
+     0.7585507469599503
+    ],
+    "bjc": [
+     [
+      1.0738270889936348,
+      1.0661031188674945,
+      1.0470689205302852,
+      1.0483664363038976,
+      1.0150316299003344
+     ],
+     0.9869007928261688
+    ],
+    "ana": [
+     [
+      0.711268167538323,
+      0.7072751785441396,
+      0.6964235795185812,
+      0.6214497653573092,
+      0.6466362335767551
+     ],
+     0.7005577717084306
+    ],
+    "fre": [
+     [
+      0.40623533543484974,
+      0.41596193379624125,
+      0.40440057560193376,
+      0.3906968340735255,
+      0.3928601630993179
+     ],
+     0.41911962639875594
+    ]
+   },
+   "computation": "dominicks_<cat>_dev_<step> seeds 1-3, mean overall WRMSSE per step; LightGBM dominicks_<cat>_dev_peaks_lightgbm seeds 1-3",
+   "sources": {
+    "che.peaks_world_model": [
+     "20261007T073528_dominicks_che_dev_peaks_world_model_seed1_ebc5beb9",
+     "20261008T100503_dominicks_che_dev_peaks_world_model_seed2_2f8317c7",
+     "20261008T101115_dominicks_che_dev_peaks_world_model_seed3_6ec679d1"
+    ],
+    "che.peaks_world_model_switching": [
+     "20261008T131620_dominicks_che_dev_peaks_world_model_switching_seed1_53219649",
+     "20261008T132228_dominicks_che_dev_peaks_world_model_switching_seed2_4a468c99",
+     "20261008T132839_dominicks_che_dev_peaks_world_model_switching_seed3_bbe931b6"
+    ],
+    "che.peaks_world_model_switching_roll_norm": [
+     "20261008T172401_dominicks_che_dev_peaks_world_model_switching_roll_norm_seed1_c150d107",
+     "20261008T173040_dominicks_che_dev_peaks_world_model_switching_roll_norm_seed2_1b850d28",
+     "20261008T173722_dominicks_che_dev_peaks_world_model_switching_roll_norm_seed3_f42422fa"
+    ],
+    "che.peaks_world_model_switching_avg3_roll_norm": [
+     "20261008T233826_dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm_seed1_65737059",
+     "20261009T044012_dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm_seed2_9b5e717e",
+     "20261009T045821_dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm_seed3_dc217d77"
+    ],
+    "che.peaks_world_model_switching_avg3_roll_norm_steps2x": [
+     "20261011T144626_dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed1_93f22448",
+     "20261011T152140_dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed2_80b9bda5",
+     "20261011T155646_dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed3_874d2101"
+    ],
+    "che.lgb": [
+     "20261007T072612_dominicks_che_dev_peaks_lightgbm_seed1_91a298df",
+     "20261008T094630_dominicks_che_dev_peaks_lightgbm_seed2_42030ad6",
+     "20261008T095551_dominicks_che_dev_peaks_lightgbm_seed3_760a9f15"
+    ],
+    "sna.peaks_world_model": [
+     "20261007T081532_dominicks_sna_dev_peaks_world_model_seed1_98c76e94",
+     "20261008T102941_dominicks_sna_dev_peaks_world_model_seed2_188fc62e",
+     "20261008T103526_dominicks_sna_dev_peaks_world_model_seed3_ad536acc"
+    ],
+    "sna.peaks_world_model_switching": [
+     "20261008T133444_dominicks_sna_dev_peaks_world_model_switching_seed1_1966c8ab",
+     "20261008T134024_dominicks_sna_dev_peaks_world_model_switching_seed2_131ec31b",
+     "20261008T134608_dominicks_sna_dev_peaks_world_model_switching_seed3_054622fe"
+    ],
+    "sna.peaks_world_model_switching_roll_norm": [
+     "20261008T174353_dominicks_sna_dev_peaks_world_model_switching_roll_norm_seed1_acdf1bf3",
+     "20261008T175003_dominicks_sna_dev_peaks_world_model_switching_roll_norm_seed2_4484776d",
+     "20261008T175612_dominicks_sna_dev_peaks_world_model_switching_roll_norm_seed3_9ce0a8c0"
+    ],
+    "sna.peaks_world_model_switching_avg3_roll_norm": [
+     "20261008T235626_dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm_seed1_027298bc",
+     "20261009T051636_dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm_seed2_a67ae514",
+     "20261009T053419_dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm_seed3_49e32754"
+    ],
+    "sna.peaks_world_model_switching_avg3_roll_norm_steps2x": [
+     "20261011T163204_dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed1_9c93c1f5",
+     "20261011T170635_dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed2_abeb87fe",
+     "20261011T174106_dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed3_01f29081"
+    ],
+    "sna.lgb": [
+     "20261007T080920_dominicks_sna_dev_peaks_lightgbm_seed1_d6f45330",
+     "20261008T101719_dominicks_sna_dev_peaks_lightgbm_seed2_59fc317a",
+     "20261008T102323_dominicks_sna_dev_peaks_lightgbm_seed3_9b87017e"
+    ],
+    "sdr.peaks_world_model": [
+     "20261007T091013_dominicks_sdr_dev_peaks_world_model_seed1_83492df7",
+     "20261008T112538_dominicks_sdr_dev_peaks_world_model_seed2_7f593a93",
+     "20261008T113304_dominicks_sdr_dev_peaks_world_model_seed3_0f811d62"
+    ],
+    "sdr.peaks_world_model_switching": [
+     "20261008T135217_dominicks_sdr_dev_peaks_world_model_switching_seed1_8d314dbd",
+     "20261008T135951_dominicks_sdr_dev_peaks_world_model_switching_seed2_028f4dc4",
+     "20261008T140726_dominicks_sdr_dev_peaks_world_model_switching_seed3_f3bbc8af"
+    ],
+    "sdr.peaks_world_model_switching_roll_norm": [
+     "20261008T180248_dominicks_sdr_dev_peaks_world_model_switching_roll_norm_seed1_c2848798",
+     "20261008T181050_dominicks_sdr_dev_peaks_world_model_switching_roll_norm_seed2_71910775",
+     "20261008T181852_dominicks_sdr_dev_peaks_world_model_switching_roll_norm_seed3_b25cdd5d"
+    ],
+    "sdr.peaks_world_model_switching_avg3_roll_norm": [
+     "20261009T001423_dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm_seed1_3f2c6bf0",
+     "20261009T055227_dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm_seed2_591ccf7b",
+     "20261009T061311_dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm_seed3_6b221263"
+    ],
+    "sdr.peaks_world_model_switching_avg3_roll_norm_steps2x": [
+     "20261011T181612_dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed1_f41d6824",
+     "20261011T185417_dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed2_12c59aaf",
+     "20261011T193222_dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed3_83f9a31a"
+    ],
+    "sdr.lgb": [
+     "20261007T084843_dominicks_sdr_dev_peaks_lightgbm_seed1_98b470b3",
+     "20261008T104141_dominicks_sdr_dev_peaks_lightgbm_seed2_f8577ce6",
+     "20261008T110343_dominicks_sdr_dev_peaks_lightgbm_seed3_a96493d9"
+    ],
+    "bjc.peaks_world_model": [
+     "20261007T095551_dominicks_bjc_dev_peaks_world_model_seed1_293f1e5d",
+     "20261008T115451_dominicks_bjc_dev_peaks_world_model_seed2_caf3c4b8",
+     "20261008T120038_dominicks_bjc_dev_peaks_world_model_seed3_02acca10"
+    ],
+    "bjc.peaks_world_model_switching": [
+     "20261008T141434_dominicks_bjc_dev_peaks_world_model_switching_seed1_dfdf5d07",
+     "20261008T142025_dominicks_bjc_dev_peaks_world_model_switching_seed2_8ce4baf1",
+     "20261008T142618_dominicks_bjc_dev_peaks_world_model_switching_seed3_76649c53"
+    ],
+    "bjc.peaks_world_model_switching_roll_norm": [
+     "20261008T182625_dominicks_bjc_dev_peaks_world_model_switching_roll_norm_seed1_0e8388ca",
+     "20261008T183242_dominicks_bjc_dev_peaks_world_model_switching_roll_norm_seed2_09ec124b",
+     "20261008T183857_dominicks_bjc_dev_peaks_world_model_switching_roll_norm_seed3_a385f57a"
+    ],
+    "bjc.peaks_world_model_switching_avg3_roll_norm": [
+     "20261009T003425_dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm_seed1_4f650f2f",
+     "20261009T063339_dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm_seed2_1ab2781a",
+     "20261009T065147_dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm_seed3_ab9c1b2d"
+    ],
+    "bjc.peaks_world_model_switching_avg3_roll_norm_steps2x": [
+     "20261011T200943_dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed1_43fdb35a",
+     "20261011T204424_dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed2_1d5f34c0",
+     "20261011T211903_dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed3_5c9de9d0"
+    ],
+    "bjc.lgb": [
+     "20261007T094847_dominicks_bjc_dev_peaks_lightgbm_seed1_a2dcd6b1",
+     "20261008T114007_dominicks_bjc_dev_peaks_lightgbm_seed2_fca390e8",
+     "20261008T114730_dominicks_bjc_dev_peaks_lightgbm_seed3_aec73f7d"
+    ],
+    "ana.peaks_world_model": [
+     "20261007T103654_dominicks_ana_dev_peaks_world_model_seed1_5c677c99",
+     "20261008T122450_dominicks_ana_dev_peaks_world_model_seed2_ffda04ff",
+     "20261008T123049_dominicks_ana_dev_peaks_world_model_seed3_82291734"
+    ],
+    "ana.peaks_world_model_switching": [
+     "20261008T143209_dominicks_ana_dev_peaks_world_model_switching_seed1_ccf20f47",
+     "20261008T143804_dominicks_ana_dev_peaks_world_model_switching_seed2_f70c7f96",
+     "20261008T144358_dominicks_ana_dev_peaks_world_model_switching_seed3_cfaebda0"
+    ],
+    "ana.peaks_world_model_switching_roll_norm": [
+     "20261008T184515_dominicks_ana_dev_peaks_world_model_switching_roll_norm_seed1_9afaaeac",
+     "20261008T185136_dominicks_ana_dev_peaks_world_model_switching_roll_norm_seed2_625e7384",
+     "20261008T185800_dominicks_ana_dev_peaks_world_model_switching_roll_norm_seed3_ffb8dd14"
+    ],
+    "ana.peaks_world_model_switching_avg3_roll_norm": [
+     "20261009T005205_dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm_seed1_050f495d",
+     "20261009T071002_dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm_seed2_2f2b0121",
+     "20261009T072824_dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm_seed3_fd519212"
+    ],
+    "ana.peaks_world_model_switching_avg3_roll_norm_steps2x": [
+     "20261011T215337_dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed1_01766a0f",
+     "20261011T222842_dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed2_ac60cb82",
+     "20261011T230424_dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed3_ff344063"
+    ],
+    "ana.lgb": [
+     "20261007T102821_dominicks_ana_dev_peaks_lightgbm_seed1_a834ac24",
+     "20261008T120628_dominicks_ana_dev_peaks_lightgbm_seed2_c6e2e16c",
+     "20261008T121530_dominicks_ana_dev_peaks_lightgbm_seed3_7bcdbc9e"
+    ],
+    "fre.peaks_world_model": [
+     "20261007T112251_dominicks_fre_dev_peaks_world_model_seed1_f453b5ad",
+     "20261008T130326_dominicks_fre_dev_peaks_world_model_seed2_3f95d8c1",
+     "20261008T130949_dominicks_fre_dev_peaks_world_model_seed3_7e162e64"
+    ],
+    "fre.peaks_world_model_switching": [
+     "20261008T145006_dominicks_fre_dev_peaks_world_model_switching_seed1_2df25020",
+     "20261008T145631_dominicks_fre_dev_peaks_world_model_switching_seed2_77845d2a",
+     "20261008T150300_dominicks_fre_dev_peaks_world_model_switching_seed3_07054692"
+    ],
+    "fre.peaks_world_model_switching_roll_norm": [
+     "20261008T190431_dominicks_fre_dev_peaks_world_model_switching_roll_norm_seed1_e1e06e9e",
+     "20261008T191131_dominicks_fre_dev_peaks_world_model_switching_roll_norm_seed2_10c10a56",
+     "20261008T191828_dominicks_fre_dev_peaks_world_model_switching_roll_norm_seed3_2d2aa838"
+    ],
+    "fre.peaks_world_model_switching_avg3_roll_norm": [
+     "20261009T041818_dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm_seed1_96596a28",
+     "20261009T074654_dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm_seed2_70b9fa89",
+     "20261009T080603_dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm_seed3_5e2f8946"
+    ],
+    "fre.peaks_world_model_switching_avg3_roll_norm_steps2x": [
+     "20261011T234058_dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed1_4e9b45d8",
+     "20261012T001801_dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed2_e4245d80",
+     "20261012T005440_dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed3_26ca83bf"
+    ],
+    "fre.lgb": [
+     "20261007T111004_dominicks_fre_dev_peaks_lightgbm_seed1_d28e6e44",
+     "20261008T123703_dominicks_fre_dev_peaks_lightgbm_seed2_9403b49a",
+     "20261008T125013_dominicks_fre_dev_peaks_lightgbm_seed3_8571a62a"
+    ]
+   }
+  },
+  "LADDER_RANGE": {
+   "value": {
+    "che": [
+     [
+      0.9808115525960203,
+      1.1675236723166655
+     ],
+     [
+      0.9432444600659278,
+      0.9875745006775881
+     ]
+    ],
+    "sna": [
+     [
+      0.7514934949900929,
+      0.8742507644459101
+     ],
+     [
+      0.7299015254492318,
+      1.8062750812395945
+     ]
+    ],
+    "sdr": [
+     [
+      0.7466753321701018,
+      1.1231180745015856
+     ],
+     [
+      0.7134665789330703,
+      0.7698310692642718
+     ]
+    ],
+    "bjc": [
+     [
+      1.0331118732946116,
+      1.0997616189811987
+     ],
+     [
+      1.018942848729697,
+      1.0652339785128342
+     ]
+    ],
+    "ana": [
+     [
+      0.6548664492619671,
+      0.7996554488145398
+     ],
+     [
+      0.6176862153673109,
+      0.6246388711628832
+     ]
+    ],
+    "fre": [
+     [
+      0.391045398440181,
+      0.4344432241789114
+     ],
+     [
+      0.3863576700829685,
+      0.3981189954674063
+     ]
+    ]
+   },
+   "computation": "lowest and highest seed (1-3) of the first step (8-week level) and of the chosen step (average of three fits)",
+   "sources": {
+    "che.peaks_world_model": [
+     "20261007T073528_dominicks_che_dev_peaks_world_model_seed1_ebc5beb9",
+     "20261008T100503_dominicks_che_dev_peaks_world_model_seed2_2f8317c7",
+     "20261008T101115_dominicks_che_dev_peaks_world_model_seed3_6ec679d1"
+    ],
+    "che.peaks_world_model_switching_avg3_roll_norm": [
+     "20261008T233826_dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm_seed1_65737059",
+     "20261009T044012_dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm_seed2_9b5e717e",
+     "20261009T045821_dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm_seed3_dc217d77"
+    ],
+    "sna.peaks_world_model": [
+     "20261007T081532_dominicks_sna_dev_peaks_world_model_seed1_98c76e94",
+     "20261008T102941_dominicks_sna_dev_peaks_world_model_seed2_188fc62e",
+     "20261008T103526_dominicks_sna_dev_peaks_world_model_seed3_ad536acc"
+    ],
+    "sna.peaks_world_model_switching_avg3_roll_norm": [
+     "20261008T235626_dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm_seed1_027298bc",
+     "20261009T051636_dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm_seed2_a67ae514",
+     "20261009T053419_dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm_seed3_49e32754"
+    ],
+    "sdr.peaks_world_model": [
+     "20261007T091013_dominicks_sdr_dev_peaks_world_model_seed1_83492df7",
+     "20261008T112538_dominicks_sdr_dev_peaks_world_model_seed2_7f593a93",
+     "20261008T113304_dominicks_sdr_dev_peaks_world_model_seed3_0f811d62"
+    ],
+    "sdr.peaks_world_model_switching_avg3_roll_norm": [
+     "20261009T001423_dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm_seed1_3f2c6bf0",
+     "20261009T055227_dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm_seed2_591ccf7b",
+     "20261009T061311_dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm_seed3_6b221263"
+    ],
+    "bjc.peaks_world_model": [
+     "20261007T095551_dominicks_bjc_dev_peaks_world_model_seed1_293f1e5d",
+     "20261008T115451_dominicks_bjc_dev_peaks_world_model_seed2_caf3c4b8",
+     "20261008T120038_dominicks_bjc_dev_peaks_world_model_seed3_02acca10"
+    ],
+    "bjc.peaks_world_model_switching_avg3_roll_norm": [
+     "20261009T003425_dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm_seed1_4f650f2f",
+     "20261009T063339_dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm_seed2_1ab2781a",
+     "20261009T065147_dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm_seed3_ab9c1b2d"
+    ],
+    "ana.peaks_world_model": [
+     "20261007T103654_dominicks_ana_dev_peaks_world_model_seed1_5c677c99",
+     "20261008T122450_dominicks_ana_dev_peaks_world_model_seed2_ffda04ff",
+     "20261008T123049_dominicks_ana_dev_peaks_world_model_seed3_82291734"
+    ],
+    "ana.peaks_world_model_switching_avg3_roll_norm": [
+     "20261009T005205_dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm_seed1_050f495d",
+     "20261009T071002_dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm_seed2_2f2b0121",
+     "20261009T072824_dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm_seed3_fd519212"
+    ],
+    "fre.peaks_world_model": [
+     "20261007T112251_dominicks_fre_dev_peaks_world_model_seed1_f453b5ad",
+     "20261008T130326_dominicks_fre_dev_peaks_world_model_seed2_3f95d8c1",
+     "20261008T130949_dominicks_fre_dev_peaks_world_model_seed3_7e162e64"
+    ],
+    "fre.peaks_world_model_switching_avg3_roll_norm": [
+     "20261009T041818_dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm_seed1_96596a28",
+     "20261009T074654_dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm_seed2_70b9fa89",
+     "20261009T080603_dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm_seed3_5e2f8946"
+    ]
+   }
+  },
+  "SWITCH_SHARE": {
+   "value": {
+    "che": [
+     0.6991189122200012,
+     1.0
+    ],
+    "sna": [
+     0.0,
+     0.6591337323188782
+    ],
+    "sdr": [
+     0.6355938911437988,
+     1.0
+    ],
+    "bjc": [
+     0.693662703037262,
+     1.0
+    ],
+    "ana": [
+     0.7064986824989319,
+     1.0
+    ],
+    "fre": [
+     0.6827549338340759,
+     1.0
+    ]
+   },
+   "computation": "new_share saved in every checkpoint_origin*.pt of dominicks_<cat>_dev_peaks_world_model_switching seeds 1-3: lowest and highest over runs and windows",
+   "sources": {
+    "che": [
+     "20261008T131620_dominicks_che_dev_peaks_world_model_switching_seed1_53219649",
+     "20261008T132228_dominicks_che_dev_peaks_world_model_switching_seed2_4a468c99",
+     "20261008T132839_dominicks_che_dev_peaks_world_model_switching_seed3_bbe931b6"
+    ],
+    "sna": [
+     "20261008T133444_dominicks_sna_dev_peaks_world_model_switching_seed1_1966c8ab",
+     "20261008T134024_dominicks_sna_dev_peaks_world_model_switching_seed2_131ec31b",
+     "20261008T134608_dominicks_sna_dev_peaks_world_model_switching_seed3_054622fe"
+    ],
+    "sdr": [
+     "20261008T135217_dominicks_sdr_dev_peaks_world_model_switching_seed1_8d314dbd",
+     "20261008T135951_dominicks_sdr_dev_peaks_world_model_switching_seed2_028f4dc4",
+     "20261008T140726_dominicks_sdr_dev_peaks_world_model_switching_seed3_f3bbc8af"
+    ],
+    "bjc": [
+     "20261008T141434_dominicks_bjc_dev_peaks_world_model_switching_seed1_dfdf5d07",
+     "20261008T142025_dominicks_bjc_dev_peaks_world_model_switching_seed2_8ce4baf1",
+     "20261008T142618_dominicks_bjc_dev_peaks_world_model_switching_seed3_76649c53"
+    ],
+    "ana": [
+     "20261008T143209_dominicks_ana_dev_peaks_world_model_switching_seed1_ccf20f47",
+     "20261008T143804_dominicks_ana_dev_peaks_world_model_switching_seed2_f70c7f96",
+     "20261008T144358_dominicks_ana_dev_peaks_world_model_switching_seed3_cfaebda0"
+    ],
+    "fre": [
+     "20261008T145006_dominicks_fre_dev_peaks_world_model_switching_seed1_2df25020",
+     "20261008T145631_dominicks_fre_dev_peaks_world_model_switching_seed2_77845d2a",
+     "20261008T150300_dominicks_fre_dev_peaks_world_model_switching_seed3_07054692"
+    ]
+   }
+  },
+  "ROLES": {
+   "value": {
+    "che": [
+     0.7420809796173635,
+     0.7540434831894801,
+     1.1163140326153436,
+     1.1067691876230243,
+     1.0739592575921413
+    ],
+    "sna": [
+     0.5870853571439619,
+     0.5769909094333985,
+     0.8742507644459101,
+     1.1628457409059842,
+     2.422423654350535
+    ],
+    "sdr": [
+     0.746946743346323,
+     0.7343007679162619,
+     0.7466753321701018,
+     0.9192858269315438,
+     1.046308293042595
+    ],
+    "bjc": [
+     0.991970117272157,
+     0.9871494633881543,
+     1.0997616189811987,
+     1.06230799816575,
+     1.1399564897579815
+    ],
+    "ana": [
+     0.7006254291825148,
+     0.6943604164806488,
+     0.6792826045384621,
+     0.638584324343414,
+     0.6547979970041753
+    ],
+    "fre": [
+     0.41671284154849886,
+     0.42340786395250984,
+     0.3932173836854568,
+     0.4113258033255565,
+     0.41483730274557273
+    ]
+   },
+   "computation": "dominicks_<cat>_dev_<run> seed 1, overall WRMSSE",
+   "sources": {
+    "che.peaks_lightgbm": [
+     "20261007T072612_dominicks_che_dev_peaks_lightgbm_seed1_91a298df"
+    ],
+    "che.peaks_lightgbm_roles": [
+     "20261008T015721_dominicks_che_dev_peaks_lightgbm_roles_seed1_a200af07"
+    ],
+    "che.peaks_world_model": [
+     "20261007T073528_dominicks_che_dev_peaks_world_model_seed1_ebc5beb9"
+    ],
+    "che.peaks_world_model_roles": [
+     "20261008T020715_dominicks_che_dev_peaks_world_model_roles_seed1_977596b9"
+    ],
+    "che.peaks_world_model_role_level": [
+     "20261008T021334_dominicks_che_dev_peaks_world_model_role_level_seed1_5349c725"
+    ],
+    "sna.peaks_lightgbm": [
+     "20261007T080920_dominicks_sna_dev_peaks_lightgbm_seed1_d6f45330"
+    ],
+    "sna.peaks_lightgbm_roles": [
+     "20261008T021949_dominicks_sna_dev_peaks_lightgbm_roles_seed1_54a74fdd"
+    ],
+    "sna.peaks_world_model": [
+     "20261007T081532_dominicks_sna_dev_peaks_world_model_seed1_98c76e94"
+    ],
+    "sna.peaks_world_model_roles": [
+     "20261008T022606_dominicks_sna_dev_peaks_world_model_roles_seed1_db4a7e9a"
+    ],
+    "sna.peaks_world_model_role_level": [
+     "20261008T023154_dominicks_sna_dev_peaks_world_model_role_level_seed1_602b5bef"
+    ],
+    "sdr.peaks_lightgbm": [
+     "20261007T084843_dominicks_sdr_dev_peaks_lightgbm_seed1_98b470b3"
+    ],
+    "sdr.peaks_lightgbm_roles": [
+     "20261008T023814_dominicks_sdr_dev_peaks_lightgbm_roles_seed1_c5769960"
+    ],
+    "sdr.peaks_world_model": [
+     "20261007T091013_dominicks_sdr_dev_peaks_world_model_seed1_83492df7"
+    ],
+    "sdr.peaks_world_model_roles": [
+     "20261008T030047_dominicks_sdr_dev_peaks_world_model_roles_seed1_74d0fd36"
+    ],
+    "sdr.peaks_world_model_role_level": [
+     "20261008T030831_dominicks_sdr_dev_peaks_world_model_role_level_seed1_ad2fe66a"
+    ],
+    "bjc.peaks_lightgbm": [
+     "20261007T094847_dominicks_bjc_dev_peaks_lightgbm_seed1_a2dcd6b1"
+    ],
+    "bjc.peaks_lightgbm_roles": [
+     "20261008T031551_dominicks_bjc_dev_peaks_lightgbm_roles_seed1_18b6152a"
+    ],
+    "bjc.peaks_world_model": [
+     "20261007T095551_dominicks_bjc_dev_peaks_world_model_seed1_293f1e5d"
+    ],
+    "bjc.peaks_world_model_roles": [
+     "20261008T032313_dominicks_bjc_dev_peaks_world_model_roles_seed1_d7d3afdd"
+    ],
+    "bjc.peaks_world_model_role_level": [
+     "20261008T032907_dominicks_bjc_dev_peaks_world_model_role_level_seed1_545e70e5"
+    ],
+    "ana.peaks_lightgbm": [
+     "20261007T102821_dominicks_ana_dev_peaks_lightgbm_seed1_a834ac24"
+    ],
+    "ana.peaks_lightgbm_roles": [
+     "20261008T033509_dominicks_ana_dev_peaks_lightgbm_roles_seed1_d0c5df69"
+    ],
+    "ana.peaks_world_model": [
+     "20261007T103654_dominicks_ana_dev_peaks_world_model_seed1_5c677c99"
+    ],
+    "ana.peaks_world_model_roles": [
+     "20261008T034412_dominicks_ana_dev_peaks_world_model_roles_seed1_af317af2"
+    ],
+    "ana.peaks_world_model_role_level": [
+     "20261008T035016_dominicks_ana_dev_peaks_world_model_role_level_seed1_94c695b9"
+    ],
+    "fre.peaks_lightgbm": [
+     "20261007T111004_dominicks_fre_dev_peaks_lightgbm_seed1_d28e6e44"
+    ],
+    "fre.peaks_lightgbm_roles": [
+     "20261008T035630_dominicks_fre_dev_peaks_lightgbm_roles_seed1_682b2fc9"
+    ],
+    "fre.peaks_world_model": [
+     "20261007T112251_dominicks_fre_dev_peaks_world_model_seed1_f453b5ad"
+    ],
+    "fre.peaks_world_model_roles": [
+     "20261008T040900_dominicks_fre_dev_peaks_world_model_roles_seed1_567bfab1"
+    ],
+    "fre.peaks_world_model_role_level": [
+     "20261008T041537_dominicks_fre_dev_peaks_world_model_role_level_seed1_ffe1bba5"
+    ]
+   }
+  },
+  "LEVEL_VIEWS": {
+   "value": {
+    "che": [
+     0.996086402746477,
+     1.1163140326153436,
+     0.8825314842253986,
+     0.7420809796173635
+    ],
+    "sna": [
+     1.4631099144316295,
+     0.8742507644459101,
+     1.5152955422982466,
+     0.5870853571439619
+    ],
+    "sdr": [
+     0.8638053502889452,
+     0.7466753321701018,
+     1.0692527237543006,
+     0.746946743346323
+    ],
+    "bjc": [
+     1.2294264607858487,
+     1.0997616189811987,
+     1.1591429294481945,
+     0.991970117272157
+    ],
+    "ana": [
+     0.6662878809183812,
+     0.6792826045384621,
+     0.6483190187521612,
+     0.7019407326185994
+    ],
+    "fre": [
+     0.3821354552738671,
+     0.3932173836854568,
+     0.39892752802692394,
+     0.41671284154849886
+    ]
+   },
+   "computation": "(26-week, 8-week, both levels, LightGBM): the DOM28 values and dominicks_<cat>_dev_peaks_level_views seed 1, overall WRMSSE",
+   "sources": {
+    "che.both": [
+     "20261007T124655_dominicks_che_dev_peaks_level_views_seed1_823dde01"
+    ],
+    "che.lgb": [
+     "20261006T192024_dominicks_che_dev_lightgbm_seed1_cc9d97ac"
+    ],
+    "che.world26": [
+     "20261006T193418_dominicks_che_dev_world_model_seed1_90fa312e"
+    ],
+    "che.world8": [
+     "20261007T034029_dominicks_che_dev_world_model_level8_seed1_1f33ed7f"
+    ],
+    "sna.both": [
+     "20261007T125305_dominicks_sna_dev_peaks_level_views_seed1_2931c15e"
+    ],
+    "sna.lgb": [
+     "20261006T154005_dominicks_sna_dev_lightgbm_seed1_5543857b"
+    ],
+    "sna.world26": [
+     "20261006T155035_dominicks_sna_dev_world_model_seed1_c03b73d4"
+    ],
+    "sna.world8": [
+     "20261007T015529_dominicks_sna_dev_world_model_level8_seed1_c322e0e0"
+    ],
+    "sdr.both": [
+     "20261007T125922_dominicks_sdr_dev_peaks_level_views_seed1_5617d112"
+    ],
+    "sdr.lgb": [
+     "20261006T213434_dominicks_sdr_dev_lightgbm_seed1_5f86329c"
+    ],
+    "sdr.world26": [
+     "20261006T220145_dominicks_sdr_dev_world_model_seed1_56910897"
+    ],
+    "sdr.world8": [
+     "20261007T021952_dominicks_sdr_dev_world_model_level8_seed1_ca83de76"
+    ],
+    "bjc.both": [
+     "20261007T130633_dominicks_bjc_dev_peaks_level_views_seed1_723ed0ab"
+    ],
+    "bjc.lgb": [
+     "20261006T164806_dominicks_bjc_dev_lightgbm_seed1_a46e6a0b"
+    ],
+    "bjc.world26": [
+     "20261006T165942_dominicks_bjc_dev_world_model_seed1_28d085a0"
+    ],
+    "bjc.world8": [
+     "20261007T025923_dominicks_bjc_dev_world_model_level8_seed1_3c5823c8"
+    ],
+    "ana.both": [
+     "20261007T131233_dominicks_ana_dev_peaks_level_views_seed1_f1234156"
+    ],
+    "ana.lgb": [
+     "20261006T105746_dominicks_ana_dev_lightgbm_seed1_e164225a",
+     "20261006T110626_dominicks_ana_dev_lightgbm_seed2_b3a413c9",
+     "20261006T111516_dominicks_ana_dev_lightgbm_seed3_2f7d3bed",
+     "20261006T112356_dominicks_ana_dev_lightgbm_seed4_1a7262f0",
+     "20261006T113247_dominicks_ana_dev_lightgbm_seed5_14be59cf"
+    ],
+    "ana.world26": [
+     "20261006T055838_dominicks_ana_dev_world_model_plain_seed1_35f29976",
+     "20261006T060442_dominicks_ana_dev_world_model_plain_seed2_ba299cb6",
+     "20261006T061035_dominicks_ana_dev_world_model_plain_seed3_a40f96ac",
+     "20261006T103651_dominicks_ana_dev_world_model_plain_seed4_410201b1",
+     "20261006T104247_dominicks_ana_dev_world_model_plain_seed5_35e35d22"
+    ],
+    "ana.world8": [
+     "20261007T040109_dominicks_ana_dev_world_model_level8_seed1_2bab75df"
+    ],
+    "fre.both": [
+     "20261007T131847_dominicks_fre_dev_peaks_level_views_seed1_102709fe"
+    ],
+    "fre.lgb": [
+     "20261006T194032_dominicks_fre_dev_lightgbm_seed1_c5c20b38"
+    ],
+    "fre.world26": [
+     "20261006T195814_dominicks_fre_dev_world_model_seed1_09afd880"
+    ],
+    "fre.world8": [
+     "20261007T042301_dominicks_fre_dev_world_model_level8_seed1_44ddd5ca"
+    ]
+   }
+  },
+  "M5_DEV": {
+   "value": [
+    [
+     "Seasonal naive",
+     0.8697007023158386,
+     null,
+     null
+    ],
+    [
+     "LightGBM, one model per store",
+     0.7145292293549831,
+     null,
+     null
+    ],
+    [
+     "Lift model (3 seeds)",
+     0.7125384091141722,
+     0.6826549291113856,
+     0.7339730915383867
+    ],
+    [
+     "Item encoder and readout (5 seeds)",
+     0.6990891201377598,
+     0.6693284287708973,
+     0.7244585288196751
+    ],
+    [
+     "World model (3 seeds)",
+     0.7073154748779478,
+     0.6794740473146504,
+     0.750236821067075
+    ],
+    [
+     "World model + normalised roll-forward (3 seeds)",
+     0.6561577962407809,
+     0.6460554525873783,
+     0.6751746323996818
+    ],
+    [
+     "+ average of three fits (1 run)",
+     0.6654119568544373,
+     null,
+     null
+    ],
+    [
+     "+ weekday as seven inputs (seed 1)",
+     0.6529450673530638,
+     null,
+     null
+    ],
+    [
+     "+ weekday and event kinds (seed 1)",
+     0.6457540387990014,
+     null,
+     null
+    ],
+    [
+     "+ 60,000 training steps (seed 1)",
+     0.6416550613558637,
+     null,
+     null
+    ],
+    [
+     "+ item level against past-year level (seed 1)",
+     0.6804341888391376,
+     null,
+     null
+    ]
+   ],
+   "computation": "M5 practice window, overall WRMSSE: mean, lowest and highest over the seeds named (the item encoder's five runs are the unseeded run and seeds 1-4)",
+   "sources": {
+    "Seasonal naive": [
+     "20261004T045330_m5_validation_seasonal_naive_a67817a2"
+    ],
+    "LightGBM, one model per store": [
+     "20261004T034345_m5_validation_lightgbm_11b5432b"
+    ],
+    "Lift model (3 seeds)": [
+     "20261006T220902_m5_validation_lift_seed1_785c6634",
+     "20261008T192743_m5_validation_lift_seed2_47e5a527",
+     "20261008T205734_m5_validation_lift_seed3_d6ae65f3"
+    ],
+    "Item encoder and readout (5 seeds)": [
+     "20261004T112112_m5_validation_state_model_mixed_precision_7f291533",
+     "20261004T114223_m5_validation_state_model_mixed_precision_seed1_7a380533",
+     "20261004T115943_m5_validation_state_model_mixed_precision_seed2_ae7c1f2a",
+     "20261004T121703_m5_validation_state_model_mixed_precision_seed3_30c2fd80",
+     "20261004T123419_m5_validation_state_model_mixed_precision_seed4_1c67bafa"
+    ],
+    "World model (3 seeds)": [
+     "20261006T233936_m5_validation_world_model_seed1_77b92134",
+     "20261008T055942_m5_validation_world_model_seed2_e0fa8b6c",
+     "20261008T073415_m5_validation_world_model_seed3_bcd4ab19"
+    ],
+    "World model + normalised roll-forward (3 seeds)": [
+     "20261007T153614_m5_validation_world_model_roll_norm_seed1_59a9247d",
+     "20261007T181004_m5_validation_world_model_roll_norm_seed2_6d95884b",
+     "20261008T042212_m5_validation_world_model_roll_norm_seed3_fa33f062"
+    ],
+    "+ average of three fits (1 run)": [
+     "20261009T092711_m5_validation_world_model_roll_norm_avg3_seed1_5d0e4807"
+    ],
+    "+ weekday as seven inputs (seed 1)": [
+     "20261010T095828_m5_validation_world_model_v2_weekday_seed1_226e681f"
+    ],
+    "+ weekday and event kinds (seed 1)": [
+     "20261010T113553_m5_validation_world_model_v2_weekday_events_seed1_54d33a04"
+    ],
+    "+ 60,000 training steps (seed 1)": [
+     "20261010T131417_m5_validation_world_model_v2_weekday_events_60k_seed1_bf138688"
+    ],
+    "+ item level against past-year level (seed 1)": [
+     "20261010T164659_m5_validation_world_model_v2_long_level_seed1_e7a60a7e"
+    ]
+   }
+  },
+  "STEPS2X": {
+   "value": {
+    "che": [
+     0.9712578182401036,
+     0.9012743048386113
+    ],
+    "sna": [
+     1.0919569771125999,
+     0.8098989625649766
+    ],
+    "sdr": [
+     0.7432650174513168,
+     0.76538744049624
+    ],
+    "bjc": [
+     1.0483664363038976,
+     1.0150316299003344
+    ],
+    "ana": [
+     0.6214497653573092,
+     0.6466362335767551
+    ],
+    "fre": [
+     0.3906968340735255,
+     0.3928601630993179
+    ],
+    "frat": [
+     0.41086587324031754,
+     0.41810813311732586
+    ]
+   },
+   "computation": "Change C: (normal training, twice the steps), mean overall WRMSSE over seeds 1-3",
+   "sources": {
+    "che.normal": [
+     "20261008T233826_dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm_seed1_65737059",
+     "20261009T044012_dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm_seed2_9b5e717e",
+     "20261009T045821_dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm_seed3_dc217d77"
+    ],
+    "che.steps2x": [
+     "20261011T144626_dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed1_93f22448",
+     "20261011T152140_dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed2_80b9bda5",
+     "20261011T155646_dominicks_che_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed3_874d2101"
+    ],
+    "sna.normal": [
+     "20261008T235626_dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm_seed1_027298bc",
+     "20261009T051636_dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm_seed2_a67ae514",
+     "20261009T053419_dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm_seed3_49e32754"
+    ],
+    "sna.steps2x": [
+     "20261011T163204_dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed1_9c93c1f5",
+     "20261011T170635_dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed2_abeb87fe",
+     "20261011T174106_dominicks_sna_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed3_01f29081"
+    ],
+    "sdr.normal": [
+     "20261009T001423_dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm_seed1_3f2c6bf0",
+     "20261009T055227_dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm_seed2_591ccf7b",
+     "20261009T061311_dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm_seed3_6b221263"
+    ],
+    "sdr.steps2x": [
+     "20261011T181612_dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed1_f41d6824",
+     "20261011T185417_dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed2_12c59aaf",
+     "20261011T193222_dominicks_sdr_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed3_83f9a31a"
+    ],
+    "bjc.normal": [
+     "20261009T003425_dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm_seed1_4f650f2f",
+     "20261009T063339_dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm_seed2_1ab2781a",
+     "20261009T065147_dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm_seed3_ab9c1b2d"
+    ],
+    "bjc.steps2x": [
+     "20261011T200943_dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed1_43fdb35a",
+     "20261011T204424_dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed2_1d5f34c0",
+     "20261011T211903_dominicks_bjc_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed3_5c9de9d0"
+    ],
+    "ana.normal": [
+     "20261009T005205_dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm_seed1_050f495d",
+     "20261009T071002_dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm_seed2_2f2b0121",
+     "20261009T072824_dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm_seed3_fd519212"
+    ],
+    "ana.steps2x": [
+     "20261011T215337_dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed1_01766a0f",
+     "20261011T222842_dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed2_ac60cb82",
+     "20261011T230424_dominicks_ana_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed3_ff344063"
+    ],
+    "fre.normal": [
+     "20261009T041818_dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm_seed1_96596a28",
+     "20261009T074654_dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm_seed2_70b9fa89",
+     "20261009T080603_dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm_seed3_5e2f8946"
+    ],
+    "fre.steps2x": [
+     "20261011T234058_dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed1_4e9b45d8",
+     "20261012T001801_dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed2_e4245d80",
+     "20261012T005440_dominicks_fre_dev_peaks_world_model_switching_avg3_roll_norm_steps2x_seed3_26ca83bf"
+    ],
+    "frat.normal": [
+     "20261005T133632_frat_dev_world_model_plain_seed1_e7487a23",
+     "20261005T133946_frat_dev_world_model_plain_seed2_6e17347e",
+     "20261005T134301_frat_dev_world_model_plain_seed3_042fccea"
+    ],
+    "frat.steps2x": [
+     "20261011T141020_frat_dev_world_model_plain_steps2x_seed1_9629e03f",
+     "20261011T141558_frat_dev_world_model_plain_steps2x_seed2_6b6c269c",
+     "20261011T142134_frat_dev_world_model_plain_steps2x_seed3_6c0817b3"
+    ]
+   }
+  }
+ }
+}

@@ -76,7 +76,7 @@ yet been copied into `results/promoted/`. Scores are averages over five
 seeds, lower is better.
 
 M5, 25 April to 22 May 2016: our model (item encoder and readout, mixed
-precision, A100) scores 0.699 on average, range 0.669 to 0.725, against
+precision, A100) scores 0.699 on average, range 0.669 to 0.724, against
 LightGBM at 0.715. Four of the five runs beat LightGBM.
 
 Breakfast at the Frat, the two 8-week windows before the held-out final 8
@@ -100,7 +100,7 @@ weeks:
 | Lift model + the plan for the four weeks before each forecast week | 0.411 | 0.406 to 0.418 | 0.833 | 0.846 | 0.551 | 0.409 |
 | Lift model + the same week last year and its neighbours | 0.408 | 0.394 to 0.420 | 0.848 | 0.877 | 0.544 | 0.410 |
 | Lift model + both of the above | 0.418 | 0.414 to 0.424 | 0.882 | 0.900 | 0.539 | 0.413 |
-| Lift model + recorded base price as the regular price | 0.434 | 0.418 to 0.460 | 0.897 | 0.933 | 0.558 | 0.418 |
+| Lift model + recorded base price as the regular price | 0.434 | 0.419 to 0.460 | 0.897 | 0.933 | 0.558 | 0.418 |
 | Lift model + US seasonal calendar | 0.425 | 0.416 to 0.434 | 0.847 | 0.871 | 0.543 | 0.409 |
 | Lift model + crowding | 0.406 | 0.400 to 0.414 | 0.836 | 0.868 | 0.540 | 0.406 |
 | Lift model + base price, calendar and crowding | 0.446 | 0.425 to 0.459 | 0.856 | 0.893 | 0.547 | 0.422 |
@@ -196,17 +196,17 @@ Lower is better. Reference: LightGBM 0.715, lift model 0.676, lift model trained
 
 | Run | Overall | Total | Item by store | Promo on | Promo off | Forecast / actual |
 |---|---|---|---|---|---|---|
-| Lift, stop on validation | 0.683 | 0.714 | 0.708 | 1.340 | 0.604 | 1.016 |
-| Lift, totals in the loss | 0.819 | 1.042 | 0.701 | 1.291 | 0.601 | 0.909 |
-| Lift, all fixes, long training | 0.716 | 0.751 | 0.712 | 1.341 | 0.605 | 0.971 |
-| World model, fixes | 0.732 | 0.838 | 0.704 | 1.297 | 0.604 | 0.937 |
-| World model, best recipe, fixes | 0.729 | 0.843 | 0.699 | 1.272 | 0.602 | 0.944 |
+| Lift, stop on validation | 0.683 | 0.714 | 0.708 | 1.340 | 0.604 | 1.005 |
+| Lift, totals in the loss | 0.819 | 1.042 | 0.701 | 1.291 | 0.601 | 0.918 |
+| Lift, all fixes, long training | 0.716 | 0.751 | 0.712 | 1.341 | 0.605 | 0.964 |
+| World model, fixes | 0.732 | 0.838 | 0.704 | 1.297 | 0.604 | 0.945 |
+| World model, best recipe, fixes | 0.729 | 0.843 | 0.699 | 1.272 | 0.602 | 0.946 |
 
 None beats the plain lift model (0.676). Stopping on validation keeps long
 training safe (0.683 against 1.473 without it). Adding totals to the loss makes
-the total worse, not better: it under-forecasts by 9%. The world model is level
+the total worse, not better: it under-forecasts by 8%. The world model is level
 with the lift model at item-by-store level and behind at the total, where it
-under-forecasts by 6%.
+under-forecasts by 5.5%.
 
 ## Combination with LightGBM, and negative binomial likelihood (development windows)
 
@@ -261,7 +261,7 @@ Unusual = a lever mix the item had in under 2% of its own training weeks.
 | Run | Unusual plans | Usual plans |
 |---|---|---|
 | LightGBM | 0.696 | 0.697 |
-| Lift model | 0.743 | 0.725 |
+| Lift model | 0.742 | 0.725 |
 | World model | 0.730 | 0.730 |
 
 On new items the lift model with borrowing is well ahead of LightGBM (0.890
@@ -303,7 +303,7 @@ Same item and store, two weeks in the window with different lever mixes.
 
 | Run | Picks the week that sold more | Miss on the size of the change (log scale, lower is better) |
 |---|---|---|
-| LightGBM | 78.2% | 0.448 |
+| LightGBM | 78.1% | 0.448 |
 | Lift model | 77.4% | 0.460 |
 | World model | 77.5% | 0.459 |
 | World model + plan split | 77.5% | 0.458 |
@@ -362,7 +362,7 @@ Overall score and promoted-week score, lower is better. Same settings as analges
 | tpa | 0.731 | 0.802 | 0.779 | 1.183 | 1.346 | 1.324 |
 | lnd | 0.768 | 0.735 | 0.687 | 1.200 | 1.400 | 1.214 |
 | fec | 0.414 | 0.358 | 0.397 | 1.063 | 1.363 | 1.529 |
-| bjc | 0.992 | 1.248 | 1.229 | 1.926 | 2.714 | 3.070 |
+| bjc | 0.992 | 1.247 | 1.229 | 1.926 | 2.714 | 3.070 |
 | cer | 0.753 | 0.795 | 0.673 | 1.855 | 2.022 | 2.044 |
 | cso | 0.613 | 0.532 | 0.583 | 1.226 | 1.258 | 1.272 |
 | gro | 0.901 | 1.208 | 0.809 | 1.049 | 1.243 | 1.120 |
@@ -401,7 +401,7 @@ The item's level taken from its latest 4 or 8 weeks, not the 26-week average. Ov
 | sna | 0.587 | 0.959 | 0.728 | 0.739 | 1.463 | 1.097 | 0.874 |
 | sdr | 0.747 | 1.406 | 1.383 | 1.429 | 0.864 | 0.800 | 0.747 |
 | bat | 1.188 | 1.568 | 1.528 | 2.203 | 1.465 | 1.217 | 1.195 |
-| bjc | 0.992 | 1.248 | 1.173 | 1.123 | 1.229 | 1.131 | 1.100 |
+| bjc | 0.992 | 1.247 | 1.173 | 1.123 | 1.229 | 1.131 | 1.100 |
 | cig | 0.534 | 0.918 | 1.245 | 1.216 | 0.690 | 0.688 | 0.643 |
 | che | 0.742 | 0.900 | 0.937 | 0.970 | 0.996 | 1.026 | 1.116 |
 | ana (control) | 0.702 | 0.718 | 0.649 | 0.666 | 0.666 | 0.667 | 0.679 |
@@ -427,7 +427,7 @@ item-by-store accuracy stays near LightGBM. One seed per run.
 | frd | 0.930 | 0.873 | 0.884 |
 | soa | 0.517 | 0.516 | 0.518 |
 | cra | 0.709 | 0.687 | 0.749 |
-| did | 0.344 | 0.393 | 0.406 |
+| did | 0.344 | 0.393 | 0.405 |
 | tbr | 0.647 | 0.699 | 0.686 |
 | fsf | 0.650 | 0.832 | 0.742 |
 | tna | 1.163 | 0.959 | 1.004 |
@@ -515,7 +515,7 @@ Level views: the model is scaled by the 26-week level and is also shown the 8-we
 | cig | 0.534 | 0.690 | 0.643 | 0.440 |
 | tpa | 0.731 | 0.779 | 0.857 | 0.831 |
 | ber | 0.454 | 0.470 | 0.505 | 0.490 |
-| did | 0.344 | 0.393 | 0.406 | 0.388 |
+| did | 0.344 | 0.393 | 0.405 | 0.388 |
 
 Showing both levels is the best world-model version in 4 of 10 categories (cheese, analgesics, cigarettes, dish detergent) and beats LightGBM in 3 (analgesics, frozen entrees, cigarettes). It does not fix the categories the 8-week level fixed: snack crackers (1.515, promoted weeks forecast at 1.86 times actual) and soft drinks (1.069) stay at the 26-week failure. The model does not learn to switch to the recent level for in-and-out items when the recent level is only an input and the 26-week level still sets the scale.
 
@@ -570,7 +570,7 @@ Findings.
 | Run | Seed 1 | Seed 2 | Seed 3 | Mean | Range |
 |---|---|---|---|---|---|
 | World model + normalisation, overall | 0.646 | 0.675 | 0.647 | 0.656 | 0.646 to 0.675 |
-| World model, overall | 0.692 | 0.680 | 0.750 | 0.707 | 0.680 to 0.750 |
+| World model, overall | 0.692 | 0.679 | 0.750 | 0.707 | 0.679 to 0.750 |
 | World model + normalisation, total | 0.510 | 0.577 | 0.518 | 0.535 | |
 | World model, total | 0.600 | 0.579 | 0.722 | 0.634 | |
 | World model + normalisation, item by store | 0.835 | 0.833 | 0.835 | 0.834 | |
@@ -578,7 +578,7 @@ Findings.
 
 References: lift model 0.683 and LightGBM 0.715 (one seed each in this table's setting; LightGBM is deterministic).
 
-The gain holds on three seeds: 0.656 against 0.707, and the worst normalised seed (0.675) is better than the best plain seed (0.680). All of it is in the totals; item-by-store error is unchanged (0.834 against 0.831). Normalisation also makes the model steadier across seeds (range 0.029 against 0.070). It is the best M5 result so far and ahead of LightGBM by 0.059. On Dominick's (8 weekly steps) it did not help; on M5 (28 daily steps) it does, which fits the reading that it stops the rolled state drifting over a long roll.
+The gain holds on three seeds: 0.656 against 0.707, and the worst normalised seed (0.675) is better than the best plain seed (0.679). All of it is in the totals; item-by-store error is unchanged (0.834 against 0.831). Normalisation also makes the model steadier across seeds (range 0.029 against 0.071). It is the best M5 result so far and ahead of LightGBM by 0.059. On Dominick's (8 weekly steps) it did not help; on M5 (28 daily steps) it does, which fits the reading that it stops the rolled state drifting over a long roll.
 
 ## LightGBM against the world model on three seeds (Dominick's, six categories, development windows)
 
@@ -586,7 +586,7 @@ Job `configs/jobs/dominicks_peaks_seeds.yaml` adds seeds 2 and 3 to the peaks-an
 
 | Category | LightGBM | World model | Seeds where the world model is better |
 |---|---|---|---|
-| Cheese | 0.749 (0.742 to 0.759) | 1.088 (0.981 to 1.167) | 0 of 3 |
+| Cheese | 0.749 (0.742 to 0.759) | 1.088 (0.981 to 1.168) | 0 of 3 |
 | Snack crackers | 0.586 (0.581 to 0.590) | 0.813 (0.751 to 0.874) | 0 of 3 |
 | Soft drinks | 0.759 (0.747 to 0.775) | 0.902 (0.747 to 1.123) | 1 of 3 |
 | Bottled juice | 0.987 (0.979 to 0.992) | 1.074 (1.033 to 1.100) | 0 of 3 |
@@ -647,7 +647,7 @@ Job `configs/jobs/dominicks_switching_roll_norm.yaml` (commit 73c6686): the worl
 
 | Category | LightGBM | World model | World model + switching | World model + switching + normalised roll-forward |
 |---|---|---|---|---|
-| Cheese | 0.749 | 1.088 (0.981 to 1.167) | 1.111 (1.005 to 1.198) | 1.028 (0.963 to 1.067) |
+| Cheese | 0.749 | 1.088 (0.981 to 1.168) | 1.111 (1.005 to 1.198) | 1.028 (0.963 to 1.067) |
 | Snack crackers | 0.586 | 0.813 (0.751 to 0.874) | 0.752 (0.727 to 0.776) | 0.830 (0.713 to 0.979) |
 | Soft drinks | 0.759 | 0.902 (0.747 to 1.123) | 0.789 (0.711 to 0.895) | 0.827 (0.749 to 0.887) |
 | Bottled juice | 0.987 | 1.074 (1.033 to 1.100) | 1.066 (1.009 to 1.101) | 1.047 (1.020 to 1.080) |
@@ -672,7 +672,7 @@ Job `configs/jobs/m5_lift_seeds.yaml` (commit 7e5c0f4): seeds 2 and 3 of `m5_val
 |---|---|---|---|
 | LightGBM | 1 | 0.715 | |
 | Lift model | 3 | 0.713 | 0.683 to 0.734 |
-| World model | 3 | 0.707 | 0.680 to 0.750 |
+| World model | 3 | 0.707 | 0.679 to 0.750 |
 | World model + normalised roll-forward | 3 | **0.656** | 0.646 to 0.675 |
 
 Lift model by seed: 0.683, 0.721, 0.734 (category total 0.641 and 0.664 for seeds 2 and 3; item-store 0.830 and 0.833).
@@ -715,7 +715,7 @@ Jobs `dominicks_switching_avg3_roll_norm.yaml` (seed 1, commit edad17d), `domini
 | Snack crackers | 0.586 | 0.830 | 1.092 (0.730 to 1.806) | 1.806, 0.740, 0.730 |
 | Soft drinks | 0.759 | 0.827 | **0.743** (0.713 to 0.770) | 0.770, 0.713, 0.746 |
 | Bottled juice | 0.987 | 1.047 | 1.048 (1.019 to 1.065) | 1.061, 1.019, 1.065 |
-| Analgesics | 0.701 | 0.696 | **0.622** (0.618 to 0.625) | 0.625, 0.622, 0.618 |
+| Analgesics | 0.701 | 0.696 | **0.621** (0.618 to 0.625) | 0.625, 0.622, 0.618 |
 | Frozen entrees | 0.419 | 0.404 | **0.391** (0.386 to 0.398) | 0.386, 0.388, 0.398 |
 
 Findings.
@@ -791,7 +791,7 @@ Job `configs/jobs/final_dominicks.yaml`, commit 53fffe5, run 9 to 10 October 202
 | Snack crackers | 0.448 (0.397 to 0.531) | 0.412 (0.405 to 0.419) | 0.608 | 0.596 | 0.929 | 0.917 | 1.092 / 0.586 |
 | Soft drinks | 0.830 (0.805 to 0.868) | 0.989 (0.982 to 0.996) | 0.734 | 0.652 | 0.835 | 0.743 | 0.743 / 0.759 |
 | Bottled juice | 0.987 (0.943 to 1.029) | 0.994 (0.989 to 0.998) | 0.816 | 0.750 | 0.839 | 0.787 | 1.048 / 0.987 |
-| Analgesics | 0.867 (0.842 to 0.894) | 0.978 (0.971 to 0.987) | 0.713 | 0.714 | 0.925 | 0.904 | 0.622 / 0.701 |
+| Analgesics | 0.867 (0.842 to 0.894) | 0.978 (0.971 to 0.987) | 0.713 | 0.714 | 0.925 | 0.904 | 0.621 / 0.701 |
 | Frozen entrees | 0.485 (0.476 to 0.492) | 0.478 (0.475 to 0.483) | 0.558 | 0.529 | 0.889 | 0.795 | 0.391 / 0.419 |
 
 Findings.
@@ -966,7 +966,7 @@ Units over the 28 days, each seed separately (`analysis/lift_apr_seed2/april_fai
 
 | Series | Sold | World model (seeds 1, 2, 3) | LightGBM | Lift | TimesFM mean | Graph |
 |---|---|---|---|---|---|---|
-| HOUSEHOLD_1_146, four stores together | 120 | 121, 600, 243 | 3.1, 2.9, 3.3 | 79, 206,886, 316 | 7.8 | 59, 45, 55 |
+| HOUSEHOLD_1_146, four stores together | 120 | 121, 600, 243 | 3.0, 3.0, 3.2 | 79, 206,886, 316 | 7.8 | 59, 45, 55 |
 | FOODS_3_443 in WI_1 | 4 | 26, 1, 18 | 3.4, 3.4, 3.2 | 346, 25,348, 366 | 0.4 | 10, 10, 10 |
 
 - HOUSEHOLD_1_146 had sold almost nothing before (LightGBM and TimesFM, working from history, forecast about 3 and 8 units) and sold 120 over the 28 days, which held its first price cut in a year (25%, one week). The world model, which reads the cut through its plan, forecast 121 on seed 1 and 243 and 600 on the others: the right direction, with the size varying by seed. The lift model's seeds 1 and 3 were 79 and 316; seed 2 reached its ceiling.
@@ -1027,9 +1027,9 @@ Findings.
 
 | Plan input | Days back | March: control / rolled state | April | Test period |
 |---|---|---|---|---|
-| Price against the item's regular price (the discount) | 0 | 0.00 / 0.83 | 0.02 / 0.58 | 0.00 / 0.80 |
-| | 1 | 0.00 / 0.81 | 0.02 / 0.65 | 0.00 / 0.79 |
-| | 7 | 0.00 / 0.59 | 0.02 / 0.48 | 0.00 / 0.46 |
+| Price against the item's regular price (the discount) | 0 | -0.01 / 0.83 | 0.02 / 0.58 | 0.00 / 0.80 |
+| | 1 | -0.01 / 0.81 | 0.02 / 0.65 | 0.00 / 0.79 |
+| | 7 | -0.01 / 0.59 | 0.02 / 0.48 | 0.00 / 0.46 |
 | Price against the item's usual price | 0 | 0.12 / 0.90 | 0.55 / 0.87 | 0.17 / 0.89 |
 | | 7 | 0.14 / 0.68 | 0.55 / 0.73 | 0.18 / 0.67 |
 | Event day | 0 | 0.00 / 0.99 | no event in the window | 0.00 / 0.99 |
@@ -1039,7 +1039,7 @@ Findings.
 
 Findings.
 
-- The state the world model carries forward holds the plan: the day's discount is read back with R squared 0.58 to 0.83 against 0.00 to 0.02 from the state before the window; events and SNAP days at 0.98 to 0.99.
+- The state the world model carries forward holds the plan: the day's discount is read back with R squared 0.58 to 0.83 against -0.01 to 0.02 from the state before the window; events and SNAP days at 0.98 to 0.99.
 - It still holds most of it a week later (discount 0.46 to 0.59), which is what a model needs to forecast the week after a promotion.
 - The lift model has no state carried forward; its read-out from history alone is the control (April: discount 0.01).
 - This shows the plan is in the state, not that the forecast uses it correctly; plan A against plan B and the after-promotion checks test that.
@@ -1100,15 +1100,15 @@ Job `configs/jobs/timesfm_frat_dominicks.yaml`, commit 4f99140, run 12 October 2
 | Dominick's cheese | 0.829 | 0.897 / 0.708 | 0.792 | 0.715 / 0.702 | 0.855 | 0.343 |
 | Dominick's snack crackers | 0.468 | 0.448 / 0.412 | 0.640 | 0.608 / 0.596 | 0.927 | 0.630 |
 | Dominick's soft drinks | 1.070 | 0.830 / 0.989 | 0.895 | 0.734 / 0.652 | 0.731 | 0.462 |
-| Dominick's bottled juice | **0.940** | 0.987 / 0.994 | 0.782 | 0.816 / 0.750 | 0.866 | 0.327 |
-| Dominick's analgesics | 1.009 | 0.867 / 0.978 | 0.790 | 0.713 / 0.714 | 0.973 | 0.306 |
+| Dominick's bottled juice | **0.939** | 0.987 / 0.994 | 0.782 | 0.816 / 0.750 | 0.866 | 0.327 |
+| Dominick's analgesics | 1.008 | 0.867 / 0.978 | 0.790 | 0.713 / 0.714 | 0.973 | 0.306 |
 | Dominick's frozen entrees | 0.563 | 0.485 / 0.478 | 0.682 | 0.558 / 0.529 | 0.869 | 0.290 |
 
 Findings.
 
 - On the weekly, promotion-driven data TimesFM is behind both plan-aware models item by store in every category but bottled juice, and on Frat (0.827 against 0.608 and 0.665). The reverse of M5, where it was best item by store in every window.
 - The reason shows in the promoted weeks: TimesFM forecasts 29% to 63% of what sold in a promoted week, and 6% to 21% over in ordinary weeks. With no plan it cannot see the promotion coming.
-- Overall it is the lowest in one category (bottled juice, 0.940) and the highest of the three in three (soft drinks, analgesics, frozen entrees).
+- Overall it is the lowest in one category (bottled juice, 0.939) and the highest of the three in three (soft drinks, analgesics, frozen entrees).
 - So whether history alone is enough depends on how much of the sales the plan moves: on M5, where prices change rarely, history read by a large model is best item by store; where promotions drive the weeks, the plan is needed.
 
 | Run | Folder |
@@ -1126,8 +1126,8 @@ Jobs `configs/jobs/timesfm_plan_frat_dominicks.yaml` and `configs/jobs/timesfm_p
 | Dominick's cheese | 0.829 | **0.545** | 0.897 | 0.708 | 0.699 | 0.685 (0.343) |
 | Dominick's snack crackers | 0.468 | 0.475 | 0.448 | **0.412** | 0.614 | 1.129 (0.630) |
 | Dominick's soft drinks | 1.070 | 0.974 | **0.830** | 0.989 | 0.780 | 0.932 (0.462) |
-| Dominick's bottled juice | **0.940** | 0.990 | 0.987 | 0.994 | 0.754 | 0.603 (0.327) |
-| Dominick's analgesics | 1.009 | 0.889 | **0.867** | 0.978 | 0.742 | 0.779 (0.306) |
+| Dominick's bottled juice | **0.939** | 0.990 | 0.987 | 0.994 | 0.754 | 0.603 (0.327) |
+| Dominick's analgesics | 1.008 | 0.889 | **0.867** | 0.978 | 0.742 | 0.779 (0.306) |
 | Dominick's frozen entrees | 0.563 | 0.566 | 0.485 | **0.478** | 0.599 | 0.942 (0.290) |
 | M5, 29 Feb to 27 Mar | 0.854 | 0.858 | **0.642** | 0.709 | 0.837 | |
 | M5, 28 Mar to 24 Apr | 0.819 | 0.772 | **0.555** | 0.557 | 0.829 | |
@@ -1137,7 +1137,7 @@ Jobs `configs/jobs/timesfm_plan_frat_dominicks.yaml` and `configs/jobs/timesfm_p
 Findings.
 
 - On the promotion-driven data the plan closes most of TimesFM's promoted-week gap: it forecasts 60% to 113% of promoted-week sales against 29% to 63% without the plan, and overall improves in Frat (0.965 to 0.686), cheese (0.829 to 0.545), soft drinks and analgesics.
-- It is the best model in cheese (0.545 against 0.708 for LightGBM), level with the world model on Frat (0.686 against 0.681), and behind the world model or LightGBM in the other four Dominick's categories. In bottled juice the plan made it slightly worse (0.940 to 0.990).
+- It is the best model in cheese (0.545 against 0.708 for LightGBM), level with the world model on Frat (0.686 against 0.681), and behind the world model or LightGBM in the other four Dominick's categories. In bottled juice the plan made it slightly worse (0.939 to 0.990).
 - On M5 the plan changes almost nothing: item by store within 0.002 of TimesFM without the plan in every window, overall better in two windows and worse in two. Where prices change rarely, the plan carries little that history does not.
 - So a plan added on top of a pretrained history model recovers much of what promotions cost it, but does not replace a model trained on the plan.
 
@@ -1157,7 +1157,7 @@ Job `configs/jobs/dev_steps2x.yaml`, commit 6a98e67, run 11 to 12 October 2026. 
 | Dominick's snack crackers | 1.806, 0.740, 0.730 (1.092) | 0.817, 0.699, 0.913 (0.810) | mixed: seed 1 no longer fails, seed 3 worse |
 | Dominick's soft drinks | 0.770, 0.713, 0.746 (0.743) | 0.745, 0.788, 0.763 (0.765) | 0.022 worse |
 | Dominick's bottled juice | 1.061, 1.019, 1.065 (1.048) | 1.054, 1.005, 0.986 (1.015) | 0.033 better |
-| Dominick's analgesics | 0.625, 0.622, 0.618 (0.622) | 0.644, 0.645, 0.651 (0.647) | 0.025 worse |
+| Dominick's analgesics | 0.625, 0.622, 0.618 (0.621) | 0.644, 0.645, 0.651 (0.647) | 0.025 worse |
 | Dominick's frozen entrees | 0.386, 0.388, 0.398 (0.391) | 0.394, 0.377, 0.408 (0.393) | level |
 | Frat | 0.406, 0.408, 0.419 (0.411) | 0.420, 0.408, 0.426 (0.418) | 0.007 worse |
 

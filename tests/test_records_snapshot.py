@@ -89,7 +89,10 @@ def disagreements(block: str, got, want) -> list[str]:
     bad = same_shape(got, want)
     if bad:
         return [f"{block}: {d}" for d in bad]
-    for (path, g), (_, w) in zip(walk(got), walk(want)):
+    for path, w in walk(want):  # matched by path: the two files may list a block's keys in different orders
+        g = got
+        for k in path:
+            g = g[k]
         if isinstance(g, (int, float)) and isinstance(w, (int, float)):
             d = decimals(block, path)
             if abs(g - w) > 0.5 * 10 ** -d + 1e-9:
@@ -152,7 +155,7 @@ def test_rwdata_refuses_to_use_transcribed_values_unless_asked():
                        env={**env, "RWDATA_ALLOW_TRANSCRIBED": "1"}, capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
     assert "WARNING" in r.stderr and r.stdout.split()[0] == "transcribed"
-    assert "(0.0, 0.59)" in r.stdout and "(0.702, 0.718, 0.666, 0.679)" in r.stdout
+    assert "(-0.01, 0.59)" in r.stdout and "(0.702, 0.718, 0.666, 0.679)" in r.stdout
 
 
 # ------------------------------------------------- synthetic run folders ---
