@@ -1,0 +1,8 @@
+data,windows_set,model,bottom_change,total_change,persist_h1,persist_h2,persist_h3,persist_h4,persist_h5,persist_h6,persist_h7,persist_h8,probe_before_r2,probe_after_r2,windows
+dominicks_che,rolling,lift,0.26303,0.44363,1.0458,0,0,0,0,0,0,0,,,6
+dominicks_che,rolling,world_model,0.29417,0.53677,1.3387,0.02157,0.083372,0.10421,0.093162,0.083562,0.051148,0.043994,0.91144,0.92089,6
+dominicks_sdr,rolling,world_model,0.38407,0.015403,6.813,0.52024,0.28026,0.14781,0.15263,0.12791,0.11542,0.11715,0.86027,0.8659,2
+dominicks_sna,rolling,lift,0.26597,0.25878,1.8215,0,0,0,0,0,0,0,,,6
+dominicks_sna,rolling,world_model,0.26319,0.24128,2.295,0.14596,0.15018,0.13536,0.051791,0.047687,0.042785,0.039944,0.86432,0.87191,6
+frat,final,lift,0.3371,0.16244,0.41835,0,0,0,0,0,0,0,,,1
+frat,final,world_model,0.35605,0.1037,0.37058,-0.024765,-0.027766,-0.015456,-0.010137,-0.007899,-0.0071685,-0.0065832,,,1
