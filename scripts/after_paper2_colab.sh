@@ -8,8 +8,4 @@ git pull -q origin main && pip install -q -e ".[trees,deep,fetch,foundation,benc
 python scripts/audit_runs.py checkpoints --results "$OUT" --pattern "*paper2_refit_*" "*frat_*" "*dominicks_*" "*m5_*"
 python scripts/audit_summary.py --results "$OUT" --out "$OUT/paper2_summary"
 echo "paper 2 audit summary written"
-python -m rwm.experiments.job --job configs/jobs/paper1_revision_m5.yaml --out "$OUT"
-python scripts/mechanism_tests.py --results "$OUT" --out "$OUT/paper1_revision/mechanism_m5.csv" \
-  --pattern "*rev_m5_rolling_world_model_seed1_*" "*rev_m5_rolling_lift_seed1_*" "*m5_test_world_model_roll_norm_seed1_*" "*m5_test_lift_seed1_*"
-python scripts/revision_analysis.py --results "$OUT" --out "$OUT/paper1_revision/m5" --keys m5
-echo "paper 1 revision M5 finished"
+# the paper 1 revision M5 months now run on the paper 1 runtime (scripts/paper1_l4_chain.sh)
