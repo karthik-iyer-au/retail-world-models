@@ -107,3 +107,17 @@ level.
 - Every model, window and test is reported, including those that go against
   the paper's earlier claims.
 - The title is chosen after these results.
+
+## Amendments
+
+**14 October 2026, before any reconciliation result was read.** Base
+forecasts for reconciliation: seasonal AutoETS (season 52 weeks, or 7 days on
+M5) is fitted at the aggregate nodes only; the item-by-store nodes take a
+non-seasonal AutoETS. Seasonal ETS costs about ten times as much per node and
+the bottom level holds most nodes (about 9,000 per Dominick's category), which
+put the reconciliation of the rolling windows beyond the compute available.
+Frat's reconciliation, computed earlier with seasonal ETS at every node, is
+recomputed under this rule so every data set uses the same one; the earlier
+numbers are not used. The item bootstrap is now computed in closed form at the
+levels where each node holds one item and by one matrix product elsewhere; the
+numbers are the same as before (tested against the direct computation).

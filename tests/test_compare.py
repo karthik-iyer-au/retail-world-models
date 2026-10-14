@@ -75,3 +75,22 @@ def test_reconcile_all_runs_and_returns_bottom_forecasts(fr):
         assert b.shape == (len(fr.attrs), 8), name
         assert np.isfinite(b).all() and (b >= 0).all(), name
     assert "ets_mint_shrink" in out and "m_with_ets_wls_var" in out
+
+
+def test_fast_bootstrap_equals_the_direct_computation(fr):
+    rng = np.random.default_rng(3)
+    fcs = {"a": fr.units[:, -8:] * 1.1, "b": fr.units[:, -8:] * rng.uniform(0.5, 1.5, fr.units[:, -8:].shape)}
+    bs = C.Bootstrap(fr, 2, n=40, seed=5)
+    fast, slow = bs.scores(fcs, chunk=7), bs.scores_reference(fcs)
+    for m in fcs:
+        assert np.allclose(fast[m], slow[m], rtol=1e-6, atol=1e-9)
+
+
+def test_fast_bootstrap_handles_an_item_missing_from_a_resample_and_a_coarse_level(fr):
+    fc = fr.units[:, -8:] * 0.9
+    bs = C.Bootstrap(fr, 2, n=4, seed=1)
+    bs.counts[:] = 0
+    bs.counts[:, 0] = 6  # only the first item, six times
+    bs.counts[1] = [1, 1, 1, 1, 1, 1]
+    fast, slow = bs.scores({"m": fc}), bs.scores_reference({"m": fc})
+    assert np.allclose(fast["m"], slow["m"], rtol=1e-6)

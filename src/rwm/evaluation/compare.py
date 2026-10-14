@@ -12,6 +12,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import scipy.sparse as sp
 
 from rwm.data import load_dataset
 from rwm.data.schema import DATE, ITEM, PRICE, SERIES, UNITS
@@ -80,6 +81,31 @@ def level_scores(fr: Frame, origin: int, fc: np.ndarray, weights: np.ndarray | N
     return {lv["level"]: lv["wrmsse"] for lv in sc["by_level"]}
 
 
+class _Mixer:
+    """Products of resample counts (k x items) with item-by-node sums
+    (items x nodes x periods), on the GPU when there is one."""
+
+    def __init__(self, X: np.ndarray):
+        self.shape = X.shape[1:]
+        flat = X.reshape(X.shape[0], -1)
+        self.torch = None
+        try:
+            import torch
+            if torch.cuda.is_available():
+                self.torch, self.X = torch, torch.as_tensor(flat, device="cuda", dtype=torch.float64)
+        except ImportError:
+            pass
+        if self.torch is None:
+            self.X = flat
+
+    def __call__(self, c: np.ndarray) -> np.ndarray:
+        if self.torch is not None:
+            out = (self.torch.as_tensor(c, device="cuda", dtype=self.torch.float64) @ self.X).cpu().numpy()
+        else:
+            out = c @ self.X
+        return out.reshape(len(c), *self.shape)
+
+
 class Bootstrap:
     """Item bootstrap of WRMSSE at every level: items are drawn with replacement,
     every series of a drawn item counts as often as the item was drawn, and the
@@ -97,8 +123,62 @@ class Bootstrap:
         self.level_codes = [fr.codes(c) for c in fr.levels]
         self.level_names = ["x".join(c) if c else "total" for c in fr.levels]
 
-    def scores(self, forecasts: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
-        """For each model: an array resamples x levels of WRMSSE."""
+    def scores(self, forecasts: dict[str, np.ndarray], chunk: int = 50) -> dict[str, np.ndarray]:
+        """For each model: an array resamples x levels of WRMSSE.
+
+        Exact and fast. At a level whose every node holds one item (item,
+        item x store), a resample multiplies a node's history, actuals and
+        forecasts by its item's count, which leaves the node's RMSSE unchanged:
+        only the revenue weights change. At a coarser level, the node sums of
+        every resample are one product of the resample counts with the
+        item-by-node sums (on the GPU when there is one)."""
+        fr = self.fr
+        hist, act = fr.units[:, :self.t0].astype(np.float64), fr.units[:, self.t0:self.t1].astype(np.float64)
+        n_items = len(self.items)
+        out = {m: np.zeros((self.n, len(self.level_codes))) for m in forecasts}
+        counts = self.counts.astype(np.float64)
+        for j, codes in enumerate(self.level_codes):
+            g = int(codes.max()) + 1
+            pair = np.unique(codes * n_items + self.item_of)
+            if len(pair) == g:  # one item per node
+                node_item = np.zeros(g, dtype=int)
+                node_item[pair // n_items] = pair % n_items
+                h, a = _sum_by_group(hist, codes, g), _sum_by_group(act, codes, g)
+                rev = _sum_by_group(self.rev[:, None], codes, g)[:, 0]
+                scale = series_scale(h, fr.lag)
+                rw = counts[:, node_item] * rev[None, :]  # resamples x nodes
+                total = rw.sum(axis=1)
+                for m, fc in forecasts.items():
+                    f = _sum_by_group(fc.astype(np.float64), codes, g)
+                    sc = np.sqrt(((a - f) ** 2).mean(axis=1) / scale)
+                    ok = np.isfinite(sc)
+                    out[m][:, j] = (rw[:, ok] * sc[ok]).sum(axis=1) / total
+                continue
+            # item-by-node sums: (items, nodes, periods)
+            key = self.item_of * g + codes
+            M = sp.csr_matrix((np.ones(len(key)), (key, np.arange(len(key)))), shape=(n_items * g, len(key)))
+
+            def by_item(x):
+                return np.asarray(M @ x).reshape(n_items, g, x.shape[1])
+            H, A = _Mixer(by_item(hist)), _Mixer(by_item(act))
+            R = by_item(self.rev[:, None].astype(np.float64))[:, :, 0]
+            F = {m: _Mixer(by_item(fc.astype(np.float64))) for m, fc in forecasts.items()}
+            for b0 in range(0, self.n, chunk):
+                c = counts[b0:b0 + chunk]
+                h, a = H(c), A(c)  # chunk x nodes x periods
+                rw = c @ R
+                rw = rw / rw.sum(axis=1, keepdims=True)
+                k = len(c)
+                scale = series_scale(h.reshape(k * g, -1), fr.lag).reshape(k, g)
+                for m in forecasts:
+                    f = F[m](c)
+                    sc = np.sqrt(((a - f) ** 2).mean(axis=2) / scale)
+                    ok = np.isfinite(sc) & (rw > 0)
+                    out[m][b0:b0 + k, j] = np.where(ok, sc * rw, 0.0).sum(axis=1)
+        return out
+
+    def scores_reference(self, forecasts: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
+        """The direct computation, resample by resample (slow; kept to check `scores`)."""
         fr = self.fr
         hist, act = fr.units[:, :self.t0].astype(np.float32), fr.units[:, self.t0:self.t1].astype(np.float32)
         out = {m: np.zeros((self.n, len(self.level_codes))) for m in forecasts}

@@ -13,6 +13,8 @@ nodes for any diagonal W.
 """
 from __future__ import annotations
 
+import os
+
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
@@ -22,6 +24,9 @@ from rwm.evaluation.compare import Frame
 from rwm.evaluation.hierarchy import _sum_by_group
 
 MAX_DENSE = 6000
+# worker processes for the ETS fits; each holds a copy of its share of the
+# histories, so many workers on a large hierarchy can run out of memory
+ETS_JOBS = int(os.environ.get("RWM_ETS_JOBS", "4"))
 
 
 def summing_matrix(fr: Frame) -> tuple[sp.csr_matrix, list[np.ndarray]]:
@@ -36,10 +41,11 @@ def summing_matrix(fr: Frame) -> tuple[sp.csr_matrix, list[np.ndarray]]:
     return sp.vstack(blocks).tocsr(), codes
 
 
-def ets_base(history: np.ndarray, horizon: int, season: int, keep: int = 104):
+def ets_base(history: np.ndarray, horizon: int, season: int, keep: int = 104, seasonal: np.ndarray | None = None):
     """AutoETS forecasts, in-sample one-step residual variances, and the last
     `keep` in-sample residuals (node x period, NaN before a node's start) for
-    each row of `history` (node x period), from its first non-zero value."""
+    each row of `history` (node x period), from its first non-zero value.
+    `seasonal` marks the rows that may take a seasonal model (all by default)."""
     from statsforecast import StatsForecast
     from statsforecast.models import AutoETS, Naive
 
@@ -53,13 +59,15 @@ def ets_base(history: np.ndarray, horizon: int, season: int, keep: int = 104):
     df = pd.concat(rows, ignore_index=True)
     # a seasonal ETS needs at least two seasons and a little more; shorter nodes get a non-seasonal one
     long = lengths >= 2 * season + 4 if season > 1 else np.zeros(len(lengths), dtype=bool)
+    if seasonal is not None:
+        long &= seasonal
     parts_fc, parts_fit = [], []
     for mask, m in ((long, season), (~long, 1)):
         ids = np.flatnonzero(mask)
         if not len(ids):
             continue
         # a node where ETS cannot be fitted (for example a constant history) falls back to the last value
-        sf = StatsForecast(models=[AutoETS(season_length=m)], freq=1, n_jobs=-1, fallback_model=Naive())
+        sf = StatsForecast(models=[AutoETS(season_length=m)], freq=1, n_jobs=ETS_JOBS, fallback_model=Naive())
         part = df[df["unique_id"].isin(ids)]
         parts_fc.append(sf.forecast(df=part, h=horizon, fitted=True))
         parts_fit.append(sf.forecast_fitted_values())
@@ -123,8 +131,10 @@ def reconcile_all(fr: Frame, origin: int, season: int, bottoms: dict[str, np.nda
     H = t1 - t0
     S, codes = summing_matrix(fr)
     hist = np.vstack([_sum_by_group(fr.units[:, :t0], c, int(c.max()) + 1) for c in codes])
-    base, var, R = ets_base(hist, H, season)
     nb = S.shape[1]
+    # seasonal ETS at the aggregate nodes only; the item-by-store nodes take a
+    # non-seasonal one (docs/PAPER1_REVISION_PLAN.md, amendment of 14 October 2026)
+    base, var, R = ets_base(hist, H, season, seasonal=np.arange(S.shape[0]) < S.shape[0] - nb)
     last = codes[-1]  # the bottom level: one node per series, nodes sorted by the level's columns
     if int(last.max()) + 1 != nb or len(np.unique(last)) != nb:
         raise ValueError("the last level of the hierarchy must be one node per series")

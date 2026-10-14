@@ -84,6 +84,12 @@ def matrices(fr, fcs, origin):
     return mats
 
 
+def save(acc: dict, out: Path) -> None:
+    for part, rowsl in acc.items():
+        if rowsl and part != "mcs":
+            pd.DataFrame(rowsl).to_csv(out / f"{part}.csv", index=False)
+
+
 def main(argv=None):
     p = argparse.ArgumentParser()
     p.add_argument("--results", required=True)
@@ -154,10 +160,9 @@ def main(argv=None):
                     for name, b in recs.items():
                         for lv, v in C.level_scores(fr, o, b).items():
                             acc["reconcile"].append({**base, "method": name, "level": lv, "wrmsse": v})
+                save(acc, out)  # after every window, so a lost runtime costs one window
+                print(f"{key} {wset} window {o} done, {time.time() - t_start:.0f} s", flush=True)
             print(f"{key} {wset}: {len(origins)} windows, {len(fcs)} models, {time.time() - t_start:.0f} s", flush=True)
-            for part, rowsl in acc.items():
-                if rowsl and part != "mcs":
-                    pd.DataFrame(rowsl).to_csv(out / f"{part}.csv", index=False)
     if "mcs" in a.parts and (out / "scores.csv").exists():
         sc = pd.read_csv(out / "scores.csv")
         mcs = []
