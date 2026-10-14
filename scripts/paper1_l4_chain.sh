@@ -38,7 +38,7 @@ for key in $KEYS; do
   guarded python scripts/revision_analysis.py --results "$OUT" --out "$REV/weekly_$key" --keys "$key" \
     --parts scores paired mcs intervals decisions || echo "analysis FAILED for $key"
 done
-python scripts/records_snapshot.py --results "$OUT" --out "$REV/snapshot.json" || echo "snapshot FAILED"
+python scripts/records_snapshot.py --results "$OUT" --results results/promoted --out "$REV/snapshot.json" || echo "snapshot FAILED"
 for key in frat $KEYS; do  # Frat again: base forecasts under the amendment of 14 October 2026
   guarded python scripts/revision_analysis.py --results "$OUT" --out "$REV/reconcile_$key" --keys "$key" \
     --parts reconcile || echo "reconciliation FAILED for $key"

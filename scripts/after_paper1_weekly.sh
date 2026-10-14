@@ -9,5 +9,5 @@ python scripts/mechanism_tests.py --results "$OUT" --out "$OUT/paper1_revision/m
             "*rev_frat_rolling_world_model_seed1_*" "*rev_frat_rolling_lift_seed1_*" "*frat_final_world_model_seed1_*" "*frat_final_lift_seed1_*"
 python scripts/revision_analysis.py --results "$OUT" --out "$OUT/paper1_revision/weekly" \
   --keys frat dominicks_che dominicks_sna dominicks_sdr dominicks_bjc dominicks_ana dominicks_fre
-python scripts/records_snapshot.py --results "$OUT" --out "$OUT/paper1_revision/snapshot.json"
+python scripts/records_snapshot.py --results "$OUT" --results results/promoted --out "$OUT/paper1_revision/snapshot.json"
 echo "paper 1 revision weekly analyses finished"
