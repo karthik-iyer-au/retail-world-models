@@ -3,6 +3,7 @@
 # Each step skips work already saved, so the script can be started again after a dropped runtime.
 set -u
 OUT="$1"
+if [ ! -d "$OUT" ]; then echo "results folder $OUT not found: is Google Drive mounted?"; exit 1; fi
 python -m rwm.experiments.job --job configs/jobs/paper2_refit.yaml --out "$OUT"
 python scripts/audit_runs.py checkpoints --results "$OUT" --pattern "*paper2_refit_*" "*frat_*" "*dominicks_*" "*m5_*"
 for c in che sna sdr bjc ana fre; do

@@ -12,6 +12,7 @@ set -u
 OUT="$1"
 DATA="${2:-/content/drive/MyDrive/retail-world-model/data}"
 REV="$OUT/paper1_revision"
+if [ ! -d "$OUT" ]; then echo "results folder $OUT not found: is Google Drive mounted?"; exit 1; fi
 KEYS="dominicks_che dominicks_sna dominicks_sdr dominicks_bjc dominicks_ana dominicks_fre"
 
 guarded() {  # run a command; stop it if available memory falls below 6 GB
