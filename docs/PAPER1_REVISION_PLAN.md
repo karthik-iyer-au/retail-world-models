@@ -159,3 +159,32 @@ was on. For the world model and the lift model only, history occlusion: the
 periods before the last 4, 13 or 26 (M5: 28, 56) are set to missing, as for
 an item not yet on sale. All windows for the world model and the lift model;
 LightGBM on all windows of Dominick's and Frat and the last two of M5.
+
+**15 October 2026, later: study C, pantry loading, written down before it
+ran.** After a promotion the world model forecasts 1.32 and 1.33 times
+actual in soft drinks and snack crackers, the two categories where shoppers
+stock up, against 0.90 and 0.92 for LightGBM (development notes, 7 October),
+and the persistence test shows the rolled state carrying lift forward rather
+than a dip. The tested model rolls its state forward on the plan alone, and
+nothing fixes the sign of a carried effect. Study C tests two ways to give
+the dip a route with the right direction (`scripts/make_pantry_configs.py`,
+job `configs/jobs/pantry_loading.yaml`):
+1. `stock`: one number per item carried from period to period, built by sales
+   above the item's level (real sales in history; in the forecast, the
+   plan's extra sales as the model forecasts them, the same in training as in
+   forecasting), decaying by a learnt share, and lowering later sales by a
+   learnt amount that cannot be negative.
+2. `plan_lags: 2` on the lift model: each period sees the plan of the two
+   periods before it, as LightGBM does.
+Five variants on the development windows of the six Dominick's categories,
+each one fit with seed 1: the world model, the world model with `stock`, the
+lift model, the lift model with `plan_lags`, and the lift model with `stock`.
+Measures: forecast over actual and error in the two periods after a
+promotion (the after-promotion score), and the overall, total and item
+scores. Read: soft drinks and snack crackers are the categories where a dip
+is expected; the other four show whether a change costs anything where it
+is not. Stage 2, only for a variant that brings the after-promotion forecast
+of soft drinks and snack crackers within 10% of actual without making the
+overall score worse in more than two categories: seeds 2 and 3 for it and
+for the world model, then the rolling windows. Nothing becomes a default
+without stage 2.

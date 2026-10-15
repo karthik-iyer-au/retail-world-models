@@ -144,6 +144,12 @@ in `levers` set to zero.
 - `plan_lags`: each forecast period also sees what was planned for the
   periods just before it, so a promotion last week can lower this week
   (pantry loading). With `lift_readout` that dip is part of the lift.
+- `stock`: shoppers' stock as one number per item, carried from period to
+  period. It is built by sales above the item's level (in history, the real
+  sales; in the forecast, the plan's own extra sales as the model forecasts
+  them, in training as when forecasting), decays by a learnt share each
+  period, and lowers later sales by a learnt amount that cannot be negative,
+  so it can only produce a dip after a promotion (pantry loading).
 - `year_ago`: each forecast period also sees the item's sales and levers the
   same period a year ago (`year_ago: 52` for weekly data) and
   `year_ago_window` periods either side.
@@ -181,7 +187,8 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
                neighbours: str | None = None, n_products: int = 0, conditions: int = 4,
                lift_readout: bool = False, latent: bool = False, readout_dropout: float = 0.0,
                rollout: bool = False, spread: bool = False, plan_split: bool = False,
-               feedback: bool = False, teacher_rate: float = 0.5, roll_norm: bool = False):
+               feedback: bool = False, teacher_rate: float = 0.5, roll_norm: bool = False,
+               stock: bool = False):
     import torch
     from torch import nn
 
@@ -238,6 +245,16 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
                 self.effect = nn.GRUCell(n_fut + d_model, d_model, bias=False)
             self.head = readout()
             self.lift = readout() if lift_readout else None
+            self.stock = stock
+            if stock:
+                # shoppers' stock: built by sales above the item's level, decays each
+                # period, and can only lower later sales (softplus keeps beta >= 0)
+                self.stock_decay = nn.Parameter(torch.zeros(()))  # decay 0.5 at the start
+                self.stock_beta0 = nn.Parameter(torch.full((), -3.0))  # a small effect at the start
+                self.stock_beta = nn.Linear(16 * len(cat_sizes), 1) if cat_sizes else None
+                if self.stock_beta is not None:
+                    nn.init.zeros_(self.stock_beta.weight)
+                    nn.init.zeros_(self.stock_beta.bias)
             self.next = nn.Sequential(
                 nn.Linear(d_model + horizon * n_fut, 2 * d_model), nn.GELU(), nn.Linear(2 * d_model, d_model)
             ) if latent and not rollout else None
@@ -328,6 +345,27 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
                 outs.append(out); bases.append(base); ons.append(s_on)
             return torch.stack(outs, 1), torch.stack(bases, 1), torch.stack(ons, 1)
 
+        def carry_stock(self, out, base, hist, labels):
+            """Lower each period by the stock shoppers carry into it. The stock is
+            what sold above the item's level in history and, in the forecast, the
+            plan's own extra sales (the model's forecast, in training as when
+            forecasting), each decaying by the same learnt share per period."""
+            d = torch.sigmoid(self.stock_decay.float())
+            b = self.stock_beta0.float()
+            if self.stock_beta is not None and labels:
+                b = b + self.stock_beta(torch.cat(labels, dim=1).float()).squeeze(-1)
+            beta = nn.functional.softplus(b)
+            past = torch.relu(torch.nan_to_num(hist[:, :, 0].float()) - 1)
+            L = past.shape[1]
+            s = (past * d ** torch.arange(L - 1, -1, -1, device=past.device, dtype=past.dtype)).sum(dim=1)
+            extra = torch.relu(torch.expm1((out - base).float().clamp(max=10)))
+            carried = []
+            for h in range(out.shape[1]):
+                carried.append(s)
+                s = d * s + extra[:, h]
+            beta = beta if beta.dim() else beta.expand(len(out))
+            return (out.float() - beta[:, None] * torch.stack(carried, dim=1)).clamp(-10, 10).to(out.dtype)
+
         def forward(self, hist, fut, cats, group=None, fut_off=None, full=False, teacher=None):
             """Log of expected sales relative to the item's scale. With `full`,
             also the baseline part, the state and the item-to-item weights."""
@@ -362,6 +400,8 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
                 off = world if self.plan_split else states(fut_off)
                 base = run(self.head, fut_off, off).clamp(-10, 10)
                 out = (base + run(self.lift, fut, on) - run(self.lift, fut_off, off)).clamp(-10, 10)
+            if self.stock:
+                out = self.carry_stock(out, base, hist, labels)
             if not full:
                 return out
             return {"log_mu": out, "base": base, "state": state, "weights": w, "rolled": on if self.rollout else None,
@@ -434,6 +474,7 @@ class StateModel(Forecaster):
         cold_start: bool = False,
         cold_neighbours: int = 10,
         unknown_label_rate: float = 0.0,
+        stock: bool = False,
     ):
         self._settings = {k: v for k, v in locals().items() if k not in ("self", "__class__")}
         self.horizon, self.history, self.train_periods = horizon, history, train_periods
@@ -473,6 +514,8 @@ class StateModel(Forecaster):
             raise ValueError("volume_by must be 'units' or 'dollars'")
         self.volume_by = volume_by
         self.peak_weight = peak_weight
+        if stock and feedback:
+            raise ValueError("stock and feedback are two ways to feed sales forward; use one")
         if feedback and (not rollout or neighbours or plan_split):
             raise ValueError("feedback needs rollout, and does not work with neighbours or plan_split")
         self.feedback, self.teacher_rate = feedback, teacher_rate
@@ -505,7 +548,7 @@ class StateModel(Forecaster):
                              lift_readout=lift_readout, latent=latent_weight > 0 or pretrain_steps > 0,
                              readout_dropout=readout_dropout, rollout=rollout, plan_split=plan_split,
                              feedback=feedback, teacher_rate=teacher_rate, roll_norm=roll_norm,
-                             spread=likelihood == "negative_binomial")
+                             spread=likelihood == "negative_binomial", stock=stock)
         self.steps, self.batch, self.lr = steps, batch, lr
         self.power, self.seed, self.device = tweedie_power, seed, device
         self.mixed_precision = mixed_precision  # faster on a GPU; has no effect on a CPU

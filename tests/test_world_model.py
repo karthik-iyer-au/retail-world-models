@@ -116,3 +116,25 @@ def test_feedback_version_also_learns_the_dip_after_a_promotion(split):
     np.testing.assert_allclose(quiet["lift"], 0, atol=1e-4 * quiet["forecast"].max())
     assert b[first].sum() / a[first].sum() > 1.4
     assert b[second].sum() / a[second].sum() < 0.8
+
+
+def test_stock_term_alone_learns_the_dip_and_only_lowers(split, tmp_path):
+    """Without the rolled state, the stock term is the only route from the
+    first period's plan to the second period: it learns the dip, and its
+    effect can only be downwards."""
+    from rwm.model.state_model import StateModel
+
+    model = build_model("state_model", **{**SETTINGS, "rollout": False, "stock": True}).fit(split[0])
+    off, on, first = _plans(*split)
+    second = (off[DATE] == np.sort(off[DATE].unique())[1]).to_numpy()
+    a, b = model.predict(off), model.predict(on)
+    assert b[first].sum() / a[first].sum() > 1.4
+    assert b[second].sum() / a[second].sum() < 0.8
+    assert float(torch.nn.functional.softplus(model._net.stock_beta0.detach())) > 0
+    model.save(tmp_path / "stock.pt")
+    np.testing.assert_array_equal(b, StateModel.load(tmp_path / "stock.pt", device="cpu").predict(on))
+
+
+def test_stock_and_feedback_are_not_combined():
+    with pytest.raises(ValueError):
+        build_model("state_model", **{**SETTINGS, "stock": True, "feedback": True})

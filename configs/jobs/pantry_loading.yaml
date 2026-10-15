@@ -1,0 +1,101 @@
+# Pantry-loading study, development windows, six Dominick's categories, seed 1 (stage 1).
+datasets:
+- name: dominicks
+  codes:
+  - che
+  - sna
+  - sdr
+  - bjc
+  - ana
+  - fre
+runs:
+- config: configs/experiments/dominicks_che_dev_pantry_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_che_dev_pantry_world_model_stock.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_che_dev_pantry_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_che_dev_pantry_lift_lags.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_che_dev_pantry_lift_stock.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_dev_pantry_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_dev_pantry_world_model_stock.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_dev_pantry_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_dev_pantry_lift_lags.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_dev_pantry_lift_stock.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_pantry_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_pantry_world_model_stock.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_pantry_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_pantry_lift_lags.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_pantry_lift_stock.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bjc_dev_pantry_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bjc_dev_pantry_world_model_stock.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bjc_dev_pantry_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bjc_dev_pantry_lift_lags.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bjc_dev_pantry_lift_stock.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ana_dev_pantry_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ana_dev_pantry_world_model_stock.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ana_dev_pantry_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ana_dev_pantry_lift_lags.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ana_dev_pantry_lift_stock.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fre_dev_pantry_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fre_dev_pantry_world_model_stock.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fre_dev_pantry_lift.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fre_dev_pantry_lift_lags.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fre_dev_pantry_lift_stock.yaml
+  seeds:
+  - 1
