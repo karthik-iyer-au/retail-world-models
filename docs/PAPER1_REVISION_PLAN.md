@@ -134,7 +134,8 @@ recorded settings. They are reported as added after the main results.
    TimesFM with the plan); each pair left when one of the three is removed;
    and the ensemble with the lift model in place of the world model, which
    separates the carried state from adding any third model.
-2. Weights: on a grid over the three weights in steps of 0.05, (a) the weights
+2. Weights: on a grid over the three weights in steps of 0.05, with equal
+   weights added as one more point, (a) the weights
    with the lowest mean WRMSSE over the earlier windows of the data set,
    scored on the next window (out of sample; the first window has no earlier
    window and is not scored), chosen separately for item by store, for the
