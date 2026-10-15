@@ -220,3 +220,20 @@ it is reported as it comes out.
 6. Tests as in the plan: scores by level, paired comparisons with the item
    bootstrap and the bootstrap over windows, the model confidence set,
    decisions and intervals, and the ensemble ablation of study A.
+
+**15 October 2026, after stage 1 of study C, before stage 2 ran.** Stage 1
+(seed 1, `results/paper1_revision/tables/pantry_stage1.csv`): only the lift
+model with the stock term passes the stage-1 rule (after-promotion forecast
+over actual 0.93 in soft drinks and in snack crackers; overall score worse
+than the world model's in two categories). The world model with the stock
+term and the lift model with the lagged plan are worse than the world model
+in three categories each, and the plain lift model is at 1.22 after
+promotion in soft drinks. One correction to the reason given for study C:
+the 1.32 and 1.33 after promotion came from an earlier world-model version
+(8-week level, 7 October); the final world model is at 1.00 and 1.04 on
+these windows. Stage 2 as written: seeds 2 and 3 for the lift model with the
+stock term and for the world model on the development windows; the stage-1
+rule is applied again to the mean of the three seeds. If it still passes,
+the lift model with the stock term runs on the six Dominick's rolling
+windows with its settings unchanged (one fit, seed 1) and is scored and
+tested as the other models; it is not added to study D.

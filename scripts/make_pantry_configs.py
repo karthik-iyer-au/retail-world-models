@@ -45,6 +45,20 @@ def main():
         "# Pantry-loading study, development windows, six Dominick's categories, seed 1 (stage 1).\n"
         + yaml.safe_dump(job, sort_keys=False))
     print(len(runs), "configs")
+    # stage 2 (plan, after stage 1): seeds 2 and 3 on the development windows, and the rolling windows
+    stage2 = [{"config": f"configs/experiments/dominicks_{c}_dev_pantry_{v}.yaml", "seeds": [2, 3]}
+              for c in CATS for v in ("world_model", "lift_stock")]
+    for c in CATS:
+        cfg = load(f"rev_dominicks_{c}_rolling_lift.yaml")
+        cfg["name"] = f"rev_dominicks_{c}_rolling_lift_stock"
+        cfg["model"]["params"]["stock"] = True
+        (EXP / f"{cfg['name']}.yaml").write_text(
+            "# Study C stage 2: the lift model with the stock term on the rolling windows; "
+            "written by scripts/make_pantry_configs.py.\n" + yaml.safe_dump(cfg, sort_keys=False))
+    rolling = [{"config": f"configs/experiments/rev_dominicks_{c}_rolling_lift_stock.yaml", "seeds": [1]} for c in CATS]
+    for name, rs in (("pantry_stage2_seeds", stage2), ("pantry_stage2_rolling", rolling)):
+        (JOBS / f"{name}.yaml").write_text(f"# Study C stage 2: {name.split('_')[-1]}.\n" + yaml.safe_dump(
+            {"datasets": [{"name": "dominicks", "codes": CATS}], "runs": rs}, sort_keys=False))
 
 
 if __name__ == "__main__":

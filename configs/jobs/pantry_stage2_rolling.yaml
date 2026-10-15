@@ -1,0 +1,29 @@
+# Study C stage 2: rolling.
+datasets:
+- name: dominicks
+  codes:
+  - che
+  - sna
+  - sdr
+  - bjc
+  - ana
+  - fre
+runs:
+- config: configs/experiments/rev_dominicks_che_rolling_lift_stock.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_sna_rolling_lift_stock.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_sdr_rolling_lift_stock.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_bjc_rolling_lift_stock.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_ana_rolling_lift_stock.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_dominicks_fre_rolling_lift_stock.yaml
+  seeds:
+  - 1

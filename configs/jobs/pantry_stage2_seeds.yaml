@@ -1,0 +1,59 @@
+# Study C stage 2: seeds.
+datasets:
+- name: dominicks
+  codes:
+  - che
+  - sna
+  - sdr
+  - bjc
+  - ana
+  - fre
+runs:
+- config: configs/experiments/dominicks_che_dev_pantry_world_model.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_che_dev_pantry_lift_stock.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_sna_dev_pantry_world_model.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_sna_dev_pantry_lift_stock.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_sdr_dev_pantry_world_model.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_sdr_dev_pantry_lift_stock.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_bjc_dev_pantry_world_model.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_bjc_dev_pantry_lift_stock.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_ana_dev_pantry_world_model.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_ana_dev_pantry_lift_stock.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_fre_dev_pantry_world_model.yaml
+  seeds:
+  - 2
+  - 3
+- config: configs/experiments/dominicks_fre_dev_pantry_lift_stock.yaml
+  seeds:
+  - 2
+  - 3
