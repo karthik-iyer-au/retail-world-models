@@ -121,3 +121,40 @@ recomputed under this rule so every data set uses the same one; the earlier
 numbers are not used. The item bootstrap is now computed in closed form at the
 levels where each node holds one item and by one matrix product elsewhere; the
 numbers are the same as before (tested against the direct computation).
+
+**15 October 2026: two studies added after the rolling-window results were
+read, written down before either ran.** The rolling windows put the
+equal-weight ensemble first, so the claim now rests on what the world model
+adds to it. Both studies use the rolling windows and the seed-1 runs already
+made; no model is retrained except LightGBM in study B, refitted with its
+recorded settings. They are reported as added after the main results.
+
+*A. Ensemble ablation* (`scripts/ensemble_ablation.py`, saved forecasts only).
+1. Variants, each an equal-weight mean: the ensemble (world model, LightGBM,
+   TimesFM with the plan); each pair left when one of the three is removed;
+   and the ensemble with the lift model in place of the world model, which
+   separates the carried state from adding any third model.
+2. Weights: on a grid over the three weights in steps of 0.05, (a) the weights
+   with the lowest mean WRMSSE over the earlier windows of the data set,
+   scored on the next window (out of sample; the first window has no earlier
+   window and is not scored), chosen separately for item by store, for the
+   total and for the mean over all levels; and (b) the full curve of WRMSSE
+   against the world model's weight, the other two sharing the rest equally.
+3. Tests as in the plan: each variant against the ensemble by the item
+   bootstrap per window and the bootstrap over windows, and the 90% model
+   confidence set among the variants. The world model is said to add to the
+   ensemble at a level only where the ensemble beats the pair without it.
+
+*B. Input perturbation* (`scripts/input_perturbation.py`). For the world
+model, the lift model and LightGBM, on the saved checkpoints (LightGBM
+refitted on the same training data), the forecast is recomputed with one plan
+input changed at a time: price, and each lever of the data set (promotion on
+Dominick's; promotion, display, feature and price reduction only on Frat;
+events and SNAP days on M5). Each input is (a) occluded: set to nothing
+planned (price at the regular price, lever off) and (b) permuted within each
+series across the window. Read: the change in WRMSSE at item by store and at
+the total, and the change in forecast units in the periods where the input
+was on. For the world model and the lift model only, history occlusion: the
+periods before the last 4, 13 or 26 (M5: 28, 56) are set to missing, as for
+an item not yet on sale. All windows for the world model and the lift model;
+LightGBM on all windows of Dominick's and Frat and the last two of M5.
