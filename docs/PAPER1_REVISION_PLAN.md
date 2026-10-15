@@ -188,3 +188,35 @@ of soft drinks and snack crackers within 10% of actual without making the
 overall score worse in more than two categories: seeds 2 and 3 for it and
 for the world model, then the rolling windows. Nothing becomes a default
 without stage 2.
+
+**15 October 2026, later: study D, a data set kept out of development,
+written down before its data were downloaded.** Every source so far had
+development windows of its own, and every Dominick's category appears in at
+least one development config, so the results show how the models hold up
+over time, not on a new retailer. Study D applies the recipe, frozen, once to
+a source never used: Corporación Favorita (Ecuador, daily, Kaggle
+competition `favorita-grocery-sales-forecasting`). Nothing is tuned on it and
+it is reported as it comes out.
+1. Data (`rwm.data.favorita`): train.csv from 1 January 2015 to its last day
+   (15 August 2017), with items.csv, stores.csv and holidays_events.csv. A
+   missing row is a day with no sales; negative sales (returns) are set to
+   zero. The series are the 10 stores with the most units sold in 2016,
+   crossed with the items sold in every one of those 10 stores in 2016.
+   Favorita records no prices, so price is constant and the revenue weights
+   of WRMSSE become unit weights; this is stated with every result.
+2. Plan inputs, all known in advance: the promotion flag (`onpromotion`,
+   missing before April 2014 and set to off), national holidays and events
+   (not transferred), and paydays (the 15th and the last day of each month,
+   when public-sector wages are paid).
+3. Hierarchy: total, store, family, store by family, item, item by store.
+4. Windows: four rolling 28-day windows, the last ending on 15 August 2017,
+   each forecast from everything earlier.
+5. Models, each with the settings of its M5 rolling config (the other daily
+   source) and only the data set's columns changed: seasonal naive,
+   LightGBM, the world model, the lift model, TimesFM with the plan, and the
+   equal-weight ensemble; one fit each (seed 1). The world model with the
+   stock term is added only if it passes stage 1 of study C, with no other
+   change.
+6. Tests as in the plan: scores by level, paired comparisons with the item
+   bootstrap and the bootstrap over windows, the model confidence set,
+   decisions and intervals, and the ensemble ablation of study A.
