@@ -27,6 +27,7 @@ from revision_analysis import frames_and_forecasts, index  # noqa: E402
 from revision_tables import paired as window_paired  # noqa: E402
 
 from rwm.evaluation import compare as C  # noqa: E402
+from rwm.evaluation.hierarchy import _sum_by_group, series_scale  # noqa: E402
 
 MEMBERS = ["world_model", "lightgbm", "timesfm_plan"]
 VARIANTS = {
@@ -46,6 +47,32 @@ def grid(step: float = STEP) -> np.ndarray:
     k = int(round(1 / step))
     pts = [(i / k, j / k, (k - i - j) / k) for i in range(k + 1) for j in range(k + 1 - i)]
     return np.array(pts + [(1 / 3, 1 / 3, 1 / 3)])
+
+
+def grid_scores(fr, origin: int, members: list, pts: np.ndarray, chunk: int = 16) -> tuple[list, np.ndarray]:
+    """WRMSSE by level for every weighted mean `pts @ members`, the same numbers
+    as `C.level_scores` point by point: the history, actuals, scales and weights
+    of each level are aggregated once, and the forecasts are linear in the weights."""
+    t0, t1, rev = fr.cut(origin)
+    hist, act = fr.units[:, :t0], fr.units[:, t0:t1]
+    out = np.zeros((len(pts), len(fr.levels)))
+    names = []
+    for j, cols in enumerate(fr.levels):
+        names.append("x".join(cols) if cols else "total")
+        codes = fr.codes(cols)
+        g = int(codes.max()) + 1
+        a = _sum_by_group(act, codes, g)
+        w = _sum_by_group(rev[:, None], codes, g)[:, 0]
+        w = w / w.sum()
+        scale = series_scale(_sum_by_group(hist, codes, g), fr.lag)
+        F = np.stack([_sum_by_group(m, codes, g) for m in members])  # members x nodes x periods
+        for b in range(0, len(pts), chunk):
+            f = np.einsum("kp,pgh->kgh", pts[b:b + chunk], F)
+            with np.errstate(invalid="ignore", divide="ignore"):
+                sc = np.sqrt(((a[None] - f) ** 2).mean(axis=2) / scale[None])
+            ok = np.isfinite(sc) & (w[None] > 0)
+            out[b:b + chunk, j] = np.where(ok, sc * w[None], 0.0).sum(axis=1)
+    return names, out
 
 
 def variants(mats: dict) -> dict:
@@ -103,11 +130,11 @@ def main(argv=None):
                 continue
             mats = {m: C.forecast_matrix(f, fr, o) for m, f in fcs.items() if o in set(f["origin"])}
             # the weight grid; the curve of the world model's weight is the part with equal weights on the other two
+            names, sc = grid_scores(fr, o, [mats[m] for m in MEMBERS], pts)
             for i, w in enumerate(pts):
-                fc = w[0] * mats["world_model"] + w[1] * mats["lightgbm"] + w[2] * mats["timesfm_plan"]
-                for lv, v in C.level_scores(fr, o, fc).items():
+                for j, lv in enumerate(names):
                     acc["grid"].append({"key": key, "origin": o, "point": i, "w_world_model": w[0],
-                                        "w_lightgbm": w[1], "w_timesfm_plan": w[2], "level": lv, "wrmsse": v})
+                                        "w_lightgbm": w[1], "w_timesfm_plan": w[2], "level": lv, "wrmsse": sc[i, j]})
             ens = variants(mats)
             gr = pd.DataFrame(acc["grid"])
             prior = gr[(gr["key"] == key) & (gr["origin"] < o)]

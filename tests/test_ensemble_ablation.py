@@ -74,3 +74,15 @@ def test_main_on_a_small_hierarchy(fr, tmp_path, monkeypatch):
     EA.main(["--tables", str(out), "--out", str(tmp_path / "tables")])
     sweep = pd.read_csv(tmp_path / "tables" / "ablation_sweep.csv")
     assert sweep["w_world_model"].min() == 0 and sweep["w_world_model"].max() == 1
+
+
+def test_grid_scores_equal_level_scores(fr):
+    rng = np.random.default_rng(5)
+    t0, t1, _ = fr.cut(2)
+    act = fr.units[:, t0:t1]
+    members = [act * np.exp(rng.normal(0, 0.3, act.shape)) for _ in range(3)]
+    pts = EA.grid()[[0, 50, 120, 231]]
+    names, sc = EA.grid_scores(fr, 2, members, pts, chunk=3)
+    for i, w in enumerate(pts):
+        want = C.level_scores(fr, 2, sum(wi * m for wi, m in zip(w, members)))
+        assert np.allclose(sc[i], [want[n] for n in names])
