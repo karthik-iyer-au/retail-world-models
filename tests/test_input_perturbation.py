@@ -65,3 +65,14 @@ def test_runs_on_saved_and_refitted_models(tmp_path):
     n = len(df)
     IP.main(["--results", str(tmp_path), "--out", str(out), "--lightgbm-keys", "frat", "--lightgbm-last", "1"])
     assert len(pd.read_csv(out)) == n  # windows already done are skipped
+
+
+def test_table_means_over_windows():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+    import perturbation_tables as PT
+    df = pd.DataFrame({"key": "frat", "model": "world_model", "input": "price", "operation": "occlude",
+                       "origin": [0, 1], "bottom": [1.1, 1.3], "bottom_true": [1.0, 1.0],
+                       "total": [0.5, 0.5], "total_true": [0.5, 0.5], "units_change_on": [-0.2, -0.4]})
+    t = PT.table(df)
+    assert np.isclose(t["bottom_change"].iloc[0], 0.2) and np.isclose(t["units_change_on"].iloc[0], -0.3)
+    assert t["windows"].iloc[0] == 2
