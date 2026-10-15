@@ -1,0 +1,13 @@
+# Study D, Favorita, part a.
+datasets:
+- name: favorita
+runs:
+- config: configs/experiments/rev_favorita_rolling_seasonal_naive.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_favorita_rolling_lightgbm.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_favorita_rolling_timesfm_plan.yaml
+  seeds:
+  - 1

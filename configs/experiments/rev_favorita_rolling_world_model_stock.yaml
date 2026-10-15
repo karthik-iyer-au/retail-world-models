@@ -1,0 +1,43 @@
+# Study D: the world model with the stock term; run only if it passes stage 1 of study C.
+name: rev_favorita_rolling_world_model_stock
+seed: 0
+dataset:
+  name: favorita
+model:
+  name: state_model
+  params:
+    horizon: 28
+    history: 112
+    train_periods: 730
+    categorical:
+    - item_id
+    - class
+    - family
+    - store_id
+    - city
+    extra:
+    - promo
+    - event
+    - payday
+    d_model: 128
+    layers: 3
+    heads: 4
+    steps: 30000
+    batch: 1024
+    lr: 0.001
+    seed: 0
+    mixed_precision: true
+    regular_price: true
+    lift_readout: true
+    rollout: true
+    roll_norm: true
+    levers:
+    - promo
+    stock: true
+evaluation:
+  horizon: 28
+  n_origins: 4
+  scale_lag: 1
+  weight_window: 28
+  holdout_periods: 0
+  step: 28

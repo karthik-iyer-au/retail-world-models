@@ -4,6 +4,7 @@
   python -m rwm.data.fetch m5_reference
   python -m rwm.data.fetch dominicks ana cer   # category codes; none means all
   python -m rwm.data.fetch breakfast_at_the_frat --from /path/to/folder
+  python -m rwm.data.fetch favorita        # needs a Kaggle API token and the competition rules accepted
 
 `--from` copies a dataset's registered files from a folder you already hold
 them in. It is the only route for data that has no public download, such as
@@ -96,6 +97,40 @@ def fetch_m5(folder: Path) -> None:
     _from_drive(ORGANISERS["m5"], folder)
 
 
+FAVORITA_COMPETITION = "favorita-grocery-sales-forecasting"
+FAVORITA_FILES = ["train.csv", "items.csv", "stores.csv", "holidays_events.csv"]
+
+
+def fetch_favorita(folder: Path) -> None:
+    """Each file is published as <name>.7z (Kaggle may wrap it in a zip)."""
+    import py7zr
+
+    for name in FAVORITA_FILES:
+        if (folder / name).exists():
+            continue
+        subprocess.run(["kaggle", "competitions", "download", "-c", FAVORITA_COMPETITION, "-f", f"{name}.7z",
+                        "-p", str(folder)], check=True)
+        wrapped = folder / f"{name}.7z.zip"
+        if wrapped.exists():
+            with zipfile.ZipFile(wrapped) as z:
+                z.extractall(folder)
+            wrapped.unlink()
+        archive = folder / f"{name}.7z"
+        with py7zr.SevenZipFile(archive) as z:
+            z.extractall(folder)
+        archive.unlink()
+
+
+def register_favorita() -> None:
+    """The competition files are fixed; their checksums are recorded at the first download."""
+    from rwm.utils.hashing import sha256_file  # noqa: F401  (manifest.describe uses it)
+
+    root = DATA_RAW / "favorita"
+    entries = manifest.describe([root / f for f in FAVORITA_FILES], root)
+    manifest.manifest_path("favorita").write_text(
+        json.dumps({"dataset": "favorita", "files": entries}, indent=2) + "\n")
+
+
 def fetch_dominicks(folder: Path, codes: list[str]) -> None:
     listed = json.loads(manifest.manifest_path("dominicks").read_text())["files"]
     names = [e["file"] for e in listed]
@@ -114,7 +149,10 @@ def fetch_dominicks(folder: Path, codes: list[str]) -> None:
 
 
 def copy_from(dataset: str, source: Path, folder: Path) -> None:
-    listed = json.loads(manifest.manifest_path(dataset).read_text())["files"]
+    if dataset == "favorita" and not manifest.manifest_path(dataset).exists():
+        listed = [{"file": f} for f in FAVORITA_FILES]
+    else:
+        listed = json.loads(manifest.manifest_path(dataset).read_text())["files"]
     for e in listed:
         if (source / e["file"]).exists() and not (folder / e["file"]).exists():
             shutil.copy(source / e["file"], folder / e["file"])
@@ -125,7 +163,7 @@ def main(argv: list[str]) -> None:
     if "--from" in argv:
         i = argv.index("--from")
         source, argv = Path(argv[i + 1]), argv[:i] + argv[i + 2 :]
-    if not argv or not manifest.manifest_path(argv[0]).exists():
+    if not argv or not (manifest.manifest_path(argv[0]).exists() or argv[0] == "favorita"):
         sys.exit(__doc__)
     dataset, extra = argv[0], argv[1:]
     folder = DATA_RAW / dataset
@@ -138,8 +176,13 @@ def main(argv: list[str]) -> None:
         _from_drive(ORGANISERS["m5_reference"], folder)
     elif dataset == "dominicks":
         fetch_dominicks(folder, extra)
+    elif dataset == "favorita":
+        fetch_favorita(folder)
     else:
         sys.exit(f"{dataset} has no public download. Use --from with a folder that holds its files.")
+    if dataset == "favorita" and not manifest.manifest_path(dataset).exists():
+        register_favorita()
+        print("favorita: checksums recorded at first download in data/manifests/favorita.json; commit it")
     checked = manifest.verify(dataset, only_present=bool(extra))
     print(f"{dataset}: {len(checked)} files match the registered checksums")
 

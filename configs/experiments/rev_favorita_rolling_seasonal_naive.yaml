@@ -1,0 +1,16 @@
+# Study D (plan amendment of 15 October 2026): seasonal_naive on Favorita, settings of rev_m5_rolling_seasonal_naive; written by scripts/make_favorita_configs.py.
+name: rev_favorita_rolling_seasonal_naive
+seed: 0
+dataset:
+  name: favorita
+model:
+  name: seasonal_naive
+  params:
+    season: 7
+evaluation:
+  horizon: 28
+  n_origins: 4
+  scale_lag: 1
+  weight_window: 28
+  holdout_periods: 0
+  step: 28

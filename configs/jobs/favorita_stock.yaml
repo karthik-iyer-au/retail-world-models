@@ -1,0 +1,7 @@
+# Study D, the stock variant (only after study C stage 1).
+datasets:
+- name: favorita
+runs:
+- config: configs/experiments/rev_favorita_rolling_world_model_stock.yaml
+  seeds:
+  - 1

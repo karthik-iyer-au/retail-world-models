@@ -1,0 +1,25 @@
+# Study D (plan amendment of 15 October 2026): timesfm_plan on Favorita, settings of rev_m5_rolling_timesfm_plan; written by scripts/make_favorita_configs.py.
+name: rev_favorita_rolling_timesfm_plan
+seed: 0
+dataset:
+  name: favorita
+model:
+  name: timesfm
+  params:
+    context: 512
+    batch_size: 256
+    point: mean
+    plan:
+    - promo
+    - event
+    - payday
+    price_plan: false
+    ridge: 1.0
+    chunk: 2048
+evaluation:
+  horizon: 28
+  n_origins: 4
+  scale_lag: 1
+  weight_window: 28
+  holdout_periods: 0
+  step: 28

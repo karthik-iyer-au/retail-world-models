@@ -1,0 +1,10 @@
+# Study D, Favorita, part b.
+datasets:
+- name: favorita
+runs:
+- config: configs/experiments/rev_favorita_rolling_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/rev_favorita_rolling_lift.yaml
+  seeds:
+  - 1

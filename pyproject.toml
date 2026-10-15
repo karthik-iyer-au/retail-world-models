@@ -20,7 +20,7 @@ dependencies = [
 dev = ["pytest>=8.0"]
 trees = ["lightgbm>=4.3"]
 deep = ["torch>=2.3"]
-fetch = ["kaggle>=1.7.4", "gdown>=5.2"]
+fetch = ["kaggle>=1.7.4", "gdown>=5.2", "py7zr>=0.21"]
 foundation = ["timesfm[torch]==2.0.2", "chronos-forecasting==2.3.2"]
 benchmarks = ["neuralforecast==3.3.0", "statsforecast==2.1.1", "hierarchicalforecast==1.5.3"]
 

@@ -24,13 +24,14 @@ MODELS = ["world_model", "lift", "lightgbm", "seasonal_naive", "timesfm_mean", "
           "graph", "ensemble"]
 ENSEMBLE = ["world_model", "lightgbm", "timesfm_plan"]
 PAIRS_WITH = ["world_model", "lightgbm"]
-CATLEVEL = {"m5": "store_idxcat_id", "default": "cat_idxstore_id"}
+CATLEVEL = {"m5": "store_idxcat_id", "favorita": "store_idxfamily", "default": "cat_idxstore_id"}
+DAILY = ("m5", "favorita")
 
 
 def label(config_name: str) -> tuple[str, str, str] | None:
     """(data key, window set, model) for a run worth analysing, from its config name."""
     n = re.sub(r"_seed\d+$", "", config_name)
-    m = re.match(r"rev_(dominicks_\w{3}|frat|m5)_(rolling|finalwindow)_(\w+)$", n)
+    m = re.match(r"rev_(dominicks_\w{3}|frat|m5|favorita)_(rolling|finalwindow)_(\w+)$", n)
     if m:
         return m.group(1), "rolling" if m.group(2) == "rolling" else "final", m.group(3)
     finals = {
@@ -112,10 +113,10 @@ def main(argv=None):
             t_start = time.time()
             fr, fcs = frames_and_forecasts(results, rows)
             origins = sorted({o for f in fcs.values() for o in f["origin"].unique()})
-            catlevel = CATLEVEL["m5" if key == "m5" else "default"]
+            catlevel = CATLEVEL.get(key, CATLEVEL["default"])
             catcols = next(c for c in fr.levels if "x".join(c) == catlevel)
             bottom = fr.levels[-1]
-            season = 7 if key == "m5" else 52
+            season = 7 if key in DAILY else 52
             errors = {}  # model -> level -> list of scaled errors from earlier windows
             for o in origins:
                 mats = matrices(fr, fcs, o)

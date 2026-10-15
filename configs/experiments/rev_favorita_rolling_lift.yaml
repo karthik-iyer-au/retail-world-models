@@ -1,0 +1,40 @@
+# Study D (plan amendment of 15 October 2026): lift on Favorita, settings of rev_m5_rolling_lift; written by scripts/make_favorita_configs.py.
+name: rev_favorita_rolling_lift
+seed: 0
+dataset:
+  name: favorita
+model:
+  name: state_model
+  params:
+    horizon: 28
+    history: 112
+    train_periods: 730
+    categorical:
+    - item_id
+    - class
+    - family
+    - store_id
+    - city
+    extra:
+    - promo
+    - event
+    - payday
+    d_model: 128
+    layers: 3
+    heads: 4
+    steps: 30000
+    batch: 1024
+    lr: 0.001
+    seed: 0
+    mixed_precision: true
+    regular_price: true
+    lift_readout: true
+    levers:
+    - promo
+evaluation:
+  horizon: 28
+  n_origins: 4
+  scale_lag: 1
+  weight_window: 28
+  holdout_periods: 0
+  step: 28
