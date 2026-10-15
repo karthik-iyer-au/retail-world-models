@@ -237,3 +237,31 @@ rule is applied again to the mean of the three seeds. If it still passes,
 the lift model with the stock term runs on the six Dominick's rolling
 windows with its settings unchanged (one fit, seed 1) and is scored and
 tested as the other models; it is not added to study D.
+
+**16 October 2026, stage 2 of study C, results.** Table:
+`results/paper1_revision/tables/pantry_stage2.csv`.
+
+- Seeds 2 and 3 were the same fit. The pantry configs are single fits taken
+  out of a seed average, and their model settings carry no seed, so the run
+  seed never reached the network (it fits with seed 0 every time). Seeds 2
+  and 3 give identical scores in all twelve runs. Seed 1 differs from them
+  only because it ran on another runtime. Stage 2 therefore has two
+  replicates, not three, and the difference between them is runtime noise,
+  not seed noise. It is large: the world model's overall score in snack
+  crackers is 0.911 on one runtime and 0.749 on the other. No other job in
+  the repository repeats a seed on a config of this kind.
+- The rule, applied as written to the mean of the three runs: the lift model
+  with the stock term is at 0.97 (soft drinks) and 0.93 (snack crackers)
+  after promotion, and worse overall than the world model in two categories
+  (analgesics, soft drinks). It passes. On the second replicate alone it is
+  worse in four categories and would fail.
+- Rolling windows (one run each): the stock term does not fix the
+  after-promotion forecast. Soft drinks: 1.27 with it, 1.28 for the plain
+  lift model, 1.19 for the world model. Snack crackers: 1.16 with it, 1.03
+  for the plain lift model, 1.17 for the world model. Total error is lower
+  than the plain lift model's in four of six categories and higher in
+  snack crackers (1.51 against 1.03) and analgesics. It beats LightGBM at
+  total in none.
+- Decision: the stock term does not become a default. The paper reports it
+  as tried and not kept, with the runtime noise stated next to the
+  development-window differences.
