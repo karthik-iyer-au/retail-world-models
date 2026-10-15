@@ -1,0 +1,25 @@
+{
+  "dataset": "favorita",
+  "files": [
+    {
+      "file": "holidays_events.csv",
+      "bytes": 22309,
+      "sha256": "81a183d6c4d691b57f84a0fde6bbf734a5b3c36a74b97378bf33a592648e2999"
+    },
+    {
+      "file": "items.csv",
+      "bytes": 101841,
+      "sha256": "1efd8295f52c8531ec5bf6c3de37228a56bad2f2c653e79c4869baaf637edcc6"
+    },
+    {
+      "file": "stores.csv",
+      "bytes": 1387,
+      "sha256": "af503b2bce11d7906d249f81cc0598f10e2addcc9f6c59aa2d95c9f2652c296b"
+    },
+    {
+      "file": "train.csv",
+      "bytes": 4997452288,
+      "sha256": "ccf4236a6b58b0db937b8c5006a0ad8fffef6acd06bed1c10cd5cd4d68d93248"
+    }
+  ]
+}
