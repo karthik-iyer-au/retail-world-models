@@ -283,3 +283,16 @@ no higher, and the overall score is worse in at most two categories. A weight
 that passes runs on the six rolling windows with nothing else changed; it
 becomes a default only if it holds there. The model's seed still does not
 reach these single fits (study C, stage 2), so this is one fit per config.
+
+**16 October 2026, study E, results.** Table:
+`results/paper1_revision/tables/afterpromo_stage1.csv` (one fit each, all on
+one runtime; the world model rerun matches its stage-2 runs of study C to the
+fourth decimal). Neither weight passes. With w = 2 the error in the periods
+after a promotion falls in all six categories (soft drinks 0.174 to 0.150,
+snack crackers 0.477 to 0.413) and the forecast there stays within 10% of
+actual, but the overall score is worse than the world model's in four
+categories (snack crackers 0.749 to 0.857). With w = 5 the overall score is
+also worse in four categories and snack crackers after a promotion goes to
+1.11. Decision: no default changes and no rolling-window runs. The paper
+reports that weighting those periods lowers their error but costs more
+elsewhere than it gains.
