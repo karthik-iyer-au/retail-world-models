@@ -319,3 +319,21 @@ where a level has fewer than 50 earlier errors for each horizon, all horizons
 are pooled into one set of quantiles, and interval ends are rounded outwards
 to whole units (except on Favorita, where some items are sold by weight).
 Both versions are reported. The pinball score does not change.
+
+**16 October 2026, interval check, result.** Pooling fixes the aggregate
+levels. Mean over rolling windows, world model, old to new coverage at the
+total for 50%, 80% and 95%: Dominick's 0.22, 0.35, 0.43 to 0.48, 0.77, 0.88;
+Frat 0.00, 0.04, 0.08 to 0.42, 0.83, 0.88; M5 0.11, 0.18, 0.19 to 0.42, 0.76,
+0.86. LightGBM and the ensemble move the same way (ensemble 95% at the total:
+0.86, 0.96, 0.94). The pinball score at the total falls by about a third
+because pooling also widens the quantiles that were too narrow (world model:
+Dominick's 0.48 to 0.32, Frat 0.28 to 0.15, M5 0.30 to 0.19). At item by store
+the whole-unit rounding lands near the targets on Dominick's (0.46, 0.76,
+0.94) and on Favorita, which is not rounded (0.48, 0.79, 0.95), but overshoots
+on Frat (0.64, 0.87, 0.97) and on M5 (0.84, 0.94, 0.98), where most daily sales
+are zero or one and rounding a narrow interval outwards takes in a whole unit.
+So the honest bottom-level coverage on M5 and Frat lies between the old and the
+rounded figures, and the pinball score, unchanged by rounding, is the measure
+to report there. The three models stay within 0.02 of each other on coverage
+at item by store and within 0.03 on the pinball score, so intervals do not
+separate them. Table: results/paper1_revision/tables/intervals_fixed.csv.
