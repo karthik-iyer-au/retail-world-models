@@ -303,3 +303,19 @@ Before it, single fits of the state model, LightGBM and TFT whose configs
 named no seed trained with seed 0 for every run seed. The results already
 recorded are those of seed 0 and stay as they are (each manifest records its
 commit); seed averages were not affected, since their configs name a seed.
+
+**16 October 2026, interval check, written down before it runs.** The
+conformal intervals cover far less than planned: on the rolling windows the
+95% interval holds 91% of actual sales at item by store but about 36% at the
+total, and the 50% interval about 20% at every level. Two causes are visible
+in the code. First, the error quantiles are taken separately for each
+horizon, and a level with one node (the total) has only one earlier error per
+horizon per window, so with one to four earlier windows the 2.5% and 97.5%
+quantiles are the smallest and largest of one to four numbers. Second, sales
+are whole units, and an interval such as 0.3 to 0.8 holds no possible value,
+which lowers coverage of the narrow 50% interval at item by store. The fix,
+applied to the saved forecasts of every model with nothing else changed:
+where a level has fewer than 50 earlier errors for each horizon, all horizons
+are pooled into one set of quantiles, and interval ends are rounded outwards
+to whole units (except on Favorita, where some items are sold by weight).
+Both versions are reported. The pinball score does not change.

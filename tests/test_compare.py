@@ -94,3 +94,30 @@ def test_fast_bootstrap_handles_an_item_missing_from_a_resample_and_a_coarse_lev
     bs.counts[1] = [1, 1, 1, 1, 1, 1]
     fast, slow = bs.scores({"m": fc}), bs.scores_reference({"m": fc})
     assert np.allclose(fast["m"], slow["m"], rtol=1e-6)
+
+
+def test_conformal_quantiles_pool_horizons_when_a_level_has_few_errors():
+    import numpy as np
+
+    from rwm.evaluation import compare as C
+
+    rng = np.random.default_rng(0)
+    few = [rng.normal(size=(1, 8)), rng.normal(size=(1, 8))]  # the total: one node, two windows
+    per_h = C.conformal_quantiles(few)
+    pooled = C.conformal_quantiles(few, min_per_horizon=30)
+    assert np.allclose(pooled, pooled[0])  # the same quantiles at every horizon
+    assert (pooled[:, -1] - pooled[:, 0]).mean() > (per_h[:, -1] - per_h[:, 0]).mean()
+    many = [rng.normal(size=(500, 8))]
+    np.testing.assert_allclose(C.conformal_quantiles(many, min_per_horizon=30), C.conformal_quantiles(many))
+
+
+def test_whole_unit_coverage_is_never_lower(fr):
+    errs = []
+    for o in (0, 1):
+        t0, t1, _ = fr.cut(o)
+        errs.append(C.scaled_errors(fr, o, fr.units[:, t0 - 8:t0], ["item_id", "store_id"]))
+    q = C.conformal_quantiles(errs)
+    t0, t1, _ = fr.cut(2)
+    a = C.interval_scores(fr, 2, fr.units[:, t0 - 8:t0], q, ["item_id", "store_id"])
+    b = C.interval_scores(fr, 2, fr.units[:, t0 - 8:t0], q, ["item_id", "store_id"], whole_units=True)
+    assert all(b[f"coverage_{k}"] >= a[f"coverage_{k}"] for k in (50, 80, 95)) and b["spl"] == a["spl"]

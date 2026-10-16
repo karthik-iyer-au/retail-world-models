@@ -98,7 +98,10 @@ def main(argv=None):
     p.add_argument("--parts", nargs="*", default=["scores", "paired", "mcs", "intervals", "decisions", "reconcile"])
     p.add_argument("--keys", nargs="*")
     p.add_argument("--boot", type=int, default=1000)
+    p.add_argument("--interval-fix", action="store_true",
+                   help="pool horizons where a level has few earlier errors, and count whole units (plan, 16 October)")
     a = p.parse_args(argv)
+    qkw = {"min_per_horizon": 50} if a.interval_fix else {}
     results, out = Path(a.results), Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     idx = index(results)
@@ -139,9 +142,10 @@ def main(argv=None):
                             lv = "x".join(cols) if cols else "total"
                             prior = errors.get(m, {}).get(lv, [])
                             if prior and "intervals" in acc:
-                                q = C.conformal_quantiles(prior)
+                                q = C.conformal_quantiles(prior, **qkw)
+                                whole = a.interval_fix and key != "favorita"  # Favorita sells some items by weight
                                 acc["intervals"].append({**base, "model": m, "level": lv, "windows_used": len(prior),
-                                                         **C.interval_scores(fr, o, f, q, cols)})
+                                                         **C.interval_scores(fr, o, f, q, cols, whole_units=whole)})
                             if prior and "decisions" in acc and cols == bottom:
                                 q = C.conformal_quantiles(prior)
                                 for ratio in (0.5, 0.8, 0.95):

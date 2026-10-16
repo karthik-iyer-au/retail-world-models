@@ -252,13 +252,20 @@ def scaled_errors(fr: Frame, origin: int, fc: np.ndarray, cols) -> np.ndarray:
     return (a - f) / np.sqrt(series_scale(h, fr.lag))[:, None]
 
 
-def conformal_quantiles(errors: list[np.ndarray], qs=QUANTILES) -> np.ndarray:
-    """Quantiles of pooled scaled errors from earlier windows, one row per horizon."""
+def conformal_quantiles(errors: list[np.ndarray], qs=QUANTILES, min_per_horizon: int = 0) -> np.ndarray:
+    """Quantiles of pooled scaled errors from earlier windows, one row per horizon.
+
+    With `min_per_horizon`, a level with fewer earlier errors than that for each
+    horizon (the total has one per window) pools all horizons into one set of
+    quantiles: the 2.5% quantile of two or three numbers is no interval at all."""
     e = np.concatenate(errors, axis=0)
+    if np.isfinite(e).sum(axis=0).min() < min_per_horizon:
+        return np.tile(np.nanquantile(e, qs), (e.shape[1], 1))
     return np.vstack([np.nanquantile(e[:, h], qs) for h in range(e.shape[1])])  # horizon x quantile
 
 
-def interval_scores(fr: Frame, origin: int, fc: np.ndarray, qerr: np.ndarray, cols, qs=QUANTILES) -> dict:
+def interval_scores(fr: Frame, origin: int, fc: np.ndarray, qerr: np.ndarray, cols, qs=QUANTILES,
+                    whole_units: bool = False) -> dict:
     """Scaled pinball loss averaged over quantiles (as in the M5 uncertainty
     competition), weighted by revenue, and coverage of the 50, 80 and 95%
     intervals, for one level."""
@@ -281,7 +288,10 @@ def interval_scores(fr: Frame, origin: int, fc: np.ndarray, qerr: np.ndarray, co
     out = {"spl": float((spl[ok] * w[ok]).sum() / w[ok].sum())}
     for lev, (lo, hi) in {50: (0.25, 0.75), 80: (0.1, 0.9), 95: (0.025, 0.975)}.items():
         i, j = qs.index(lo), qs.index(hi)
-        inside = (a >= q[:, :, i]) & (a <= q[:, :, j])
+        lo_b, hi_b = q[:, :, i], q[:, :, j]
+        if whole_units:  # sales come in whole units: an interval from 0.3 to 0.8 holds no possible value
+            lo_b, hi_b = np.floor(lo_b), np.ceil(hi_b)
+        inside = (a >= lo_b) & (a <= hi_b)
         out[f"coverage_{lev}"] = float(inside[ok].mean())
     return out
 
