@@ -210,6 +210,17 @@ def test_with_seed_renames_the_run_and_sets_every_seed():
     assert with_seed(base, None) is base and base["seed"] == 0
 
 
+def test_with_seed_reaches_a_model_whose_config_names_no_seed():
+    """A single-fit state model without a seed in its settings used to keep seed 0
+    for every run seed, so seeds 2 and 3 were the same fit."""
+    from rwm.experiments.run import with_seed
+
+    base = {"name": "x", "seed": 0, "model": {"name": "state_model", "params": {"horizon": 4}}}
+    assert with_seed(base, 2)["model"]["params"] == {"horizon": 4, "seed": 2}
+    unknown = {"name": "x", "seed": 0, "model": {"name": "no_such_model", "params": {}}}
+    assert with_seed(unknown, 2)["model"]["params"] == {}
+
+
 def test_fetch_copies_registered_files_from_a_folder_and_checks_them(tmp_path, monkeypatch):
     from rwm.data import fetch, manifest
     from rwm.utils.hashing import sha256_file

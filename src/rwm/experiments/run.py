@@ -308,9 +308,32 @@ def with_seed(config: dict, seed: int | None) -> dict:
         return config
     config = {**config, "seed": seed, "name": f"{config['name']}_seed{seed}"}
     params = config["model"].get("params", {})
-    if "seed" in params:
+    if "seed" in params or _takes_seed(config["model"]["name"]):
+        # the model's own seed follows the run's; before 16 October 2026 a model whose
+        # config did not name a seed kept its default (0) for every run seed
         config["model"] = {**config["model"], "params": {**params, "seed": seed}}
     return config
+
+
+def _takes_seed(name: str) -> bool:
+    """Whether the named model's constructor takes a seed."""
+    import inspect
+
+    import rwm.combination  # noqa: F401  (these imports register the models)
+    import rwm.model  # noqa: F401
+    import rwm.prior_work  # noqa: F401
+    import rwm.seed_average  # noqa: F401
+    from rwm.forecaster import _MODELS
+
+    model = _MODELS.get(name)
+    try:
+        return model is not None and "seed" in inspect.signature(model).parameters
+    except (TypeError, ValueError):
+        return False
+    try:
+        return "seed" in inspect.signature(model).parameters
+    except (TypeError, ValueError):
+        return False
 
 
 def main() -> None:

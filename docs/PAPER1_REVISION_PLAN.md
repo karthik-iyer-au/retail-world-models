@@ -296,3 +296,10 @@ also worse in four categories and snack crackers after a promotion goes to
 1.11. Decision: no default changes and no rolling-window runs. The paper
 reports that weighting those periods lowers their error but costs more
 elsewhere than it gains.
+
+**16 October 2026, seed fix.** From this commit a run's seed reaches the
+model whenever the model takes a seed, also when its config names none.
+Before it, single fits of the state model, LightGBM and TFT whose configs
+named no seed trained with seed 0 for every run seed. The results already
+recorded are those of seed 0 and stay as they are (each manifest records its
+commit); seed averages were not affected, since their configs name a seed.
