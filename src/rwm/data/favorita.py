@@ -70,6 +70,10 @@ def load_favorita(root: str | None = None, start: str = "2015-01-01", n_stores: 
     for p in paths:
         if not p.exists():
             raise FileNotFoundError(f"{p} not found. Run: python -m rwm.data.fetch favorita")
+    try:  # the cache is a parquet file; without a parquet engine the panel is rebuilt each time
+        import pyarrow  # noqa: F401
+    except ImportError:
+        cache = False
     settings = {"start": start, "n_stores": n_stores, "select_year": select_year, "version": 1}
     key = hashlib.sha256(json.dumps(settings, sort_keys=True).encode()).hexdigest()[:12]
     cached = root_path / f"panel_{key}.parquet"
