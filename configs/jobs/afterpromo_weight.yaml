@@ -1,0 +1,65 @@
+# Study E: after-promotion loss weight, development windows, six Dominick's categories, with the world model rerun on the same runtime.
+datasets:
+- name: dominicks
+  codes:
+  - che
+  - sna
+  - sdr
+  - bjc
+  - ana
+  - fre
+runs:
+- config: configs/experiments/dominicks_che_dev_pantry_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_che_dev_afterpromo_w2.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_che_dev_afterpromo_w5.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_dev_pantry_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_dev_afterpromo_w2.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sna_dev_afterpromo_w5.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_pantry_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_afterpromo_w2.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_sdr_dev_afterpromo_w5.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bjc_dev_pantry_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bjc_dev_afterpromo_w2.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_bjc_dev_afterpromo_w5.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ana_dev_pantry_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ana_dev_afterpromo_w2.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_ana_dev_afterpromo_w5.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fre_dev_pantry_world_model.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fre_dev_afterpromo_w2.yaml
+  seeds:
+  - 1
+- config: configs/experiments/dominicks_fre_dev_afterpromo_w5.yaml
+  seeds:
+  - 1

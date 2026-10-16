@@ -125,6 +125,10 @@ in `levers` set to zero.
 - `peak_weight`: each period's loss is multiplied by 1 plus this times how far
   that period's sales sit from the item's usual level (capped), so peaks and
   dips count for more than ordinary periods.
+- `after_promo_weight`: each forecast period that has no lever on but had one
+  on in any of the `after_promo_periods` periods before it (the periods where
+  pantry loading would show) counts this many times more in the loss. The
+  rule is the one the evaluation uses for its after-promotion check.
 - `cold_start`: a series with no history is forecast by borrowing the state
   and scale of the `cold_neighbours` known series most like it in the same
   store (most `categorical` labels in common), run with its own labels and
@@ -462,6 +466,8 @@ class StateModel(Forecaster):
         volume_weight: float = 0.0,
         volume_by: str = "units",
         peak_weight: float = 0.0,
+        after_promo_weight: float = 0.0,
+        after_promo_periods: int = 2,
         feedback: bool = False,
         teacher_rate: float = 0.5,
         roll_norm: bool = False,
@@ -514,6 +520,7 @@ class StateModel(Forecaster):
             raise ValueError("volume_by must be 'units' or 'dollars'")
         self.volume_by = volume_by
         self.peak_weight = peak_weight
+        self.after_promo_weight, self.after_promo_periods = after_promo_weight, after_promo_periods
         if stock and feedback:
             raise ValueError("stock and feedback are two ways to feed sales forward; use one")
         if feedback and (not rollout or neighbours or plan_split):
@@ -960,6 +967,18 @@ class StateModel(Forecaster):
                         away = (target.float() - 1).abs().clamp(max=5)
                         pw = 1 + self.peak_weight * away
                         each = each * (pw / (pw * on_sale).sum().clamp(min=1e-6) * on_sale.sum().clamp(min=1))
+                    if self.after_promo_weight:
+                        # the periods just after a promotion, where sales dip if shoppers stocked up
+                        on = torch.zeros_like(each, dtype=torch.bool)
+                        just = torch.zeros_like(on)
+                        for name, e in zip(self.extra, data["extra"]):
+                            if name in self.levers:
+                                lever = torch.nan_to_num(e) > 0
+                                on |= lever[rows[:, None], ahead]
+                                for j in range(1, self.after_promo_periods + 1):
+                                    just |= lever[rows[:, None], (ahead - j).clamp(min=0)]
+                        aw = 1 + self.after_promo_weight * (just & ~on).float()
+                        each = each * (aw / (aw * on_sale).sum().clamp(min=1e-6) * on_sale.sum().clamp(min=1))
                     if self.volume_weight:
                         # bigger sellers count for more, as they do when the loss is taken
                         # on units and not on sales relative to each item's own level; without

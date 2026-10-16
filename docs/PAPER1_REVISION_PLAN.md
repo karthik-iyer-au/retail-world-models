@@ -265,3 +265,21 @@ tested as the other models; it is not added to study D.
 - Decision: the stock term does not become a default. The paper reports it
   as tried and not kept, with the runtime noise stated next to the
   development-window differences.
+
+**16 October 2026, study E, written down before it runs: a loss weight on
+the periods just after a promotion.** The three changes of study C changed
+what the model can express; none fixed the after-promotion forecast without
+costing accuracy elsewhere. Study E leaves the model as it is and changes
+only what training counts: a forecast period with no promotion, but with one
+in either of the two periods before it (the rule of the after-promotion
+check), counts 1 + w times in the loss, with the total weight kept the same.
+w = 2 and w = 5, on the world model of the pantry study, on the six
+Dominick's development windows, seed 1. The world model is rerun in the same
+job, because stage 2 of study C showed that runs on different runtimes
+differ by as much as the variants do. Rule: a weight passes if, against the
+world model of the same job, the after-promotion forecast over actual in
+soft drinks and snack crackers is within 10% of actual and its error there is
+no higher, and the overall score is worse in at most two categories. A weight
+that passes runs on the six rolling windows with nothing else changed; it
+becomes a default only if it holds there. The model's seed still does not
+reach these single fits (study C, stage 2), so this is one fit per config.

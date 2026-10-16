@@ -138,3 +138,19 @@ def test_stock_term_alone_learns_the_dip_and_only_lowers(split, tmp_path):
 def test_stock_and_feedback_are_not_combined():
     with pytest.raises(ValueError):
         build_model("state_model", **{**SETTINGS, "stock": True, "feedback": True})
+
+
+def test_after_promotion_weight_trains_learns_the_dip_and_saves(split, tmp_path):
+    """The loss weight on the periods just after a promotion leaves the
+    model's form alone: it still learns the rise and the dip, and a saved
+    model gives the same forecast."""
+    from rwm.model.state_model import StateModel
+
+    model = build_model("state_model", **{**SETTINGS, "after_promo_weight": 2.0}).fit(split[0])
+    off, on, first = _plans(*split)
+    second = (off[DATE] == np.sort(off[DATE].unique())[1]).to_numpy()
+    a, b = model.predict(off), model.predict(on)
+    assert b[first].sum() / a[first].sum() > 1.4
+    assert b[second].sum() / a[second].sum() < 0.8
+    model.save(tmp_path / "ap.pt")
+    np.testing.assert_array_equal(b, StateModel.load(tmp_path / "ap.pt", device="cpu").predict(on))
