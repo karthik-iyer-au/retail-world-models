@@ -34,6 +34,7 @@ class Frame:
     splits: list
     window: int
     lag: int
+    promo: np.ndarray | None = None  # series x dates, where the data records promotions
 
     def cut(self, origin: int):
         sp = next(s for s in self.splits if s.origin == origin)
@@ -61,8 +62,10 @@ def frame(config: dict) -> Frame:
     names = pd.Index(attrs[SERIES].astype(str))
     units = to_matrix(panel, SERIES, DATE, UNITS, dates, names)
     price = to_matrix(panel, SERIES, DATE, PRICE, dates, names) if PRICE in panel else np.ones_like(units)
+    promo = to_matrix(panel, SERIES, DATE, "promo", dates, names) if "promo" in panel else None
     splits = rolling_origins(dates, ev["horizon"], ev["n_origins"], ev.get("step"))
-    return Frame(attrs, names, units, price, dates, levels, splits, ev.get("weight_window", 28), ev.get("scale_lag", 1))
+    return Frame(attrs, names, units, price, dates, levels, splits, ev.get("weight_window", 28), ev.get("scale_lag", 1),
+                 promo)
 
 
 def forecast_matrix(forecasts: pd.DataFrame, fr: Frame, origin: int, col: str = "forecast") -> np.ndarray:
@@ -250,6 +253,66 @@ def scaled_errors(fr: Frame, origin: int, fc: np.ndarray, cols) -> np.ndarray:
     a = _sum_by_group(fr.units[:, t0:t1], codes, g)
     f = _sum_by_group(fc, codes, g)
     return (a - f) / np.sqrt(series_scale(h, fr.lag))[:, None]
+
+
+def change_rank(fr: Frame, origin: int, fc: np.ndarray, cols) -> dict:
+    """Does the forecast put the nodes of one level in the right order of change?
+    Spearman correlation, across nodes that sold in the previous horizon, between
+    forecast and actual change (horizon total over the previous horizon's actual
+    total). Missing values in the forecast or actuals count as zero."""
+    from scipy.stats import spearmanr
+
+    t0, t1, _ = fr.cut(origin)
+    codes = fr.codes(cols)
+    g = int(codes.max()) + 1
+    h = t1 - t0
+    before = _sum_by_group(np.nan_to_num(fr.units[:, t0 - h:t0]), codes, g).sum(axis=1)
+    actual = _sum_by_group(np.nan_to_num(fr.units[:, t0:t1]), codes, g).sum(axis=1)
+    fcast = _sum_by_group(np.nan_to_num(fc), codes, g).sum(axis=1)
+    ok = before > 0
+    if ok.sum() < 10:
+        return {"spearman": np.nan, "top_decile_hit": np.nan, "nodes": int(ok.sum())}
+    fch, ach = fcast[ok] / before[ok], actual[ok] / before[ok]
+    rho = spearmanr(fch, ach).statistic
+    k = max(1, int(round(0.1 * len(fch))))
+    top_f, top_a = np.argsort(-fch, kind="stable")[:k], np.argsort(-ach, kind="stable")[:k]
+    hit = len(np.intersect1d(top_f, top_a)) / k  # 0.10 by chance
+    return {"spearman": float(rho), "top_decile_hit": hit, "nodes": int(ok.sum())}
+
+
+def promo_rank(fr: Frame, origin: int, fc: np.ndarray) -> dict:
+    """Does the forecast put promotions in the right order? Spearman correlation,
+    across promoted series-periods of the horizon, between forecast and actual
+    units, each over the series' mean units in its unpromoted periods of the
+    weight window before the horizon (series with none, or no sales, left out)."""
+    from scipy.stats import spearmanr
+
+    if fr.promo is None:
+        return {}
+    t0, t1, _ = fr.cut(origin)
+    past_u = np.nan_to_num(fr.units[:, t0 - fr.window:t0])
+    past_off = np.nan_to_num(fr.promo[:, t0 - fr.window:t0]) <= 0
+    with np.errstate(all="ignore"):
+        base = (past_u * past_off).sum(axis=1) / past_off.sum(axis=1)
+    on = (np.nan_to_num(fr.promo[:, t0:t1]) > 0) & (np.isfinite(base) & (base > 0))[:, None]
+    if on.sum() < 10:
+        return {"promo_spearman": np.nan, "promo_events": int(on.sum())}
+    f = np.nan_to_num(fc)[on] / np.broadcast_to(base[:, None], on.shape)[on]
+    a = np.nan_to_num(fr.units[:, t0:t1])[on] / np.broadcast_to(base[:, None], on.shape)[on]
+    return {"promo_spearman": float(spearmanr(f, a).statistic), "promo_events": int(on.sum())}
+
+
+def bias(fr: Frame, origin: int, fc: np.ndarray, cols) -> dict:
+    """Forecast over actual for the whole horizon, in total and as the median
+    across the nodes of one level (nodes with no actual sales left out)."""
+    t0, t1, _ = fr.cut(origin)
+    codes = fr.codes(cols)
+    g = int(codes.max()) + 1
+    a = _sum_by_group(np.nan_to_num(fr.units[:, t0:t1]), codes, g).sum(axis=1)
+    f = _sum_by_group(np.nan_to_num(fc), codes, g).sum(axis=1)
+    ok = a > 0
+    return {"total_ratio": float(f.sum() / a.sum()) if a.sum() > 0 else np.nan,
+            "median_node_ratio": float(np.median(f[ok] / a[ok])) if ok.any() else np.nan}
 
 
 def conformal_quantiles(errors: list[np.ndarray], qs=QUANTILES, min_per_horizon: int = 0) -> np.ndarray:

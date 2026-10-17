@@ -1,0 +1,27 @@
+# Study F, Timestral (weekly data).
+datasets:
+- name: breakfast_at_the_frat
+  from: /content/drive/MyDrive/retail-world-model/data
+- name: dominicks
+  codes:
+  - che
+  - sna
+  - sdr
+  - bjc
+  - ana
+  - fre
+runs:
+- config: configs/experiments/rev_dominicks_che_rolling_timestral_plan.yaml
+- config: configs/experiments/rev_dominicks_che_rolling_timestral_mean.yaml
+- config: configs/experiments/rev_dominicks_sna_rolling_timestral_plan.yaml
+- config: configs/experiments/rev_dominicks_sna_rolling_timestral_mean.yaml
+- config: configs/experiments/rev_dominicks_sdr_rolling_timestral_plan.yaml
+- config: configs/experiments/rev_dominicks_sdr_rolling_timestral_mean.yaml
+- config: configs/experiments/rev_dominicks_bjc_rolling_timestral_plan.yaml
+- config: configs/experiments/rev_dominicks_bjc_rolling_timestral_mean.yaml
+- config: configs/experiments/rev_dominicks_ana_rolling_timestral_plan.yaml
+- config: configs/experiments/rev_dominicks_ana_rolling_timestral_mean.yaml
+- config: configs/experiments/rev_dominicks_fre_rolling_timestral_plan.yaml
+- config: configs/experiments/rev_dominicks_fre_rolling_timestral_mean.yaml
+- config: configs/experiments/rev_frat_rolling_timestral_plan.yaml
+- config: configs/experiments/rev_frat_rolling_timestral_mean.yaml

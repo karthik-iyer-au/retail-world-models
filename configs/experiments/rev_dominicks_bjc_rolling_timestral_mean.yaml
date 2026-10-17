@@ -1,0 +1,27 @@
+# Study F (plan amendment of 17 October 2026): Timestral-209M, windows and inputs of rev_dominicks_bjc_rolling_timesfm_plan; written by scripts/make_timestral_configs.py.
+name: rev_dominicks_bjc_rolling_timestral_mean
+seed: 0
+dataset:
+  name: dominicks
+  params:
+    categories:
+    - bjc
+model:
+  name: timestral
+  params:
+    context: 512
+    batch_size: 256
+    repo: mistralai/Timestral-209M
+evaluation:
+  horizon: 8
+  n_origins: 6
+  holdout_periods: 24
+  scale_lag: 1
+  weight_window: 13
+  conditions:
+  - promo
+  after_promo:
+    levers:
+    - promo
+    periods: 2
+  step: 8

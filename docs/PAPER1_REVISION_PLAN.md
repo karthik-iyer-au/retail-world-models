@@ -337,3 +337,41 @@ rounded figures, and the pinball score, unchanged by rounding, is the measure
 to report there. The three models stay within 0.02 of each other on coverage
 at item by store and within 0.03 on the pinball score, so intervals do not
 separate them. Table: results/paper1_revision/tables/intervals_fixed.csv.
+
+**17 October 2026, study F, Timestral, written down before it runs.**
+Mistral released Timestral 1.0 on 15 October 2026, a pretrained forecaster
+that reads known-future inputs itself and that its authors report ahead of
+TimesFM and Chronos on public benchmarks. A reader will ask whether the
+ensemble result holds against it. Timestral-209M (code commit a534bdb of
+github.com/mistralai/timestral) is run zero-shot on the rolling windows of
+every data set, in two forms that mirror TimesFM's: history only
+(`timestral_mean`) and with the plan as known-future inputs, the same inputs
+TimesFM's plan form gets (`timestral_plan`). The forecast is the mean of its
+21 quantiles. Two ensembles are added to the analysis: Timestral's plan form
+in place of TimesFM's (`ensemble_timestral`), and all four together
+(`ensemble_4`). Questions and pass rules, judged on the mean over rolling
+windows with the paired item bootstrap: (1) does `timestral_plan` beat
+`timesfm_plan`, and does it beat the ensemble on its own, at the total and at
+item by store; (2) does `ensemble_timestral` beat the current ensemble. If the
+ensemble still beats Timestral alone, the main result stands. If
+`ensemble_timestral` is better, it is reported as such and the paper's
+ensemble is not changed after the fact; the swap is reported as a robustness
+result. Timestral's own quantiles are scored with the pinball score beside the
+conformal intervals.
+
+**17 October 2026, ranking check, written down before it runs.** Accuracy
+scores say how close a forecast is, not whether it puts items in the right
+order, which is what a merchant uses it for when choosing which items to back.
+For every window and model: the Spearman rank correlation, across item by
+store series with sales in the window before, between the forecast change
+(horizon total over the previous horizon's actual total) and the actual
+change. Also across the category by store nodes. With it, three more measures
+from the same saved forecasts: the top-decile hit rate (of the tenth of nodes
+the forecast puts highest for change, the share that are in the actual top
+tenth; 0.10 by chance); a promotion ranking, the Spearman correlation across
+promoted item by store periods of the horizon between forecast and actual
+units, each over the series' mean in its unpromoted periods of the weight
+window before (data sets that record promotions: Dominick's, Frat, Favorita);
+and bias, forecast over actual for the whole horizon, in total and as the
+median across nodes of the level. Reported as the mean over windows with the
+spread across windows; no pass rule, they are descriptive.

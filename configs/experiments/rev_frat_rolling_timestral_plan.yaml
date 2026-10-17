@@ -1,0 +1,29 @@
+# Study F (plan amendment of 17 October 2026): Timestral-209M, windows and inputs of rev_frat_rolling_timesfm_plan; written by scripts/make_timestral_configs.py.
+name: rev_frat_rolling_timestral_plan
+seed: 0
+dataset:
+  name: breakfast_at_the_frat
+model:
+  name: timestral
+  params:
+    context: 512
+    batch_size: 256
+    repo: mistralai/Timestral-209M
+    plan:
+    - promo
+    - display
+    - feature
+    - tpr_only
+    price_plan: true
+evaluation:
+  horizon: 8
+  n_origins: 4
+  holdout_periods: 24
+  scale_lag: 1
+  weight_window: 13
+  conditions:
+  - promo
+  - display
+  - feature
+  - tpr_only
+  step: 8

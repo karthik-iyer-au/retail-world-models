@@ -121,3 +121,39 @@ def test_whole_unit_coverage_is_never_lower(fr):
     a = C.interval_scores(fr, 2, fr.units[:, t0 - 8:t0], q, ["item_id", "store_id"])
     b = C.interval_scores(fr, 2, fr.units[:, t0 - 8:t0], q, ["item_id", "store_id"], whole_units=True)
     assert all(b[f"coverage_{k}"] >= a[f"coverage_{k}"] for k in (50, 80, 95)) and b["spl"] == a["spl"]
+
+
+def test_change_rank_is_one_for_the_truth_and_lower_for_noise(fr):
+    o = fr.splits[0].origin
+    t0, t1, _ = fr.cut(o)
+    bottom = fr.levels[-1]
+    assert C.change_rank(fr, o, fr.units[:, t0:t1], bottom)["spearman"] == pytest.approx(1.0)
+    noise = np.random.default_rng(0).permutation(fr.units[:, t0:t1])
+    assert C.change_rank(fr, o, noise, bottom)["spearman"] < 0.9
+
+
+def test_top_decile_hit_and_bias_of_the_truth(fr):
+    o = fr.splits[0].origin
+    t0, t1, _ = fr.cut(o)
+    r = C.change_rank(fr, o, fr.units[:, t0:t1], fr.levels[-1])
+    assert r["top_decile_hit"] == 1.0
+    b = C.bias(fr, o, 1.2 * fr.units[:, t0:t1], fr.levels[-1])
+    assert b["total_ratio"] == pytest.approx(1.2) and b["median_node_ratio"] == pytest.approx(1.2)
+
+
+def test_promo_rank_orders_promotions():
+    import dataclasses
+    rng = np.random.default_rng(1)
+    n, T = 40, 60
+    attrs = pd.DataFrame({"series_id": [f"s{i:02d}" for i in range(n)]})
+    promo = (rng.random((n, T)) < 0.3).astype(np.float32)
+    lift = rng.uniform(1, 4, (n, 1))
+    units = rng.poisson(10 * np.where(promo > 0, lift, 1.0)).astype(np.float32)
+    dates = pd.date_range("2020-01-01", periods=T, freq="7D").to_numpy()
+    fr = C.Frame(attrs, pd.Index(attrs["series_id"]), units, np.ones_like(units), dates, [["series_id"]],
+                 rolling_origins(dates, 8, 2), 13, 1, promo)
+    o = fr.splits[0].origin
+    t0, t1, _ = fr.cut(o)
+    good = 10 * np.where(promo[:, t0:t1] > 0, lift, 1.0)
+    assert C.promo_rank(fr, o, good)["promo_spearman"] > 0.6
+    assert C.promo_rank(dataclasses.replace(fr, promo=None), o, good) == {}

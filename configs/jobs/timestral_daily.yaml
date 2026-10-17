@@ -1,0 +1,11 @@
+# Study F, Timestral (daily data).
+datasets:
+- name: favorita
+  from: /content/drive/MyDrive/retail-world-model/data/favorita
+- name: m5
+  from: /content/drive/MyDrive/retail-world-model/data/m5
+runs:
+- config: configs/experiments/rev_favorita_rolling_timestral_plan.yaml
+- config: configs/experiments/rev_favorita_rolling_timestral_mean.yaml
+- config: configs/experiments/rev_m5_rolling_timestral_plan.yaml
+- config: configs/experiments/rev_m5_rolling_timestral_mean.yaml

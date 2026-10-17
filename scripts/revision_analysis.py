@@ -2,7 +2,7 @@
 
   python scripts/revision_analysis.py --results <runs folder> --out results/paper1_revision [--parts ...] [--boot 1000]
 
-Parts (all by default): scores, paired, mcs, intervals, decisions, reconcile.
+Parts (all by default): scores, paired, mcs, intervals, decisions, reconcile, ranks.
 Writes one small CSV per part; a part whose CSV exists is skipped, so the
 script can be started again after a dropped runtime.
 """
@@ -21,9 +21,12 @@ import pandas as pd
 from rwm.evaluation import compare as C
 
 MODELS = ["world_model", "lift", "lightgbm", "seasonal_naive", "timesfm_mean", "timesfm_plan", "chronos", "tft",
-          "graph", "ensemble"]
+          "graph", "timestral_mean", "timestral_plan", "ensemble", "ensemble_timestral", "ensemble_4"]
 ENSEMBLE = ["world_model", "lightgbm", "timesfm_plan"]
-PAIRS_WITH = ["world_model", "lightgbm"]
+# study F (plan, 17 October): Timestral's plan form in place of TimesFM's, and all four together
+VARIANTS = {"ensemble_timestral": ["world_model", "lightgbm", "timestral_plan"],
+            "ensemble_4": ["world_model", "lightgbm", "timesfm_plan", "timestral_plan"]}
+PAIRS_WITH = ["world_model", "lightgbm", "ensemble"]
 CATLEVEL = {"m5": "store_idxcat_id", "favorita": "store_idxfamily", "default": "cat_idxstore_id"}
 DAILY = ("m5", "favorita")
 
@@ -82,6 +85,9 @@ def matrices(fr, fcs, origin):
     mats = {m: C.forecast_matrix(f, fr, origin) for m, f in fcs.items() if origin in set(f["origin"])}
     if all(m in mats for m in ENSEMBLE):
         mats["ensemble"] = np.mean([mats[m] for m in ENSEMBLE], axis=0)
+    for name, members in VARIANTS.items():
+        if all(m in mats for m in members):
+            mats[name] = np.mean([mats[m] for m in members], axis=0)
     return mats
 
 
@@ -95,7 +101,7 @@ def main(argv=None):
     p = argparse.ArgumentParser()
     p.add_argument("--results", required=True)
     p.add_argument("--out", required=True)
-    p.add_argument("--parts", nargs="*", default=["scores", "paired", "mcs", "intervals", "decisions", "reconcile"])
+    p.add_argument("--parts", nargs="*", default=["scores", "paired", "mcs", "intervals", "decisions", "reconcile", "ranks"])
     p.add_argument("--keys", nargs="*")
     p.add_argument("--boot", type=int, default=1000)
     p.add_argument("--interval-fix", action="store_true",
@@ -159,6 +165,13 @@ def main(argv=None):
                             nat = C.native_scores(fr, o, fcs[m])
                             if nat:
                                 acc["intervals"].append({**base, "model": m, "level": "native_bottom", **nat})
+                if "ranks" in acc:
+                    for m, f in mats.items():
+                        for cols in (bottom, catcols):
+                            r = {**C.change_rank(fr, o, f, cols), **C.bias(fr, o, f, cols)}
+                            if cols == bottom:
+                                r.update(C.promo_rank(fr, o, f))
+                            acc["ranks"].append({**base, "model": m, "level": "x".join(cols), **r})
                 if "reconcile" in acc:
                     from rwm.evaluation.reconcile import reconcile_all
                     recs = reconcile_all(fr, o, season, {m: mats[m] for m in ("world_model", "lightgbm") if m in mats})
