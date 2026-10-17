@@ -451,3 +451,26 @@ cracker final rows already in the table agree to 0.001. Result: combining a
 trained model's item forecasts with ETS above them raises LightGBM's total
 error in all six categories, and the best reconciled ETS total is behind
 LightGBM and the ensemble in every category.
+
+**17 October 2026, study G, the second review, written down before it runs.**
+A second reader of the revised paper asked for four checks. (1) The category-plan
+cost, quoted as point estimates, gets paired uncertainty: per category-by-store
+node errors are saved for every model, window and data set
+(`scripts/category_cost_nodes.py`), and the cost difference between the world
+model and each other model is bootstrapped over nodes within each window
+(5000 resamples, seed 0) and summarised by the mean over windows. The world
+model's lead on a data set is called clear only when the 95% interval of that
+mean difference lies below zero against every other model. The same comparison is
+repeated with three other choices, reported whatever they show: the first half of
+the window only; error of the window total instead of the sum of period errors;
+and nodes weighted by units sold and equally, in place of dollar sales. (2) The
+Frat lift model ran with readout dropout 0.2 and weight decay 0.01, carried over
+from the companion paper's final Frat config, while the world model ran with
+neither; on the other data sets the two share every setting but the transition.
+The Frat lift model is rerun with the world model's settings
+(`rev_frat_rolling_lift_matched`, job `frat_lift_matched`), and the ensemble
+ablation adds `lift_matched_for_world_model`. Both numbers are reported; the
+matched one is used for the claim that only the transition differs. (3) The
+MinT-shrink failure on Frat is diagnosed from the ETS fits, which need no saved
+forecasts, before any reconciliation conclusion is drawn. (4) Wording: a
+difference not detected is not called equal.

@@ -36,6 +36,8 @@ VARIANTS = {
     "without_lightgbm": ["world_model", "timesfm_plan"],
     "without_timesfm": ["world_model", "lightgbm"],
     "lift_for_world_model": ["lift", "lightgbm", "timesfm_plan"],
+    # study G: the Frat lift model rerun with the world model's regularisation
+    "lift_matched_for_world_model": ["lift_matched", "lightgbm", "timesfm_plan"],
 }
 TARGETS = ["bottom", "total", "all_levels"]
 STEP = 0.05

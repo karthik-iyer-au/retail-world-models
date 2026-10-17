@@ -1,0 +1,6 @@
+# Study G (plan amendment of 17 October 2026): Frat lift model with the world model's regularisation.
+datasets:
+- name: breakfast_at_the_frat
+  from: /content/drive/MyDrive/retail-world-model/data
+runs:
+- config: configs/experiments/rev_frat_rolling_lift_matched.yaml
