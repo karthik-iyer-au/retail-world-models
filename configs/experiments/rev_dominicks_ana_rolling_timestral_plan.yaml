@@ -10,7 +10,7 @@ model:
   name: timestral
   params:
     context: 512
-    batch_size: 1024
+    batch_size: 256
     repo: mistralai/Timestral-28M
     plan:
     - promo

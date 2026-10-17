@@ -20,8 +20,8 @@ def timestral(src: dict, plan: bool) -> dict:
     cfg = copy.deepcopy(src)
     p = src["model"]["params"]
     params = {"context": p.get("context", 512), "batch_size": 1024, "repo": REPO}
-    if plan:
-        params.update(plan=p.get("plan", []), price_plan=p.get("price_plan", False))
+    if plan:  # the plan inputs multiply memory per series; batches are also halved on the GPU when memory runs out
+        params.update(plan=p.get("plan", []), price_plan=p.get("price_plan", False), batch_size=256)
     cfg["model"] = {"name": "timestral", "params": params}
     return cfg
 

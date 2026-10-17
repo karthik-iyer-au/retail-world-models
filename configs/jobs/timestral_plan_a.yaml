@@ -1,0 +1,14 @@
+# Study F, Timestral-28M plan form, rerun after running out of GPU memory at batch 1024.
+datasets:
+- name: breakfast_at_the_frat
+  from: /content/drive/MyDrive/retail-world-model/data
+- name: dominicks
+  codes:
+  - che
+  - sna
+  - sdr
+runs:
+- config: configs/experiments/rev_frat_rolling_timestral_plan.yaml
+- config: configs/experiments/rev_dominicks_che_rolling_timestral_plan.yaml
+- config: configs/experiments/rev_dominicks_sna_rolling_timestral_plan.yaml
+- config: configs/experiments/rev_dominicks_sdr_rolling_timestral_plan.yaml

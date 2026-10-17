@@ -41,6 +41,14 @@ def _numpy(x) -> np.ndarray:
     return x.detach().cpu().numpy() if hasattr(x, "detach") else np.asarray(x)
 
 
+def _free_gpu() -> None:
+    try:
+        import torch
+        torch.cuda.empty_cache()
+    except Exception:
+        pass
+
+
 @register_model("timestral")
 class TimestralZeroShot(TimesFMZeroShot):
     def __init__(self, context: int = 512, batch_size: int = 256, repo: str = REPO,
@@ -80,14 +88,23 @@ class TimestralZeroShot(TimesFMZeroShot):
         context = np.where(has[:, None], self._history, 0.0)  # a series with no record reads as zeros
         known = self._known(future, horizon)
         qs, levels = [], None
-        for lo in range(0, len(context), self.batch_size):
-            part = slice(lo, lo + self.batch_size)
-            f = model.forecast(
-                context[part][:, None, :], prediction_length=horizon,
-                known_covariates=None if known is None else known[part],
-            )
+        lo, size = 0, self.batch_size
+        while lo < len(context):
+            part = slice(lo, lo + size)
+            try:
+                f = model.forecast(
+                    context[part][:, None, :], prediction_length=horizon,
+                    known_covariates=None if known is None else known[part],
+                )
+            except Exception as e:  # out of GPU memory: halve the batch and try again (results do not depend on it)
+                if "out of memory" not in str(e).lower() or size == 1:
+                    raise
+                _free_gpu()
+                size //= 2
+                continue
             qs.append(_numpy(f.quantiles)[:, 0])  # series x horizon x levels
             levels = tuple(float(x) for x in f.quantile_levels)
+            lo += size
         q = np.clip(np.concatenate(qs), 0.0, None)
         q[~has] = 0.0
         lv = np.asarray(levels)

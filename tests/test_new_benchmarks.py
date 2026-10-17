@@ -82,3 +82,22 @@ def test_timestral_output_on_a_gpu_reaches_numpy(split):
     m = build_model("timestral", loader=lambda repo, device: Fake()).fit(split[0])
     f = m.predict(split[1].drop(columns=[UNITS]))
     assert np.allclose(f[f > 0], 1.0)
+
+
+def test_timestral_halves_the_batch_when_the_gpu_runs_out_of_memory(split):
+    import types
+    levels = tuple(np.linspace(0.05, 0.95, 21))
+    sizes = []
+
+    class Fake:
+        def forecast(self, context, prediction_length, known_covariates=None):
+            sizes.append(len(context))
+            if len(context) > 4:
+                raise RuntimeError("CUDA out of memory. Tried to allocate 8.44 GiB")
+            return types.SimpleNamespace(quantiles=np.ones((len(context), 1, prediction_length, 21)),
+                                         quantile_levels=levels)
+
+    m = build_model("timestral", batch_size=64, loader=lambda repo, device: Fake()).fit(split[0])
+    f = m.predict(split[1].drop(columns=[UNITS]))
+    assert len(f) == len(split[1]) and np.allclose(f[f > 0], 1.0)
+    assert max(s for s in sizes[1:] if s <= 4) <= 4 and sizes[0] > 4
