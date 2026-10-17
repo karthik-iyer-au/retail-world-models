@@ -246,11 +246,17 @@ data set item by store, and its total error in snack crackers is
 \rv{sna}{chronos}{total}.
 
 Timestral (study F, Table~\ref{tab:timestral}) is behind the ensemble on every
-data set, at both levels. Given the plan its mean error is higher than TimesFM's
-given the plan on every data set at both levels except the M5 total
-(\rsf{mfive}{tsplan}{total} against \rsf{mfive}{tfmplan}{total}); the plan
-asked for a paired test of the two, which was not run, so these are
-differences of means. Putting it in place of TimesFM makes the
+data set, at both levels. Given the plan it is less accurate than TimesFM given the
+plan by the paired test over windows in \rcount{tfmbeatstsplan} of
+\rcount{tsvstfmplann} comparisons (every data set item by store and at the
+total), and level with it at \rcount{tsvstfmplanlevel}
+(\rsf{mfive}{tsplan}{total} against \rsf{mfive}{tfmplan}{total} on M5); it is
+more accurate in \rcount{tsbeatstfmplan}. From history alone it is less
+accurate than TimesFM from history alone in \rcount{tfmbeatstsmean} of
+\rcount{tsvstfmmeann} comparisons and more accurate in
+\rcount{tsbeatstfmmean}. This test was asked for by the plan and computed from
+the saved per-window scores after the first version of this section, by the
+bootstrap over windows only. Putting it in place of TimesFM makes the
 ensemble less accurate on Dominick's and Frat, level at the Favorita total and
 slightly less accurate item by store, and more
 accurate only at the M5 total (\rsf{mfive}{enstimestral}{total} against
@@ -395,7 +401,15 @@ with ETS above them by weighted least squares lowers the Frat total error
 \rrec{frat}{worldmodelwithetswlsvar}{total} against \rv{frat}{world}{total})
 and raises the M5 total error (world model
 \rrec{mfive}{worldmodelwithetswlsvar}{total} against
-\rv{mfive}{world}{total}). MinT with a shrunk covariance gave a total WRMSSE of
+\rv{mfive}{world}{total}). On Dominick's it raises LightGBM's total error in
+\rcount{reclgbworsedom} of six categories (cheese
+\rrec{che}{lightgbmwithetswlsvar}{total} against \rv{che}{lgb}{total}), so it
+is not a fix for the weekly totals. There the best reconciled ETS forecast at
+the total, whichever method gives it, is behind LightGBM and the ensemble in
+every category. Item by store, ETS bottom-up is behind LightGBM in every
+category, and ahead of the world model and the ensemble only in cheese, where
+one window inflates their means (\rrec{che}{etsbottomup}{ixs} against
+\rv{che}{world}{ixs} and \rv{che}{ens}{ixs}). MinT with a shrunk covariance gave a total WRMSSE of
 \rrec{frat}{etsmintshrink}{total} on Frat, a numerical failure we did not
 investigate further.
 
@@ -654,10 +668,8 @@ TFT was not run on M5 or Favorita, and Chronos-Bolt and TimesFM from history
 alone not on Favorita. TimesFM with the plan fits its linear plan model within
 groups of 2,048 series. Pretrained models are used as published with their point
 forecast fixed in advance (the mean), which for Timestral let a few extreme
-upper quantiles dominate on weekly data. The paired test of Timestral against
-TimesFM asked for by the plan was not run. Reconciliation was not run on the
-Dominick's rolling windows, and the Timestral tail check and the cheese window
-were looked at after the results were read.
+upper quantiles dominate on weekly data. The Timestral tail check and the
+cheese window were looked at after the results were read.
 
 \paragraph{What lift means}
 Merchants promote in weeks they expect to sell well, so part of a measured lift
@@ -748,10 +760,6 @@ either needs a separate licence from the author.
 
 \clearpage
 \appendix
-
-\section{Constraints the models work within}
-\label{sec:constraints}
-
 \begin{table*}[t]
 \centering
 \caption{\textbf{Every constraint the trained models and the ensemble work
@@ -778,9 +786,13 @@ Timestral context and batch & 512 periods; batch 256, halved on running out of G
 \end{tabular}
 \end{table*}
 
+\section{Constraints the models work within}
+\label{sec:constraints}
+
+
+
 Table~\ref{tab:constraints} lists the constraints. The world model's settings are
 in Table~\ref{tab:settings}.
 
-\clearpage
 \label{sec:supplement}
 \input{supplement_dev}

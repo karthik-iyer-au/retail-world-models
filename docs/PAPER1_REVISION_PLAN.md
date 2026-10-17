@@ -432,3 +432,22 @@ TimesFM's plan form trails the ensemble by 0.03 to 0.11. The ensemble's total bi
 every data set; Timestral's plan form over-forecasts Dominick's by 3 times on
 average and Frat by 17%. Tables: results/paper1_revision/tables/studyF_accuracy.csv,
 studyF_paired.csv, studyF_ranks.csv.
+
+**17 October 2026, study F, the paired test asked for in question (1).** The
+Colab analysis compared each Timestral form with the ensemble only. Timestral
+against TimesFM, in the same form, is computed from the saved per-window scores
+(`scripts/paired_from_scores.py`, bootstrap over windows as in
+`scripts/revision_tables.py`; the per-window item bootstrap needs the saved
+forecasts and is not computed). With the plan, TimesFM is more accurate in 16 of
+18 comparisons and level at the Favorita and M5 totals; Timestral is more
+accurate in none. Table: results/paper1_revision/tables/studyF_timestral_vs_timesfm.csv.
+
+**17 October 2026, reconciliation on Dominick's.** The reconciliation of the
+six Dominick's categories ran on the rolling and final windows on 14 and 15
+October (Drive folders `reconcile_dominicks_*`) but was left out when the tables
+were gathered, so the first draft said it was not run. Its per-window files are
+now under results/paper1_revision/reconcile/ and in reconcile.csv; the snack
+cracker final rows already in the table agree to 0.001. Result: combining a
+trained model's item forecasts with ETS above them raises LightGBM's total
+error in all six categories, and the best reconciled ETS total is behind
+LightGBM and the ensemble in every category.

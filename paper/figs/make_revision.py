@@ -361,6 +361,23 @@ def count_values(acc, sets, p, ab):
         put("rcount", f"bothadd{lv(level)}list", value=join_and(lname(k) for k in KEYS if k in w_ & l_) or "none")
         put("rcount", f"addsnotlift{lv(level)}list", value=join_and(lname(k) for k in KEYS if k in w_ - l_) or "none")
         put("rcount", f"liftonly{lv(level)}list", value=join_and(lname(k) for k in KEYS if k in l_ - w_) or "none")
+    rc = read("reconcile.csv")
+    rc = rc[(rc.set == "rolling") & (rc.level == "total")]
+    dom = [k for k in KEYS if k.startswith("dominicks")]
+    worse = 0
+    for k in dom:
+        r_ = rc[(rc.key == k) & (rc.method == "lightgbm_with_ets_wls_var")].wrmsse.iloc[0]
+        u_ = acc[(acc.key == k) & (acc.model == "lightgbm") & (acc.level == "total")].wrmsse.iloc[0]
+        worse += r_ > u_
+    put("rcount", "reclgbworsedom", value=word[int(worse)])
+    tt = read("studyF_timestral_vs_timesfm.csv")
+    for form, code in (("timestral_plan", "plan"), ("timestral_mean", "mean")):
+        q = tt[(tt.a == form) & tt.level.isin([BOTTOM, "total"])]
+        put("rcount", f"tfmbeatsts{code}", value=str(int((q.lo > 0).sum())))
+        put("rcount", f"tsbeatstfm{code}", value=word.get(int((q.hi < 0).sum()), str(int((q.hi < 0).sum()))))
+        put("rcount", f"tsvstfm{code}n", value=str(len(q)))
+        put("rcount", f"tsvstfm{code}level", value=join_and(f"the {lv(r.level).replace('ixs', 'item-by-store level').replace('total', 'total')} {where(r.key)}"
+                                                       for r in q.itertuples() if r.lo <= 0 <= r.hi) or "none")
     i = read("intervals_fixed.csv")
     i = i[i.set == "rolling"]
     nat = i[(i.level == "native_bottom") & (i.model == "tft")].set_index("key").native_spl
@@ -630,40 +647,42 @@ def tab_reconcile():
                ("ets_mint_shrink", "ETS, MinT shrink"), ("lightgbm_with_ets_wls_var", "LightGBM + ETS, WLS variance"),
                ("world_model_with_ets_wls_var", "World model + ETS, WLS variance")]
     lines = []
+    dom = [k for k in KEYS if k.startswith("dominicks")]
+
+    def val(frame, col, k, level, what):
+        if k == "dom":
+            q = frame[frame.key.isin(dom) & (frame[col] == what) & (frame.level == level)].wrmsse
+            return q.mean() if len(q) == len(dom) else None
+        q = frame[(frame.key == k) & (frame[col] == what) & (frame.level == level)].wrmsse
+        return q.iloc[0] if len(q) else None
+
     for m, lbl in methods:
-        cells = []
-        for k in ("frat", "m5"):
-            for level in (BOTTOM, "total"):
-                q = rc[(rc.key == k) & (rc.method == m) & (rc.level == level)].wrmsse
-                cells.append(f3(q.iloc[0]) if len(q) else "--")
+        cells = [f3(val(rc, "method", k, level, m)) for k in ("dom", "frat", "m5") for level in (BOTTOM, "total")]
         lines.append(f"{lbl} & " + " & ".join(cells) + " \\\\")
     lines.append("\\midrule")
     for m in ("lightgbm", "world_model", "ensemble"):
-        cells = []
-        for k in ("frat", "m5"):
-            for level in (BOTTOM, "total"):
-                q = acc[(acc.key == k) & (acc.model == m) & (acc.level == level)].wrmsse
-                cells.append(f3(q.iloc[0]))
+        cells = [f3(val(acc, "model", k, level, m)) for k in ("dom", "frat", "m5") for level in (BOTTOM, "total")]
         lines.append(f"{MODEL_LABEL[m]}, unreconciled & " + " & ".join(cells) + " \\\\")
-    tex = f"""\\begin{{table}}[t]
+    tex = f"""\\begin{{table*}}[t]
 \\centering
 \\caption{{\\textbf{{Reconciled ETS forecasts are far behind the trained models; reconciling a trained model's item
-forecasts with ETS above them helps on Frat and hurts on M5.}} Mean WRMSSE over the rolling windows. MinT with a shrunk
+forecasts with ETS above them helps at the Frat total and hurts on Dominick's and M5.}} Mean WRMSSE over the rolling
+windows (Dominick's: mean of the six categories). MinT with a shrunk
 covariance was computed only where the hierarchy has at most 6,000 nodes; on Frat it gave a total WRMSSE of
 \\rrec{{frat}}{{etsmintshrink}}{{total}}, a numerical failure not investigated further.}}
 \\label{{tab:reconcile}}
 \\footnotesize
 \\setlength{{\\tabcolsep}}{{3pt}}
-\\begin{{tabular}}{{p{{0.42\\columnwidth}}rrrr}}
+\\begin{{tabular}}{{l*{{6}}{{r}}}}
 \\toprule
- & \\multicolumn{{2}}{{c}}{{\\textbf{{Frat}}}} & \\multicolumn{{2}}{{c}}{{\\textbf{{M5}}}} \\\\
-\\cmidrule(lr){{2-3}}\\cmidrule(lr){{4-5}}
-\\textbf{{Method}} & I$\\times$S & Total & I$\\times$S & Total \\\\
+ & \\multicolumn{{2}}{{c}}{{\\textbf{{Dominick's}}}} & \\multicolumn{{2}}{{c}}{{\\textbf{{Frat}}}} & \\multicolumn{{2}}{{c}}{{\\textbf{{M5}}}} \\\\
+\\cmidrule(lr){{2-3}}\\cmidrule(lr){{4-5}}\\cmidrule(lr){{6-7}}
+\\textbf{{Method}} & I$\\times$S & Total & I$\\times$S & Total & I$\\times$S & Total \\\\
 \\midrule
 {chr(10).join(lines)}
 \\bottomrule
 \\end{{tabular}}
-\\end{{table}}
+\\end{{table*}}
 """
     (GEN / "rev_tab_reconcile.tex").write_text(tex)
 
