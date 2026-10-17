@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install figure and table dependencies
-        run: pip install numpy scipy pandas matplotlib pikepdf
+        run: pip install numpy scipy pandas matplotlib pikepdf pyyaml
       - name: Install XeLaTeX and TeX Gyre Pagella
         run: |
           sudo apt-get update -qq
