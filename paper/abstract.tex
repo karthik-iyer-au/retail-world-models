@@ -1,34 +1,37 @@
 \small
 \textbf{Abstract.}
-An equal-weight average of three forecasts, a world model that carries each
-item's state forward under the price and promotion plan, LightGBM, and the
-pretrained TimesFM given the plan, is the most accurate item-by-store forecast
-we found for retail sales. We test it against each of its members, a lift model
-that is the world model without the carried state, Chronos-Bolt, the Temporal
-Fusion Transformer and Mistral's Timestral on rolling forecast origins of four
-public data sets: M5, six Dominick's categories, Breakfast at the Frat, and
-Corporaci\'on Favorita, which was kept out of all development. On
-\rcount{ensinsetixs} of the nine the ensemble is in the 90\% model confidence
-set item by store, and it has the lowest error on \rcount{enslowestixs}; at the
-chain total it is in the set on all nine. Removing the world model makes the
-ensemble less accurate item by store on \rcount{withoutworldmodelixsens} data
-sets and at the total on \rcount{withoutworldmodeltotalens}; on \rcount{addsnotliftixslist} the
-ensemble is not less accurate, by the paired test, with the lift model (the
-same network without the carried state) in its place, so there the gain comes from adding a third
-model. Weights fitted on earlier windows beat equal weights
-in \rcount{fittedwins} of \rcount{fittedn} comparisons. On its own the world model is
-behind LightGBM item by store on \rcount{lgbbeatsworldixs} of eight data sets
-and strongest at the totals a merchant plans against: it has the lowest
-category-plan cost on \rcount{decworldcat} of eight, and the lowest error at
-the M5 chain total (WRMSSE \rv{mfive}{world}{total} against
-\rv{mfive}{ens}{total} for the ensemble), though within the spread of the
-windows. Perturbing the plan shows all trained
-models use it; the world model carries a promotion forward as further lift
-rather than the dip that follows stocking up, and the changes we tried for
-that dip were not kept. Timestral, given the plan, puts extreme upper quantiles on a
-few weekly series, and by a paired test over windows it is less accurate than
-TimesFM with the plan on every data set item by store. Every model, test and change that lost is reported.
+A retailer makes different decisions at different grains of the product, store
+and time hierarchy: store orders for one item in one store by day or week,
+supplier funding for an item across stores by week, category performance by
+store and week or across weeks, and the financial plan for the chain. Which
+forecasting model to use depends on the grain being solved for. This paper
+compares models at each of these grains on four public data sets (M5, six
+Dominick's categories, Breakfast at the Frat, and Corporaci\'on Favorita, the
+last kept out of all development), over rolling forecast origins with paired
+tests and model confidence sets. It addresses two of the four Ps of retail,
+price and promotion, through the plan inputs these data record; it does not
+forecast product, assortment or place, and does not solve them jointly. The
+models are a world model that carries each item's state forward under the
+price and promotion plan, the same network without that carried state,
+LightGBM, the Temporal Fusion Transformer, TimesFM, Chronos-Bolt, Timestral,
+seasonal naive, and an equal-weight average of the world model, LightGBM and
+TimesFM given the plan. On these data the answer changed with the grain. For
+an item by store and for an item across stores, the average had the lowest
+error on \rgrain{ixs}{ens}{best} and \rgrain{item}{ens}{best} of nine data
+sets, and the 90\% confidence set held a median of \rgrain{ixs}{set}{median} and
+\rgrain{item}{set}{median} models. For a category by store, a category and the
+chain total, the lowest-error model differed between data sets and a median of
+\rgrain{catstore}{set}{median} of nine models could not be told apart. For
+category-by-store totals over the whole window, the world model alone had the
+lowest cost on \rcount{decworldcat} of eight data sets, while it was behind
+LightGBM item by store on \rcount{lgbbeatsworldixs}. Every trained model used
+the plan, and on the weekly promotion-driven data pretrained models were less
+accurate without it. These are
+results for these data sets, with the plan inputs and constraints they carry; a
+forecast solved across all four Ps, or a retailer's own data, may give
+different results. Every model, test and change that lost is reported.
 
 \vspace{4pt}
-\textbf{Keywords:} retail forecasting; forecast combination; promotions;
-world models; foundation models; rolling-origin evaluation; M5.
+\textbf{Keywords:} retail forecasting; hierarchical evaluation; forecast
+combination; promotions; world models; foundation models; rolling-origin
+evaluation.

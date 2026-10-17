@@ -1,67 +1,83 @@
 \section{Introduction}
 \label{sec:intro}
 
-A retailer uses one sales forecast for several decisions, made at different
-levels of the product and store hierarchy. Prices, promotions, supplier funding
-and store orders are decided for one item in one store, week by week. Sales,
-unit and margin plans are set for a category or the chain. A forecast can be
-accurate item by store and still miss the category total by several percent,
-because small errors in the same direction add up while large errors in
-opposite directions cancel. Much of what moves the weeks being forecast is
-known in advance: the prices, promotions, displays and events in the plan.
+A retailer uses sales forecasts for several decisions, and each decision is made
+at its own grain of the product, store and time hierarchy. Store orders and
+inventory are set for one item in one store, by day or week. Supplier funding
+and deal terms are agreed for an item across all stores, by week. Category
+performance is reviewed by category and store, week by week or over a run of
+weeks, and category sales and margin plans are set for the category across the
+chain. The financial plan is a chain total. A forecast can be accurate item by
+store and still miss the category total by several percent, because small
+errors in the same direction add up while large errors in opposite directions
+cancel. Knowing which grain is being solved for therefore bears on which model
+to use.
 
-This paper asks which forecast a retailer should use when the plan is known,
-and what a world model adds. Our world model turns each item's recent history
-into a state and carries that state forward one period at a time under the
-plan, so that what is planned for one week can change the forecast for the
-weeks after it (Figure~\ref{fig:overview}). An earlier version of this work
-compared it with LightGBM, a pretrained foundation model and others on one
-final window per data set and found that the most accurate model changed with
-the level scored, the month and the data set. An outside review asked for
-several forecast origins, significance tests, the transition removed as an
-ablation, interval forecasts, decision costs, reconciliation and further
-benchmarks. We ran all of them, on rolling windows taken before any window used
-for development, and wrote down every analysis before it ran,
-except two checks of unexpected results made after reading them, which are
-marked where they appear (Figure~\ref{fig:study}). The rolling windows put an equal-weight average of
-three models first, so the question the paper answers is what the world model
-adds to that average, and what it does on its own.
+This paper asks that question directly: at which grain do which models
+forecast best, when the price and promotion plan for the weeks ahead is known?
+Of the four Ps of retail (product, price, promotion and place), it addresses
+price and promotion, through the plan inputs that public data record: shelf
+price, temporary price cuts, promotion flags, displays and circulars, event and
+payment days. It does not forecast product (assortment, new items, ranging) or
+place (space, distribution), and it does not solve the four together. A
+forecast that did, or a retailer's own data with stock, space and range
+recorded, could give different results from those reported here.
 
-The paper finds the following.
+We compare models chosen to span what retailers use or are offered: LightGBM,
+the tree model behind the leading M5 entries; the Temporal Fusion Transformer;
+three pretrained models used without training on our data (TimesFM, Chronos-Bolt
+and Timestral); a world model of our own, which turns each item's recent history
+into a state and carries it forward one period at a time under the plan
+(Figure~\ref{fig:overview}); the same network without the carried state; and an
+equal-weight average of the world model, LightGBM and TimesFM given the plan.
+An earlier version of this work scored one final window per data set and found
+that the most accurate model changed with the level scored, the month and the
+data set. This version tests that on rolling forecast origins taken before any
+window used for development, on four public data sets, one of them kept out of
+all development, with paired tests, model confidence sets, interval forecasts,
+decision costs and reconciliation, every analysis written down before it ran
+except two checks of unexpected results, which are marked where they appear
+(Figure~\ref{fig:study}).
+
+On these data sets, with the plan inputs and constraints they carry, we
+observed the following.
 \begin{enumerate}\setlength{\itemsep}{2pt}
-\item \textbf{An equal-weight ensemble of the world model, LightGBM and TimesFM
-  with the plan is the most accurate item-by-store forecast.} Over the rolling
-  windows it has the lowest error on \rcount{enslowestixs} of nine data sets
-  and is in the 90\% model confidence set on \rcount{ensinsetixs}; at the chain
-  total it is in the set on all nine. It is never less accurate than LightGBM
-  or the world model by a paired test at either level on the eight data sets with paired results (\S\ref{sec:res-ensemble}).
-\item \textbf{The world model adds to the ensemble on some data sets, and its
-  carried state on almost none.} Without it the ensemble is less accurate item
-  by store on \rcount{withoutworldmodelixsens} data sets and at the total on
-  \rcount{withoutworldmodeltotalens}. On \rcount{addsnotliftixslist} the lift
-  model, the same network without the carried state, does no worse in its place;
-  only on \rcount{bothaddixslist} does the world model add and beat its
-  replacement. Fitted weights beat equal weights in
-  \rcount{fittedwins} of \rcount{fittedn} comparisons (\S\ref{sec:res-adds}).
-\item \textbf{On its own the world model is behind LightGBM item by store and
-  gets category totals right.} LightGBM is more accurate item by store on
-  \rcount{lgbbeatsworldixs} of eight data sets by the paired test; the world
-  model has the lowest category-plan cost on \rcount{decworldcat} of eight and
-  the lowest error at the M5 chain total, the latter within the spread of the
-  windows (\S\ref{sec:res-world}, \S\ref{sec:res-decisions}).
-\item \textbf{All trained models use the plan, and the world model's carried
-  state holds a promotion as further lift.} Removing the plan inputs makes
-  every trained model worse; after a promotion the world model forecasts more,
-  not the dip that follows stocking up, and the changes we tried for the dip
-  were not kept (\S\ref{sec:res-plan}, \S\ref{sec:dropped}).
-\item \textbf{Pretrained models need the plan, and the newest one needs a check
-  on its tails.} TimesFM with the plan is the most accurate model that is not
-  trained on the data; Chronos-Bolt and Timestral, released two days after
-  this revision began, are behind it, and Timestral given the plan puts extreme upper
-  quantiles on a few weekly series (\S\ref{sec:res-pretrained}).
-\item \textbf{The ensemble result holds on a data set kept out of development}
-  (Favorita, \S\ref{sec:res-favorita}), and the rolling windows confirm that a
-  single test month would have misled (\S\ref{sec:res-final}).
+\item \textbf{The model with the lowest error depended on the grain}
+  (\S\ref{sec:res-grain}). For an item by store and an item across stores, the
+  equal-weight average had the lowest error on \rgrain{ixs}{ens}{best} and
+  \rgrain{item}{ens}{best} of nine data sets, and few models could not be told
+  apart from the best (median \rgrain{ixs}{set}{median} and
+  \rgrain{item}{set}{median} of nine). For a category by store, a category and
+  the chain total, the lowest-error model differed from data set to data set
+  and a median of \rgrain{catstore}{set}{median} models could not be told apart:
+  at these grains the data did not settle the choice.
+\item \textbf{The time grain matters too.} Summed over the whole window, the
+  world model alone had the lowest category-by-store planning cost on
+  \rcount{decworldcat} of eight data sets, although by week it was not the
+  lowest at that grain anywhere (\S\ref{sec:res-decisions}). For store orders at
+  critical ratios of 0.5 and 0.8, the average or LightGBM had the lowest cost on
+  every data set.
+\item \textbf{LightGBM was the strongest single model at the fine grains, and
+  averaging added to it.} LightGBM was more accurate than the world model item by
+  store on \rcount{lgbbeatsworldixs} of eight data sets by the paired test. The
+  average was more accurate than LightGBM item by store on
+  \rcount{ensbeatslgbixs} and never less accurate. Weights fitted on earlier
+  windows beat equal weights in \rcount{fittedwins} of \rcount{fittedn}
+  comparisons (\S\ref{sec:res-ensemble}, \S\ref{sec:res-adds}).
+\item \textbf{The world model added to the average on some data sets, and its
+  carried state on almost none.} Without it the average was less accurate item
+  by store on \rcount{withoutworldmodelixsens} data sets; on
+  \rcount{addsnotliftixslist} the same network without the carried state did no
+  worse in its place (\S\ref{sec:res-adds}, \S\ref{sec:res-world}).
+\item \textbf{Every trained model used the plan, and pretrained models needed
+  it.} Removing the plan inputs made every trained model less accurate; TimesFM
+  with the plan was the most accurate model not trained on the data, and
+  Timestral, released two days after this revision began, was behind it on
+  every data set item by store and put extreme upper quantiles on a few weekly
+  series (\S\ref{sec:res-plan}, \S\ref{sec:res-pretrained}).
+\item \textbf{After a promotion the world model forecast more, not the dip that
+  follows stocking up}, and the changes we tried for the dip were not kept
+  (\S\ref{sec:res-plan}, \S\ref{sec:dropped}).
 \item \textbf{Every model, test and change that lost is reported}, including a
   seed that never reached single-fit runs and run-to-run noise as large as the
   differences being tested (\S\ref{sec:dropped}).
@@ -70,9 +86,8 @@ The paper finds the following.
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figs/fig_study.pdf}
-\caption{\textbf{The revision's main results come from rolling windows taken
-before any window used to choose a setting, and the ensemble it tests is fixed
-in advance.} \textbf{(a)} Windows by data source, in periods before the end of the
+\caption{\textbf{The main results come from rolling windows taken before any
+window used to choose a setting, and the average tested is fixed in advance.} \textbf{(a)} Windows by data source, in periods before the end of the
 data: rolling windows (scored for this revision), development windows (used to
 choose settings) and final windows (scored once in the first version). Favorita
 has rolling windows only; nothing was chosen on it. \textbf{(b)} The ensemble:

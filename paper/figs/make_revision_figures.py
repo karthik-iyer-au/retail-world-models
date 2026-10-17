@@ -729,8 +729,68 @@ def fig_decisions():
     return cov, sp
 
 
+def fig_grain():
+    """Which model had the lowest error at each decision grain, and how many models could not be told apart."""
+    gt = R.grain_table(R.rolling_accuracy())
+    grains = [g for g, *_ in R.GRAIN]
+    gname = {g: n for g, n, _, _ in R.GRAIN}
+    fig = plt.figure(figsize=(FULL, 2.75))
+    ax = fig.add_axes([0.14, 0.17, 0.53, 0.66])
+    bx = fig.add_axes([0.765, 0.17, 0.225, 0.66])
+    nk = len(KEYS)
+    for i, g in enumerate(grains):
+        for j, k in enumerate(KEYS):
+            r = gt[(gt.grain == g) & (gt.key == k)].iloc[0]
+            shade = 1.0 - 0.34 * (r.set_size - 1) / 8.0  # darker grey: more models in the confidence set
+            ax.add_patch(Rectangle((j - 0.5, i - 0.5), 1, 1, facecolor=(shade, min(1, shade * 1.005), min(1, shade * 1.02)),
+                                   edgecolor="white", lw=1.2, zorder=1))
+            m = SK[r.best]
+            ax.scatter([j - 0.13], [i], marker=MARKER[m], s=40 if m != "ensemble" else 70, color=COLOR[m],
+                       edgecolor="white", lw=0.5, zorder=3)
+            ax.text(j + 0.2, i, str(r.set_size), ha="left", va="center", fontsize=SMALL, color=INK, zorder=3)
+    ax.set_xlim(-0.5, nk - 0.5)
+    ax.set_ylim(len(grains) - 0.5, -0.5)
+    ax.set_yticks(range(len(grains)))
+    ax.set_yticklabels([gname[g] for g in grains])
+    ax.set_xticks(range(nk))
+    ax.set_xticklabels([NAME[k].replace("Snack crackers", "Snack\ncrackers").replace("Bottled juice", "Bottled\njuice")
+                        .replace("Frozen entrees", "Frozen\nentrees").replace("Soft drinks", "Soft\ndrinks")
+                        for k in KEYS], fontsize=SMALL)
+    ax.xaxis.tick_top()
+    ax.tick_params(length=0)
+    for side in ("top", "right", "left", "bottom"):
+        ax.spines[side].set_visible(False)
+    ax.plot([5.5, 5.5], [-0.5, len(grains) - 0.5], color="white", lw=3, zorder=2)
+    ax.text(2.5, len(grains) - 0.2, "Dominick's", ha="center", va="top", fontsize=SMALL, color=MUTED)
+    panel_label(ax, "a", dx=-0.02, dy=1.16)
+    used = [m for m in ("ensemble", "lightgbm", "world_model", "lift", "timesfm_plan") if m in set(gt.best)]
+    hs = [Line2D([], [], color=COLOR[SK[m]], marker=MARKER[SK[m]], ls="none", ms=5 if m != "ensemble" else 7,
+                 markeredgecolor="white", markeredgewidth=0.5, label=LABEL[SK[m]]) for m in used]
+    fig.legend(handles=hs, loc="lower left", bbox_to_anchor=(0.14, -0.005), ncol=len(hs), frameon=False,
+               fontsize=6.6, handletextpad=0.2, columnspacing=1.0)
+    # (b) confidence-set size by grain
+    rng = np.random.default_rng(0)
+    for i, g in enumerate(grains):
+        q = gt[gt.grain == g].set_size.to_numpy()
+        bx.scatter(q, i + rng.uniform(-0.18, 0.18, len(q)), s=10, color=MUTED, alpha=0.7, edgecolor="none", zorder=2)
+        med = np.median(q)
+        bx.plot([med, med], [i - 0.3, i + 0.3], color=ACCENT, lw=2.0, zorder=3)
+    bx.set_ylim(len(grains) - 0.5, -0.5)
+    bx.set_yticks(range(len(grains)))
+    bx.set_yticklabels([])
+    bx.set_xlim(0.5, 9.5)
+    bx.set_xticks([1, 3, 5, 7, 9])
+    bx.set_xlabel("Models in the 90% confidence set")
+    bx.grid(axis="x", color=GRID, lw=0.5)
+    despine(bx)
+    bx.text(9.4, len(grains) - 0.55, "bar: median", ha="right", va="bottom", fontsize=SMALL, color=ACCENT)
+    panel_label(bx, "b", dx=-0.02, dy=1.16)
+    save(fig, OUT / "fig_grain.pdf")
+
+
 def main():
     use_style()
+    fig_grain()
     lay = fig_study()
     clipped = fig_rolling()
     abl_clip, sweep = fig_ablation()

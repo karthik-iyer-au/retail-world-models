@@ -2,11 +2,68 @@
 \section{Results}
 \label{sec:results}
 
-All results in \S\ref{sec:res-ensemble} to \S\ref{sec:res-recon} are means over
+All results in \S\ref{sec:res-grain} to \S\ref{sec:res-recon} are means over
 the rolling windows; \S\ref{sec:res-final} gives the final windows of the first
-version.
+version. Every statement is about these data sets and the plan inputs they
+record.
 
-\subsection{The ensemble is the most accurate item-by-store forecast}
+\subsection{Which model at which grain}
+\label{sec:res-grain}
+
+\input{generated/rev_tab_grain}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_grain.pdf}
+\caption{\textbf{On these data the fine grains had a clear lowest-error model and
+the coarse grains did not.} \textbf{(a)} For each decision grain (rows, finest at
+the top) and data set (columns): the model with the lowest mean WRMSSE over the
+rolling windows (marker) and the number of the nine models compared that are in
+the 90\% model confidence set (number; darker cells hold more models that cannot
+be told apart from the best). \textbf{(b)} The size of the confidence set at each
+grain, one point per data set; bar: the median. On Dominick's the category and
+the chain total are the same series.}
+\label{fig:grain}
+\end{figure*}
+
+Table~\ref{tab:grain} and Figure~\ref{fig:grain} give, for each grain at which a
+decision is made, the model with the lowest error and how many models could not
+be told apart from it. Two patterns hold across the data sets.
+
+\emph{At the fine grains the choice was settled.} For an item in one store, the
+grain of store orders, the equal-weight average had the lowest error on
+\rgrain{ixs}{ens}{best} of nine data sets and LightGBM on the other
+\rgrain{ixs}{lgb}{best} (\rgrain{ixs}{lgb}{bestlist}); the confidence set held a
+median of \rgrain{ixs}{set}{median} model and never more than
+\rgrain{ixs}{set}{max}. For an item across all stores, the grain of supplier
+funding, the average was lowest on \rgrain{item}{ens}{best} and LightGBM on
+\rgrain{item}{lgb}{best}, with a median of \rgrain{item}{set}{median} models in
+the set. Neither the world model nor any pretrained model was in the set at
+these two grains except TimesFM with the plan and the world model once each for
+an item across stores.
+
+\emph{At the coarse grains it was not.} For a category by store, a category
+across stores and the chain total, the lowest-error model was the average on
+\rgrain{catstore}{ens}{best}, \rgrain{cat}{ens}{best} and \rgrain{total}{ens}{best}
+data sets, LightGBM on \rgrain{catstore}{lgb}{best}, \rgrain{cat}{lgb}{best} and
+\rgrain{total}{lgb}{best}, and the world model, the lift model or TimesFM with the
+plan on the rest. A median of \rgrain{catstore}{set}{median} of nine models were
+in the confidence set at each of these grains, and up to
+\rgrain{total}{set}{max}: with four to six windows, these data do not separate
+the plan-aware models at the totals. The world model was in the set at the
+chain total on \rgrain{total}{world}{inset} data sets and the average on all
+nine.
+
+The time grain changes the answer again. Summed over the whole window rather than
+week by week, the world model had the lowest category-by-store planning cost on
+\rcount{decworldcat} of eight data sets (\S\ref{sec:res-decisions}). The
+sections that follow look at each part of this picture: the fine grains and the
+average (\S\ref{sec:res-ensemble}, \S\ref{sec:res-adds}), the world model
+(\S\ref{sec:res-world}), how the models use the plan (\S\ref{sec:res-plan}),
+the pretrained models (\S\ref{sec:res-pretrained}), the data set kept out of
+development (\S\ref{sec:res-favorita}), intervals, decisions and reconciliation.
+
+\subsection{Item by store: the equal-weight average}
 \label{sec:res-ensemble}
 
 \input{generated/rev_tab_rolling}
@@ -57,7 +114,7 @@ median of \rwin{che}{world}{ixsmedian} over the six, and the lift model's
 \rwin{che}{lift}{ixsmax}; the ensemble, a third of whose forecast is the world
 model's, inherits part of that error.
 
-\subsection{What the world model adds to the ensemble}
+\subsection{What each model adds to the average}
 \label{sec:res-adds}
 
 \input{generated/rev_tab_ablation}
@@ -232,7 +289,7 @@ last 28 days raises the world model's total error by
 
 \input{generated/rev_tab_timestral}
 
-TimesFM with the plan is the most accurate model not trained on the data, and
+On these data TimesFM with the plan was the most accurate model not trained on the data, and
 the plan matters to it: item by store it is ahead of TimesFM from history alone
 on every data set where both ran except M5, where they are equal to three decimals
 (Table~\ref{tab:rolling}), and most on the weekly
@@ -591,33 +648,38 @@ throughout, does not have the problem.
 \section{Discussion}
 \label{sec:discussion}
 
-A retailer that knows its plan should forecast items with an equal-weight
-average of a plan-aware world model, a tree model and a pretrained model given
-the plan, and should check the category totals against the world model alone
-(Table~\ref{tab:advice}).
+The grain a decision is made at bore on which model forecast it best on these
+data (Table~\ref{tab:advice}). The rows below are observations on four public
+data sets with price and promotion plans, not a ranking that holds for every
+retailer: a retailer's own data, with stock, space and range recorded, or a
+forecast solved across all four Ps, could order the models differently, and the
+comparison should be run there.
 
 \begin{table*}[t]
 \centering
-\caption{\textbf{Each decision has its own level, and the results point to a
-forecast for each.}}
+\caption{\textbf{Each decision has its own grain, and on these data the model
+that forecast it best differed by grain.} Observations on the four public data
+sets of this paper.}
 \label{tab:advice}
 \footnotesize
 \renewcommand{\arraystretch}{1.2}
 \begin{tabular}{p{0.23\textwidth}p{0.18\textwidth}p{0.51\textwidth}}
 \toprule
-\textbf{Decision} & \textbf{Level} & \textbf{What the results say} \\
+\textbf{Decision} & \textbf{Grain} & \textbf{What was observed on these data} \\
 \midrule
-Store orders and inventory & Item by store, day or week & The ensemble or LightGBM: lowest order cost on every data set at critical ratios 0.5 and 0.8; the ensemble lowest item-by-store error on \rcount{enslowestixs} of nine \\
-Promotion, price change, supplier funding & Item by week, under a planned change & A model that reads the plan; history alone forecasts \promoTfmLo\% to \promoTfmHi\% of promoted-week sales. Check forecasts after a promotion in categories where shoppers stock up: the world model carries the lift forward \\
-Category sales, units and margin plans & Category or chain, week or month & The world model alone: lowest category-plan cost on \rcount{decworldcat} of eight; the ensemble at the total is in the confidence set everywhere \\
+Store orders and inventory & Item by store, day or week & The average lowest error on \rgrain{ixs}{ens}{best} of nine, LightGBM on \rgrain{ixs}{lgb}{best}; one or two models in the confidence set; the average or LightGBM lowest order cost on every data set at critical ratios 0.5 and 0.8 \\
+Supplier funding, promotion and price decisions & Item across stores, by week, under a planned change & The average lowest error on \rgrain{item}{ens}{best} of nine; a model that reads the plan is needed, since history alone forecast \promoTfmLo\% to \promoTfmHi\% of promoted-week sales; after a promotion the world model forecast more rather than the dip \\
+Category performance by store & Category by store, by week & No settled choice: the average lowest on \rgrain{catstore}{ens}{best}, LightGBM on \rgrain{catstore}{lgb}{best}; a median of \rgrain{catstore}{set}{median} models in the confidence set \\
+Category sales and margin plans & Category by store over the window; category across stores & Over the window the world model alone had the lowest planning cost on \rcount{decworldcat} of eight; by week no settled choice (median \rgrain{cat}{set}{median} models in the set) \\
+Financial plan & Chain total & No settled choice; the average in the confidence set on all nine \\
 Choosing a model & Any & Score several windows with paired tests; one test month reversed the ranking on M5, and runs on different machines differed by as much as the changes tested \\
 Adopting a new pretrained model & Any & Check its totals and its upper quantiles before use; Timestral's tails made its mean forecast 3 to 6 times sales in analgesics \\
 \bottomrule
 \end{tabular}
 \end{table*}
 
-\paragraph{Why an equal-weight ensemble}
-The three members fail in different places. LightGBM is the most accurate single
+\paragraph{Why an equal-weight average}
+On these data the three members failed in different places. LightGBM is the most accurate single
 model item by store on most data sets and the member the ensemble can least do
 without. TimesFM with the plan brings a pretrained view of each series' history.
 The world model has the lowest category-plan cost on \rcount{decworldcat} of
@@ -636,8 +698,9 @@ replacement there only on \rcount{bothaddixslist} item by store, and has a lower
 category-plan cost than the lift model on \rcount{worldbeatsliftcat} of eight. The carried state holds the plan (Figure~\ref{fig:readback}), but the
 rolled state does not predict sales beyond the window better than the state
 before it, and it carries a promotion forward as more lift rather than a dip.
-On these data the case for the carried state is what it adds to an ensemble and
-to category totals, not item accuracy on its own.
+On these data the case for the carried state rests on category totals over the
+window, not on item accuracy, and its contribution to the average was mostly
+that of any third model.
 
 \paragraph{Two cautions}
 A plan-driven forecast responds to plans unlike history with a size the data do
@@ -649,6 +712,16 @@ plans against.
 % =====================================================================
 \section{Limitations and threats to validity}
 \label{sec:limitations}
+
+\paragraph{Scope: two of the four Ps, on public data}
+The paper addresses price and promotion. It does not forecast product
+(assortment, new items, ranging) or place (space, distribution), and it does not
+solve the four Ps together; a unified forecast across them does not exist in
+this work, and one could change which model works best at each grain. The data
+are four public data sets with their own plan inputs and constraints. A single
+retailer's data, with its own levers, stock and space records, could give a
+different ordering of models, and the grain comparison should be repeated on
+it before a choice is made.
 
 \paragraph{Windows and seeds}
 Trained models are one fit each in the rolling windows, and runs of one
@@ -690,17 +763,19 @@ data set. The decision costs are simulations under stated costs.
 \section{Conclusion}
 \label{sec:conclusion}
 
-An equal-weight ensemble of a world model, LightGBM and TimesFM given the plan
-has the lowest item-by-store error on seven of nine rolling-window data sets
-from four public retail sources, including one kept out of development, and on
-the eight with paired results it is never less accurate than LightGBM or the
-world model by a paired test. The world model adds to it on some data sets, and
-its carried state on almost none; on its own it is
-behind LightGBM item by store and gets category totals right. Every trained model
-uses the plan, the world model carries promotions forward as further lift, and a
-pretrained model released this month needs its tails checked before use.
-Retail forecasts should be chosen by the decision they feed, at that decision's
-level, over several windows with paired tests, with the losing models stated.
+Which forecasting model works best depends on the grain of the decision it
+serves. On four public data sets with price and promotion plans, an equal-weight
+average of a world model, LightGBM and TimesFM given the plan had the lowest
+error for items by store and items across stores on most data sets, with few
+models close to it; for categories and the chain total the best model changed
+from data set to data set and several could not be told apart; and over a whole
+window the world model alone gave the lowest category-planning cost on most
+data sets. LightGBM was the strongest single model at the fine grains, and
+averaging added to it. These observations cover two of the four Ps on public
+data; a forecast solved across all four, or a retailer's own data, may order
+the models differently. The grain comparison itself, run over several windows
+with paired tests and the losing models stated, is what we propose a retailer
+repeats on its own data before choosing a model.
 
 \section{Reproducibility and compute}
 \label{sec:repro}

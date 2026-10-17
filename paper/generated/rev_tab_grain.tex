@@ -1,0 +1,24 @@
+\begin{table*}[t]
+\centering
+\caption{\textbf{On these data, which model had the lowest error depended on the grain, and the coarser the grain the
+more models could not be told apart.} For each decision grain and data set: the model with the lowest mean WRMSSE
+over the rolling windows, and in brackets how many of the nine models compared are in the 90\% model confidence set
+(models that cannot be told apart from the best). Ens.: the equal-weight ensemble of the world model, LightGBM and
+TimesFM with the plan; World: world model; Lift: lift model; LGB: LightGBM; TFM+p: TimesFM with the plan. On
+Dominick's each data set is one category, so the category and the chain total are the same series. Favorita: the
+category is the product family. Daily on M5 and Favorita, weekly elsewhere.}
+\label{tab:grain}
+\footnotesize
+\setlength{\tabcolsep}{3.2pt}
+\begin{tabular}{p{0.13\textwidth}p{0.17\textwidth}*{9}{c}}
+\toprule
+\textbf{Grain} & \textbf{Decision made there} & \rotatebox{70}{Cheese} & \rotatebox{70}{Snack crackers} & \rotatebox{70}{Soft drinks} & \rotatebox{70}{Bottled juice} & \rotatebox{70}{Analgesics} & \rotatebox{70}{Frozen entrees} & \rotatebox{70}{Frat} & \rotatebox{70}{M5} & \rotatebox{70}{Favorita} \\
+\midrule
+Item by store & Store orders and inventory & LGB (1) & Ens. (1) & Ens. (2) & Ens. (1) & LGB (2) & Ens. (2) & Ens. (1) & Ens. (1) & Ens. (1) \\
+Item, all stores & Supplier funding and deals & Ens. (3) & Ens. (2) & LGB (2) & Ens. (1) & Ens. (2) & Ens. (3) & Ens. (2) & Ens. (1) & Ens. (1) \\
+Category by store & Store-level category performance & LGB (6) & LGB (9) & Ens. (3) & Ens. (4) & Ens. (2) & LGB (4) & Ens. (2) & LGB (4) & Ens. (2) \\
+Category, all stores & Category sales and margin plans & Ens. (5) & Lift (9) & LGB (4) & Ens. (5) & Ens. (7) & LGB (4) & Ens. (4) & World (4) & Ens. (2) \\
+Chain total & Financial plan & Ens. (5) & Lift (9) & LGB (4) & Ens. (5) & Ens. (7) & LGB (4) & TFM+p (4) & World (4) & Ens. (3) \\
+\bottomrule
+\end{tabular}
+\end{table*}
