@@ -9,7 +9,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import category_cost_nodes as CC  # noqa: E402
 
 from rwm.evaluation import compare as C  # noqa: E402
-from tests.test_ensemble_ablation import fr  # noqa: E402,F401  (fixture)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from test_ensemble_ablation import fr  # noqa: E402,F401  (fixture)
 
 
 def test_nodes_rebuild_the_reported_cost(fr):  # noqa: F811
