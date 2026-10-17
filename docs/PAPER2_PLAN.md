@@ -189,3 +189,22 @@ weeks: one soft-drink episode starting in week 1 had no comparison weeks at all
 only some. They are now listed but not scored, leaving 38. The robustness analyses are rerun. Also corrected: the chain's experiments
 reported a 10% regular price change moving category volume about 3% over 16
 weeks, an elasticity near -0.3, not -0.4 as first written here.
+
+**17 October 2026, after the audit results were read: diagnosis only.** The
+audit of the saved versions (933 version-windows of 494 versions) finished on
+15 October. Two results needed a cause before they could be written up: C1
+failed on most Dominick's versions although baseline plus lift equals the
+forecast exactly in every version, and C4 failed on almost every Dominick's and
+M5 version. `scripts/audit_diagnose.py` reruns both on fourteen saved runs
+(`results/paper2/diagnose_runs.txt`, chosen by rule: the three Dominick's runs
+with the largest C1 violation and six others drawn at random from the six
+categories fetched, three M5 runs at random, the two Frat runs with the largest
+C1 violation). For C1 it uses the regular price the model itself stores, and
+leaves a missing price missing; for C4 it cuts a random tenth of series instead
+of every price at once, and reports drops larger than 5%. The pre-registered
+scores, pass counts and main test are reported unchanged; the diagnosis is
+reported beside them as added after the results. A local check on a Frat world
+model before this ran: with the model's own regular price the largest C1
+violation fell from 0.08% to 0.02% of the largest forecast. The main test is
+computed per version (mean over a version's windows), as the plan states
+("across versions"); the first table code computed it per version-window.
