@@ -36,6 +36,11 @@ def _load(repo: str, device: str):
     return TimestralForecaster.from_pretrained(repo, device=dev)
 
 
+def _numpy(x) -> np.ndarray:
+    """The model's output as a NumPy array; on a GPU it comes back in GPU memory."""
+    return x.detach().cpu().numpy() if hasattr(x, "detach") else np.asarray(x)
+
+
 @register_model("timestral")
 class TimestralZeroShot(TimesFMZeroShot):
     def __init__(self, context: int = 512, batch_size: int = 256, repo: str = REPO,
@@ -81,7 +86,7 @@ class TimestralZeroShot(TimesFMZeroShot):
                 context[part][:, None, :], prediction_length=horizon,
                 known_covariates=None if known is None else known[part],
             )
-            qs.append(np.asarray(f.quantiles)[:, 0])  # series x horizon x levels
+            qs.append(_numpy(f.quantiles)[:, 0])  # series x horizon x levels
             levels = tuple(float(x) for x in f.quantile_levels)
         q = np.clip(np.concatenate(qs), 0.0, None)
         q[~has] = 0.0

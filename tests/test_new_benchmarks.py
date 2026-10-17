@@ -59,3 +59,26 @@ def test_timestral_reads_the_plan():
     f = build_model("timestral", repo="mistralai/Timestral-5M", plan=["promo"]).fit(train).predict(test.drop(columns=[UNITS]))
     on = test["promo"].to_numpy() > 0
     assert f[on].mean() > 1.3 * f[~on].mean()
+
+
+def test_timestral_output_on_a_gpu_reaches_numpy(split):
+    """On a GPU the forecaster returns tensors in GPU memory, which NumPy cannot read directly."""
+    import types
+    torch = pytest.importorskip("torch")
+
+    class GpuTensor:  # stands in for a CUDA tensor: refuses NumPy conversion until moved to the CPU
+        def __init__(self, t): self.t = t
+        def __array__(self, *a, **k): raise TypeError("can't convert cuda:0 device type tensor to numpy")
+        def detach(self): return self
+        def cpu(self): return self.t
+
+    levels = tuple(np.linspace(0.05, 0.95, 21))
+
+    class Fake:
+        def forecast(self, context, prediction_length, known_covariates=None):
+            q = torch.ones((context.shape[0], 1, prediction_length, len(levels)))
+            return types.SimpleNamespace(quantiles=GpuTensor(q), quantile_levels=levels)
+
+    m = build_model("timestral", loader=lambda repo, device: Fake()).fit(split[0])
+    f = m.predict(split[1].drop(columns=[UNITS]))
+    assert np.allclose(f[f > 0], 1.0)
