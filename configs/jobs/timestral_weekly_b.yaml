@@ -1,0 +1,14 @@
+# Study F, Timestral (weekly data).
+datasets:
+- name: dominicks
+  codes:
+  - bjc
+  - ana
+  - fre
+runs:
+- config: configs/experiments/rev_dominicks_bjc_rolling_timestral_plan.yaml
+- config: configs/experiments/rev_dominicks_bjc_rolling_timestral_mean.yaml
+- config: configs/experiments/rev_dominicks_ana_rolling_timestral_plan.yaml
+- config: configs/experiments/rev_dominicks_ana_rolling_timestral_mean.yaml
+- config: configs/experiments/rev_dominicks_fre_rolling_timestral_plan.yaml
+- config: configs/experiments/rev_dominicks_fre_rolling_timestral_mean.yaml

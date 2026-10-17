@@ -21,7 +21,7 @@ import pandas as pd
 from rwm.evaluation import compare as C
 
 MODELS = ["world_model", "lift", "lightgbm", "seasonal_naive", "timesfm_mean", "timesfm_plan", "chronos", "tft",
-          "graph", "timestral_mean", "timestral_plan", "ensemble", "ensemble_timestral", "ensemble_4"]
+          "graph", "timestral_mean", "timestral_plan", "timestral209_plan", "ensemble", "ensemble_timestral", "ensemble_4"]
 ENSEMBLE = ["world_model", "lightgbm", "timesfm_plan"]
 # study F (plan, 17 October): Timestral's plan form in place of TimesFM's, and all four together
 VARIANTS = {"ensemble_timestral": ["world_model", "lightgbm", "timestral_plan"],

@@ -1,4 +1,4 @@
-# Study F (plan amendment of 17 October 2026): Timestral-209M, windows and inputs of rev_dominicks_sna_rolling_timesfm_plan; written by scripts/make_timestral_configs.py.
+# Study F (plan amendment of 17 October 2026): Timestral, windows and inputs of rev_dominicks_sna_rolling_timesfm_plan; written by scripts/make_timestral_configs.py.
 name: rev_dominicks_sna_rolling_timestral_mean
 seed: 0
 dataset:
@@ -10,8 +10,8 @@ model:
   name: timestral
   params:
     context: 512
-    batch_size: 256
-    repo: mistralai/Timestral-209M
+    batch_size: 1024
+    repo: mistralai/Timestral-28M
 evaluation:
   horizon: 8
   n_origins: 6

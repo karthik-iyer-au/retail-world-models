@@ -375,3 +375,14 @@ window before (data sets that record promotions: Dominick's, Frat, Favorita);
 and bias, forecast over actual for the whole horizon, in total and as the
 median across nodes of the level. Reported as the mean over windows with the
 spread across windows; no pass rule, they are descriptive.
+
+**17 October 2026, study F, model size changed before any result.**
+Timestral-209M proved too slow for the study: the first Dominick's
+category (47,000 series, six windows, with the plan as inputs) had not
+finished after 80 minutes on a T4, which puts the study at about a day of GPU
+time. No Timestral forecast had been scored. The study now uses Timestral-28M,
+which its authors report ahead of Chronos-2, with the same inputs, windows and
+questions. Model size is checked rather than assumed: on Frat, the smallest
+data set, the plan form is also run with 209M (`timestral209_plan`) and the
+two sizes are compared. If 209M is clearly better there, the paper says that
+the reported Timestral results are a lower bound for the larger model.
