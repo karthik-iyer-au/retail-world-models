@@ -1,0 +1,16 @@
+# Study G (plan amendment of 17 October 2026): the Frat lift model with the world model's
+# regularisation; the data sets are fetched so the per-node category costs can be computed after it.
+datasets:
+- name: breakfast_at_the_frat
+  from: /content/drive/MyDrive/retail-world-model/data
+- name: dominicks
+  codes:
+  - che
+  - sna
+  - sdr
+  - bjc
+  - ana
+  - fre
+- name: m5
+runs:
+- config: configs/experiments/rev_frat_rolling_lift_matched.yaml

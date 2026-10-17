@@ -468,7 +468,7 @@ Frat lift model ran with readout dropout 0.2 and weight decay 0.01, carried over
 from the companion paper's final Frat config, while the world model ran with
 neither; on the other data sets the two share every setting but the transition.
 The Frat lift model is rerun with the world model's settings
-(`rev_frat_rolling_lift_matched`, job `frat_lift_matched`), and the ensemble
+(`rev_frat_rolling_lift_matched`, job `study_g`), and the ensemble
 ablation adds `lift_matched_for_world_model`. Both numbers are reported; the
 matched one is used for the claim that only the transition differs. (3) The
 MinT-shrink failure on Frat is diagnosed from the ETS fits, which need no saved
