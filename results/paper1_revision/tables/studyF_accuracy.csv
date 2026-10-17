@@ -1,0 +1,9 @@
+data,level,ensemble,ensemble_4,ensemble_timestral,lightgbm,timesfm_plan,timestral209_plan,timestral_mean,timestral_plan,world_model
+dominicks,item_idxstore_id,0.612,0.821,0.916,0.568,0.613,,0.728,1.565,0.778
+dominicks,total,0.672,2.858,3.729,0.684,0.807,,2.121,10.788,0.782
+favorita,item_idxstore_id,0.694,0.694,0.697,0.719,0.712,,0.771,0.731,0.726
+favorita,total,0.303,0.313,0.298,0.309,0.397,,0.43,0.403,0.341
+frat,item_idxstore_id,0.549,0.595,0.623,0.57,0.578,1.036,0.792,0.864,0.595
+frat,total,0.337,0.407,0.501,0.36,0.327,1.392,0.484,1.048,0.457
+m5,item_idxstore_id,0.834,0.842,0.846,0.861,0.842,,0.861,0.894,0.851
+m5,total,0.706,0.699,0.609,0.693,1.035,,1.014,1.025,0.609

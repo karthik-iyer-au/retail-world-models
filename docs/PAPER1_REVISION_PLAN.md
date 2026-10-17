@@ -386,3 +386,49 @@ questions. Model size is checked rather than assumed: on Frat, the smallest
 data set, the plan form is also run with 209M (`timestral209_plan`) and the
 two sizes are compared. If 209M is clearly better there, the paper says that
 the reported Timestral results are a lower bound for the larger model.
+
+**17 October 2026, study F result.** The ensemble beats Timestral's plan form on every
+data set, at the total and at item by store, in every Dominick's category and
+on Frat, Favorita and M5, with the paired interval clear of zero in 17 of 18
+comparisons (Dominick's cheese at item by store just touches zero). Timestral's
+history-only form is closer and loses on the mean everywhere except Dominick's
+cheese at item by store, where it is level.
+(1) Timestral's plan form does not beat TimesFM's plan form anywhere except
+the M5 total, where they tie (WRMSSE 1.03 against 1.04). (2) Swapping
+Timestral in for TimesFM makes the ensemble worse on Dominick's and Frat,
+leaves it level on Favorita (item by store 0.003 worse), and makes it better on the M5 total only (0.61
+against 0.71; item by store slightly worse). Per the rule above, the paper's
+ensemble is unchanged and the M5 swap is reported as a robustness result. The
+size check runs the wrong way for Timestral: on Frat, 209M is worse than 28M
+(item by store 1.04 against 0.86, total 1.39 against 1.05), so 28M is not
+understating it.
+
+Why Timestral does badly on Dominick's was checked before reporting, on the
+saved forecasts. It is not a scale or input bug: its median forecast sums to
+0.8 to 1.3 of actual sales in every window on analgesics and soft drinks, and
+the history-only form's mean sums to 0.9 to 1.4. The failure is in its upper tail when it is given the plan. On
+analgesics its 99% quantile sums to 57 to 107 times actual sales, and because
+the point forecast is the mean of the quantiles, as written down above, a
+handful of series carry the error: the top 1% of series by excess hold 75 to
+88% of it. One series that sold 2 units in a window was forecast 7,586 (median
+289). The same happens, more mildly, on soft drinks (99% quantile 14 to 53
+times actual) and Frat (3 to 7 times), and not on the daily data sets. The
+forecast rule is not changed after the result; the paper reports the finding
+and notes that Timestral's median would sit much closer, which is a reason a
+merchant should not use a foundation model's plan-conditioned tails unchecked.
+
+Timestral's own quantiles score a pinball loss at item by store of 0.31
+(Dominick's), 0.28 (Frat, Favorita) and 0.37 (M5), behind TFT where it was run
+(Dominick's 0.20, Frat 0.19) and the ensemble's conformal intervals
+(Dominick's 0.22, Frat 0.20, Favorita 0.24, M5 0.32).
+
+Ranking check. The ensemble ranks item by store changes best or level with the
+best on every data set (Spearman 0.61 Dominick's, 0.46 Favorita, 0.83 Frat,
+0.43 M5; the four-model ensemble is 0.47 on Favorita) and has the best or
+level-best top-decile hit rate (0.57, 0.51, 0.68, 0.53 against 0.10 by
+chance). On promoted periods, LightGBM and the ensemble lead (Spearman 0.67 and
+0.66 on Dominick's; the ensemble leads on Frat, 0.74, and Favorita, 0.58);
+TimesFM's plan form trails the ensemble by 0.03 to 0.11. The ensemble's total bias is within 6% of actual sales on
+every data set; Timestral's plan form over-forecasts Dominick's by 3 times on
+average and Frat by 17%. Tables: results/paper1_revision/tables/studyF_accuracy.csv,
+studyF_paired.csv, studyF_ranks.csv.
