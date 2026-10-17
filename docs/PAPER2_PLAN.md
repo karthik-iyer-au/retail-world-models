@@ -206,5 +206,10 @@ scores, pass counts and main test are reported unchanged; the diagnosis is
 reported beside them as added after the results. A local check on a Frat world
 model before this ran: with the model's own regular price the largest C1
 violation fell from 0.08% to 0.02% of the largest forecast. The main test is
-computed per version (mean over a version's windows), as the plan states
-("across versions"); the first table code computed it per version-window.
+reported on the unit the manuscript fixed before any result, a version being a
+configuration, seed and window; the same test on the mean over each version's
+windows (configuration and seed) is reported beside it, because the windows of
+one version are not independent and differ in difficulty. Pass counts with C5
+left out, and with C1 and C5 left out, are added as exploratory: C5 compares the
+forecast with sales over the same baseline and so shares information with
+accuracy.

@@ -3,8 +3,9 @@
 \caption{\textbf{Reconciled ETS forecasts are far behind the trained models; reconciling a trained model's item
 forecasts with ETS above them helps at the Frat total and hurts on Dominick's and M5.} Mean WRMSSE over the rolling
 windows (Dominick's: mean of the six categories). MinT with a shrunk
-covariance was computed only where the hierarchy has at most 6,000 nodes; on Frat it gave a total WRMSSE of
-\rrec{frat}{etsmintshrink}{total}, a numerical failure not investigated further.}
+covariance was computed only where the hierarchy has at most 6,000 nodes (Frat), after the fix for nodes with no
+in-sample error; its first run gave a total WRMSSE of \rrec{frat}{etsmintshrinkbeforefix}{total}
+(\S\ref{sec:res-recon}).}
 \label{tab:reconcile}
 \footnotesize
 \setlength{\tabcolsep}{3pt}
@@ -19,7 +20,7 @@ ETS, top-down & 0.753 & 0.924 & 0.806 & 0.487 & 0.917 & 0.902 \\
 ETS, OLS & 0.778 & 1.177 & 0.953 & 0.520 & 0.888 & 0.902 \\
 ETS, WLS structural & 0.748 & 1.125 & 0.912 & 0.538 & 0.885 & 0.908 \\
 ETS, WLS variance & 0.853 & 1.750 & 0.903 & 0.511 & 0.884 & 0.946 \\
-ETS, MinT shrink & -- & -- & 0.926 & 247.170 & -- & -- \\
+ETS, MinT shrink & -- & -- & 0.926 & 0.610 & -- & -- \\
 LightGBM + ETS, WLS variance & 0.720 & 1.483 & 0.581 & 0.304 & 0.855 & 0.763 \\
 World model + ETS, WLS variance & 0.786 & 1.666 & 0.602 & 0.343 & 0.849 & 0.754 \\
 \midrule

@@ -1,0 +1,34 @@
+\begin{table*}[t]
+\centering
+\caption{\textbf{With the cost corrected, the world model had the lowest category-plan cost only on M5; the
+ensemble or LightGBM was lowest elsewhere under every rule but one.} On M5 the world model is not separated from the
+ensemble by period and is lower in all four windows over the whole window; the exception elsewhere is cheese over the
+first half, where TimesFM with the plan is lowest.
+Category-by-store planning cost, mean over the rolling windows. Lowest other: the model other than the world model with
+the lowest cost by period, in dollars. World minus it: the world model's cost minus that model's, with a 95\% interval
+from 5,000 resamples of category-by-store nodes within each window, the same nodes for both models (positive: the
+world model costs more); this interval does not cover variation between windows, for which the next column counts the
+windows in which the world model cost less. The last five columns give the lowest-cost model of the five under each
+rule: absolute error of each period's total in dollars (the cost used in Table~\ref{tab:decisions}); the same over
+the first half of the window; error of the total over the whole window; each unit of error counted alike; and the mean
+over nodes of each node's error over its sales. Study G.}
+\label{tab:catcost}
+\footnotesize
+\setlength{\tabcolsep}{3.4pt}
+\begin{tabular}{lllc*{5}{c}}
+\toprule
+ & & & & \multicolumn{5}{c}{\textbf{Lowest cost under each rule}} \\
+\cmidrule(l){5-9}
+\textbf{Data} & \textbf{Lowest other} & \textbf{World minus it} & \textbf{World lower} & By period & First half & Window total & Units & Equal nodes \\
+\midrule
+Cheese & LGB & 0.129 (0.046 to 0.212) & 2/6 & LGB & TFM+p & LGB & LGB & Ens. \\
+Snack crackers & LGB & 0.100 (0.081 to 0.122) & 2/6 & LGB & LGB & LGB & LGB & LGB \\
+Soft drinks & Ens. & 0.017 (0.014 to 0.019) & 1/6 & Ens. & Ens. & Ens. & Ens. & Ens. \\
+Bottled juice & Ens. & 0.033 (0.029 to 0.037) & 0/6 & Ens. & Ens. & LGB & Ens. & Ens. \\
+Analgesics & Ens. & 0.005 (0.003 to 0.007) & 1/6 & Ens. & Ens. & LGB & Ens. & Ens. \\
+Frozen entrees & LGB & 0.024 (0.020 to 0.028) & 2/6 & LGB & LGB & LGB & LGB & LGB \\
+Frat & Ens. & 0.021 (0.019 to 0.023) & 0/4 & Ens. & Ens. & Ens. & Ens. & Ens. \\
+M5 & Ens. & \textminus 0.002 (\textminus 0.006 to 0.003) & 2/4 & World & World & World & World & LGB \\
+\bottomrule
+\end{tabular}
+\end{table*}

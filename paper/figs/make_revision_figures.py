@@ -638,7 +638,7 @@ def fig_decisions():
     fig = plt.figure(figsize=(FULL, 2.5))
     # (a) category planning cost relative to seasonal naive
     ax = fig.add_axes([0.125, 0.25, 0.235, 0.67])
-    d = read("decisions.csv")
+    d = R.read_decisions()
     d = d[(d.set == "rolling") & (d.decision == "category_planning")]
     models = ["world_model", "ensemble", "lightgbm", "lift"]
     keys = [k for k in KEYS if k in set(d.key)]

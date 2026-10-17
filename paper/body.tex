@@ -36,8 +36,8 @@ data set. This version tests that on rolling forecast origins taken before any
 window used for development, on four public data sets, one of them kept out of
 all development, with paired tests, model confidence sets, interval forecasts,
 decision costs and reconciliation, every analysis written down before it ran
-except two checks of unexpected results, which are marked where they appear
-(Figure~\ref{fig:study}).
+except checks of unexpected results and two corrections, which are marked where
+they appear (Figure~\ref{fig:study}).
 
 On these data sets, with the plan inputs and constraints they carry, we
 observed the following.
@@ -45,18 +45,23 @@ observed the following.
 \item \textbf{The model with the lowest error depended on the grain}
   (\S\ref{sec:res-grain}). For an item by store and an item across stores, the
   equal-weight average had the lowest error on \rgrain{ixs}{ens}{best} and
-  \rgrain{item}{ens}{best} of nine data sets, and few models could not be told
-  apart from the best (median \rgrain{ixs}{set}{median} and
+  \rgrain{item}{ens}{best} of nine data sets, and the 90\% confidence set kept
+  few models with it (median \rgrain{ixs}{set}{median} and
   \rgrain{item}{set}{median} of nine). For a category by store, a category and
   the chain total, the lowest-error model differed from data set to data set
-  and a median of \rgrain{catstore}{set}{median} models could not be told apart:
-  at these grains the data did not settle the choice.
-\item \textbf{The time grain matters too.} Summed over the whole window, the
-  world model alone had the lowest category-by-store planning cost on
-  \rcount{decworldcat} of eight data sets, although by week it was not the
-  lowest at that grain anywhere (\S\ref{sec:res-decisions}). For store orders at
-  critical ratios of 0.5 and 0.8, the average or LightGBM had the lowest cost on
-  every data set.
+  and the confidence set kept a median of \rgrain{catstore}{set}{median}: with
+  four to six windows, these data did not separate the models at these grains.
+\item \textbf{The decision costs followed the same pattern.} For category-by-store
+  plans the average had the lowest cost on \rcount{ccdollarsens} of eight data
+  sets and LightGBM on \rcount{ccdollarslgb}, each ahead of the world model by an
+  interval over category-by-store nodes that excludes zero (the world model was
+  lower in at most two of the four to six windows); under the other horizon and
+  weighting rules the lowest was the same kind of model with one exception. The
+  world model was lowest only on M5, not separated by period and lower in all
+  four windows over the whole window. A first version of
+  this cost, which put the world model first on most data sets, was wrong
+  (\S\ref{sec:res-decisions}). For store orders at critical ratios of 0.5 and
+  0.8, the average or LightGBM had the lowest cost on every data set.
 \item \textbf{LightGBM was the strongest single model at the fine grains, and
   averaging added to it.} LightGBM was more accurate than the world model item by
   store on \rcount{lgbbeatsworldixs} of eight data sets by the paired test. The
@@ -67,8 +72,9 @@ observed the following.
 \item \textbf{The world model added to the average on some data sets, and its
   carried state on almost none.} Without it the average was less accurate item
   by store on \rcount{withoutworldmodelixsens} data sets; on
-  \rcount{addsnotliftixslist} the same network without the carried state did no
-  worse in its place (\S\ref{sec:res-adds}, \S\ref{sec:res-world}).
+  \rcount{addsnotliftixslist} we did not detect a difference when the same network
+  without the carried state took its place, also on Frat when it was rerun with
+  the world model's regularisation (\S\ref{sec:res-adds}, \S\ref{sec:res-world}).
 \item \textbf{Every trained model used the plan, and pretrained models needed
   it.} Removing the plan inputs made every trained model less accurate; TimesFM
   with the plan was the most accurate model not trained on the data, and
@@ -117,7 +123,8 @@ the experimental setup. Section~\ref{sec:results} reports the results,
 Section~\ref{sec:dropped} what was tried and dropped, and
 Sections~\ref{sec:discussion} to \ref{sec:conclusion} discuss what the results
 mean for a retailer, their limits, and conclude. The development study is in
-Appendix~\ref{sec:supplementdev}.
+Supplement~\ref{sec:supplementdev}, and the final windows and dropped changes of
+the first version in Supplement~\ref{sec:supplementfinal}.
 
 % =====================================================================
 \section{Related work}
@@ -224,6 +231,24 @@ actions are the plan. Our world model uses a recurrent transition~\cite{gru}
 with layer normalisation~\cite{layernorm} on a transformer
 encoder~\cite{transformer}, and is compared with the same model without the
 transition so that what the carried state adds is measured on its own.
+
+\subsection{What this paper adds}
+
+Two findings here are not new. That an equal-weight average of different models
+is hard to beat, and that fitted weights rarely help, is the forecast
+combination puzzle~\cite{smithwallis2009,wang2023}; that a gradient-boosted tree
+is a strong single model on retail panels was the lesson of M5~\cite{m5accuracy}.
+Hierarchical forecasting asks how to make forecasts at different levels agree,
+and scores them over all levels together~\cite{hyndman2011,mint,m5accuracy}. This
+paper asks a different question: which model to choose for the grain at which a
+given decision is made, when the price and promotion plan is known. It adds
+three things to the work above. It scores each grain separately, ties each to
+the decision made there, and reports how many models each grain's data can
+separate, rather than one score averaged over levels; on these data the answer
+differed between fine and coarse grains. It compares trained plan-aware models
+with pretrained models given the plan as covariates on the same windows and
+grains. And it measures, inside the average, what a model that carries a state
+forward under the plan adds beyond the same network without it.
 
 % =====================================================================
 \section{Data}
@@ -397,10 +422,13 @@ state before the window. Seed 1 in three M5 windows.}
 \end{figure}
 
 \subsection{Lift model}
-The same model without the roll-forward: $s_{t+h}(p) = s_t$ for every $h$. The
-two share encoder, readout, size, inputs and training steps, so the difference
-between them is the carried state; it is the transition ablation. On Frat its
-readout uses dropout~\cite{dropout} and decoupled weight decay~\cite{adamw}.
+The same model without the roll-forward: $s_{t+h}(p) = s_t$ for every $h$. On
+M5, Dominick's and Favorita the two share encoder, readout, size, inputs, training
+steps and regularisation, so the difference between them is the carried state; it
+is the transition ablation. On Frat the lift model's settings, carried over from
+the first version, add readout dropout~\cite{dropout} of 0.2 and decoupled weight
+decay~\cite{adamw} of 0.01 that the world model does not use; study G reruns it
+with the world model's settings (\S\ref{sec:res-adds}).
 
 \subsection{Ensemble}
 The equal-weight mean of the forecasts of the world model, LightGBM and TimesFM
@@ -423,7 +451,7 @@ between the same item in other stores and items of the same department in the
 same store; run on the M5 final windows only. \emph{TimesFM}~\cite{timesfm,timesfm25}:
 the 200M-parameter TimesFM~2.5 checkpoint given each series' last 512 periods;
 we use its mean output, because its median forecasts 27\% to 31\% below M5
-totals (\S\ref{sec:dropped}). \emph{TimesFM with the plan}: the same model
+totals (\S\ref{sec:dropped-first}). \emph{TimesFM with the plan}: the same model
 through its covariate method, a linear model on the plan inputs fitted over
 groups of 2,048 series, then TimesFM on what that model leaves.
 \emph{Chronos-Bolt}~\cite{chronos}: the base checkpoint, zero-shot, the mean of
@@ -467,9 +495,17 @@ For a window and a level, the difference in WRMSSE between two models gets a
 95\% interval from 1,000 resamples of items: an item drawn twice counts twice in
 every series and aggregate it feeds, with the weights recomputed. Across
 windows, the mean difference gets a 95\% interval from 5,000 resamples of
-windows. A model is said to beat another only when that interval excludes zero.
-For each data set and level we report the 90\% model confidence
-set~\cite{hansen2011} by the range statistic with a bootstrap over windows.
+windows. A model is said to beat another only when that interval excludes zero;
+when it does not, we say no difference was detected, which is not a finding that
+the two are equal. For each data set and level we report the 90\% model
+confidence set~\cite{hansen2011} by the range statistic with a bootstrap over
+windows. With four to six windows these tests have little power, and adjacent
+windows are dependent: each is forecast from all data before it, so they share
+most of their training history, and an error tied to a season or a stretch of
+trading can recur in neighbouring windows. A bootstrap that resamples whole
+windows treats them as exchangeable and so understates that dependence; we
+report the number of windows in which one model beats another next to the
+interval where it matters (\S\ref{sec:res-world}).
 
 \paragraph{Intervals}
 Each model's interval forecasts come from its own errors in the earlier rolling
@@ -490,8 +526,11 @@ over every window.
 Three simulations turn forecasts into costs. \emph{Store orders}: for each
 item-store-period, order the model's interval quantile at a critical ratio $r$
 of 0.5, 0.8 or 0.95; each unit over costs 1 and each unit short $r/(1-r)$.
-\emph{Category plan}: the absolute error of each category-by-store total over the
-window, weighted by dollar sales. \emph{Promotion decisions}: in the generated
+\emph{Category plan}: the absolute error of each category-by-store total in each
+period, in dollars (each node's units valued at its average price before the
+window), summed over the window and divided by sales in dollars; study G checks
+it against the first half of the window, the error of the whole window's total,
+units in place of dollars and equal node weights. \emph{Promotion decisions}: in the generated
 store worlds of the companion paper~\cite{paper2}, where each promotion's true
 lift is known, promote when the predicted lift times margin exceeds a fixed
 cost; regret is the value lost against deciding with the true lift. The first
@@ -504,7 +543,9 @@ window (seasonal at the aggregate nodes, non-seasonal item by store). They are
 reconciled bottom-up, top-down by historical proportions, and by the MinT
 family~\cite{mint}: ordinary least squares, weighted least squares with
 structural weights and with in-sample variances, and MinT with a shrunk
-covariance where the hierarchy has at most 6,000 nodes (Frat). Each model's own
+covariance where the hierarchy has at most 6,000 nodes (Frat); nodes with no
+in-sample error are given the smallest variance of the others, a fix made after
+the first run failed (\S\ref{sec:res-recon}). Each model's own
 item-by-store forecasts are also combined with ETS above them by weighted least
 squares.
 
@@ -519,12 +560,17 @@ actual units over the series' unpromoted level; and bias, forecast over actual.
 These were written down before they ran and have no pass rule.
 
 \paragraph{Studies added after the rolling results}
-The rolling windows put the ensemble first, so six studies were added, each
+The rolling windows put the ensemble first, so studies were added, each
 written down before it ran and reported as added after the main results:
 \emph{A}, what each member adds to the ensemble and whether fitted weights beat
 equal ones; \emph{B}, input perturbation on the saved models; \emph{C} and
 \emph{E}, changes aimed at the forecast after a promotion; \emph{D}, Favorita;
-and \emph{F}, Timestral, with the ranking check alongside. Three tests on the
+\emph{F}, Timestral, with the ranking check alongside; and \emph{G}, asked for by
+a reader of the first revision: paired uncertainty and sensitivity for the
+category-plan cost, the Frat lift model rerun with the world model's
+regularisation, and a diagnosis of the MinT failure. Study G found an error in
+the category-plan cost and a numerical failure in MinT-shrink; both are
+corrected and the first results kept for the record. Three tests on the
 saved world models complete the set: shuffling the timing of the plan within
 each series, adding one promotion and price cut and following its effect
 through later periods, and a ridge read-out from the rolled state to sales after

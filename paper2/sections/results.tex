@@ -1,29 +1,173 @@
 \section{The audit of the saved model versions}
 \label{sec:results}
 
-\emph{This section is filled from \texttt{results/paper2/summary/} when the
-audit of the saved versions finishes on Colab: the pass counts by check and data
-set, every check across versions, the models' stated response to the zone price
-deviations against the measured one, and the main test. The figure and
-table code is in \texttt{paper2/figs/real.py} and has been run end to end.}
+The audit read every saved world-model and lift-model checkpoint of the
+companion paper~\cite{rwm}: \rVersions{} versions (a configuration and seed),
+\rVerM{} on M5, \rVerD{} on Dominick's and \rVerF{} on Frat, scored on
+\rWindows{} version-windows. Most are development variants, so they differ in
+many settings at once. No model was refitted or tuned. Table~\ref{tab:realpass}
+gives the pass counts and Figure~\ref{fig:realchecks} every score.
 
-\IfFileExists{generated/tab_real_pass.tex}{%
-\begin{table}[t]\centering
-\caption{\textbf{Pass counts by check and data set.}}\label{tab:realpass}
-\footnotesize\input{generated/tab_real_pass}\end{table}
-\begin{table}[t]\centering
-\caption{\textbf{The main test.}}\label{tab:realmain}
-\footnotesize\input{generated/tab_real_main}\end{table}
+\begin{table*}[t]\centering
+\caption{\textbf{No version passed every check on M5 or Dominick's.} Pass counts
+by check and data set, over version-windows (a check counted only where it
+applies: C3 needs two or more seeds, C6 a LightGBM run on the same window).
+Thresholds in Table~\ref{tab:thresholds}.}\label{tab:realpass}
+\footnotesize\setlength{\tabcolsep}{6pt}\input{generated/tab_real_pass}\end{table*}
+
 \begin{figure*}[t]\centering
 \includegraphics[width=\textwidth]{figs/fig_real_checks.pdf}
-\caption{\textbf{Every check across every audited version.}}\label{fig:realchecks}
+\caption{\textbf{The explanations agreed with themselves across seeds on
+Dominick's and Frat, failed the price-direction check on Dominick's and M5,
+and agreed with LightGBM only on Frat.} One point per version-window, coloured
+by data set; dashed lines: pass thresholds. \textbf{(a)} C1, the largest
+violation of the construction properties as a share of the largest forecast.
+\textbf{(b)} C2, rank agreement of the total lift with the original as the lift
+readout, baseline readout, transition and encoder are re-initialised in turn.
+\textbf{(c)} C3, agreement of lifts between seeds against agreement of
+forecasts. \textbf{(d)} C4, the share of item-weeks forecast lower after a
+deeper price cut. \textbf{(e)} C5, forecast over sales and rank of predicted
+with observed lift on planned item-weeks; shaded: the pass region. \textbf{(f)}
+C6, rank agreement with LightGBM's on/off contributions (circles) and TreeSHAP
+values (squares), by lever.}\label{fig:realchecks}
 \end{figure*}
+
+\paragraph{No version passes every check on M5 or Dominick's}
+On Frat \rAllF{} of \rWinF{} version-windows pass every check that applies;
+on M5 and Dominick's none do. The checks fail for different reasons on each
+data set, and two of them, C1 and C4, needed a diagnosis before they could be
+read. We reran both on \dRuns{} saved runs (\dWindows{} windows) chosen by a rule
+fixed before the rerun (\texttt{docs/PAPER2\_PLAN.md}, 17 October); the
+diagnosis is reported as added after the results.
+
+\paragraph{C1: the parts add up, but the lift with nothing planned is often not zero}
+In every version baseline plus lift equals the forecast (largest violation
+\rCaPartsMax{} of the largest forecast), and the baseline moves with the plan by
+at most \rCaBaseMax\% of it. What fails is the lift when nothing is planned: it
+passes on all \rVerM{} M5 versions, but only on \rPassDCa{} Dominick's and
+\rPassFCa{} Frat version-windows, with a median violation of \rMedDCaPct\% and
+\rMedFCaPct\% of the largest forecast. In the rerun, using the regular price the
+model stores (its highest price over the last 12 periods), or leaving a missing
+price missing, did not remove the violation in any of the \dRuns{} runs. It is
+largest in two groups: the Frat development configurations that read a recorded
+base price as the regular price (\dFratLo\% to \dFratHi\% of the largest
+forecast, on \dFratRowsLo\% to \dFratRowsHi\% of item-weeks), where the audit's
+regular price may differ from the model's, which the rerun did not test; and the
+Dominick's configurations built for new items (\dNewLo\% to \dNewHi\%).
+Elsewhere on Dominick's it is \dDomLo\% to \dDomHi\% of the largest forecast on
+at most \dDomRows\% of item-weeks. We have not found the cause, so the C1
+failures on real data may come from the audit's definition of nothing planned
+as much as from the models.
+
+\paragraph{C2 and C3: the lifts depend on what was learned, and agree across seeds where the data are rich}
+After the lift readout is re-initialised the lifts' rank agreement with the
+original falls below 0.5 in \rPassDCb{} Dominick's, \rPassFCb{} Frat and
+\rPassMCb{} M5 version-windows (medians \rMedDCb, \rMedFCb{} and \rMedMCb), so
+the lifts mostly depend on what the readout learned; in the known-answer study
+the same check did not separate correct models from broken ones
+(\S\ref{sec:known}), so a pass here says little. Seeds agree on the lifts with a
+median rank agreement of \rStabLiftF{} on Frat and \rStabLiftD{} on Dominick's,
+but only \rStabLiftM{} on M5, against \rStabFcM{} to \rStabFcF{} for the
+forecasts themselves on every data set. On M5, where prices rarely change and
+the plan is mostly event and SNAP days, fits that agree on the forecast disagree
+on how much of it the plan explains; \rPassMCc{} M5 version-windows pass C3.
+
+\paragraph{C4: on Dominick's and M5 a deeper price cut often lowers the forecast}
+A deeper cut gives a forecast lower by more than 0.1\% in a median of
+\rMedDCdPct\% of Dominick's and \rMedMCdPct\% of M5 item-weeks, against
+\rMedFCdPct\% on Frat; \rPassDCd{} Dominick's and \rPassMCd{} M5 version-windows
+pass. The diagnosis rules out the two simple explanations. Cutting only a random
+tenth of series, so that other items' cuts barely enter, gives the same share
+(median \dCdTenthD\% against \dCdAllD\% on Dominick's, \dCdTenthM\% against
+\dCdAllM\% on M5). And the drops are not small: in a median of \dCdBigD\% of
+Dominick's and \dCdBigM\% of M5 item-weeks the forecast falls by more than 5\%,
+and the share is already \dCdFiveD\% and \dCdFiveM\% at the first 5\% cut. On
+Frat \dCdBigF\% of item-weeks fall by more than 5\%. On Dominick's and M5 these
+models' forecast fell after a deeper cut in about half the item-weeks or more,
+and no accuracy score showed it. (The rerun runs, chosen partly for large C1
+violations, show higher shares than the full audit on Dominick's.)
+
+\paragraph{C5 and C6: agreement with sales and with LightGBM}
+On planned item-weeks the forecast is close to sales in total on every data set
+(median bias \rMedDCeBias, \rMedFCeBias{} and \rMedMCeBias), and the rank
+agreement of predicted with observed lift is \rMedDCeRank{} on Dominick's and
+\rMedFCeRank{} on Frat but \rMedMCeRank{} on M5 (event days \rCeMevent, SNAP days
+\rCeMsnap), so no M5 version passes C5. Agreement with LightGBM's total lift
+passes on Frat (median \rMedFCf) and mostly fails on Dominick's (\rMedDCf) and
+M5 (\rMedMCf). Lever by lever, the models' promotion contributions on Dominick's agree with
+LightGBM's on/off contributions (median rank agreement \rAgDpromoOn) but not
+with its TreeSHAP values (\rAgDpromoShap); on Frat they agree with both
+(\rAgFpromoOn{} and \rAgFpromoShap). Which attribution of LightGBM one compares
+with can change the verdict.
+
+\paragraph{C7: both models state a larger price response than the one measured}
+Over the \rZEpisodes{} scored zone price episodes, the pooled slope of the stated
+response on the price deviation is \rZSlopeWorld{} for the world model (95\%
+interval \rZSlopeWorldLo{} to \rZSlopeWorldHi) and \rZSlopeLgb{} for LightGBM
+(\rZSlopeLgbLo{} to \rZSlopeLgbHi), against \rZSlopeMeas{} (\rZSlopeMeasLo{} to
+\rZSlopeMeasHi) measured over the same eight weeks and about $-0.3$ in the
+chain's own experiments (Figure~\ref{fig:realc7}). Both models state roughly
+twice the measured response, though the measured interval is wide and overlaps
+both, the pattern the known-answer study produced when a
+model answers a question about the regular price with what it learned from
+temporary cuts (\S\ref{sec:known}). The measured interval is wide and overlaps
+the world model's, so these episodes do not exclude the world model's slope;
+both models' intervals lie below the $-0.3$ the experiments implied. Per episode,
+the world model's stated response falls inside the measured interval in
+\rZWorldInside{} of \rZEpisodes{} episodes and LightGBM's in \rZLgbInside, but
+those intervals are too narrow to trust (\S\ref{sec:zones}); the stated response
+has the expected sign in \rZWorldSign{} and \rZLgbSign{} episodes, the measured
+one in \rZMeasuredSign.
+
 \begin{figure*}[t]\centering
 \includegraphics[width=\textwidth]{figs/fig_real_c7.pdf}
-\caption{\textbf{Stated against measured response to zone price deviations.}}\label{fig:realc7}
+\caption{\textbf{The world model and LightGBM state about twice the measured
+response to a regular price change; the measured interval is wide.} \textbf{(a)} For each scored Dominick's
+zone price episode, the store's price against its zone peers and the change in
+its category units over the first eight weeks: stated by the world model and
+LightGBM, each fitted up to the week before the episode, and measured by
+difference in differences; dashed: an elasticity of $-0.3$. \textbf{(b)} Pooled
+slope across episodes with a 95\% interval robust to unequal variances.}
+\label{fig:realc7}
 \end{figure*}
+
+\paragraph{The main test: passing more checks did not go with forecasting better}
+On the unit fixed before any result, a version and window, the correlation
+across version-windows between the number of checks passed and item-by-store
+WRMSSE is \rRhoPassedM{} on M5, \rRhoPassedD{} on Dominick's and \rRhoPassedF{}
+on Frat; pooled, \rRhoPassedPool{} (permutation $p = \rPPassed$), so we did not
+detect a relation (Table~\ref{tab:realmain}). Averaged over each version's
+windows the pooled correlation is \rRhoPassedPoolV{} ($p = \rPPassedV$),
+negative, so versions passing more checks forecast slightly better. The two
+differ because a version's windows differ in difficulty and in which checks
+pass: on Frat the second window is both easier and passes C1 and C4 less often,
+which the version-window correlation reads as passing fewer checks with lower
+error. The one check that goes clearly with accuracy is C5 (rank of predicted
+with observed lift \rRhoCeRankPool, bias \rRhoCeBiasPool, both $p < 0.001$), and
+C5 compares the forecast with sales over the same baseline, so it shares
+information with accuracy by construction. Leaving C5 out, an analysis added
+after the results, the pooled correlation is \rRhoPassedNoCePool{}
+($p = \rPPassedNoCe$) by version-window and \rRhoPassedNoCePoolV{}
+($p = \rPPassedNoCeV$) by version. Versions that share a configuration are not
+independent, so these $p$-values are optimistic. On these versions, how well an
+explanation passed checks against the model, its seeds, common sense and
+another model told us little about how well the model forecast
+(Figure~\ref{fig:realmain}).
+
+\begin{table*}[t]\centering
+\caption{\textbf{Across versions, the number of checks passed was not clearly
+related to accuracy; the check that was, C5, shares information with
+accuracy.} Spearman correlation between each score and item-by-store WRMSSE
+(negative: higher scores go with lower error), within each data set and pooled
+by permutation within data set (10,000 permutations). Left: over
+version-windows, the unit fixed in advance. Right: over versions, the mean over
+each version's windows. $^\dagger$Added after the results.}\label{tab:realmain}
+\footnotesize\setlength{\tabcolsep}{6pt}\input{generated/tab_real_main}\end{table*}
+
 \begin{figure*}[t]\centering
 \includegraphics[width=\textwidth]{figs/fig_real_main.pdf}
-\caption{\textbf{Checks passed against accuracy.}}\label{fig:realmain}
+\caption{\textbf{Checks passed against accuracy, one point per version.}
+Item-by-store WRMSSE (lower is better) against the mean number of checks passed
+over the version's windows, with the Spearman correlation within each data
+set.}\label{fig:realmain}
 \end{figure*}
-}{}

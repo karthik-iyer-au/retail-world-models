@@ -431,3 +431,9 @@ m5,without_world_model,store_id,0.79405,4
 m5,without_world_model,store_idxcat_id,0.79668,4
 m5,without_world_model,store_idxdept_id,0.82494,4
 m5,without_world_model,total,0.81964,4
+frat,lift_matched_for_world_model,cat_id,0.48177,4
+frat,lift_matched_for_world_model,cat_idxstore_id,0.54172,4
+frat,lift_matched_for_world_model,item_id,0.47229,4
+frat,lift_matched_for_world_model,item_idxstore_id,0.55181,4
+frat,lift_matched_for_world_model,store_id,0.42729,4
+frat,lift_matched_for_world_model,total,0.34447,4

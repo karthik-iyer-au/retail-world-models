@@ -1,7 +1,7 @@
 \section{Discussion}
 \label{sec:discussion}
 
-\paragraph{Faithful is not correct, in retail too}
+\paragraph{The explanation was faithful but wrong in size and in kind}
 The world model's explanation is faithful by construction: the baseline does not
 move with the plan, the lift is zero when nothing is planned, and the two add up
 to the forecast. In the known-answer study that explanation was right about what
@@ -16,8 +16,8 @@ similar reason: a model can be faithful to what it learned and what it learned
 can be wrong.
 
 \paragraph{What this means for a merchant reading a lift}
-A lift read from a model fitted to a retailer's own history inherits that
-retailer's planning habits. If promotions go into weeks that would sell well
+In the known-answer study, a lift read from a model fitted to the store's own
+history inherited its planning habits. If promotions go into weeks that would sell well
 anyway, the model's promotion lift overstates what the promotion adds, and an
 accurate forecast is no protection: in the known-answer study the correct
 world-model seeds and LightGBM forecast better when plans followed demand than
@@ -55,9 +55,23 @@ with the design under its control: stores assigned at random, a known start
 date, and enough stores per arm for honest intervals.
 
 \paragraph{The audit of the saved versions}
-\emph{To be written with the results of \S\ref{sec:results}: whether the real
-versions behave like the known-answer models, and whether versions that pass
-more checks forecast better.}
+The real versions behaved like the known-answer models in the two ways that
+matter most. Checks against the model and against another model were not
+shown to track whether the lift is right, and the one comparison with a
+measured cause found both models stating a larger price response than the
+measured one, as the known-answer world model did, though the measured interval
+is wide. The real versions also showed two things the generated data did not.
+First, the lift was not zero when the audit planned nothing on most Dominick's
+and Frat versions, and we could not fully trace why, so an audit's definition
+of nothing planned needs checking against the model's before C1 is read.
+Second, the price-direction check failed on most Dominick's and M5 versions
+because their forecasts fall after a deeper cut in about half the item-weeks or
+more, a fault no accuracy score revealed and one a merchant setting prices from
+the model would meet directly. Across versions, passing more checks did not
+clearly go with forecasting better. For a retailer this means two separate
+tests: an accuracy comparison to choose the forecast, and checks of the
+explanation, with a price-direction test and a measured cause among them,
+before its lifts are used to plan.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -70,7 +84,12 @@ blind to price and, compared lever by lever, lifts given to the wrong lever.
 They did not catch lifts inflated by planning into strong weeks, or a model that
 answers a question about the regular price with the response to a temporary
 cut. Only a measured cause found the second. On public retail data the one such
-cause we could measure, Dominick's zone price deviations, is real but imprecise.
-\emph{The audit of the companion paper's saved versions, and the test of whether
-faithful explanations go with accurate forecasts on real data, complete this
-section when the Colab run finishes.}
+cause we could measure, Dominick's zone price deviations, gives a pooled response
+near the chain's experiments over the full spell, but imprecise.
+In the audit of \rVersions{} saved versions on public data, no version passed
+every check on M5 or Dominick's, both the world model and LightGBM stated about
+twice the measured response to a regular price change (the measured interval is
+wide and overlaps both), and the number of checks
+a version passed was not clearly related to how well it forecast. On these
+models and data sets, an accurate forecast was not evidence of a correct
+explanation, and the explanation has to be tested on its own.

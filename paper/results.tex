@@ -12,25 +12,17 @@ record.
 
 \input{generated/rev_tab_grain}
 
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{figs/fig_grain.pdf}
-\caption{\textbf{On these data the fine grains had a clear lowest-error model and
-the coarse grains did not.} \textbf{(a)} For each decision grain (rows, finest at
-the top) and data set (columns): the model with the lowest mean WRMSSE over the
-rolling windows (marker) and the number of the nine models compared that are in
-the 90\% model confidence set (number; darker cells hold more models that cannot
-be told apart from the best). \textbf{(b)} The size of the confidence set at each
-grain, one point per data set; bar: the median. On Dominick's the category and
-the chain total are the same series.}
-\label{fig:grain}
-\end{figure*}
+Table~\ref{tab:grain} gives, for each grain at which a decision is made, the
+model with the lowest error and how many models the 90\% confidence set kept with
+it. Every statement here rests on four to six windows per data set, and the
+windows are not independent: each forecast is made from all earlier data, so
+adjacent windows share most of their training history, and errors that come
+from the same season or the same stretch of trading are correlated across
+windows. A model alone in the confidence set is a model that stood apart in
+these windows; a set of several is a set these windows did not separate, not a
+set of equally good models. Two patterns appear across the data sets.
 
-Table~\ref{tab:grain} and Figure~\ref{fig:grain} give, for each grain at which a
-decision is made, the model with the lowest error and how many models could not
-be told apart from it. Two patterns hold across the data sets.
-
-\emph{At the fine grains the choice was settled.} For an item in one store, the
+\emph{At the fine grains one or two models stood apart.} For an item in one store, the
 grain of store orders, the equal-weight average had the lowest error on
 \rgrain{ixs}{ens}{best} of nine data sets and LightGBM on the other
 \rgrain{ixs}{lgb}{best} (\rgrain{ixs}{lgb}{bestlist}); the confidence set held a
@@ -42,15 +34,16 @@ the set. Neither the world model nor any pretrained model was in the set at
 these two grains except TimesFM with the plan and the world model once each for
 an item across stores.
 
-\emph{At the coarse grains it was not.} For a category by store, a category
+\emph{At the coarse grains these windows did not separate the models.} For a category by store, a category
 across stores and the chain total, the lowest-error model was the average on
 \rgrain{catstore}{ens}{best}, \rgrain{cat}{ens}{best} and \rgrain{total}{ens}{best}
 data sets, LightGBM on \rgrain{catstore}{lgb}{best}, \rgrain{cat}{lgb}{best} and
 \rgrain{total}{lgb}{best}, and the world model, the lift model or TimesFM with the
 plan on the rest. A median of \rgrain{catstore}{set}{median} of nine models were
 in the confidence set at each of these grains, and up to
-\rgrain{total}{set}{max}: with four to six windows, these data do not separate
-the plan-aware models at the totals. The world model was in the set at the
+\rgrain{total}{set}{max}. A total is one series, so each window adds one error
+per period, and four to six windows leave too few to separate the plan-aware
+models there; more windows might. The world model was in the set at the
 chain total on \rgrain{total}{world}{inset} data sets and the average on all
 nine.
 
@@ -64,7 +57,7 @@ it at the M5 category and total, and far behind in cheese.
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figs/fig_profile.pdf}
-\caption{\textbf{Against the average, LightGBM was level at every grain, TimesFM
+\caption{\textbf{Against the average, LightGBM was close at every grain, TimesFM
 with the plan fell behind as the grain coarsened, and the world model was a few
 percent behind with a wide spread.} Mean WRMSSE over the rolling windows of
 \textbf{(a)} the world model, \textbf{(b)} LightGBM and \textbf{(c)} TimesFM with
@@ -75,10 +68,10 @@ Log scale. On Dominick's the category and the chain total are the same series.}
 \label{fig:profile}
 \end{figure*}
 
-The time grain changes the answer again. Summed over the whole window rather than
-week by week, the world model had the lowest category-by-store planning cost on
-\rcount{decworldcat} of eight data sets (\S\ref{sec:res-decisions}). The
-sections that follow look at each part of this picture: the fine grains and the
+The decision costs agree (\S\ref{sec:res-decisions}): the average or LightGBM
+had the lowest category-by-store planning cost on seven of eight data sets,
+whether the error is taken period by period or over the whole window, and the
+world model only on M5. The sections that follow look at each part of this picture: the fine grains and the
 average (\S\ref{sec:res-ensemble}, \S\ref{sec:res-adds}), the world model
 (\S\ref{sec:res-world}), how the models use the plan (\S\ref{sec:res-plan}),
 the pretrained models (\S\ref{sec:res-pretrained}), the data set kept out of
@@ -144,7 +137,8 @@ model's, inherits part of that error.
 \caption{\textbf{Taking the world model out of the ensemble costs accuracy on
 some data sets; replacing it with the same network without the carried state
 costs less often.} \textbf{(a, b)} Mean WRMSSE of the ensemble without the
-world model, and with the lift model in its place, minus the ensemble's, with
+world model, and with the lift model in its place (on Frat the lift model also had
+readout dropout and weight decay; \S\ref{sec:res-adds}), minus the ensemble's, with
 95\% intervals from the bootstrap over windows; right of zero the ensemble with
 the world model is more accurate; filled markers: the interval excludes zero.
 \textbf{(a)} Item by store. \textbf{(b)} Total. \textbf{(c)} Item by store:
@@ -168,20 +162,39 @@ accurate item by store on \rcount{withouttimesfmixsens}, at the total on
 \rcount{withouttimesfmtotalvar} (\rcount{withouttimesfmtotalvarlist}).
 LightGBM is the member the ensemble can least do without.
 
-Most of the world model's contribution is any third model's. With the lift
-model in its place, which has the same encoder, readout, inputs and training and
-no carried state, the ensemble is not less accurate by the paired test than
-with the world model on
+Replacing the world model with the lift model, the same network without the
+carried state, tests what the carried state adds. On
 \rcount{addsnotliftixslist}, where the world model adds item by store, and at
-the total on \rcount{addsnotlifttotallist}. It is less accurate with the lift
+the total on \rcount{addsnotlifttotallist}, we did not detect a difference
+between the ensemble with the lift model and with the world model. That is not
+evidence that the two are equal, and the lift model is one replacement, so it
+does not show that any third model would do as well. It is less accurate with the lift
 model item by store on \rcount{liftforworldmodelixsens} data sets
 (\rcount{liftforworldmodelixsenslist}) and at the total on
 \rcount{liftforworldmodeltotalens} (\rcount{liftforworldmodeltotalenslist}),
 but by the rule written down for study A the world model adds to the ensemble
 only where the ensemble beats the pair without it, and on soft drinks and
-analgesics it does not. The carried state therefore adds to an ensemble that
-gains from the world model only on \rcount{bothaddixslist} item by store, and
-at the total on none.
+analgesics it does not. So we detected the carried state adding to an ensemble
+that gains from the world model only on \rcount{bothaddixslist} item by store,
+and at the total on none.
+
+On Frat the two networks did not differ only in the carried state: the lift
+model's settings, carried over from the first version, add readout dropout and
+a larger weight decay that the world model does not have. We reran it with the
+world model's settings (study G), so that only the transition differs. On its
+own it is then less accurate than the world model (item by store
+\rsg{liftmatched}{ixs} against \rv{frat}{world}{ixs}; total
+\rsg{liftmatched}{total} against \rv{frat}{world}{total}), where the regularised
+lift model had a lower mean total error (\rv{frat}{lift}{total}), a difference the
+paired test did not detect. In the
+ensemble in the world model's place we again detect no difference (item by
+store \rab{frat}{liftmatchedforworldmodel}{ixs}{meandiff}, interval
+\rab{frat}{liftmatchedforworldmodel}{ixs}{lo} to
+\rab{frat}{liftmatchedforworldmodel}{ixs}{hi}; total
+\rab{frat}{liftmatchedforworldmodel}{total}{meandiff}, interval
+\rab{frat}{liftmatchedforworldmodel}{total}{lo} to
+\rab{frat}{liftmatchedforworldmodel}{total}{hi}). The Frat rows of
+Table~\ref{tab:ablation} keep the regularised lift model, as run.
 
 Equal weights are hard to beat. Weights chosen on the earlier windows of each
 data set, for item by store, for the total or for all levels, and scored on the
@@ -222,11 +235,11 @@ and the world model in \rcore{world}{ixs}{better} (median
 \rcore{world}{ixs}{max} times LightGBM's error. At the total the world model was
 more accurate than LightGBM in \rcore{world}{total}{better} of
 \rcore{world}{total}{n} windows and TimesFM with the plan in
-\rcore{tfmplan}{total}{better}, so window by window neither is clearly behind
-LightGBM there, while their means are (Figure~\ref{fig:core}b, c).
+\rcore{tfmplan}{total}{better}: window by window neither is consistently
+behind LightGBM there, although their means are (Figure~\ref{fig:core}b, c).
 
-On its own the world model is behind LightGBM item by store and level with it
-at the total. By the paired test LightGBM is more accurate item by store on
+On its own the world model is behind LightGBM item by store, and at the total
+we did not detect a difference on most data sets. By the paired test LightGBM is more accurate item by store on
 \rcount{lgbbeatsworldixs} of eight data sets (\rcount{lgbbeatsworldixslist})
 and at the total on \rcount{lgbbeatsworldtotal} (\rcount{lgbbeatsworldtotallist});
 the world model is more accurate than LightGBM on \rcount{worldbeatslgbixs} at
@@ -237,14 +250,15 @@ the difference is not outside its interval (LightGBM minus the world model
 \rpair{mfive}{lgb}{world}{total}{meandiff}, interval
 \rpair{mfive}{lgb}{world}{total}{lo} to \rpair{mfive}{lgb}{world}{total}{hi}).
 
-Against the lift model, which differs only in the carried state, the world model
+Against the lift model (on Frat the regularised one, \S\ref{sec:res-adds}), the world model
 is more accurate item by store on \rcount{worldbeatsliftixs}
 (\rcount{worldbeatsliftixslist}), less accurate on \rcount{liftbeatsworldixs}
-(\rcount{liftbeatsworldixslist}), and level at the total on all eight. Taken
-alone, carrying the state forward neither helps nor hurts accuracy in most data
-sets. Its value shows in what it adds to the ensemble (\S\ref{sec:res-adds}) and
-in category plans (\S\ref{sec:res-decisions}), where the world model has the
-lowest cost on \rcount{decworldcat} of eight data sets.
+(\rcount{liftbeatsworldixslist}), and no difference is detected at the total on
+any of the eight. Taken alone, we did not detect an effect of carrying the state
+forward on accuracy in most data sets. What it may add shows in what it adds to
+the ensemble (\S\ref{sec:res-adds}) and at the M5 totals, where it has the
+lowest total error and the lowest category-plan cost over the window
+(\S\ref{sec:res-decisions}).
 
 \subsection{How the models use the plan}
 \label{sec:res-plan}
@@ -338,7 +352,7 @@ last 28 days raises the world model's total error by
 
 On these data TimesFM with the plan was the most accurate model not trained on the data, and
 the plan matters to it: item by store it is ahead of TimesFM from history alone
-on every data set where both ran except M5, where they are equal to three decimals
+on every data set where both ran except M5, where their means agree to three decimals
 (Table~\ref{tab:rolling}), and most on the weekly
 promotion-driven data (soft drinks \rv{sdr}{tfmplan}{ixs} against
 \rv{sdr}{tfm}{ixs}). LightGBM is more accurate than it item by store on
@@ -353,7 +367,7 @@ Timestral (study F, Table~\ref{tab:timestral}) is behind the ensemble on every
 data set, at both levels. Given the plan it is less accurate than TimesFM given the
 plan by the paired test over windows in \rcount{tfmbeatstsplan} of
 \rcount{tsvstfmplann} comparisons (every data set item by store and at the
-total), and level with it at \rcount{tsvstfmplanlevel}
+total), and not separated from it at \rcount{tsvstfmplanlevel}
 (\rsf{mfive}{tsplan}{total} against \rsf{mfive}{tfmplan}{total} on M5); it is
 more accurate in \rcount{tsbeatstfmplan}. From history alone it is less
 accurate than TimesFM from history alone in \rcount{tfmbeatstsmean} of
@@ -361,7 +375,7 @@ accurate than TimesFM from history alone in \rcount{tfmbeatstsmean} of
 \rcount{tsbeatstfmmean}. This test was asked for by the plan and computed from
 the saved per-window scores after the first version of this section, by the
 bootstrap over windows only. Putting it in place of TimesFM makes the
-ensemble less accurate on Dominick's and Frat, level at the Favorita total and
+ensemble less accurate on Dominick's and Frat, not separated at the Favorita total and
 slightly less accurate item by store, and more
 accurate only at the M5 total (\rsf{mfive}{enstimestral}{total} against
 \rsf{mfive}{ens}{total}); as written down before it ran, the paper's ensemble is
@@ -457,10 +471,11 @@ every data source (\rrank{mfive}{ens}{ixs}{totalratio} on M5 is the furthest).
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figs/fig_decisions.pdf}
-\caption{\textbf{The world model has the lowest category-plan cost on most data
-sets, pooling fixed the interval coverage at the totals, and the ensemble ranks
-changes best.} \textbf{(a)} Category-plan cost relative to seasonal naive
-(dashed line at 1), mean over the rolling windows. \textbf{(b)} Share of actual
+\caption{\textbf{The ensemble or LightGBM has the lowest category-plan cost on
+seven of eight data sets, pooling fixed the interval coverage at the totals, and
+the ensemble ranks changes best.} \textbf{(a)} Category-plan cost (error of
+category-by-store totals in dollars, corrected in study G) relative to seasonal
+naive (dashed line at 1), mean over the rolling windows. \textbf{(b)} Share of actual
 sales inside the 50\%, 80\% and 95\% intervals at the chain total, mean over
 the eight data sets scored both before the interval fix (open) and after it
 (filled); dashes: the nominal level. \textbf{(c)} Spearman correlation across
@@ -469,14 +484,41 @@ windows (Dominick's: over its six categories).}
 \label{fig:decisions}
 \end{figure*}
 
-The two decisions point to different models (Table~\ref{tab:decisions},
-Figure~\ref{fig:decisions}a). For the
-category plan, the world model alone has the lowest cost on
-\rcount{decworldcat} of eight data sets (\rcount{decworldcatlist}), at
-\rdec{fre}{categoryplanning}{world} of seasonal naive's cost in frozen entrees
-against \rdec{fre}{categoryplanning}{ens} for the ensemble and
-\rdec{fre}{categoryplanning}{lgb} for LightGBM. Its category-by-store totals
-over the window are close even where its item forecasts are behind LightGBM's.
+\input{generated/rev_tab_catcost}
+
+Both decisions point to the ensemble or LightGBM (Table~\ref{tab:decisions},
+Figure~\ref{fig:decisions}a). For the category plan the ensemble has the lowest
+cost on \rcount{ccdollarsens} of eight data sets (\rcount{ccdollarsenslist}) and
+LightGBM on \rcount{ccdollarslgb} (\rcount{ccdollarslgblist}); on
+\rcount{ccclearother} of the eight the lowest of them is ahead of the world
+model by a paired interval that excludes zero (Table~\ref{tab:catcost}). The
+world model is lowest only on M5, where by period it is not separated from the
+ensemble (\rcc{mfive}{dollars}{ens}{worldminus}, interval
+\rcc{mfive}{dollars}{ens}{lo} to \rcc{mfive}{dollars}{ens}{hi}) and over the
+whole window it is clearly lowest (\rcc{mfive}{windowtotal}{world}{cost}
+against \rcc{mfive}{windowtotal}{ens}{cost} for the ensemble and
+\rcc{mfive}{windowtotal}{lgb}{cost} for LightGBM), in line with its lowest total
+error there (\S\ref{sec:res-world}). Under every rule written down for the
+sensitivity check (the first half of the window, the error of the whole window's
+total, units in place of dollars, every node weighted equally) the lowest cost
+on the seven other data sets belongs to the ensemble, LightGBM or, once,
+TimesFM with the plan, and the world model is lowest on M5 at most. The node bootstrap covers the choice of stores and categories within
+a window, not the variation between windows, which with four to six windows
+remains the larger uncertainty; by period the world model costs less than the
+lowest other model in no more than two windows on any data set.
+
+\emph{A correction.} The first version of this cost divided each node's error by
+its sales in the window, with a floor of $10^{-9}$, and put the world model first
+on six of eight data sets. On Dominick's \rcount{cczerolo} or \rcount{cczerohi}
+of the \rcount{cczeron} category-by-store nodes and windows had no sales (a
+store closed or not reporting), and those nodes entered at about $10^9$ times
+their error, so the result measured which model forecast closest to zero for a
+store that had stopped selling. Frat and M5 have no such nodes; their costs move
+slightly with the change to dollars and their ranking is unchanged. The plan defines the cost as the absolute error of category-by-store
+totals weighted by dollar sales; it is now computed as that error in dollars
+over sales in dollars, with each node's units valued at its average price before
+the window (study G).
+
 For store orders
 at a critical ratio of 0.8, LightGBM has the lowest cost on
 \rcount{declgborder} (\rcount{declgborderlist}) and the ensemble on
@@ -513,86 +555,37 @@ the total, whichever method gives it, is behind LightGBM and the ensemble in
 every category. Item by store, ETS bottom-up is behind LightGBM in every
 category, and ahead of the world model and the ensemble only in cheese, where
 one window inflates their means (\rrec{che}{etsbottomup}{ixs} against
-\rv{che}{world}{ixs} and \rv{che}{ens}{ixs}). MinT with a shrunk covariance gave a total WRMSSE of
-\rrec{frat}{etsmintshrink}{total} on Frat, a numerical failure we did not
-investigate further.
+\rv{che}{world}{ixs} and \rv{che}{ens}{ixs}). MinT with a shrunk covariance first
+gave a total WRMSSE of \rrec{frat}{etsmintshrinkbeforefix}{total} on Frat. The
+cause was numerical: 47 of the 4,349 Frat nodes had no in-sample error (constant
+histories), so the covariance was singular, and the solve gave item forecasts of
+the order of $10^7$ of both signs, which the rule that forecasts are not below
+zero then turned into very large totals. With those nodes given the smallest
+variance of the others and the shrinkage intensity computed rather than fixed,
+MinT-shrink gives \rrec{frat}{etsmintshrink}{total} at the Frat total and
+\rrec{frat}{etsmintshrink}{ixs} item by store; at the total it is behind every
+other ETS method and behind LightGBM (\rv{frat}{lgb}{total}); the other methods are
+unchanged.
 
 \subsection{The final windows of the first version}
 \label{sec:res-final}
 
-\input{generated/tab_m5}
-\input{generated/tab_finals}
-\input{generated/rev_tab_finalsnew}
-
-The first version scored each data set once, on its final window, and its
-findings stand: on M5 the most accurate model depended on the level and the
-month (Table~\ref{tab:m5}), and on Dominick's and Frat on the category
-(Table~\ref{tab:finals}). On M5, TimesFM given only history was the most
-accurate single model item by store in all four months (\mTfmTestIxs{} on the
-test month, against \mWorldTestIxs{} for the world model and \mLgbTestIxs{} for
-LightGBM), while the plan-aware models were far more accurate at the totals. The
-official test month was the only one of four in which LightGBM was the most
-accurate over all levels (\mLgbTestOverall{} against \mWorldTestOverall), so a
-comparison on that month alone would have ranked it first. Run on the final
-windows (Table~\ref{tab:finalsnew}), the ensemble is lowest or within
-\rcount{finalsgap} of the lowest item by store on every data set, which agrees
-with the rolling windows.
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{figs/fig_m5_heat.pdf}
-\caption{\textbf{On the M5 final windows, TimesFM from history alone had the
-lowest item-by-store error of the single models in every month; at the total and
-over all levels the plan-aware models did, and which one changed by month.}
-WRMSSE of every single model, four windows, three levels; cell shade: how far
-above the lowest value in its column (white: the lowest, outlined). Trained
-models: mean of three seeds. The lift model's April mean includes one failed
-seed (\S\ref{sec:dropped}).}
-\label{fig:m5heat}
-\end{figure*}
-
-\paragraph{How much the plan matters}
-On M5, where prices rarely change, giving TimesFM the plan changed its
-item-by-store error by at most 0.002 in any month. On Dominick's, where promoted
-weeks carry \promoShareLo\% to \promoShareHi\% of a category's units, TimesFM
-without the plan forecast \promoTfmLo\% to \promoTfmHi\% of promoted-week sales
-and with it \promoTfmPlanLo\% to \promoTfmPlanHi\%
-(Figure~\ref{fig:planarrows}a). The trained plan-aware models also fell short in
-promoted weeks: the world model forecast \promoWorldLo\% to \promoWorldHi\% of
-promoted-week sales and LightGBM \promoLgbLo\% to \promoLgbHi\%.
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{figs/fig_plan_arrows.pdf}
-\caption{\textbf{Given the plan, TimesFM closes most of its promoted-week
-shortfall; for a price cut history has not shown, plan-aware models respond and
-history-only models do not.} \textbf{(a)} Forecast against sales in the promoted
-weeks of the final 8 weeks, by Dominick's category (promoted weeks' share of the
-category's units in brackets): TimesFM from history alone (diamond) to TimesFM
-with the plan (arrow head), with the world model and LightGBM (ticks). \textbf{(b)}
-HOUSEHOLD\_1\_146 in the four M5 stores where it had its first price cut in a year
-(5.98 to 4.50 for one week) inside the April window: each seed's forecast over
-the 28 days against the \cutSold{} units sold, log scale.}
-\label{fig:planarrows}
-\end{figure*}
-
-\paragraph{First-time price cuts}
-In the April M5 window, HOUSEHOLD\_1\_146 had sold almost nothing for a year at
-5.98, then sold \cutSold{} units in four stores over a window that held a
-one-week cut to 4.50 (Figure~\ref{fig:planarrows}b). Models working from history
-forecast almost nothing: LightGBM \cutLgb{} units across seeds, TimesFM
-\cutTfm. The world model, which reads the cut through its plan, forecast
-\cutWorld; the graph model \cutGraph; the lift model \cutLift. How large the
-response should be is not fixed by the data: the world-model seeds differ by a
-factor of five, and one lift-model seed forecast over 200,000 units.
+The first version scored each data set once, on its final window; those results
+are in Supplement~\ref{sec:supplementfinal}. They agree with the rolling windows
+where the two overlap: on the final windows the ensemble is lowest or within
+\rcount{finalsgap} of the lowest item by store on every data set. They also show
+why one window is not enough: on M5 the official test month was the only one of
+four in which LightGBM was the most accurate over all levels
+(\mLgbTestOverall{} against \mWorldTestOverall{} for the world model), so a
+comparison on that month alone would have ranked it first.
 
 % =====================================================================
 \section{What was tried and dropped}
 \label{sec:dropped}
 
-We report the failures at the same length as the results.
-Table~\ref{tab:dropped} lists what this revision tried and did not keep, and
-Table~\ref{tab:ledger} what the first version did.
+Table~\ref{tab:dropped} lists what this revision tried and did not keep;
+Table~\ref{tab:ledger} in Supplement~\ref{sec:supplementfinal} lists what the
+first version tried, with its failures.
 
 \begin{table*}[t]
 \centering
@@ -615,12 +608,10 @@ Loss weight $1+w$, $w=5$ (study E) & Dominick's dev., seed 1 & Overall worse in 
 Fitted ensemble weights (study A) & All nine, rolling & Better than equal weights in \rcount{fittedwins} of \rcount{fittedn} comparisons, worse in \rcount{fittedlosses} \\
 Timestral in place of TimesFM (study F) & All four sources, rolling & Worse on Dominick's and Frat; better at the M5 total only \\
 Timestral-209M (study F) & Frat, rolling & Less accurate than 28M; too slow for the other data sets \\
-MinT, shrunk covariance & Frat, rolling & Total WRMSSE \rrec{frat}{etsmintshrink}{total}; not investigated \\
+MinT, shrunk covariance, as first run & Frat, rolling & Total WRMSSE \rrec{frat}{etsmintshrinkbeforefix}{total} from a singular covariance; after the fix \rrec{frat}{etsmintshrink}{total} \\
 \bottomrule
 \end{tabular}
 \end{table*}
-
-\input{generated/tab_ledger}
 
 \paragraph{The forecast after a promotion}
 The persistence test showed the world model carrying a promotion forward as
@@ -653,54 +644,14 @@ world model in the same job as the variants it was compared with. The rolling
 windows, being one fit per model, carry this noise; the paired tests over
 windows absorb part of it, not all.
 
-\paragraph{A lift-model seed that broke on five series}
-In the April M5 final window, lift-model seed 2 scored \mLiftAprSeedBOverall{}
-over all levels against \mLiftAprSeedAOverall{} and \mLiftAprSeedCOverall{} for
-seeds 1 and 3, and forecast \liftSeedTwoForecast{} units against
-\liftSeedTwoSold{} sold. Five item-store series hold all of the excess, each with
-its first price cut in a year inside the window; the seed read the cuts as lifts
-up to the model's bound. Item by store, weighted by dollar sales, the failure is
-invisible (\mLiftAprIxs); at the totals it dominates. The world model did not
-fail on these series in any seed.
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{figs/fig_frat_story.pdf}
-\caption{\textbf{On the Frat final window the world model got the 8-week total
-right and missed the holiday shape, which the development windows did not
-contain.} \textbf{(a)} Units sold each week of the final window over all
-item-stores (bars), and the weekly forecasts of the world model and LightGBM,
-three seeds averaged; labels: the world model's largest weekly misses.
-\textbf{(b)} All-level WRMSSE on the development windows and on the final 8 weeks.}
-\label{fig:fratstory}
-\end{figure*}
-
-\paragraph{Frat holiday weeks}
-On the Frat development windows the world model, lift model and LightGBM were
-level (0.406 to 0.421). On the final 8 weeks the world model fell to
-\fWorldFratOverall{} against \fLgbFratOverall{} for LightGBM. The final weeks
-are the holiday period, which the development windows did not contain
-(Figure~\ref{fig:fratstory}); the world model's 8-week total is right (forecast
-against sales \fWorldFratFa) but it is 15\% to 17\% under in the two December
-peak weeks. LightGBM, with week-of-year and month inputs and the previous
-holiday season in its training data, follows that shape more closely.
-
-\paragraph{TimesFM's default output}
-TimesFM's default point forecast is the median. For an item that sells nothing
-on most days the median is near zero while the mean is not, so the median
-forecast is 27\% to 31\% below M5 totals in every month. The mean output, used
-throughout, does not have the problem.
-
 % =====================================================================
 \section{Discussion}
 \label{sec:discussion}
 
 The grain a decision is made at bore on which model forecast it best on these
-data (Table~\ref{tab:advice}). The rows below are observations on four public
-data sets with price and promotion plans, not a ranking that holds for every
-retailer: a retailer's own data, with stock, space and range recorded, or a
-forecast solved across all four Ps, could order the models differently, and the
-comparison should be run there.
+data (Table~\ref{tab:advice}). The rows are observations on these data sets,
+within the scope set out in \S\ref{sec:limitations}, not a ranking for every
+retailer.
 
 \begin{table*}[t]
 \centering
@@ -716,9 +667,9 @@ sets of this paper.}
 \midrule
 Store orders and inventory & Item by store, day or week & The average lowest error on \rgrain{ixs}{ens}{best} of nine, LightGBM on \rgrain{ixs}{lgb}{best}; one or two models in the confidence set; the average or LightGBM lowest order cost on every data set at critical ratios 0.5 and 0.8 \\
 Supplier funding, promotion and price decisions & Item across stores, by week, under a planned change & The average lowest error on \rgrain{item}{ens}{best} of nine; a model that reads the plan is needed, since history alone forecast \promoTfmLo\% to \promoTfmHi\% of promoted-week sales; after a promotion the world model forecast more rather than the dip \\
-Category performance by store & Category by store, by week & No settled choice: the average lowest on \rgrain{catstore}{ens}{best}, LightGBM on \rgrain{catstore}{lgb}{best}; a median of \rgrain{catstore}{set}{median} models in the confidence set \\
-Category sales and margin plans & Category by store over the window; category across stores & Over the window the world model alone had the lowest planning cost on \rcount{decworldcat} of eight; by week no settled choice (median \rgrain{cat}{set}{median} models in the set) \\
-Financial plan & Chain total & No settled choice; the average in the confidence set on all nine \\
+Category performance by store & Category by store, by week & Not separated by these windows: the average lowest on \rgrain{catstore}{ens}{best}, LightGBM on \rgrain{catstore}{lgb}{best}; a median of \rgrain{catstore}{set}{median} models in the confidence set \\
+Category sales and margin plans & Category by store over the window; category across stores & The average or LightGBM lowest planning cost on seven of eight, ahead of the world model by a paired interval; the world model lowest on M5; by WRMSSE not separated (median \rgrain{cat}{set}{median} models in the set) \\
+Financial plan & Chain total & Not separated by these windows; the average in the confidence set on all nine \\
 Choosing a model & Any & Score several windows with paired tests; one test month reversed the ranking on M5, and runs on different machines differed by as much as the changes tested \\
 Adopting a new pretrained model & Any & Check its totals and its upper quantiles before use; Timestral's tails made its mean forecast 3 to 6 times sales in analgesics \\
 \bottomrule
@@ -729,25 +680,23 @@ Adopting a new pretrained model & Any & Check its totals and its upper quantiles
 On these data the three members failed in different places. LightGBM is the most accurate single
 model item by store on most data sets and the member the ensemble can least do
 without. TimesFM with the plan brings a pretrained view of each series' history.
-The world model has the lowest category-plan cost on \rcount{decworldcat} of
-eight data sets, and the ensemble without it is less accurate item by store on
-\rcount{withoutworldmodelixsens}. An average of three models whose errors
+The world model is the weakest of the three alone, and the ensemble without it
+is less accurate item by store on \rcount{withoutworldmodelixsens} data sets. An average of three models whose errors
 differ has a lower mean error item by store than any of them on
 \rcount{enslowestixs} of nine data sets, and by the paired test beats LightGBM
-on \rcount{ensbeatslgbixs} of eight; equal weights are as good as weights fitted on a few earlier
-windows, as the forecast combination literature leads one to
+on \rcount{ensbeatslgbixs} of eight; weights fitted on a few earlier windows did not
+beat equal weights, as the forecast combination literature leads one to
 expect~\cite{smithwallis2009,wang2023}.
 
 \paragraph{What the carried state adds}
-Against the lift model, which differs only in the carried state, the world model
-is level on its own in most data sets, adds to the ensemble and beats its lift-model
-replacement there only on \rcount{bothaddixslist} item by store, and has a lower
-category-plan cost than the lift model on \rcount{worldbeatsliftcat} of eight. The carried state holds the plan (Figure~\ref{fig:readback}), but the
+Against the lift model, the world model on its own showed no detected difference
+in most data sets, and we detected it adding to the ensemble beyond its
+lift-model replacement only on \rcount{bothaddixslist} item by store. The carried state holds the plan (Figure~\ref{fig:readback}), but the
 rolled state does not predict sales beyond the window better than the state
 before it, and it carries a promotion forward as more lift rather than a dip.
-On these data the case for the carried state rests on category totals over the
-window, not on item accuracy, and its contribution to the average was mostly
-that of any third model.
+On these data we found little case for the carried state beyond the M5 totals,
+and where the world model helped the average we mostly could not tell its help
+from the lift model's.
 
 \paragraph{Two cautions}
 A plan-driven forecast responds to plans unlike history with a size the data do
@@ -773,12 +722,17 @@ it before a choice is made.
 \paragraph{Windows and seeds}
 Trained models are one fit each in the rolling windows, and runs of one
 configuration on different machines differed by as much as some differences
-tested (\S\ref{sec:dropped}). Four to six windows per data set give wide
-intervals across windows, so ``level'' often means ``not separated''. Single-fit
+tested (\S\ref{sec:dropped}). Four to six windows per data set is a thin basis
+for a bootstrap over windows and for a model confidence set: a bootstrap over
+six windows can draw few distinct samples, its intervals are approximate, and the
+set has little power, so a model kept in the set has not been shown to be as good
+as the best. Adjacent windows share training history and season, so they carry
+less information than their number suggests. The item bootstrap within a window
+treats the items as the sample and does not cover variation between windows. Single-fit
 runs before 16 October trained with seed 0 whatever seed was named.
 
 \paragraph{Studies added after the main results}
-Studies A to F were added after the rolling results were read. Each was written
+Studies A to G were added after the rolling results were read. Each was written
 down before it ran, but which studies to run was chosen knowing that the
 ensemble came first. Timestral was run at 28M parameters, not 209M, because the
 larger model was too slow, a change made before any Timestral result.
@@ -810,17 +764,16 @@ data set. The decision costs are simulations under stated costs.
 \section{Conclusion}
 \label{sec:conclusion}
 
-Which forecasting model works best depends on the grain of the decision it
-serves. On four public data sets with price and promotion plans, an equal-weight
+On these data, which forecasting model worked best depended on the grain of the
+decision it serves. On four public data sets with price and promotion plans, an equal-weight
 average of a world model, LightGBM and TimesFM given the plan had the lowest
 error for items by store and items across stores on most data sets, with few
 models close to it; for categories and the chain total the best model changed
-from data set to data set and several could not be told apart; and over a whole
-window the world model alone gave the lowest category-planning cost on most
-data sets. LightGBM was the strongest single model at the fine grains, and
-averaging added to it. These observations cover two of the four Ps on public
-data; a forecast solved across all four, or a retailer's own data, may order
-the models differently. The grain comparison itself, run over several windows
+from data set to data set and four to six windows did not separate several of
+them; and the category-planning cost was lowest for the average or LightGBM on
+seven of eight data sets. LightGBM was the strongest single model at the fine grains, and
+averaging added to it. These observations cover price and promotion on public
+data (\S\ref{sec:limitations}). The grain comparison itself, run over several windows
 with paired tests and the losing models stated, is what we propose a retailer
 repeats on its own data before choosing a model.
 
@@ -918,3 +871,4 @@ in Table~\ref{tab:settings}.
 
 \label{sec:supplement}
 \input{supplement_dev}
+\input{supplement_final}

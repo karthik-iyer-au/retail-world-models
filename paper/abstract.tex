@@ -21,10 +21,13 @@ error on \rgrain{ixs}{ens}{best} and \rgrain{item}{ens}{best} of nine data
 sets, and the 90\% confidence set held a median of \rgrain{ixs}{set}{median} and
 \rgrain{item}{set}{median} models. For a category by store, a category and the
 chain total, the lowest-error model differed between data sets and a median of
-\rgrain{catstore}{set}{median} of nine models could not be told apart. For
-category-by-store totals over the whole window, the world model alone had the
-lowest cost on \rcount{decworldcat} of eight data sets, while it was behind
-LightGBM item by store on \rcount{lgbbeatsworldixs}. Every trained model used
+\rgrain{catstore}{set}{median} of nine models were not separated by the four to
+six windows available. For category-by-store planning cost, the average or
+LightGBM was lowest on \rcount{ccclearother} of eight data sets, ahead of the
+world model by an interval over category-by-store nodes within windows (the
+world model was lower in at most two windows), and the world model was lowest
+only on M5; it was behind LightGBM item by store on \rcount{lgbbeatsworldixs}
+of eight. Every trained model used
 the plan, and on the weekly promotion-driven data pretrained models were less
 accurate without it. These are
 results for these data sets, with the plan inputs and constraints they carry; a

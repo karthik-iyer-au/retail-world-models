@@ -90,6 +90,17 @@ def read(name: str) -> pd.DataFrame:
 
 
 # ------------------------------------------------------------- loading ---
+def read_decisions() -> pd.DataFrame:
+    """decisions.csv with the category-plan rows of the rolling windows replaced by
+    the corrected cost in dollars (study G, category_cost.csv): the first cost let
+    category-by-store nodes with no sales in a window dominate on Dominick's."""
+    d = read("decisions.csv")
+    d = d[~((d.set == "rolling") & (d.decision == "category_planning"))]
+    cc = read("category_cost.csv")
+    cc = cc[cc.variant == "dollars"].assign(set="rolling", decision="category_planning")
+    return pd.concat([d, cc[["key", "set", "decision", "model", "cost", "windows", "ratio_to_naive"]]], ignore_index=True)
+
+
 def rolling_accuracy() -> pd.DataFrame:
     """Mean WRMSSE over rolling windows, one row per data set, model and level."""
     a = read("accuracy.csv")
@@ -182,7 +193,7 @@ def ablation_values():
 
 
 def other_values():
-    d = read("decisions.csv")
+    d = read_decisions()
     for r in d[d.set == "rolling"].itertuples():
         if not np.isnan(r.ratio_to_naive):
             put("rdec", SHORT[r.key], r.decision.replace("_", "").replace(".", ""), MCODE[r.model], value=f2(r.ratio_to_naive))
@@ -297,7 +308,7 @@ def pantry_values():
 
 # ------------------------------------------------------------- counts ----
 def decision_counts(word):
-    d = read("decisions.csv")
+    d = read_decisions()
     d = d[(d.set == "rolling") & d.model.isin(["ensemble", "world_model", "lift", "lightgbm", "timesfm_plan"])]
     for dec, code in (("category_planning", "cat"), ("replenish_0.8", "order")):
         best = d[d.decision == dec].loc[lambda x: x.groupby("key").ratio_to_naive.idxmin()]
@@ -510,7 +521,7 @@ windows of the data set (lowest mean WRMSSE over all levels), scored on the next
 
 
 def tab_decisions():
-    d = read("decisions.csv")
+    d = read_decisions()
     d = d[d.set == "rolling"]
     models = ["ensemble", "world_model", "lift", "lightgbm", "timesfm_plan"]
     lines = []
@@ -526,11 +537,12 @@ def tab_decisions():
     head = " & ".join(["Ens. & World & Lift & LGB & TFM+p"] * 2)
     tex = f"""\\begin{{table*}}[t]
 \\centering
-\\caption{{\\textbf{{For category plans the world model alone has the lowest cost on \\rcount{{decworldcat}} of eight data sets;
-for store orders the ensemble or LightGBM has the lowest cost on every one.}} Cost relative to seasonal naive (below 1 is better), mean over the rolling
-windows. Category plan: absolute error of each category-by-store total over the window, weighted by dollar sales.
-Store orders: order the model's 80\\% interval quantile for each item, store and period; each unit over costs 1 and each
-unit short costs 4. Simulations under stated costs, not business results. Bold: the lowest in the group.}}
+\\caption{{\\textbf{{For category plans and for store orders the ensemble or LightGBM has the lowest cost on every
+data set except the M5 category plan.}} Cost relative to seasonal naive (below 1 is better), mean over the rolling
+windows. Category plan: absolute error of each category-by-store total in each period, in dollars, over sales in
+dollars (corrected in study G; Table~\\ref{{tab:catcost}}). Store orders: order the model's 80\\% interval
+quantile for each item, store and period; each unit over costs 1 and each unit short costs 4. Simulations under
+stated costs, not business results. Bold: the lowest in the group.}}
 \\label{{tab:decisions}}
 \\footnotesize
 \\setlength{{\\tabcolsep}}{{3.6pt}}
@@ -668,8 +680,9 @@ def tab_reconcile():
 \\caption{{\\textbf{{Reconciled ETS forecasts are far behind the trained models; reconciling a trained model's item
 forecasts with ETS above them helps at the Frat total and hurts on Dominick's and M5.}} Mean WRMSSE over the rolling
 windows (Dominick's: mean of the six categories). MinT with a shrunk
-covariance was computed only where the hierarchy has at most 6,000 nodes; on Frat it gave a total WRMSSE of
-\\rrec{{frat}}{{etsmintshrink}}{{total}}, a numerical failure not investigated further.}}
+covariance was computed only where the hierarchy has at most 6,000 nodes (Frat), after the fix for nodes with no
+in-sample error; its first run gave a total WRMSSE of \\rrec{{frat}}{{etsmintshrinkbeforefix}}{{total}}
+(\\S\\ref{{sec:res-recon}}).}}
 \\label{{tab:reconcile}}
 \\footnotesize
 \\setlength{{\\tabcolsep}}{{3pt}}
@@ -825,9 +838,9 @@ def tab_grain(gt):
     tex = f"""\\begin{{table*}}[t]
 \\centering
 \\caption{{\\textbf{{On these data, which model had the lowest error depended on the grain, and the coarser the grain the
-more models could not be told apart.}} For each decision grain and data set: the model with the lowest mean WRMSSE
+more models the windows did not separate.}} For each decision grain and data set: the model with the lowest mean WRMSSE
 over the rolling windows, and in brackets how many of the nine models compared are in the 90\\% model confidence set
-(models that cannot be told apart from the best). Ens.: the equal-weight ensemble of the world model, LightGBM and
+(models four to six windows did not separate from the best; not a finding that they are equally good). Ens.: the equal-weight ensemble of the world model, LightGBM and
 TimesFM with the plan; World: world model; Lift: lift model; LGB: LightGBM; TFM+p: TimesFM with the plan. On
 Dominick's each data set is one category, so the category and the chain total are the same series. Favorita: the
 category is the product family. Daily on M5 and Favorita, weekly elsewhere.}}
@@ -844,6 +857,107 @@ category is the product family. Daily on M5 and Favorita, weekly elsewhere.}}
 \\end{{table*}}
 """
     (GEN / "rev_tab_grain.tex").write_text(tex)
+
+
+def studyg_values():
+    """Study G (plan amendment of 17 October 2026): the Frat lift model rerun with the
+    world model's regularisation, and the category-plan cost with paired uncertainty."""
+    m = read("studyG_frat_lift_matched.csv")
+    for r in m.itertuples():
+        put("rsg", "liftmatched", lv(r.level) if r.level != "overall" else "overall", value=f3(r.wrmsse))
+    if (T / "category_cost.csv").exists():
+        cc = read("category_cost.csv")
+        for r in cc.itertuples():
+            k, v, mm = SHORT[r.key], r.variant.replace("_", ""), MCODE.get(r.model, r.model.replace("_", ""))
+            put("rcc", k, v, mm, "cost", value=f3(r.cost))
+            if pd.notna(getattr(r, "world_minus", np.nan)):
+                for fld in ("world_minus", "lo", "hi"):
+                    put("rcc", k, v, mm, fld.replace("_", ""), value=f3(getattr(r, fld)))
+                put("rcc", k, v, mm, "lowerwin", value=str(int(r.world_lower_windows)))
+                put("rcc", k, v, mm, "windows", value=str(int(r.windows)))
+
+
+CC_VARIANTS = [("dollars", "By period"), ("first_half", "First half"), ("window_total", "Window total"),
+               ("units", "Units"), ("node_mean", "Equal nodes")]
+CORE5 = ["ensemble", "world_model", "lift", "lightgbm", "timesfm_plan"]
+ABBR = {"ensemble": "Ens.", "world_model": "World", "lift": "Lift", "lightgbm": "LGB", "timesfm_plan": "TFM+p"}
+
+
+def catcost_values():
+    """Study G: which model has the lowest category-plan cost under each variant, and
+    the world model against the lowest other model with its paired interval."""
+    word = {i: w for i, w in enumerate(["none", "one", "two", "three", "four", "five", "six", "seven", "eight"])}
+    cc = read("category_cost.csv")
+    lines = []
+    for v, _ in CC_VARIANTS:
+        x = cc[cc.variant == v].pivot(index="key", columns="model", values="cost")[CORE5]
+        best = x.idxmin(axis=1)
+        for m in ("world_model", "ensemble", "lightgbm"):
+            put("rcount", f"cc{v.replace('_', '')}{MCODE[m]}", value=word[int((best == m).sum())])
+            put("rcount", f"cc{v.replace('_', '')}{MCODE[m]}list",
+                value=join_and(lname(k) for k in best[best == m].index) or "none")
+    z = read("category_cost_nodes_zero.csv")
+    dz = z[z.key.str.startswith("dominicks")]
+    put("rcount", "cczerolo", value=str(int(dz.zero_node_windows.min())))
+    put("rcount", "cczerohi", value=str(int(dz.zero_node_windows.max())))
+    put("rcount", "cczeron", value=str(int(dz.node_windows.iloc[0])))
+    d = cc[cc.variant == "dollars"]
+    clear_other, clear_world = [], []
+    for k in KEYS:
+        g = d[d.key == k].set_index("model")
+        if g.empty:
+            continue
+        others = g.loc[[m for m in CORE5 if m != "world_model"]]
+        b = others.cost.idxmin()
+        r = g.loc[b]
+        cells = []
+        for v, _ in CC_VARIANTS:
+            x = cc[(cc.key == k) & (cc.variant == v)].set_index("model").cost.reindex(CORE5)
+            cells.append(ABBR[x.idxmin()])
+        if g.loc["world_model"].cost < others.cost.min():
+            lead = "World"
+        else:
+            lead = ABBR[b]
+        diff = f"{f3(r.world_minus)} ({f3(r.lo)} to {f3(r.hi)})"
+        wins = f"{int(r.world_lower_windows)}/{int(r.windows)}"
+        if r.lo > 0:
+            clear_other.append(k)
+        if r.hi < 0:
+            clear_world.append(k)
+        lines.append(f"{NAME[k]} & {ABBR[b]} & {diff} & {wins} & " + " & ".join(cells) + " \\\\")
+    put("rcount", "ccclearother", value=word[len(clear_other)])
+    put("rcount", "ccclearotherlist", value=join_and(lname(k) for k in clear_other) or "none")
+    put("rcount", "ccclearworld", value=word[len(clear_world)])
+    head = " & ".join(lbl for _, lbl in CC_VARIANTS)
+    tex = f"""\\begin{{table*}}[t]
+\\centering
+\\caption{{\\textbf{{With the cost corrected, the world model had the lowest category-plan cost only on M5; the
+ensemble or LightGBM was lowest elsewhere under every rule but one.}} On M5 the world model is not separated from the
+ensemble by period and is lower in all four windows over the whole window; the exception elsewhere is cheese over the
+first half, where TimesFM with the plan is lowest.
+Category-by-store planning cost, mean over the rolling windows. Lowest other: the model other than the world model with
+the lowest cost by period, in dollars. World minus it: the world model's cost minus that model's, with a 95\\% interval
+from 5,000 resamples of category-by-store nodes within each window, the same nodes for both models (positive: the
+world model costs more); this interval does not cover variation between windows, for which the next column counts the
+windows in which the world model cost less. The last five columns give the lowest-cost model of the five under each
+rule: absolute error of each period's total in dollars (the cost used in Table~\\ref{{tab:decisions}}); the same over
+the first half of the window; error of the total over the whole window; each unit of error counted alike; and the mean
+over nodes of each node's error over its sales. Study G.}}
+\\label{{tab:catcost}}
+\\footnotesize
+\\setlength{{\\tabcolsep}}{{3.4pt}}
+\\begin{{tabular}}{{lllc*{{5}}{{c}}}}
+\\toprule
+ & & & & \\multicolumn{{5}}{{c}}{{\\textbf{{Lowest cost under each rule}}}} \\\\
+\\cmidrule(l){{5-9}}
+\\textbf{{Data}} & \\textbf{{Lowest other}} & \\textbf{{World minus it}} & \\textbf{{World lower}} & {head} \\\\
+\\midrule
+{chr(10).join(lines)}
+\\bottomrule
+\\end{{tabular}}
+\\end{{table*}}
+"""
+    (GEN / "rev_tab_catcost.tex").write_text(tex)
 
 
 def core_values():
@@ -890,6 +1004,8 @@ def write_values():
         "\\newcommand{\\rreg}[3]{\\revget{rreg@#1@#2@#3}}",
         "\\newcommand{\\rgrain}[3]{\\revget{rgrain@#1@#2@#3}}",
         "\\newcommand{\\rcore}[3]{\\revget{rcore@#1@#2@#3}}",
+        "\\newcommand{\\rsg}[2]{\\revget{rsg@#1@#2}}",
+        "\\newcommand{\\rcc}[4]{\\revget{rcc@#1@#2@#3@#4}}",
         "\\makeatother",
     ]
     (GEN / "rev_values.tex").write_text("\n".join(lines) + "\n")
@@ -910,6 +1026,8 @@ def main():
     count_values(acc, sets, p, ab)
     gt = grain_values(acc)
     core_values()
+    studyg_values()
+    catcost_values()
     tab_grain(gt)
     tab_rolling(acc, sets)
     tab_ablation(ab)

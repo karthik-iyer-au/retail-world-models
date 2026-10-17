@@ -1,0 +1,4 @@
+key,model,level,wrmsse,windows,source
+frat,lift_matched,item_idxstore_id,0.6019,4,run 20261017T115727_rev_frat_rolling_lift_matched_8d171f4e metrics (job summary)
+frat,lift_matched,total,0.4735,4,run 20261017T115727_rev_frat_rolling_lift_matched_8d171f4e metrics (job summary)
+frat,lift_matched,overall,0.5598,4,run 20261017T115727_rev_frat_rolling_lift_matched_8d171f4e metrics (job summary)

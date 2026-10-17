@@ -108,24 +108,34 @@ def gls_bottom(S: sp.csr_matrix, y: np.ndarray, wdiag: np.ndarray) -> np.ndarray
 
 def mint_shrink_bottom(S: sp.csr_matrix, y: np.ndarray, residuals: np.ndarray) -> np.ndarray:
     """MinT with the shrinkage covariance of Schafer and Strimmer, for small
-    hierarchies. `residuals` is node x period of in-sample errors."""
+    hierarchies. `residuals` is node x period of in-sample errors.
+
+    Nodes whose in-sample errors have no variance (a constant history, or a
+    fallback fit with no error) would make the covariance singular. Their
+    variance is set to the smallest positive variance of the other nodes
+    (fix of 17 October 2026, docs/PAPER1_REVISION_PLAN.md study G: on Frat 47 of
+    4,349 nodes had none, and the singular solve gave bottom forecasts of the
+    order of 10^7 of both signs). The shrinkage intensity is computed for every
+    hierarchy this function takes, not fixed at one half above 1,500 nodes."""
     r = residuals - np.nanmean(residuals, axis=1, keepdims=True)
     r = np.nan_to_num(r)
     T = r.shape[1]
     cov = r @ r.T / T
-    sd = np.sqrt(np.diag(cov))
-    sd[sd == 0] = 1e-9
+    d = np.diag(cov).copy()
+    floor = d[d > 0].min() if (d > 0).any() else 1.0
+    zero = d <= 0
+    d[zero] = floor
+    cov[np.diag_indices_from(cov)] = d
+    sd = np.sqrt(d)
     corr = cov / np.outer(sd, sd)
     xs = r / sd[:, None]
-    v = ((xs[:, None, :] * xs[None, :, :]) ** 2).mean(axis=2) * T / (T - 1) ** 2 if len(r) < 1500 else None
-    if v is not None:
-        off = ~np.eye(len(r), dtype=bool)
-        lam = float(np.clip(v[off].sum() / (corr[off] ** 2).sum(), 0, 1))
-    else:
-        lam = 0.5
-    shrunk = lam * np.diag(np.diag(cov)) + (1 - lam) * cov
+    x2 = xs ** 2
+    v = (x2 @ x2.T) / T * T / (T - 1) ** 2  # estimated variance of each correlation
+    off = ~np.eye(len(r), dtype=bool)
+    lam = float(np.clip(v[off].sum() / (corr[off] ** 2).sum(), 0, 1))
+    shrunk = lam * np.diag(d) + (1 - lam) * cov
     Sd = S.toarray()
-    Winv = np.linalg.pinv(shrunk)
+    Winv = np.linalg.inv(shrunk)
     G = np.linalg.solve(Sd.T @ Winv @ Sd, Sd.T @ Winv)
     return G @ y
 

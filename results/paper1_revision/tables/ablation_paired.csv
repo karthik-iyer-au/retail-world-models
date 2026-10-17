@@ -377,3 +377,9 @@ m5,without_world_model,ensemble,store_id,4,0.083003,0.0091164,0.14829,1,3
 m5,without_world_model,ensemble,store_idxcat_id,4,0.066163,0.0087904,0.12056,1,3
 m5,without_world_model,ensemble,store_idxdept_id,4,0.057925,0.01277,0.10187,0,3
 m5,without_world_model,ensemble,total,4,0.11324,0.017675,0.19042,1,3
+frat,lift_matched_for_world_model,ensemble,cat_id,4,0.0086051,-0.01315,0.034849,0,1
+frat,lift_matched_for_world_model,ensemble,cat_idxstore_id,4,0.0058585,-0.0074542,0.025257,0,1
+frat,lift_matched_for_world_model,ensemble,item_id,4,0.0068445,0.00048657,0.013836,0,1
+frat,lift_matched_for_world_model,ensemble,item_idxstore_id,4,0.0027714,-0.0013366,0.0082295,0,1
+frat,lift_matched_for_world_model,ensemble,store_id,4,0.0047815,-0.010683,0.024347,0,1
+frat,lift_matched_for_world_model,ensemble,total,4,0.0073601,-0.019521,0.038308,0,1

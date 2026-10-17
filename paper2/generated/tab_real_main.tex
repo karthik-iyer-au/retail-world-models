@@ -1,0 +1,18 @@
+\begin{tabular}{@{}lrrrrrrr@{}}
+\toprule
+ & \multicolumn{5}{c}{Version and window} & \multicolumn{2}{c}{Version} \\
+\cmidrule(lr){2-6}\cmidrule(l){7-8}
+Score & M5 & Dom. & Frat & Pooled & $p$ & Pooled & $p$ \\
+\midrule
+Checks passed & $-0.32$ & $-0.19$ & $0.26$ & $-0.08$ & 0.205 & $-0.19$ & 0.004 \\
+C1 violation & $0.10$ & $-0.18$ & $-0.41$ & $-0.17$ & 0.007 & $-0.03$ & 0.664 \\
+C2 agreement after randomising & $-0.11$ & $0.20$ & $-0.02$ & $0.02$ & 0.740 & $0.01$ & 0.842 \\
+C3 seed agreement & $-0.07$ & $0.32$ & $0.30$ & $0.18$ & 0.010 & $-0.01$ & 0.938 \\
+C4 share lower & $-0.06$ & $-0.04$ & $-0.18$ & $-0.09$ & 0.159 & $-0.01$ & 0.916 \\
+C5 rank & $-0.19$ & $-0.32$ & $-0.75$ & $-0.42$ & 0.000 & $-0.32$ & 0.000 \\
+C5 bias & $0.62$ & $0.03$ & $0.70$ & $0.45$ & 0.000 & $0.36$ & 0.000 \\
+C6 agreement with LightGBM & $-0.31$ & $-0.48$ & $0.20$ & $-0.20$ & 0.394 & $-0.20$ & 0.392 \\
+Checks passed, C5 left out$^\dagger$ & $-0.32$ & $-0.04$ & $0.26$ & $-0.03$ & 0.615 & $-0.13$ & 0.055 \\
+Checks passed, C1 and C5 left out$^\dagger$ & $-0.32$ & $-0.10$ & $0.15$ & $-0.09$ & 0.163 & $-0.15$ & 0.032 \\
+\bottomrule
+\end{tabular}

@@ -18,19 +18,26 @@ Favorita, over rolling forecast origins with paired tests:
 
 - **Item by store and item across stores:** an equal-weight average of a world
   model, LightGBM and TimesFM given the plan had the lowest error on 7 and 8 of
-  9 data sets, with one or two models statistically level with the best.
+  9 data sets, and the 90% model confidence set kept one or two models.
 - **Category by store, category and chain total:** the lowest-error model
-  changed from data set to data set, and a median of 4 of 9 models could not be
-  told apart.
-- **Over a whole window:** the world model alone had the lowest
-  category-by-store planning cost on 6 of 8 data sets.
+  changed from data set to data set, and four to six windows did not separate a
+  median of 4 of 9 models.
+- **Category-by-store planning cost:** the average or LightGBM was lowest on 7
+  of 8 data sets, ahead of the world model by a paired interval; the world model
+  was lowest only on M5. (A first version of this cost put the world model first
+  on 6 of 8; it let category-store nodes with no sales in a window dominate on
+  Dominick's and was corrected in study G.)
 - LightGBM was the strongest single model at the fine grains; averaging added
   to it, and weights fitted on earlier windows rarely beat equal weights.
 
 A retailer's own data, or a forecast solved across all four Ps, may order the
 models differently. Each claim is linked to its table, script and runs in
 [`docs/RESULTS.md`](docs/RESULTS.md); the manuscript is `paper/main.pdf`.
-Paper 2 (`paper2/`), an audit of plan-lift explanations, is a draft.
+Paper 2 (`paper2/main.pdf`) audits the plan-lift explanations of the 494 saved
+world-model and lift-model versions: no version passed every check on M5 or
+Dominick's, both the world model and LightGBM state about twice the measured
+response to Dominick's zone price changes, and the number of checks a version
+passed was not clearly related to its accuracy.
 
 ## Layout
 

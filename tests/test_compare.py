@@ -157,3 +157,18 @@ def test_promo_rank_orders_promotions():
     good = 10 * np.where(promo[:, t0:t1] > 0, lift, 1.0)
     assert C.promo_rank(fr, o, good)["promo_spearman"] > 0.6
     assert C.promo_rank(dataclasses.replace(fr, promo=None), o, good) == {}
+
+
+def test_mint_shrink_with_a_zero_variance_node():
+    """A node with no in-sample error must not make MinT-shrink blow up (study G fix)."""
+    import scipy.sparse as sp
+    from rwm.evaluation.reconcile import mint_shrink_bottom
+    rng = np.random.default_rng(0)
+    # total, two bottom series
+    S = sp.csr_matrix(np.array([[1.0, 1.0], [1.0, 0.0], [0.0, 1.0]]))
+    R = rng.normal(0, 1, (3, 40))
+    R[2] = 0.0  # second series: no in-sample error
+    y = np.array([[20.0, 21.0], [12.0, 11.0], [9.0, 9.0]])
+    b = mint_shrink_bottom(S, y, R)
+    assert np.all(np.abs(b) < 100)
+    assert np.allclose(b.sum(axis=0), [20.5, 20.0], atol=2.0)  # close to the base forecasts

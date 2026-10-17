@@ -76,14 +76,33 @@ def score(v, st, ag) -> pd.DataFrame:
     passes = d[[f"C{k}_pass" for k in range(1, 7)]].astype(float)
     d["passed"] = passes.sum(axis=1, skipna=True)
     d["applicable"] = passes.notna().sum(axis=1)
+    # exploratory, added after the results were read (docs/PAPER2_PLAN.md, 17 October 2026):
+    # C5 compares the forecast with sales over the same baseline, so it shares
+    # information with accuracy; C1 failures come from the audit's regular price
+    d["passed_no_c5"] = passes.drop(columns="C5_pass").sum(axis=1, skipna=True)
+    d["passed_no_c1_c5"] = passes.drop(columns=["C1_pass", "C5_pass"]).sum(axis=1, skipna=True)
     return d
+
+
+SCORES = ["passed", "passed_no_c5", "passed_no_c1_c5", "applicable", "C1", "C2", "C3", "C4", "C5_rank", "C5_bias", "C6", "item_by_store"]
+
+
+def per_version(d: pd.DataFrame) -> pd.DataFrame:
+    """One row per version (a saved configuration and seed): the mean of each score
+    and of checks passed over the version's windows (docs/PAPER2_PLAN.md: the main
+    test is across versions)."""
+    g = d.groupby(["dataset", "run", "config", "base", "seed"], dropna=False)
+    v = g[SCORES].mean().reset_index()
+    v["windows"] = g.size().to_numpy()
+    v["model"] = np.where(v["config"].str.contains("lift"), "lift", "world")
+    return v
 
 
 def main_test(d: pd.DataFrame, n_perm: int = 10_000, seed: int = 0) -> pd.DataFrame:
     """Spearman of checks passed (and each check's score) with item-by-store WRMSSE,
-    within data set; pooled by permuting scores within data set."""
+    within data set, across versions; pooled by permuting scores within data set."""
     rng = np.random.default_rng(seed)
-    cols = ["passed", "C1", "C2", "C3", "C4", "C5_rank", "C5_bias", "C6"]
+    cols = ["passed", "C1", "C2", "C3", "C4", "C5_rank", "C5_bias", "C6", "passed_no_c5", "passed_no_c1_c5"]
     rows = []
     for col in cols:
         per = {}
@@ -237,6 +256,9 @@ def fig_real_c7(z, measured_slope, measured_lo, measured_hi, out: Path):
         b.scatter([sl], [k], s=16, color=INK if k == 0 else ACCENT, zorder=3)
     b.axvline(-0.3, color=MUTED, lw=0.8, ls=(0, (4, 3)))
     b.axvline(0, color=INK, lw=0.5)
+    lo = min(sl - 1.96 * se for _, sl, se in rows)
+    hi = max(sl + 1.96 * se for _, sl, se in rows)
+    b.set_xlim(lo - 0.08, max(0.1, hi + 0.08))
     b.set_yticks(range(len(rows)))
     b.set_yticklabels([r[0] for r in rows])
     b.set_ylim(len(rows) - 0.4, -0.6)
@@ -249,12 +271,12 @@ def fig_real_c7(z, measured_slope, measured_lo, measured_hi, out: Path):
     return rows
 
 
-def write_tables(d, mt, gen: Path):
-    lines = ["\\begin{tabular}{@{}lrrrrrrrr@{}}", "\\toprule",
-             "Data & Versions & C1 & C2 & C3 & C4 & C5 & C6 & All \\\\", "\\midrule"]
+def write_tables(d, dv, mt, gen: Path, mtv=None):
+    lines = ["\\begin{tabular}{@{}lrrrrrrrrr@{}}", "\\toprule",
+             "Data & Versions & Windows & C1 & C2 & C3 & C4 & C5 & C6 & All \\\\", "\\midrule"]
     for ds in [k for k in DATASETS if k in set(d["dataset"])]:
         g = d[d["dataset"] == ds]
-        cells = [DATASETS[ds], str(len(g))]
+        cells = [DATASETS[ds], str(int((dv["dataset"] == ds).sum())), str(len(g))]
         for k in range(1, 7):
             p = g[f"C{k}_pass"].astype(float).dropna()
             cells.append(f"{int(p.sum())}/{len(p)}" if len(p) else "n/a")
@@ -262,17 +284,23 @@ def write_tables(d, mt, gen: Path):
         lines.append(" & ".join(cells) + " \\\\")
     lines += ["\\bottomrule", "\\end{tabular}"]
     (gen / "tab_real_pass.tex").write_text("\n".join(lines) + "\n")
-    names = {"passed": "Checks passed", "C1": "C1 violation", "C2": "C2 agreement after randomising",
+    names = {"passed": "Checks passed", "passed_no_c5": "Checks passed, C5 left out$^\\dagger$",
+             "passed_no_c1_c5": "Checks passed, C1 and C5 left out$^\\dagger$", "C1": "C1 violation", "C2": "C2 agreement after randomising",
              "C3": "C3 seed agreement", "C4": "C4 share lower", "C5_rank": "C5 rank", "C5_bias": "C5 bias",
              "C6": "C6 agreement with LightGBM"}
-    lines = ["\\begin{tabular}{@{}lrrrrr@{}}", "\\toprule",
-             "Score & M5 & Dominick's & Frat & Pooled & $p$ \\\\", "\\midrule"]
+    lines = ["\\begin{tabular}{@{}lrrrrrrr@{}}", "\\toprule",
+             " & \\multicolumn{5}{c}{Version and window} & \\multicolumn{2}{c}{Version} \\\\",
+             "\\cmidrule(lr){2-6}\\cmidrule(l){7-8}",
+             "Score & M5 & Dom. & Frat & Pooled & $p$ & Pooled & $p$ \\\\", "\\midrule"]
     for _, r in mt.iterrows():
         cells = [names.get(r["score"], r["score"])]
         for ds in DATASETS:
             v = r.get(f"rho_{ds}")
             cells.append(f"${v:.2f}$" if pd.notna(v) else "n/a")
         cells += [f"${r['pooled_rho']:.2f}$", f"{r['p']:.3f}"]
+        if mtv is not None:
+            q = mtv[mtv["score"] == r["score"]].iloc[0]
+            cells += [f"${q['pooled_rho']:.2f}$", f"{q['p']:.3f}"]
         lines.append(" & ".join(cells) + " \\\\")
     lines += ["\\bottomrule", "\\end{tabular}"]
     (gen / "tab_real_main.tex").write_text("\n".join(lines) + "\n")
@@ -283,10 +311,130 @@ def make(out: Path, measured):
     d = score(v, st, ag)
     gen = out.parent / "generated"
     d.to_csv(gen / "real_scores.csv", index=False)
+    dv = per_version(d)
+    dv.to_csv(gen / "real_versions.csv", index=False)
+    # the unit fixed in the manuscript before any result: a version is a
+    # configuration, seed and window; the mean over a version's windows is reported beside it
     mt = main_test(d)
     mt.to_csv(gen / "real_main_test.csv", index=False)
+    mtv = main_test(dv)
+    mtv.to_csv(gen / "real_main_test_by_version.csv", index=False)
     fig_real_checks(d, st, ag, out)
-    fig_real_main(d, out)
+    fig_real_main(dv, out)
     rows = fig_real_c7(z, *measured, out) if len(z) else []
-    write_tables(d, mt, gen)
+    write_tables(d, dv, mt, gen, mtv)
+    write_macros(d, dv, mt, z, rows, gen, mtv)
+    write_diag_macros(gen)
     return d, mt, rows
+
+
+def write_macros(d, dv, mt, z, rows, gen: Path, mtv=None):
+    """Every number the audit section quotes, as LaTeX macros (generated/real_macros.tex)."""
+    out = []
+
+    def put(name, value):
+        out.append(f"\\newcommand{{\\{name}}}{{{value}}}")
+
+    tag = {"m5": "M", "dominicks": "D", "frat": "F"}
+    f2 = lambda x: f"{x:.2f}".replace("-", "$-$") if pd.notna(x) else "n/a"  # noqa: E731
+    pct = lambda x: f"{100 * x:.0f}"  # noqa: E731
+    put("rVersions", int(len(dv)))
+    put("rWindows", int(len(d)))
+    for ds, t in tag.items():
+        g, gv = d[d["dataset"] == ds], dv[dv["dataset"] == ds]
+        put(f"rVer{t}", int(len(gv)))
+        put(f"rWin{t}", int(len(g)))
+        for k in range(1, 7):
+            p = g[f"C{k}_pass"].astype(float).dropna()
+            put(f"rPass{t}C{'abcdef'[k - 1]}", f"{int(p.sum())} of {len(p)}" if len(p) else "none")
+        put(f"rAll{t}", int((g["passed"] == g["applicable"]).sum()))
+        for col, nm in (("C1", "Ca"), ("C2", "Cb"), ("C3", "Cc"), ("C5_rank", "CeRank"), ("C5_bias", "CeBias"), ("C6", "Cf")):
+            put(f"rMed{t}{nm}", f2(g[col].median()))
+        put(f"rMed{t}CdPct", pct(g["C4"].median()))
+        put(f"rMed{t}CaPct", f"{100 * g['C1'].median():.1f}")
+        put(f"rMax{t}CaPct", f"{100 * g['C1'].max():.0f}")
+    put("rCaPartsMax", f"{d['c1_parts_do_not_add_up'].max():.0g}")
+    put("rCaBaseMax", f"{100 * d['c1_baseline_moves_with_plan'].max():.1f}")
+    st = pd.read_csv(SUM / "stability.csv")
+    st["dataset"] = st["config"].map(dataset_of)
+    ag = pd.read_csv(SUM / "agreement.csv")
+    ag["dataset"] = ag["model_config"].map(dataset_of)
+    for ds, t in tag.items():
+        g = st[st["dataset"] == ds]
+        put(f"rStabLift{t}", f2(g["lift_rank_agreement"].median()))
+        put(f"rStabFc{t}", f2(g["forecast_rank_agreement"].median()))
+        a = ag[ag["dataset"] == ds]
+        for col in ("promo_onoff", "promo_shap", "price_onoff", "price_shap", "event_onoff", "snap_onoff"):
+            if col in a and a[col].notna().any():
+                put(f"rAg{t}{col.replace('_', '').replace('onoff', 'On').replace('shap', 'Shap')}", f2(a[col].median()))
+        g = d[d["dataset"] == ds]
+        for col in ("c5_event_rank", "c5_snap_rank", "c5_promo_rank", "c5_price_cut_only_rank"):
+            if g[col].notna().any():
+                put(f"rCe{t}{col.replace('c5_', '').replace('_rank', '').replace('_', '')}", f2(g[col].median()))
+    for _, r in mt.iterrows():
+        key = {"passed": "Passed", "passed_no_c5": "PassedNoCe", "passed_no_c1_c5": "PassedNoCaCe", "C1": "Ca",
+               "C2": "Cb", "C3": "Cc", "C4": "Cd", "C5_rank": "CeRank", "C5_bias": "CeBias", "C6": "Cf"}[r["score"]]
+        for ds, t in tag.items():
+            put(f"rRho{key}{t}", f2(r.get(f"rho_{ds}")))
+        put(f"rRho{key}Pool", f2(r["pooled_rho"]))
+        put(f"rP{key}", f"{r['p']:.3f}")
+        if mtv is not None:
+            q = mtv[mtv["score"] == r["score"]].iloc[0]
+            put(f"rRho{key}PoolV", f2(q["pooled_rho"]))
+            put(f"rP{key}V", f"{q['p']:.3f}")
+            for ds, t in tag.items():
+                put(f"rRho{key}{t}V", f2(q.get(f"rho_{ds}")))
+    if len(z):
+        put("rZEpisodes", int(len(z)))
+        inside = ((z["world_implied"] >= z["did_lo"]) & (z["world_implied"] <= z["did_hi"])).sum()
+        put("rZWorldInside", int(inside))
+        put("rZLgbInside", int(((z["lightgbm_implied"] >= z["did_lo"]) & (z["lightgbm_implied"] <= z["did_hi"])).sum()))
+        same = lambda c: int((np.sign(z[c]) == np.sign(-z["price_log_ratio"])).sum())  # noqa: E731
+        put("rZWorldSign", same("world_implied"))
+        put("rZLgbSign", same("lightgbm_implied"))
+        put("rZMeasuredSign", same("did_estimate"))
+        for lab, sl, se in rows:
+            t = {"Measured": "Meas", "World model": "World", "LightGBM": "Lgb"}[lab]
+            put(f"rZSlope{t}", f2(sl))
+            put(f"rZSlope{t}Lo", f2(sl - 1.96 * se))
+            put(f"rZSlope{t}Hi", f2(sl + 1.96 * se))
+    (gen / "real_macros.tex").write_text("\n".join(out) + "\n")
+
+
+def write_diag_macros(gen: Path):
+    """Numbers from the diagnosis of C1 and C4 on fourteen saved runs
+    (results/paper2/diagnose/audit_diagnose.csv, scripts/audit_diagnose.py)."""
+    f = ROOT / "results" / "paper2" / "diagnose" / "audit_diagnose.csv"
+    if not f.exists():
+        return
+    x = pd.read_csv(f)
+    x["dataset"] = x["config"].map(dataset_of)
+    new = x["config"].str.contains("new_items")
+    regcol = x["config"].str.startswith("frat_dev_state_model_lift")
+    out = []
+
+    def put(name, value):
+        out.append(f"\\newcommand{{\\{name}}}{{{value}}}")
+
+    pc = lambda v: f"{100 * v:.0f}"  # noqa: E731
+    p1 = lambda v: f"{100 * v:.1f}"  # noqa: E731
+    put("dRuns", x["run"].nunique())
+    put("dWindows", len(x))
+    other_dom = x[(x["dataset"] == "dominicks") & ~new]
+    put("dNewLo", pc(x.loc[new, "c1_audit_zero_lift_when_nothing_planned"].min()))
+    put("dNewHi", pc(x.loc[new, "c1_audit_zero_lift_when_nothing_planned"].max()))
+    put("dDomLo", p1(other_dom["c1_keep_missing_zero_lift_when_nothing_planned"].min()))
+    put("dDomHi", p1(other_dom["c1_keep_missing_zero_lift_when_nothing_planned"].max()))
+    put("dDomRows", p1(other_dom["c1_keep_missing_share_rows_over_0.001"].max()))
+    put("dFratLo", pc(x.loc[regcol, "c1_audit_zero_lift_when_nothing_planned"].min()))
+    put("dFratHi", pc(x.loc[regcol, "c1_audit_zero_lift_when_nothing_planned"].max()))
+    put("dFratRowsLo", pc(x.loc[regcol, "c1_keep_missing_share_rows_over_0.001"].min()))
+    put("dFratRowsHi", pc(x.loc[regcol, "c1_keep_missing_share_rows_over_0.001"].max()))
+    put("dBaseMax", p1(x["c1_audit_baseline_moves_with_plan"].max()))
+    for ds, t in (("dominicks", "D"), ("m5", "M"), ("frat", "F")):
+        g = x[x["dataset"] == ds]
+        put(f"dCdAll{t}", pc(g["c4_all_lower"].median()))
+        put(f"dCdTenth{t}", pc(g["c4_tenth_lower"].median()))
+        put(f"dCdBig{t}", pc(g["c4_all_lower_5pct"].median()))
+        put(f"dCdFive{t}", pc(g["c4_all_lower_at_5"].median()))
+    (gen / "diag_macros.tex").write_text("\n".join(out) + "\n")
