@@ -794,7 +794,7 @@ def fig_frat_story():
     a.grid(axis="y")
     a.set_axisbelow(True)
     despine(a)
-    a.set_title("Final 8 weeks: total right, shape missed")
+    a.set_title("Final 8 weeks, units by week")
     panel_label(a, "a")
     # (b) development to final
     dev = {"world": 0.408, "lift": 0.406, "lgb": 0.421}
@@ -812,7 +812,7 @@ def fig_frat_story():
     b.grid(axis="y")
     b.set_axisbelow(True)
     despine(b)
-    b.set_title("Level in development, apart at the holidays")
+    b.set_title("All-level WRMSSE, development and final")
     panel_label(b, "b")
     save(fig, OUT / "fig_frat_story.pdf")
 

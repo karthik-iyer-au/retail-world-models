@@ -15,8 +15,8 @@ version.
 \centering
 \includegraphics[width=\textwidth]{figs/fig_rolling.pdf}
 \caption{\textbf{Item by store, every single model is less accurate than the
-ensemble on almost every data set; at the total the ensemble is never far from
-the best and the best single model changes with the data set.} Mean WRMSSE over
+ensemble on almost every data set; at the total the ensemble is in the confidence set
+everywhere and the best single model changes with the data set.} Mean WRMSSE over
 the rolling windows of each model divided by the ensemble's (dashed line at 1;
 log scale; left of the line is more accurate than the ensemble).
 \textbf{(a)} Item by store. \textbf{(b)} Chain total. Values beyond the axis are
@@ -45,11 +45,13 @@ results (\rcount{ensbeatslgbixslist}; M5: \rv{mfive}{ens}{ixs} against
 (\rcount{ensbeatslgbtotallist}). It is more accurate than the world model item
 by store on \rcount{ensbeatsworldixs} and at the total on
 \rcount{ensbeatsworldtotal} (\rcount{ensbeatsworldtotallist}). It is less
-accurate than either at either level on none. The Temporal Fusion Transformer,
-Chronos-Bolt and TimesFM from history alone are behind the ensemble item by store
-on every data set where they ran.
+accurate than either at either level on none. On mean error, the Temporal
+Fusion Transformer, Chronos-Bolt and TimesFM from history alone are behind the
+ensemble item by store on every data set where they ran; they were not
+compared with it by a paired test.
 
-The cheese result comes from one window. In one of the six cheese windows the
+The cheese result comes from one window, which we looked for after reading the
+result. In one of the six cheese windows the
 world model's item-by-store WRMSSE was \rwin{che}{world}{ixsmax}, against a
 median of \rwin{che}{world}{ixsmedian} over the six, and the lift model's
 \rwin{che}{lift}{ixsmax}; the ensemble, a third of whose forecast is the world
@@ -90,15 +92,20 @@ accurate item by store on \rcount{withouttimesfmixsens}, at the total on
 \rcount{withouttimesfmtotalvar} (\rcount{withouttimesfmtotalvarlist}).
 LightGBM is the member the ensemble can least do without.
 
-Some of the world model's contribution is any third model's. With the lift
+Most of the world model's contribution is any third model's. With the lift
 model in its place, which has the same encoder, readout, inputs and training and
-no carried state, the ensemble is less accurate item by store on
-\rcount{liftforworldmodelixsens} data sets (\rcount{liftforworldmodelixsenslist})
-and at the total on \rcount{liftforworldmodeltotalens}
-(\rcount{liftforworldmodeltotalenslist}), and more accurate on none. The carried
-state therefore adds to the ensemble where those intervals exclude zero, and
-elsewhere the gain from the world model is a gain from adding a third,
-different model.
+no carried state, the ensemble is not less accurate by the paired test than
+with the world model on
+\rcount{addsnotliftixslist}, where the world model adds item by store, and at
+the total on \rcount{addsnotlifttotallist}. It is less accurate with the lift
+model item by store on \rcount{liftforworldmodelixsens} data sets
+(\rcount{liftforworldmodelixsenslist}) and at the total on
+\rcount{liftforworldmodeltotalens} (\rcount{liftforworldmodeltotalenslist}),
+but by the rule written down for study A the world model adds to the ensemble
+only where the ensemble beats the pair without it, and on soft drinks and
+analgesics it does not. The carried state therefore adds to an ensemble that
+gains from the world model only on \rcount{bothaddixslist} item by store, and
+at the total on none.
 
 Equal weights are hard to beat. Weights chosen on the earlier windows of each
 data set, for item by store, for the total or for all levels, and scored on the
@@ -144,7 +151,7 @@ lowest cost on \rcount{decworldcat} of eight data sets.
 \centering
 \includegraphics[width=\textwidth]{figs/fig_mechanism.pdf}
 \caption{\textbf{The world model carries a promotion forward as further lift and
-leans on the most recent weeks; Timestral given the plan puts extreme upper
+uses all 26 weeks of history it reads; Timestral given the plan puts extreme upper
 quantiles on a few series.}
 \textbf{(a)} Persistence: the change in the forecast, in percent, at each later
 period after one promotion and a 20\% price cut are added in the first period
@@ -174,9 +181,16 @@ LightGBM's by \rper{mfive}{lgb}{snap}{occlude}{total}\%, and occluding event day
 by \rper{mfive}{world}{event}{occlude}{total}\% against
 \rper{mfive}{lgb}{event}{occlude}{total}\%. The world model reads these
 calendar inputs more than LightGBM does, which fits its lower error at the M5
-total. On Frat the world model gets almost nothing from the
-promotion flag once price is given (\rper{frat}{world}{promo}{occlude}{ixs}\%
-item by store), while LightGBM and the lift model do.
+total. On Frat the promotion flag adds little to the world model once price is
+given: occluding it changes the world model's error by
+\rper{frat}{world}{promo}{occlude}{ixs}\% item by store and
+\rper{frat}{world}{promo}{occlude}{total}\% at the total, against
+\rper{frat}{lift}{promo}{occlude}{total}\% for the lift model. Permuting an
+input within each series across the window, rather than removing it, costs more
+item by store and less at the total: permuting price raises the Dominick's
+item-by-store error by \rper{dom}{world}{price}{permute}{ixs}\% for the world
+model and \rper{dom}{lgb}{price}{permute}{ixs}\% for LightGBM
+(Table~\ref{tab:perturbation} shows occlusion only).
 
 Three tests on the saved world models show what the carried state does with
 the plan. \emph{Timing}: shuffling the plan within each series, with its total
@@ -189,10 +203,11 @@ the carried state adds little to that. \emph{Persistence}
 (Figure~\ref{fig:mechanism}a): after a promotion and price cut added in the
 first period, the world model's forecast stays higher in later periods, by
 \rmech{sna}{rolling}{world}{persisth2}\% one period later in snack crackers and
-\rmech{che}{rolling}{world}{persisth3}\% two periods later in cheese, falling
-slowly. In categories where shoppers stock up, sales after a promotion dip; the
-world model carries the promotion forward as further lift. On Frat the effect
-is a small dip (\rmech{frat}{final}{world}{persisth2}\% one period later).
+\rmech{che}{rolling}{world}{persisth3}\% two periods later in cheese, and
+above zero through the window. In categories where shoppers stock up, sales
+after a promotion dip; the world model carries the promotion forward as further
+lift. On the Frat final window, the one Frat window tested, the effect is a
+small dip (\rmech{frat}{final}{world}{persisth2}\% one period later).
 \emph{State}: a ridge read-out from the rolled state predicts sales in the
 periods after the window no better than the same read-out from the state before
 it ($R^2$ \rmech{che}{rolling}{world}{probeafterr2} against
@@ -201,7 +216,8 @@ it ($R^2$ \rmech{che}{rolling}{world}{probeafterr2} against
 \rmech{mfive}{rolling}{world}{probebeforer2} on M5).
 
 On the weekly data the world model and the lift model read the last 26 weeks of
-history, and the most recent weeks matter most (Figure~\ref{fig:mechanism}b):
+history, and removing the older part of it costs accuracy
+(Figure~\ref{fig:mechanism}b):
 keeping only the last 13 raises the Dominick's total error by
 \rper{dom}{world}{historylast13}{occlude}{total}\% for the world model and
 \rper{dom}{lift}{historylast13}{occlude}{total}\% for the lift model, and
@@ -218,7 +234,7 @@ last 28 days raises the world model's total error by
 
 TimesFM with the plan is the most accurate model not trained on the data, and
 the plan matters to it: item by store it is ahead of TimesFM from history alone
-on every data set where both ran except M5, where they tie
+on every data set where both ran except M5, where they are equal to three decimals
 (Table~\ref{tab:rolling}), and most on the weekly
 promotion-driven data (soft drinks \rv{sdr}{tfmplan}{ixs} against
 \rv{sdr}{tfm}{ixs}). LightGBM is more accurate than it item by store on
@@ -230,9 +246,11 @@ data set item by store, and its total error in snack crackers is
 \rv{sna}{chronos}{total}.
 
 Timestral (study F, Table~\ref{tab:timestral}) is behind the ensemble on every
-data set, at both levels. Given the plan it is behind TimesFM given the plan on
-every data set except the M5 total, where they tie (\rsf{mfive}{tsplan}{total}
-against \rsf{mfive}{tfmplan}{total}). Putting it in place of TimesFM makes the
+data set, at both levels. Given the plan its mean error is higher than TimesFM's
+given the plan on every data set at both levels except the M5 total
+(\rsf{mfive}{tsplan}{total} against \rsf{mfive}{tfmplan}{total}); the plan
+asked for a paired test of the two, which was not run, so these are
+differences of means. Putting it in place of TimesFM makes the
 ensemble less accurate on Dominick's and Frat, level at the Favorita total and
 slightly less accurate item by store, and more
 accurate only at the M5 total (\rsf{mfive}{enstimestral}{total} against
@@ -242,8 +260,9 @@ Timestral-209M, run on Frat to check the model size, is less accurate than the
 28M model (\rsf{frat}{tsbig}{ixs} against \rsf{frat}{tsplan}{ixs} item by
 store).
 
-On Dominick's Timestral with the plan forecasts several times total sales
-(Figure~\ref{fig:mechanism}c). This is not a scale or input error: summed over
+On Dominick's Timestral with the plan forecasts more than total sales, in
+analgesics several times more (Figure~\ref{fig:mechanism}c). We checked the
+cause after reading the result. It is not a scale or input error: summed over
 all series, its median is \rtail{ana}{tsplan}{median}{lo} to
 \rtail{ana}{tsplan}{median}{hi} times actual sales in analgesics, and its
 history-only point forecast \rtail{ana}{tsmean}{forecast}{lo} to
@@ -256,9 +275,10 @@ drinks (99\% quantile \rtail{sdr}{tsplan}{q99}{lo} to
 \rtail{sdr}{tsplan}{q99}{hi} times sales) and Frat
 (\rtail{frat}{tsplan}{q99}{lo} to \rtail{frat}{tsplan}{q99}{hi}), and not on
 the daily data. The forecast rule was not changed after the result. Timestral's
-median would sit much closer to sales here, but it is fixed in advance to the
-mean, as for Chronos-Bolt, because the median forecasts well below totals for
-items that often sell nothing.
+median sums much closer to sales here, but the point forecast was fixed in
+advance to the mean, as for Chronos-Bolt, because a median forecasts well below
+totals for items that often sell nothing; how the median would score was not
+tested.
 
 \subsection{A data set kept out of development}
 \label{sec:res-favorita}
@@ -294,10 +314,15 @@ are few (Table~\ref{tab:intervals}, Figure~\ref{fig:decisions}b) the ensemble's 
 rounding a narrow interval outwards to a whole unit widens it; the pinball loss,
 unchanged by rounding, is the measure to compare there, and it separates the
 three models by at most 0.03 on every data set. Scored on their own
-quantiles item by store, TFT's are level with the conformal intervals
-(\rint{frat}{tft}{native}{spl} on Frat against \rint{frat}{ens}{ixs}{spl} for
-the ensemble) and Chronos-Bolt's are behind them
-(\rint{mfive}{chronos}{native}{spl} on M5 against \rint{mfive}{ens}{ixs}{spl}).
+quantiles item by store, TFT's have a lower pinball loss than the ensemble's
+conformal intervals on \rcount{tftnativebetter} of the \rcount{tftnativen}
+data sets where it ran (\rint{fre}{tft}{native}{spl} against
+\rint{fre}{ens}{ixs}{spl} in frozen entrees,
+\rint{frat}{tft}{native}{spl} against \rint{frat}{ens}{ixs}{spl} on Frat),
+and Chronos-Bolt's are behind them (\rint{mfive}{chronos}{native}{spl} on M5
+against \rint{mfive}{ens}{ixs}{spl}). Native quantiles are scored over every
+window and the conformal ones over all but the first, so the comparison is
+close but not exact.
 
 The ensemble also ranks item-by-store changes better than any single model
 (Figure~\ref{fig:decisions}c). Across item-store series, the Spearman
@@ -345,7 +370,18 @@ over the window are close even where its item forecasts are behind LightGBM's.
 For store orders
 at a critical ratio of 0.8, LightGBM has the lowest cost on
 \rcount{declgborder} (\rcount{declgborderlist}) and the ensemble on
-\rcount{decensorder} (\rcount{decensorderlist}); the world model on none.
+\rcount{decensorder} (\rcount{decensorderlist}); the world model on none. At
+0.95 the world model is lowest on bottled juice and M5, by less than 0.02.
+
+For promotion decisions, in the companion paper's generated worlds where the
+true lifts are known, deciding at the median promotion cost with the world
+model's predicted lift loses \rreg{clean}{world}{lo}\% to
+\rreg{clean}{world}{hi}\% of the value of deciding with the true lifts across
+three seeds, and with LightGBM's \rreg{clean}{lightgbm}{v}\%; in the world where
+merchants promote into strong weeks, \rreg{confounded}{world}{lo}\% to
+\rreg{confounded}{world}{hi}\% against \rreg{confounded}{lightgbm}{v}\%. A world
+model that cannot see the promotion levers loses
+\rreg{clean}{worldleverblind}{v}\% and \rreg{confounded}{worldleverblind}{v}\%.
 
 \input{generated/rev_tab_reconcile}
 
@@ -456,8 +492,8 @@ after a promotion.}
 Stock term on the world model (study C) & Dominick's dev., seed 1 & Overall worse than the world model in three of six categories \\
 Plan of the two periods before, on the lift model (study C) & Dominick's dev., seed 1 & Overall worse than the world model in three of six \\
 Stock term on the lift model (study C) & Dominick's dev., then rolling & Passed on development (after promotion \rpan{dev}{sdr}{liftstock}{mean}{afterpromofa} soft drinks, \rpan{dev}{sna}{liftstock}{mean}{afterpromofa} snack crackers); on the rolling windows \rpan{rol}{sdr}{liftstock}{roll}{afterpromofa} and \rpan{rol}{sna}{liftstock}{roll}{afterpromofa}, against \rpan{rol}{sdr}{worldmodel}{roll}{afterpromofa} and \rpan{rol}{sna}{worldmodel}{roll}{afterpromofa} for the world model \\
-Weight 3 on periods after a promotion (study E) & Dominick's dev., seed 1 & Error after promotion lower in all six (soft drinks \raft{sdr}{worldmodel}{afterpromoerr} to \raft{sdr}{afterpromow2}{afterpromoerr}); overall worse in four (snack crackers \raft{sna}{worldmodel}{overall} to \raft{sna}{afterpromow2}{overall}) \\
-Weight 6 on periods after a promotion (study E) & Dominick's dev., seed 1 & Overall worse in four; snack crackers after promotion \raft{sna}{afterpromow5}{afterpromofa} \\
+Loss weight $1+w$, $w=2$, after a promotion (study E) & Dominick's dev., seed 1 & Error after promotion lower in all six (soft drinks \raft{sdr}{worldmodel}{afterpromoerr} to \raft{sdr}{afterpromow2}{afterpromoerr}); overall worse in four (snack crackers \raft{sna}{worldmodel}{overall} to \raft{sna}{afterpromow2}{overall}) \\
+Loss weight $1+w$, $w=5$ (study E) & Dominick's dev., seed 1 & Overall worse in four; snack crackers after promotion \raft{sna}{afterpromow5}{afterpromofa} \\
 Fitted ensemble weights (study A) & All nine, rolling & Better than equal weights in \rcount{fittedwins} of \rcount{fittedn} comparisons, worse in \rcount{fittedlosses} \\
 Timestral in place of TimesFM (study F) & All four sources, rolling & Worse on Dominick's and Frat; better at the M5 total only \\
 Timestral-209M (study F) & Frat, rolling & Less accurate than 28M; too slow for the other data sets \\
@@ -485,8 +521,7 @@ reason given for study C also needed a correction: the 1.32 and 1.33
 after-promotion ratios that prompted it came from an earlier world-model
 version; the final world model was at 1.00 and 1.04 on those windows.
 
-\paragraph{A seed that never reached single fits, and noise as large as the
-effects}
+\paragraph{Seeds and run-to-run noise}
 Stage 2 of study C repeated each configuration with seeds 2 and 3 and got
 identical scores in all twelve runs. Single-fit configurations whose settings
 named no seed trained with seed 0 for every run seed; the seed now reaches the
@@ -558,11 +593,11 @@ forecast for each.}}
 \toprule
 \textbf{Decision} & \textbf{Level} & \textbf{What the results say} \\
 \midrule
-Store orders and inventory & Item by store, day or week & The ensemble or LightGBM: lowest order cost on every data set; the ensemble lowest item-by-store error on \rcount{enslowestixs} of nine \\
+Store orders and inventory & Item by store, day or week & The ensemble or LightGBM: lowest order cost on every data set at critical ratios 0.5 and 0.8; the ensemble lowest item-by-store error on \rcount{enslowestixs} of nine \\
 Promotion, price change, supplier funding & Item by week, under a planned change & A model that reads the plan; history alone forecasts \promoTfmLo\% to \promoTfmHi\% of promoted-week sales. Check forecasts after a promotion in categories where shoppers stock up: the world model carries the lift forward \\
 Category sales, units and margin plans & Category or chain, week or month & The world model alone: lowest category-plan cost on \rcount{decworldcat} of eight; the ensemble at the total is in the confidence set everywhere \\
 Choosing a model & Any & Score several windows with paired tests; one test month reversed the ranking on M5, and runs on different machines differed by as much as the changes tested \\
-Adopting a new pretrained model & Any & Check its totals and its upper quantiles before use; Timestral's tails made its mean forecast several times sales on weekly data \\
+Adopting a new pretrained model & Any & Check its totals and its upper quantiles before use; Timestral's tails made its mean forecast 3 to 6 times sales in analgesics \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -574,17 +609,17 @@ without. TimesFM with the plan brings a pretrained view of each series' history.
 The world model has the lowest category-plan cost on \rcount{decworldcat} of
 eight data sets, and the ensemble without it is less accurate item by store on
 \rcount{withoutworldmodelixsens}. An average of three models whose errors
-differ is more accurate item by store than any of them on
-\rcount{enslowestixs} of nine data sets, and equal weights are as good as weights fitted on a few earlier
+differ has a lower mean error item by store than any of them on
+\rcount{enslowestixs} of nine data sets, and by the paired test beats LightGBM
+on \rcount{ensbeatslgbixs} of eight; equal weights are as good as weights fitted on a few earlier
 windows, as the forecast combination literature leads one to
 expect~\cite{smithwallis2009,wang2023}.
 
 \paragraph{What the carried state adds}
 Against the lift model, which differs only in the carried state, the world model
-is level on its own in most data sets, adds to the ensemble beyond the lift
-model on \rcount{liftforworldmodelixsens} data sets item by store and
-\rcount{liftforworldmodeltotalens} at the total, and has a lower category-plan
-cost than the lift model on \rcount{worldbeatsliftcat} of eight. The carried state holds the plan (Figure~\ref{fig:readback}), but the
+is level on its own in most data sets, adds to the ensemble and beats its lift-model
+replacement there only on \rcount{bothaddixslist} item by store, and has a lower
+category-plan cost than the lift model on \rcount{worldbeatsliftcat} of eight. The carried state holds the plan (Figure~\ref{fig:readback}), but the
 rolled state does not predict sales beyond the window better than the state
 before it, and it carries a promotion forward as more lift rather than a dip.
 On these data the case for the carried state is what it adds to an ensemble and
@@ -618,8 +653,11 @@ larger model was too slow, a change made before any Timestral result.
 TFT was not run on M5 or Favorita, and Chronos-Bolt and TimesFM from history
 alone not on Favorita. TimesFM with the plan fits its linear plan model within
 groups of 2,048 series. Pretrained models are used as published with their point
-forecast fixed in advance (the mean), which for Timestral was the wrong choice on
-weekly data.
+forecast fixed in advance (the mean), which for Timestral let a few extreme
+upper quantiles dominate on weekly data. The paired test of Timestral against
+TimesFM asked for by the plan was not run. Reconciliation was not run on the
+Dominick's rolling windows, and the Timestral tail check and the cheese window
+were looked at after the results were read.
 
 \paragraph{What lift means}
 Merchants promote in weeks they expect to sell well, so part of a measured lift
@@ -641,10 +679,11 @@ data set. The decision costs are simulations under stated costs.
 \label{sec:conclusion}
 
 An equal-weight ensemble of a world model, LightGBM and TimesFM given the plan
-is the most accurate item-by-store forecast on rolling windows of four public
-retail data sets, including one kept out of development, and it is never less
-accurate than LightGBM or the world model by a paired test. The world model
-adds to it on some data sets, and its carried state on fewer; on its own it is
+has the lowest item-by-store error on seven of nine rolling-window data sets
+from four public retail sources, including one kept out of development, and on
+the eight with paired results it is never less accurate than LightGBM or the
+world model by a paired test. The world model adds to it on some data sets, and
+its carried state on almost none; on its own it is
 behind LightGBM item by store and gets category totals right. Every trained model
 uses the plan, the world model carries promotions forward as further lift, and a
 pretrained model released this month needs its tails checked before use.
@@ -724,7 +763,7 @@ within, with its value and where it lives in the code.}}
 \toprule
 \textbf{Constraint} & \textbf{Value} & \textbf{Where} \\
 \midrule
-Log forecast bound (world and lift model) & $[-10, 10]$ around the item's level & \texttt{src/rwm/models/} readout \\
+Log forecast bound (world and lift model) & $[-10, 10]$ around the item's level & \nolinkurl{src/rwm/model/state_model.py} readout \\
 Lift when nothing is planned & Exactly zero & Readout; tested in \texttt{tests/} \\
 Baseline under a changed plan & Unchanged & Readout; tested in \texttt{tests/} \\
 Regular price & Highest price in the last 12 periods & Plan features \\

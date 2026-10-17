@@ -13,7 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PAPER = ROOT / "paper"
 ARITY = {"rv": 3, "rf": 3, "rpair": 5, "rab": 4, "rw": 3, "rdec": 3, "rint": 4, "rintold": 4, "rrec": 3,
-         "rper": 5, "rmech": 4, "rsf": 3, "rtail": 4, "rrank": 4, "rpan": 5, "raft": 3, "rcount": 1, "rwin": 3}
+         "rper": 5, "rmech": 4, "rsf": 3, "rtail": 4, "rrank": 4, "rpan": 5, "raft": 3, "rcount": 1, "rwin": 3, "rreg": 3}
 
 
 def _values():
@@ -28,6 +28,7 @@ def _values():
     ab = mod.ablation_values()
     mod.other_values()
     mod.studyf_values()
+    mod.regret_values()
     mod.window_values()
     mod.pantry_values()
     mod.count_values(acc, sets, p, ab)

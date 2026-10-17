@@ -12,10 +12,10 @@ Corporaci\'on Favorita, which was kept out of all development. On
 set item by store, and it has the lowest error on \rcount{enslowestixs}; at the
 chain total it is in the set on all nine. Removing the world model makes the
 ensemble less accurate item by store on \rcount{withoutworldmodelixsens} data
-sets and at the total on \rcount{withoutworldmodeltotalens}; putting the lift
-model in its place does so on \rcount{liftforworldmodelixsens} and
-\rcount{liftforworldmodeltotalens}, so the carried state accounts for part of
-that gain, not all of it. Weights fitted on earlier windows beat equal weights
+sets and at the total on \rcount{withoutworldmodeltotalens}; on \rcount{addsnotliftixslist} the
+ensemble is not less accurate, by the paired test, with the lift model (the
+same network without the carried state) in its place, so there the gain comes from adding a third
+model. Weights fitted on earlier windows beat equal weights
 in \rcount{fittedwins} of \rcount{fittedn} comparisons. On its own the world model is
 behind LightGBM item by store on \rcount{lgbbeatsworldixs} of eight data sets
 and strongest at the totals a merchant plans against: it has the lowest
@@ -26,8 +26,8 @@ windows. Perturbing the plan shows all trained
 models use it; the world model carries a promotion forward as further lift
 rather than the dip that follows stocking up, and the changes we tried for
 that dip were not kept. Timestral, given the plan, puts extreme upper quantiles on a
-few weekly series, and its point forecast is behind TimesFM's everywhere but
-the M5 total. Every model, test and change that lost is reported.
+few weekly series, and its point forecast has a higher mean error than
+TimesFM's on every data set except at the M5 total. Every model, test and change that lost is reported.
 
 \vspace{4pt}
 \textbf{Keywords:} retail forecasting; forecast combination; promotions;

@@ -45,6 +45,11 @@ def where(k: str) -> str:
     return f"in {lname(k)}" if k.startswith("dominicks") else f"on {NAME[k]}"
 
 
+def join_and(xs) -> str:
+    xs = list(xs)
+    return xs[0] if len(xs) == 1 else ", ".join(xs[:-1]) + " and " + xs[-1] if xs else ""
+
+
 def lname(k: str) -> str:
     """Name for use inside a sentence: Dominick's categories in lower case."""
     return NAME[k].lower() if k.startswith("dominicks") else NAME[k]
@@ -232,6 +237,21 @@ def window_values():
         put("rwin", k, m, "n", value=str(len(g)))
 
 
+def regret_values():
+    """Promotion-decision regret in paper 2's generated worlds (promo_regret.csv)."""
+    r = pd.read_csv(T.parent / "promo_regret.csv")
+    r = r[r.cost_percentile == 50]
+    for w, g in r.groupby("world"):
+        seeds = g[g.model.str.startswith("world_seed")].regret_share
+        p1 = lambda x: f"{100 * x:.1f}"
+        put("rreg", w, "world", "lo", value=p1(seeds.min()))
+        put("rreg", w, "world", "hi", value=p1(seeds.max()))
+        for m in ("lightgbm", "lightgbm_price_blind", "world_lever_blind", "world_price_blind"):
+            v = g[g.model == m].regret_share.iloc[0]
+            put("rreg", w, m.replace("_", ""), "v", value=p1(v) if v < 0.2 else pct(v))
+        put("rreg", w, "n", "v", value=str(int(g.promotions.iloc[0])))
+
+
 def studyf_values():
     acc = read("studyF_accuracy.csv")
     for r in acc.itertuples():
@@ -283,7 +303,7 @@ def decision_counts(word):
         best = d[d.decision == dec].loc[lambda x: x.groupby("key").ratio_to_naive.idxmin()]
         for m in ("world_model", "ensemble", "lightgbm", "lift"):
             put("rcount", f"dec{MCODE[m]}{code}", value=word[int((best.model == m).sum())])
-            put("rcount", f"dec{MCODE[m]}{code}list", value=", ".join(lname(k) for k in best[best.model == m].key) or "none")
+            put("rcount", f"dec{MCODE[m]}{code}list", value=join_and(lname(k) for k in best[best.model == m].key) or "none")
     cp = d[d.decision == "category_planning"].pivot_table(index="key", columns="model", values="ratio_to_naive")
     put("rcount", "worldbeatsliftcat", value=word[int((cp.world_model < cp.lift).sum())])
     a = read("accuracy.csv")
@@ -303,8 +323,8 @@ def count_values(acc, sets, p, ab):
     put("rcount", "ensinsetixs", value=word[len(bottom_in)])
     put("rcount", "ensaloneixs", value=word[len(bottom_alone)])
     put("rcount", "ensinsettotal", value=word[len(total_in)])
-    put("rcount", "ensaloneixslist", value=", ".join(lname(k) for k in bottom_alone))
-    put("rcount", "ensnotinsetixs", value=", ".join(lname(k) for k in KEYS if k not in bottom_in) or "none")
+    put("rcount", "ensaloneixslist", value=join_and(lname(k) for k in bottom_alone))
+    put("rcount", "ensnotinsetixs", value=join_and(lname(k) for k in KEYS if k not in bottom_in) or "none")
     # lowest mean item-by-store error among single models and the ensemble
     w = wide(acc, BOTTOM)[["ensemble", "world_model", "lift", "lightgbm", "timesfm_plan", "timesfm_mean", "chronos", "tft",
                            "seasonal_naive"]]
@@ -322,7 +342,7 @@ def count_values(acc, sets, p, ab):
             better = [r.key for r in q.itertuples() if r.hi < 0]
             worse = [r.key for r in q.itertuples() if r.lo > 0]
             put("rcount", f"ensbeats{MCODE[b]}{lv(level)}", value=word[len(better)])
-            put("rcount", f"ensbeats{MCODE[b]}{lv(level)}list", value=", ".join(lname(k) for k in better) or "none")
+            put("rcount", f"ensbeats{MCODE[b]}{lv(level)}list", value=join_and(lname(k) for k in better) or "none")
             put("rcount", f"enslosesto{MCODE[b]}{lv(level)}", value=word[len(worse)])
             put("rcount", f"ensn{MCODE[b]}{lv(level)}", value=word[len(q)])
     for a_, b_ in (("lightgbm", "world_model"), ("lift", "world_model"), ("timesfm_plan", "world_model"),
@@ -330,10 +350,23 @@ def count_values(acc, sets, p, ab):
         for level in (BOTTOM, "total"):
             q = p[(p.a == a_) & (p.b == b_) & (p.level == level)]
             put("rcount", f"{MCODE[a_]}beats{MCODE[b_]}{lv(level)}", value=word[int((q.hi < 0).sum())])
-            put("rcount", f"{MCODE[a_]}beats{MCODE[b_]}{lv(level)}list", value=", ".join(lname(k) for k in q[q.hi < 0].key) or "none")
+            put("rcount", f"{MCODE[a_]}beats{MCODE[b_]}{lv(level)}list", value=join_and(lname(k) for k in q[q.hi < 0].key) or "none")
             put("rcount", f"{MCODE[b_]}beats{MCODE[a_]}{lv(level)}", value=word[int((q.lo > 0).sum())])
-            put("rcount", f"{MCODE[b_]}beats{MCODE[a_]}{lv(level)}list", value=", ".join(lname(k) for k in q[q.lo > 0].key) or "none")
+            put("rcount", f"{MCODE[b_]}beats{MCODE[a_]}{lv(level)}list", value=join_and(lname(k) for k in q[q.lo > 0].key) or "none")
             put("rcount", f"{MCODE[a_]}{MCODE[b_]}{lv(level)}n", value=word[len(q)])
+    for level in (BOTTOM, "total"):
+        w_ = set(ab[(ab.a == "without_world_model") & (ab.level == level) & (ab.lo > 0)].key)
+        l_ = set(ab[(ab.a == "lift_for_world_model") & (ab.level == level) & (ab.lo > 0)].key)
+        put("rcount", f"bothadd{lv(level)}", value=word[len(w_ & l_)])
+        put("rcount", f"bothadd{lv(level)}list", value=join_and(lname(k) for k in KEYS if k in w_ & l_) or "none")
+        put("rcount", f"addsnotlift{lv(level)}list", value=join_and(lname(k) for k in KEYS if k in w_ - l_) or "none")
+        put("rcount", f"liftonly{lv(level)}list", value=join_and(lname(k) for k in KEYS if k in l_ - w_) or "none")
+    i = read("intervals_fixed.csv")
+    i = i[i.set == "rolling"]
+    nat = i[(i.level == "native_bottom") & (i.model == "tft")].set_index("key").native_spl
+    ens = i[(i.level == BOTTOM) & (i.model == "ensemble")].set_index("key").spl.reindex(nat.index)
+    put("rcount", "tftnativebetter", value=word[int((nat < ens).sum())])
+    put("rcount", "tftnativen", value=word[len(nat)])
     fit = ab[ab.a.str.startswith("fitted") & ab.level.isin([BOTTOM, "total"])]
     put("rcount", "fittedwins", value=word.get(int((fit.hi < 0).sum()), str(int((fit.hi < 0).sum()))))
     put("rcount", "fittedlosses", value=str(int((fit.lo > 0).sum())))
@@ -347,9 +380,9 @@ def count_values(acc, sets, p, ab):
             hurts = [r.key for r in q.itertuples() if r.hi < 0]
             v = variant.replace("_", "")
             put("rcount", f"{v}{lv(level)}ens", value=word[len(adds)])
-            put("rcount", f"{v}{lv(level)}enslist", value=", ".join(lname(k) for k in adds) or "none")
+            put("rcount", f"{v}{lv(level)}enslist", value=join_and(lname(k) for k in adds) or "none")
             put("rcount", f"{v}{lv(level)}var", value=word[len(hurts)])
-            put("rcount", f"{v}{lv(level)}varlist", value=", ".join(lname(k) for k in hurts) or "none")
+            put("rcount", f"{v}{lv(level)}varlist", value=join_and(lname(k) for k in hurts) or "none")
 
 
 # ------------------------------------------------------------- tables ----
@@ -390,7 +423,7 @@ and at the total on \\rcount{{ensinsettotal}}.}} Mean WRMSSE over the rolling
 windows (lower is better); W: windows. Bold: the lowest in the row. $^{{\\circ}}$: in the 90\\% model confidence set of
 the row (Hansen, Lunde and Nason, range statistic, bootstrap over windows; Timestral, added in study F, is not
 in the comparison). Ensemble: the equal-weight mean of the world model, LightGBM and TimesFM with the plan,
-fixed before any rolling result. Neural models are one fit (seed~1). The Temporal Fusion Transformer was not run on M5
+fixed before any rolling result. Trained models are one fit each (\\S\\ref{{sec:setup}}). The Temporal Fusion Transformer was not run on M5
 or Favorita, Chronos-Bolt, TimesFM and TFT not on Favorita. Timestral+plan is Timestral-28M with the plan (study F).}}
 \\label{{tab:rolling}}
 \\footnotesize
@@ -525,7 +558,7 @@ def tab_perturbation():
     tex = f"""\\begin{{table*}}[t]
 \\centering
 \\caption{{\\textbf{{All three trained models use the plan. On the weekly data price carries most of it; on M5 the world
-model relies on event and SNAP days, which LightGBM barely uses.}} Input occlusion on the saved models (study B): one plan input is set to
+model relies on event and SNAP days more than LightGBM does.}} Input occlusion on the saved models (study B): one plan input is set to
 ``nothing planned'' (regular price, lever off) in the forecast periods and the forecast recomputed, with no refitting.
 Change in WRMSSE item by store and at the total, in percent (above zero: the forecast gets worse without the input),
 and the change in forecast units, in percent, in the periods where the input was on. Mean over the rolling windows (LightGBM on M5: the
@@ -563,8 +596,8 @@ def tab_intervals():
     sub = " & ".join(["SPL & 80 & 95"] * 6)
     tex = f"""\\begin{{table*}}[t]
 \\centering
-\\caption{{\\textbf{{Rolling conformal intervals cover close to their level at item by store and somewhat less at the
-total, and do not separate the models.}} Scaled pinball loss (SPL, lower is better) and the share of actual sales
+\\caption{{\\textbf{{Rolling conformal intervals cover close to their level item by store, from 0.72 to 1.00 at the
+95\\% level at the total, and their pinball losses item by store are within 0.03 of each other.}} Scaled pinball loss (SPL, lower is better) and the share of actual sales
 inside the 80\\% and 95\\% intervals, mean over the rolling windows after the first. Intervals from each model's own
 scaled errors in the earlier windows of the data set, pooled over horizons where a level has fewer than 50 earlier
 errors per horizon, ends rounded outwards to whole units except on Favorita (interval check of 16 October).}}
@@ -652,7 +685,7 @@ def tab_finals_new():
 \\centering
 \\caption{{\\textbf{{On the single final windows the ensemble is lowest or within \\rcount{{finalsgap}} of the lowest item by
 store on every data set, and the order at the total changes from data set to data set.}} WRMSSE on the final
-window of each data set (lower is better; on M5 the official test month). One fit (seed~1) per trained model, so the world
+window of each data set (lower is better; on M5 the official test month). One fit per trained model, so the world
 model and LightGBM differ slightly from the three-seed means of Tables~\\ref{{tab:m5}} and~\\ref{{tab:finals}}. Bold:
 lowest in the group.}}
 \\label{{tab:finalsnew}}
@@ -688,7 +721,7 @@ def tab_timestral():
     head = " & ".join(lbl for _, lbl in models)
     tex = f"""\\begin{{table*}}[t]
 \\centering
-\\caption{{\\textbf{{Timestral, released two days before this revision, is behind the ensemble on every data set, and
+\\caption{{\\textbf{{Timestral, released two days after this revision began, is behind the ensemble on every data set, and
 putting it in place of TimesFM helps only at the M5 total.}} Mean WRMSSE over the rolling windows (Dominick's: mean
 of the six categories). Timestral-28M, zero-shot, the mean of its 21 quantiles as the point forecast; with the plan as
 known future inputs (TS+p) and from history alone (TS); TFM+p: TimesFM with the plan. Ens.: the ensemble; Ens.\\,T:
@@ -736,6 +769,7 @@ def write_values():
         "\\newcommand{\\raft}[3]{\\revget{raft@#1@#2@#3}}",
         "\\newcommand{\\rcount}[1]{\\revget{rcount@#1}}",
         "\\newcommand{\\rwin}[3]{\\revget{rwin@#1@#2@#3}}",
+        "\\newcommand{\\rreg}[3]{\\revget{rreg@#1@#2@#3}}",
         "\\makeatother",
     ]
     (GEN / "rev_values.tex").write_text("\n".join(lines) + "\n")
@@ -750,6 +784,7 @@ def main():
     ab = ablation_values()
     other_values()
     studyf_values()
+    regret_values()
     window_values()
     pantry_values()
     count_values(acc, sets, p, ab)

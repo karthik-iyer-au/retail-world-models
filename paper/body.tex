@@ -21,8 +21,9 @@ the level scored, the month and the data set. An outside review asked for
 several forecast origins, significance tests, the transition removed as an
 ablation, interval forecasts, decision costs, reconciliation and further
 benchmarks. We ran all of them, on rolling windows taken before any window used
-for development, and wrote down every analysis before it ran
-(Figure~\ref{fig:study}). The rolling windows put an equal-weight average of
+for development, and wrote down every analysis before it ran,
+except two checks of unexpected results made after reading them, which are
+marked where they appear (Figure~\ref{fig:study}). The rolling windows put an equal-weight average of
 three models first, so the question the paper answers is what the world model
 adds to that average, and what it does on its own.
 
@@ -33,13 +34,14 @@ The paper finds the following.
   windows it has the lowest error on \rcount{enslowestixs} of nine data sets
   and is in the 90\% model confidence set on \rcount{ensinsetixs}; at the chain
   total it is in the set on all nine. It is never less accurate than LightGBM
-  or the world model by a paired test at either level (\S\ref{sec:res-ensemble}).
+  or the world model by a paired test at either level on the eight data sets with paired results (\S\ref{sec:res-ensemble}).
 \item \textbf{The world model adds to the ensemble on some data sets, and its
-  carried state on fewer.} Without it the ensemble is less accurate item by
-  store on \rcount{withoutworldmodelixsens} data sets and at the total on
-  \rcount{withoutworldmodeltotalens}; with the lift model, the same network
-  without the carried state, in its place, on \rcount{liftforworldmodelixsens}
-  and \rcount{liftforworldmodeltotalens}. Fitted weights beat equal weights in
+  carried state on almost none.} Without it the ensemble is less accurate item
+  by store on \rcount{withoutworldmodelixsens} data sets and at the total on
+  \rcount{withoutworldmodeltotalens}. On \rcount{addsnotliftixslist} the lift
+  model, the same network without the carried state, does no worse in its place;
+  only on \rcount{bothaddixslist} does the world model add and beat its
+  replacement. Fitted weights beat equal weights in
   \rcount{fittedwins} of \rcount{fittedn} comparisons (\S\ref{sec:res-adds}).
 \item \textbf{On its own the world model is behind LightGBM item by store and
   gets category totals right.} LightGBM is more accurate item by store on
@@ -54,8 +56,8 @@ The paper finds the following.
   were not kept (\S\ref{sec:res-plan}, \S\ref{sec:dropped}).
 \item \textbf{Pretrained models need the plan, and the newest one needs a check
   on its tails.} TimesFM with the plan is the most accurate model that is not
-  trained on the data; Chronos-Bolt and Timestral, released two days before
-  this revision, are behind it, and Timestral given the plan puts extreme upper
+  trained on the data; Chronos-Bolt and Timestral, released two days after
+  this revision began, are behind it, and Timestral given the plan puts extreme upper
   quantiles on a few weekly series (\S\ref{sec:res-pretrained}).
 \item \textbf{The ensemble result holds on a data set kept out of development}
   (Favorita, \S\ref{sec:res-favorita}), and the rolling windows confirm that a
@@ -68,9 +70,9 @@ The paper finds the following.
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figs/fig_study.pdf}
-\caption{\textbf{Every revision result comes from rolling windows taken before
-any window used to choose a setting, and the ensemble it tests is fixed in
-advance.} \textbf{(a)} Windows by data source, in periods before the end of the
+\caption{\textbf{The revision's main results come from rolling windows taken
+before any window used to choose a setting, and the ensemble it tests is fixed
+in advance.} \textbf{(a)} Windows by data source, in periods before the end of the
 data: rolling windows (scored for this revision), development windows (used to
 choose settings) and final windows (scored once in the first version). Favorita
 has rolling windows only; nothing was chosen on it. \textbf{(b)} The ensemble:
@@ -435,10 +437,14 @@ rolling windows, the last ending on its last day, and no other.
 \paragraph{Rules fixed in advance}
 The revision plan, including every window, model, test and pass rule below,
 was written down on 13 October 2026 before any revision run, and every change
-to it is a dated amendment made before the results it affects were read. Every
+to it is a dated amendment; all but the interval fix below were made before the
+results they affect were read. Every
 model runs in every rolling window with the settings of its final configuration,
-unchanged. Trained models are one fit (seed~1) in the rolling windows; the
-final windows keep their three-seed results. No new result changes a setting of
+unchanged. Trained models are one fit in the rolling windows: seed~1 where the
+configuration names a seed (M5, Frat, LightGBM everywhere), and seed~0 for the
+world model, lift model and TFT on Dominick's, whose configurations name none
+and which, before a fix on 16 October, did not pass the run's seed to the model
+(\S\ref{sec:dropped}). The final windows keep their three-seed results. No new result changes a setting of
 a model already reported, and every model, window and test is reported.
 
 \paragraph{Comparing two models}
@@ -462,16 +468,20 @@ far less than planned at the totals, and both versions are reported. The first
 rolling window has no earlier window and is not scored. We report the scaled
 pinball loss averaged over the quantiles, weighted as in the M5 uncertainty
 competition~\cite{m5uncertainty}, and coverage at 50\%, 80\% and 95\%. Models
-that give quantiles of their own (Chronos-Bolt, TFT, Timestral) are also scored
-on them.
+that give quantiles of their own (Chronos-Bolt, TFT) are also scored on them,
+over every window.
 
 \paragraph{Decisions}
-Two simulations turn forecasts into costs. \emph{Store orders}: for each
+Three simulations turn forecasts into costs. \emph{Store orders}: for each
 item-store-period, order the model's interval quantile at a critical ratio $r$
 of 0.5, 0.8 or 0.95; each unit over costs 1 and each unit short $r/(1-r)$.
 \emph{Category plan}: the absolute error of each category-by-store total over the
-window, weighted by dollar sales. Both are reported against seasonal naive and
-are simulations under stated costs, not business results.
+window, weighted by dollar sales. \emph{Promotion decisions}: in the generated
+store worlds of the companion paper~\cite{paper2}, where each promotion's true
+lift is known, promote when the predicted lift times margin exceeds a fixed
+cost; regret is the value lost against deciding with the true lift. The first
+two are reported against seasonal naive. All are simulations under stated
+costs, not business results.
 
 \paragraph{Reconciliation}
 Base forecasts at every node come from AutoETS fitted on the history before each
@@ -479,7 +489,8 @@ window (seasonal at the aggregate nodes, non-seasonal item by store). They are
 reconciled bottom-up, top-down by historical proportions, and by the MinT
 family~\cite{mint}: ordinary least squares, weighted least squares with
 structural weights and with in-sample variances, and MinT with a shrunk
-covariance where the hierarchy has at most 6,000 nodes. Each model's own
+covariance where the hierarchy has at most 6,000 nodes. It was run on the
+rolling windows of Frat and M5 and not on those of Dominick's. Each model's own
 item-by-store forecasts are also combined with ETS above them by weighted least
 squares.
 
