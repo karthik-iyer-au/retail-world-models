@@ -1,0 +1,7 @@
+# Study F, Timestral, Frat only (rerun: the Frat data did not copy from Drive in the weekly job).
+datasets:
+- name: breakfast_at_the_frat
+  from: /content/drive/MyDrive/retail-world-model/data
+runs:
+- config: configs/experiments/rev_frat_rolling_timestral_plan.yaml
+- config: configs/experiments/rev_frat_rolling_timestral_mean.yaml
