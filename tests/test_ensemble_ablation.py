@@ -44,7 +44,7 @@ def fr():
 def test_main_on_a_small_hierarchy(fr, tmp_path, monkeypatch):
     rng = np.random.default_rng(2)
     fcs = {}
-    noise = {"world_model": 0.3, "lightgbm": 0.3, "timesfm_plan": 0.3, "lift": 0.6}
+    noise = {"world_model": 0.3, "lightgbm": 0.3, "timesfm_plan": 0.3, "lift": 0.6, "lift_matched": 0.5}
     for m, s in noise.items():
         recs = []
         for sp in fr.splits:
