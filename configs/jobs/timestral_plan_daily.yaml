@@ -1,0 +1,9 @@
+# Study F, Timestral-28M plan form on the daily data, rerun after running out of GPU memory at batch 1024.
+datasets:
+- name: favorita
+  from: /content/drive/MyDrive/retail-world-model/data/favorita
+- name: m5
+  from: /content/drive/MyDrive/retail-world-model/data/m5
+runs:
+- config: configs/experiments/rev_favorita_rolling_timestral_plan.yaml
+- config: configs/experiments/rev_m5_rolling_timestral_plan.yaml
