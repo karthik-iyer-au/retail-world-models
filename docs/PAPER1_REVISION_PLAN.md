@@ -474,3 +474,19 @@ matched one is used for the claim that only the transition differs. (3) The
 MinT-shrink failure on Frat is diagnosed from the ETS fits, which need no saved
 forecasts, before any reconciliation conclusion is drawn. (4) Wording: a
 difference not detected is not called equal.
+
+**17 October 2026, study G, an error found in the category-plan cost.** The
+per-node rerun showed that the cost as implemented divided each
+category-by-store node's error by its sales in the window, floored at 1e-9. On
+Dominick's some nodes sold nothing in a window (a store closed or not
+reporting), so they entered at about 10^9 times their error and decided every
+Dominick's result: the costs in `decisions.csv` are of the order of 10^10. Frat
+and M5 have no such nodes and are unaffected. The plan's definition, absolute
+error of category-store-period totals weighted by dollar sales, is now computed
+as the error in dollars over sales in dollars, each node's units valued at its
+average price in the weight window (`scripts/category_cost_uncertainty.py`,
+variant `dollars`), and the paper's category-plan results are restated on it.
+The first cost is kept in the table as `as_first_run`. The sensitivity variants
+fixed before the run (first half, window total, unit weights, equal weights)
+are computed on the corrected cost; equal weights become the mean over nodes
+that sold in the window of each node's error over its sales.

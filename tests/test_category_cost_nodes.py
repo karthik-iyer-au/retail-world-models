@@ -37,6 +37,12 @@ def test_uncertainty_summary_signs():
                 rows.append(dict(key="toy", origin=o, model=m, node=node, abs_period=e, actual_window=a,
                                  fc_window=a + e, abs_half=e / 2, actual_half=a / 2, abs_week=e,
                                  actual_week_sum=a, dollars=a, units_before=a))
-    s = CU.summarise(pd.DataFrame(rows), boot=200)
-    r = s[(s.variant == "reported") & (s.model == "lightgbm")].iloc[0]
+    d = pd.DataFrame(rows)
+    s = CU.summarise(d, boot=200)
+    r = s[(s.variant == "dollars") & (s.model == "lightgbm")].iloc[0]
     assert r.hi < 0 and r.world_lower_windows == 3 and r.lo <= r.world_minus <= r.hi
+    # a node that sold nothing must not dominate the corrected cost
+    d.loc[(d.node == 0), "actual_window"] = 0.0
+    s2 = CU.summarise(d, boot=50)
+    assert s2[(s2.variant == "dollars")].cost.max() < 1
+    assert s2[(s2.variant == "as_first_run")].cost.max() > 1e3
