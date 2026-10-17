@@ -1036,52 +1036,67 @@ PROFILE_LEVELS = {
 
 
 def fig_profile():
+    """The three core models at each decision grain, relative to the equal-weight average."""
     acc = R.rolling_accuracy()
-    core = ["world_model", "lightgbm", "timesfm_plan"]
-    mean = acc[acc.model.isin(core + ["ensemble"])].pivot_table(index=["key", "level"], columns="model",
-                                                                 values="wrmsse")
-    fig = plt.figure(figsize=(FULL, 3.2))
-    lo, hi = 0.6, 1.9
-    W, Hp = 0.29, 0.19
-    lefts = [0.075, 0.395, 0.715]
-    bottoms = [0.70, 0.405, 0.12]
-    ext = {}
-    for idx, k in enumerate(KEYS):
-        r, c = divmod(idx, 3)
-        ax = fig.add_axes([lefts[c], bottoms[r], W, Hp])
-        levs = PROFILE_LEVELS[src_of(k)]
-        xs = np.arange(len(levs))
-        for m in core:
-            v = np.array([mean.loc[(k, l), m] / mean.loc[(k, l), "ensemble"] for l, _ in levs])
-            ext[(k, m)] = (v.min(), v.max())
-            ax.plot(xs, np.clip(v, lo, hi), color=COLOR[SK[m]], lw=1.0, zorder=3)
-            ax.scatter(xs, np.clip(v, lo, hi), s=11, marker=MARKER[SK[m]], color=COLOR[SK[m]], edgecolor="white",
-                       lw=0.35, zorder=4)
-            for xi, vi in zip(xs, v):
-                if vi > hi or vi < lo:
-                    ax.text(xi, hi if vi > hi else lo, f"{vi:.2f}", fontsize=SMALL, color=COLOR[SK[m]],
-                            ha="center", va="bottom" if vi > hi else "top")
-        ax.axhline(1.0, color=MUTED, lw=0.8, ls=(0, (4, 3)), zorder=1)
-        ax.set_ylim(lo, hi)
-        ax.set_yticks([0.75, 1.0, 1.25, 1.5, 1.75])
-        ax.set_yticklabels(["0.75", "1", "1.25", "1.5", "1.75"] if c == 0 else [])
+    grains = [(g, n) for g, n, _, _ in R.GRAIN]
+    short = {"ixs": "Item ×\nstore", "item": "Item,\nall stores", "catstore": "Category\n× store",
+             "cat": "Category,\nall stores", "total": "Chain\ntotal"}
+    core = [("world_model", "World model"), ("lightgbm", "LightGBM"), ("timesfm_plan", "TimesFM with the plan")]
+    lo, hi = 0.6, 2.0
+    fig, axes = plt.subplots(1, 3, figsize=(FULL, 2.8), sharey=True)
+    fig.subplots_adjust(left=0.075, right=0.985, top=0.80, bottom=0.2, wspace=0.08)
+    xs = np.arange(len(grains))
+    for ax, (m, title), letter in zip(axes, core, "abc"):
+        allr = []
+        for k in KEYS:
+            r = []
+            for g, _ in grains:
+                lv = R.grain_level(k, {gg: mm for gg, _, _, mm in R.GRAIN}[g])
+                q = acc[(acc.key == k) & (acc.level == lv)].set_index("model").wrmsse
+                r.append(q[m] / q["ensemble"])
+            r = np.array(r)
+            allr.append(r)
+            src = src_of(k)
+            rc = np.clip(r, lo, hi)
+            ax.plot(xs, rc, color=MUTED, lw=0.6, alpha=0.55, zorder=2)
+            ax.scatter(xs, rc, s=9, marker=SRC[src][1], color=MUTED, alpha=0.75, edgecolor="none", zorder=2)
+            if k == "dominicks_che":  # the one data set far from the rest; name it at its furthest point
+                i_ = int(np.argmax(np.abs(np.log(rc))))
+                ax.text(xs[i_] + 0.1, rc[i_], "cheese", fontsize=SMALL, color=MUTED, ha="left",
+                        va="bottom" if rc[i_] > 1 else "top")
+            for x, v in zip(xs, r):
+                if v > hi:
+                    ax.text(x + 0.08, hi - 0.012, f"{NAME[k].lower()} {v:.2f}", fontsize=SMALL - 0.3, color=MUTED,
+                            ha="left", va="top", rotation=0)
+        med = np.median(np.array(allr), axis=0)
+        sk = SK[m]
+        ax.plot(xs, med, color=COLOR[sk], lw=2.0, zorder=4)
+        ax.scatter(xs, med, s=34 if sk != "ensemble" else 60, marker=MARKER[sk], color=COLOR[sk], edgecolor="white",
+                   lw=0.6, zorder=5)
+        for x, v in zip(xs, med):
+            ax.text(x + 0.12, v * 1.045, f"{v:.2f}", ha="left", va="bottom", fontsize=SMALL, color=COLOR[sk], zorder=6,
+                    bbox=dict(boxstyle="square,pad=0.08", facecolor="white", edgecolor="none", alpha=0.85))
+        ax.axhline(1.0, color=MUTED, ls="--", lw=0.7, zorder=1)
+        ax.set_yscale("log")
+        ax.set_ylim(lo, hi + 0.02)
+        ax.set_yticks([0.6, 0.8, 1.0, 1.25, 1.5, 2.0])
+        ax.set_yticklabels(["0.6", "0.8", "1", "1.25", "1.5", "2"])
+        ax.minorticks_off()
         ax.set_xticks(xs)
-        rot = 90 if len(levs) > 8 else 0
-        ax.set_xticklabels([s for _, s in levs], fontsize=SMALL, rotation=rot)
-        ax.set_xlim(-0.4, len(levs) - 0.6)
-        ax.grid(axis="y")
-        ax.set_axisbelow(True)
+        ax.set_xticklabels([short[g] for g, _ in grains], fontsize=SMALL)
+        ax.set_xlim(-0.35, len(grains) - 0.65)
+        ax.grid(axis="y", color=GRID, lw=0.5)
+        ax.set_title(title, color=COLOR[sk], loc="left", pad=4)
         despine(ax)
-        ax.text(0.0, 1.02, NAME[k], transform=ax.transAxes, ha="left", va="bottom", fontsize=7.2, color=INK)
-    fig.text(0.012, (bottoms[2] + bottoms[0] + Hp) / 2, "Mean WRMSSE / ensemble", rotation=90, ha="left",
-             va="center", fontsize=8)
-    fig.legend(handles=[handle(SK[m]) for m in core] + [Line2D([], [], color=MUTED, lw=0.8, ls=(0, (4, 3)),
-                                                               label="Ensemble")],
-               loc="upper center", bbox_to_anchor=(0.5, 1.0), ncol=4, fontsize=7.0, handletextpad=0.3,
-               columnspacing=1.6, borderaxespad=0.1)
+        panel_label(ax, letter, dx=-0.02, dy=1.10)
+    axes[0].set_ylabel("Mean WRMSSE / average")
+    hs = [Line2D([], [], color=MUTED, marker=SRC[s][1], ls="-", lw=0.6, ms=3.5, markeredgecolor="none", label=SRC[s][0])
+          for s in ("dominicks", "frat", "m5", "favorita")]
+    hs.append(Line2D([], [], color=INK, lw=2.0, label="median of the nine data sets"))
+    hs.append(Line2D([], [], color=MUTED, ls="--", lw=0.7, label="equal-weight average"))
+    fig.legend(handles=hs, loc="upper center", bbox_to_anchor=(0.53, 1.0), ncol=6, frameon=False, fontsize=6.6,
+               handlelength=1.8, columnspacing=1.1)
     save(fig, OUT / "fig_profile.pdf")
-    return ext
-
 
 def main():
     use_style()

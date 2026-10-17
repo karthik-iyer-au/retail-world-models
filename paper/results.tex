@@ -54,24 +54,24 @@ the plan-aware models at the totals. The world model was in the set at the
 chain total on \rgrain{total}{world}{inset} data sets and the average on all
 nine.
 
-Figure~\ref{fig:profile} follows the three core models through every level of
-each data set's hierarchy. LightGBM stays close to the average at every level
-except in cheese. TimesFM with the plan moves away from the average as the grain
-coarsens, most on M5 and frozen entrees. The world model is closest to the
-average at the coarse M5 levels, where it is below it at the total, and furthest
-in cheese.
+Figure~\ref{fig:profile} compares the three core models at each grain against
+the average. LightGBM stays within a few percent of the average at every grain
+on almost every data set; cheese is the exception. TimesFM with the plan is close
+to the average for items and falls behind it as the grain coarsens. The world
+model is a few percent behind the average at every grain in the median, ahead of
+it at the M5 category and total, and far behind in cheese.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figs/fig_profile.pdf}
-\caption{\textbf{The three core models track the average closely at the fine
-grains and part ways at the coarse ones, differently on each data set.} Mean
-WRMSSE over the rolling windows of the world model, LightGBM and TimesFM with the
-plan divided by the equal-weight average's (dashed line at 1), at every level of
-each data set's hierarchy from the finest (item by store, left) to the chain
-total (right). i: item; s: store; c: category; d: department; st: state; f, fam.:
-product family. On Dominick's and Frat the category by store equals the store and
-the category equals the total.}
+\caption{\textbf{Against the average, LightGBM was level at every grain, TimesFM
+with the plan fell behind as the grain coarsened, and the world model was a few
+percent behind with a wide spread.} Mean WRMSSE over the rolling windows of
+\textbf{(a)} the world model, \textbf{(b)} LightGBM and \textbf{(c)} TimesFM with
+the plan, divided by the equal-weight average's, at the five decision grains of
+Table~\ref{tab:grain}. Thin grey lines: one per data set (marker: data source);
+thick line and labels: the median over the nine data sets; dashed: the average.
+Log scale. On Dominick's the category and the chain total are the same series.}
 \label{fig:profile}
 \end{figure*}
 
