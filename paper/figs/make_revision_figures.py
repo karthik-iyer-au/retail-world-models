@@ -788,6 +788,301 @@ def fig_grain():
     save(fig, OUT / "fig_grain.pdf")
 
 
+# ================================================ 6. annotated heatmaps ===
+HEAT_MODELS = ["ensemble", "world_model", "lift", "lightgbm", "timesfm_plan", "timesfm_mean", "chronos", "tft",
+               "timestral_plan", "seasonal_naive"]
+SHORT_NAME = {"dominicks_che": "Cheese", "dominicks_sna": "Snack crackers", "dominicks_sdr": "Soft drinks",
+              "dominicks_bjc": "Bottled juice", "dominicks_ana": "Analgesics", "dominicks_fre": "Frozen entrees",
+              "frat": "Frat", "m5": "M5", "favorita": "Favorita"}
+
+
+def fig_heatmaps():
+    from matplotlib.colors import LinearSegmentedColormap
+    acc = R.rolling_accuracy()
+    cap = 1.6
+    cmap = LinearSegmentedColormap.from_list("muted", ["#ffffff", "#dbe4ee", "#9db3cb", "#5b7ea3", ACCENT])
+    fig = plt.figure(figsize=(FULL, 3.0))
+    axes = [fig.add_axes([0.165, 0.25, 0.36, 0.70]), fig.add_axes([0.572, 0.25, 0.36, 0.70])]
+    out = {}
+    for p, (ax, level) in enumerate(zip(axes, [BOTTOM, "total"])):
+        w = R.wide(acc, level).reindex(index=KEYS, columns=HEAT_MODELS)
+        rel = (w / w.min(axis=1).values[:, None]).T  # rows: models, columns: data sets; 1.00 = best in column
+        out[level] = rel
+        nr, nc = rel.shape
+        # a gap of 0.25 cell after the six Dominick's columns
+        xs = [j + (0.25 if j >= 6 else 0) for j in range(nc)]
+        for i in range(nr):
+            for j in range(nc):
+                v = rel.iat[i, j]
+                x, y = xs[j], i
+                if np.isnan(v):
+                    ax.add_patch(Rectangle((x, y), 1, 1, facecolor="#f3f4f6", edgecolor="white", lw=0.8))
+                    ax.text(x + 0.5, y + 0.5, "–", ha="center", va="center", fontsize=SMALL, color=MUTED)
+                    continue
+                t = min((v - 1) / (cap - 1), 1.0)
+                face = cmap(t)
+                ax.add_patch(Rectangle((x, y), 1, 1, facecolor=face, edgecolor="white", lw=0.8))
+                txt = f"{v:.2f}" if v <= cap else f">{cap:.1f}"
+                ax.text(x + 0.5, y + 0.5, txt, ha="center", va="center", fontsize=SMALL,
+                        color="white" if t > 0.55 else INK)
+            # outline the best cell of each column
+        for j in range(nc):
+            i = int(np.nanargmin(rel.iloc[:, j].to_numpy()))
+            ax.add_patch(Rectangle((xs[j] + 0.04, i + 0.04), 0.92, 0.92, facecolor="none", edgecolor=INK, lw=1.1,
+                                   zorder=5))
+        ax.set_xlim(0, xs[-1] + 1)
+        ax.set_ylim(nr, 0)
+        ax.set_xticks([x + 0.5 for x in xs])
+        ax.set_xticklabels([SHORT_NAME[k] for k in KEYS], rotation=45, ha="right", rotation_mode="anchor",
+                           fontsize=7.0)
+        ax.set_yticks([i + 0.5 for i in range(nr)])
+        ax.set_yticklabels([LABEL[SK[m]] for m in HEAT_MODELS] if p == 0 else [], fontsize=7.0)
+        ax.tick_params(length=0)
+        despine(ax, keep=())
+        ax.text(0.0, 1.015, "Item by store" if level == BOTTOM else "Total", transform=ax.transAxes, fontsize=8,
+                ha="left", va="bottom")
+        panel_label(ax, "ab"[p], dx=-0.02 if p else -0.36, dy=1.015)
+        # bracket under the Dominick's columns
+        t = ax.get_xaxis_transform()
+        ax.plot([0.1, 5.9], [-0.33, -0.33], transform=t, color=MUTED, lw=0.6, clip_on=False)
+        ax.text(3.0, -0.35, "Dominick's", transform=t, ha="center", va="top", fontsize=7.0, color=MUTED)
+    # colour key
+    cax = fig.add_axes([0.945, 0.25 + 0.70 * 0.25, 0.012, 0.70 * 0.5])
+    grad = np.linspace(0, 1, 64)[:, None]
+    cax.imshow(grad, aspect="auto", cmap=cmap, origin="lower", extent=(0, 1, 1.0, cap))
+    cax.set_xticks([])
+    cax.yaxis.tick_right()
+    cax.set_yticks([1.0, 1.2, 1.4, cap])
+    cax.set_yticklabels(["1.0", "1.2", "1.4", f"≥{cap:.1f}"], fontsize=SMALL)
+    cax.tick_params(length=2)
+    for s in cax.spines.values():
+        s.set_visible(False)
+    save(fig, OUT / "fig_heatmaps.pdf")
+    return out
+
+
+# ================================================ 7. the three core models ===
+SRC = {"dominicks": ("Dominick's", "o"), "frat": ("Frat", "s"), "m5": ("M5", "^"), "favorita": ("Favorita", "D")}
+
+
+def src_of(key):
+    return "dominicks" if key.startswith("dominicks") else key
+
+
+def window_scores():
+    d = pd.concat([pd.read_csv(ROOT / "results" / "paper1_revision" / "scores" / f"studyF_scores_{f}.csv")
+                   for f in ("weekly", "daily", "sdr")])
+    d = d[d.set == "rolling"].drop_duplicates(["key", "origin", "model", "level"])
+    return d
+
+
+GRAIN = {"dominicks": ["item_idxstore_id", "cat_idxstore_id", "cat_id", "total"],
+         "frat": ["item_idxstore_id", "cat_idxstore_id", "cat_id", "total"],
+         "m5": ["item_idxstore_id", "store_idxcat_id", "cat_id", "total"],
+         "favorita": ["item_idxstore_id", "store_idxfamily", "family", "total"]}
+
+
+def fig_core():
+    d = window_scores()
+    core = ["world_model", "lightgbm", "timesfm_plan", "ensemble"]
+    d = d[d.model.isin(core)]
+    fig = plt.figure(figsize=(FULL, 2.8))
+    rng = np.random.default_rng(0)  # jitter only
+
+    # (a) per window, item by store, relative to LightGBM in the same window
+    ax = fig.add_axes([0.075, 0.2, 0.23, 0.66])
+    x = d[d.level == BOTTOM].pivot_table(index=["key", "origin"], columns="model", values="wrmsse")
+    rel = x[["world_model", "timesfm_plan", "ensemble"]].div(x.lightgbm, axis=0)
+    lo, hi = 0.85, 1.6
+    clipped = []
+    for gi, m in enumerate(rel.columns):
+        v = rel[m].dropna()
+        jit = rng.uniform(-0.22, 0.22, len(v))
+        for (k, o), val, j in zip(v.index, v.values, jit):
+            s = src_of(k)
+            yv = min(val, hi)
+            ax.scatter([gi + j], [yv], s=13, marker=SRC[s][1], facecolor=COLOR[SK[m]], edgecolor="white", lw=0.35,
+                       alpha=0.85, zorder=3)
+            if val > hi:
+                clipped.append((m, k, o, val))
+                ax.text(gi + j + 0.08, hi * 0.985, f"{val:.1f}", ha="left", va="top", fontsize=SMALL,
+                        color=COLOR[SK[m]])
+        med = float(np.median(v))
+        ax.plot([gi - 0.3, gi + 0.3], [med, med], color=INK, lw=1.6, zorder=4, solid_capstyle="butt")
+        ax.text(gi, 1.02, f"n={len(v)}", transform=ax.get_xaxis_transform(), ha="center", va="bottom",
+                fontsize=SMALL, color=MUTED)
+    ax.set_yscale("log")
+    ax.set_ylim(lo, hi * 1.02)
+    yt = [0.9, 1.0, 1.1, 1.25, 1.5]
+    ax.set_yticks(yt)
+    ax.set_yticklabels([f"{t:g}" for t in yt])
+    ax.yaxis.set_minor_locator(plt.NullLocator())
+    ax.axhline(1.0, color=MUTED, lw=0.8, ls=(0, (4, 3)), zorder=1)
+    ax.set_xticks(range(3))
+    ax.set_xticklabels(["World\nmodel", "TimesFM\n+ plan", "Ensemble"])
+    ax.set_xlim(-0.55, 2.55)
+    ax.set_ylabel("WRMSSE / LightGBM, per window")
+    ax.grid(axis="y")
+    ax.set_axisbelow(True)
+    despine(ax)
+    ax.tick_params(axis="x", length=0)
+    panel_label(ax, "a", dx=-0.2, dy=1.07)
+
+    # (b), (c) across grain: mean over windows relative to LightGBM, one line per data set
+    acc = R.rolling_accuracy()
+    acc = acc[acc.model.isin(core)]
+    mean = acc.pivot_table(index=["key", "level"], columns="model", values="wrmsse")
+    gl = ["item ×\nstore", "cat. ×\nstore", "cat.", "total"]
+    slope_axes = []
+    for p, (m, left) in enumerate((("world_model", 0.405), ("timesfm_plan", 0.605))):
+        sx = fig.add_axes([left, 0.2, 0.14, 0.66])
+        slope_axes.append(sx)
+        allv = []
+        slope_hi = 2.5
+        for k in KEYS:
+            s = src_of(k)
+            levs = GRAIN[s]
+            v = [mean.loc[(k, l), m] / mean.loc[(k, l), "lightgbm"] for l in levs]
+            allv.append(v)  # the median uses the unclipped values
+            for xi, vi in zip(range(4), v):
+                if vi > slope_hi:
+                    sx.text(xi + 0.12, slope_hi * 0.99, f"{vi:.2f}", ha="left", va="top", fontsize=SMALL,
+                            color=COLOR[SK[m]])
+            v = list(np.minimum(v, slope_hi))
+            sx.plot(range(4), v, color=COLOR[SK[m]], lw=0.7, alpha=0.55, zorder=2)
+            sx.scatter(range(4), v, s=9, marker=SRC[s][1], facecolor=COLOR[SK[m]], edgecolor="white", lw=0.3,
+                       alpha=0.85, zorder=3)
+        med = np.median(np.array(allv), axis=0)
+        sx.plot(range(4), med, color=INK, lw=1.8, zorder=4, solid_capstyle="round")
+        sx.text(2.0, med[2] * 0.955, "median", ha="center", va="top", fontsize=SMALL, color=INK, zorder=5,
+                bbox=dict(boxstyle="square,pad=0.05", fc="white", ec="none", alpha=0.8))
+        sx.axhline(1.0, color=MUTED, lw=0.8, ls=(0, (4, 3)), zorder=1)
+        sx.set_xticks(range(4))
+        sx.set_xticklabels(gl, fontsize=SMALL)
+        sx.set_xlim(-0.3, 3.3)
+        sx.set_yscale("log")
+        sx.set_ylim(0.75, slope_hi * 1.03)
+        yt = [0.8, 1.0, 1.25, 1.6, 2.0, 2.5]
+        sx.set_yticks(yt)
+        sx.set_yticklabels([f"{t:g}" for t in yt] if p == 0 else [])
+        sx.yaxis.set_minor_locator(plt.NullLocator())
+        if p == 0:
+            sx.set_ylabel("Mean WRMSSE / LightGBM")
+        sx.grid(axis="y")
+        sx.set_axisbelow(True)
+        despine(sx)
+        sx.text(0.0, 1.02, LABEL[SK[m]].replace(" with the plan", " + plan"), transform=sx.transAxes, fontsize=7.5,
+                ha="left", va="bottom", color=COLOR[SK[m]])
+        panel_label(sx, "bc"[p], dx=-0.1 if p else -0.38, dy=1.07)
+
+    # (d) per window at the total: world model against LightGBM
+    dw = 0.155
+    dx = fig.add_axes([0.838, 0.86 - dw * FULL / 2.8, dw, dw * FULL / 2.8])  # square, top-aligned
+    t = d[d.level == "total"].pivot_table(index=["key", "origin"], columns="model", values="wrmsse")
+    for (k, o), r in t.iterrows():
+        s = src_of(k)
+        dx.scatter([r.lightgbm], [r.world_model], s=12, marker=SRC[s][1], facecolor=COLOR["world"],
+                   edgecolor="white", lw=0.35, alpha=0.85, zorder=3)
+    vals = t[["lightgbm", "world_model"]].to_numpy().ravel()
+    a, b = vals.min() * 0.8, vals.max() * 1.3
+    dx.plot([a, b], [a, b], color=MUTED, lw=0.8, ls=(0, (4, 3)), zorder=1)
+    dx.set_xscale("log")
+    dx.set_yscale("log")
+    dx.set_xlim(a, b)
+    dx.set_ylim(a, b)
+    tk = [v for v in (0.2, 0.5, 1, 2) if a <= v <= b]
+    for f in (dx.set_xticks, dx.set_yticks):
+        f(tk)
+    dx.set_xticklabels([f"{v:g}" for v in tk])
+    dx.set_yticklabels([f"{v:g}" for v in tk])
+    dx.xaxis.set_minor_locator(plt.NullLocator())
+    dx.yaxis.set_minor_locator(plt.NullLocator())
+    dx.set_xlabel("LightGBM, total")
+    dx.set_ylabel("World model, total")
+    n_below = int((t.world_model < t.lightgbm).sum())
+    dx.text(0.97, 0.04, f"below diagonal:\n{n_below} of {len(t)}", transform=dx.transAxes, ha="right", va="bottom",
+            fontsize=SMALL, color=MUTED)
+    dx.grid(True, which="major")
+    dx.set_axisbelow(True)
+    despine(dx)
+    panel_label(dx, "d", dx=-0.3, dy=1.07)
+
+    hs = [Line2D([], [], color=MUTED, marker=mk_, ls="none", ms=4, markeredgecolor="white", markeredgewidth=0.3,
+                 label=nm) for nm, mk_ in SRC.values()]
+    hs.append(Line2D([], [], color=INK, lw=1.6, label="median"))
+    fig.legend(handles=hs, loc="upper center", bbox_to_anchor=(0.5, 1.0), ncol=5, fontsize=7.0,
+               handletextpad=0.3, columnspacing=1.4, borderaxespad=0.1)
+    save(fig, OUT / "fig_core.pdf")
+    return rel, clipped, n_below, len(t)
+
+
+# ======================================= 8. profile across every level ===
+# Levels ordered from the most series to the fewest. M5 counts (fixed by the data set's design):
+# item x store 30490, item x state 9147, item 3049, store x dept 70, store x cat 30, state x dept 21,
+# store 10, state x cat 9, dept 7, state 3, cat 3, total 1. Dominick's and Frat: one category per data set,
+# so category x store has as many series as store, and category as many as total.
+PROFILE_LEVELS = {
+    "dominicks": [("item_idxstore_id", "i×s"), ("item_id", "item"), ("cat_idxstore_id", "c×s"),
+                  ("store_id", "store"), ("cat_id", "cat"), ("total", "total")],
+    "frat": [("item_idxstore_id", "i×s"), ("item_id", "item"), ("cat_idxstore_id", "c×s"),
+             ("store_id", "store"), ("cat_id", "cat"), ("total", "total")],
+    "favorita": [("item_idxstore_id", "i×s"), ("item_id", "item"), ("store_idxfamily", "s×f"),
+                 ("store_id", "store"), ("family", "fam."), ("total", "total")],
+    "m5": [("item_idxstore_id", "i×s"), ("item_idxstate_id", "i×st"), ("item_id", "item"),
+           ("store_idxdept_id", "s×d"), ("store_idxcat_id", "s×c"), ("state_idxdept_id", "st×d"),
+           ("store_id", "store"), ("state_idxcat_id", "st×c"), ("dept_id", "dept"), ("state_id", "state"),
+           ("cat_id", "cat"), ("total", "total")],
+}
+
+
+def fig_profile():
+    acc = R.rolling_accuracy()
+    core = ["world_model", "lightgbm", "timesfm_plan"]
+    mean = acc[acc.model.isin(core + ["ensemble"])].pivot_table(index=["key", "level"], columns="model",
+                                                                 values="wrmsse")
+    fig = plt.figure(figsize=(FULL, 3.2))
+    lo, hi = 0.6, 1.9
+    W, Hp = 0.29, 0.19
+    lefts = [0.075, 0.395, 0.715]
+    bottoms = [0.70, 0.405, 0.12]
+    ext = {}
+    for idx, k in enumerate(KEYS):
+        r, c = divmod(idx, 3)
+        ax = fig.add_axes([lefts[c], bottoms[r], W, Hp])
+        levs = PROFILE_LEVELS[src_of(k)]
+        xs = np.arange(len(levs))
+        for m in core:
+            v = np.array([mean.loc[(k, l), m] / mean.loc[(k, l), "ensemble"] for l, _ in levs])
+            ext[(k, m)] = (v.min(), v.max())
+            ax.plot(xs, np.clip(v, lo, hi), color=COLOR[SK[m]], lw=1.0, zorder=3)
+            ax.scatter(xs, np.clip(v, lo, hi), s=11, marker=MARKER[SK[m]], color=COLOR[SK[m]], edgecolor="white",
+                       lw=0.35, zorder=4)
+            for xi, vi in zip(xs, v):
+                if vi > hi or vi < lo:
+                    ax.text(xi, hi if vi > hi else lo, f"{vi:.2f}", fontsize=SMALL, color=COLOR[SK[m]],
+                            ha="center", va="bottom" if vi > hi else "top")
+        ax.axhline(1.0, color=MUTED, lw=0.8, ls=(0, (4, 3)), zorder=1)
+        ax.set_ylim(lo, hi)
+        ax.set_yticks([0.75, 1.0, 1.25, 1.5, 1.75])
+        ax.set_yticklabels(["0.75", "1", "1.25", "1.5", "1.75"] if c == 0 else [])
+        ax.set_xticks(xs)
+        rot = 90 if len(levs) > 8 else 0
+        ax.set_xticklabels([s for _, s in levs], fontsize=SMALL, rotation=rot)
+        ax.set_xlim(-0.4, len(levs) - 0.6)
+        ax.grid(axis="y")
+        ax.set_axisbelow(True)
+        despine(ax)
+        ax.text(0.0, 1.02, NAME[k], transform=ax.transAxes, ha="left", va="bottom", fontsize=7.2, color=INK)
+    fig.text(0.012, (bottoms[2] + bottoms[0] + Hp) / 2, "Mean WRMSSE / ensemble", rotation=90, ha="left",
+             va="center", fontsize=8)
+    fig.legend(handles=[handle(SK[m]) for m in core] + [Line2D([], [], color=MUTED, lw=0.8, ls=(0, (4, 3)),
+                                                               label="Ensemble")],
+               loc="upper center", bbox_to_anchor=(0.5, 1.0), ncol=4, fontsize=7.0, handletextpad=0.3,
+               columnspacing=1.6, borderaxespad=0.1)
+    save(fig, OUT / "fig_profile.pdf")
+    return ext
+
+
 def main():
     use_style()
     fig_grain()
@@ -796,6 +1091,9 @@ def main():
     abl_clip, sweep = fig_ablation()
     fig_mechanism()
     cov, sp = fig_decisions()
+    fig_heatmaps()
+    fig_core()
+    fig_profile()
     print("window layout (periods before the end of the data):")
     for k, v in lay.items():
         print(f"  {k}: " + "; ".join(f"{r}={v[r]}" for r in ("rolling", "development", "final") if v[r]))

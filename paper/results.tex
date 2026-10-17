@@ -54,6 +54,27 @@ the plan-aware models at the totals. The world model was in the set at the
 chain total on \rgrain{total}{world}{inset} data sets and the average on all
 nine.
 
+Figure~\ref{fig:profile} follows the three core models through every level of
+each data set's hierarchy. LightGBM stays close to the average at every level
+except in cheese. TimesFM with the plan moves away from the average as the grain
+coarsens, most on M5 and frozen entrees. The world model is closest to the
+average at the coarse M5 levels, where it is below it at the total, and furthest
+in cheese.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_profile.pdf}
+\caption{\textbf{The three core models track the average closely at the fine
+grains and part ways at the coarse ones, differently on each data set.} Mean
+WRMSSE over the rolling windows of the world model, LightGBM and TimesFM with the
+plan divided by the equal-weight average's (dashed line at 1), at every level of
+each data set's hierarchy from the finest (item by store, left) to the chain
+total (right). i: item; s: store; c: category; d: department; st: state; f, fam.:
+product family. On Dominick's and Frat the category by store equals the store and
+the category equals the total.}
+\label{fig:profile}
+\end{figure*}
+
 The time grain changes the answer again. Summed over the whole window rather than
 week by week, the world model had the lowest category-by-store planning cost on
 \rcount{decworldcat} of eight data sets (\S\ref{sec:res-decisions}). The
@@ -70,21 +91,19 @@ development (\S\ref{sec:res-favorita}), intervals, decisions and reconciliation.
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=\textwidth]{figs/fig_rolling.pdf}
-\caption{\textbf{Item by store, every single model is less accurate than the
-ensemble on almost every data set; at the total the ensemble is in the confidence set
-everywhere and the best single model changes with the data set.} Mean WRMSSE over
-the rolling windows of each model divided by the ensemble's (dashed line at 1;
-log scale; left of the line is more accurate than the ensemble).
-\textbf{(a)} Item by store. \textbf{(b)} Chain total. Values beyond the axis are
-marked at its edge with their value. Six, four, four and four windows on
-Dominick's, Frat, M5 and Favorita.}
-\label{fig:rolling}
+\includegraphics[width=\textwidth]{figs/fig_heatmaps.pdf}
+\caption{\textbf{Item by store the average or LightGBM was best on every data set;
+at the total the best model changed from data set to data set.} Mean WRMSSE over
+the rolling windows of every model divided by the best in its column (1.00: the
+best, outlined), \textbf{(a)} item by store and \textbf{(b)} at the chain total.
+Dash: not run. Six windows on each Dominick's category, four on Frat, M5 and
+Favorita.}
+\label{fig:heatmaps}
 \end{figure*}
 
 The equal-weight ensemble has the lowest item-by-store error on
 \rcount{enslowestixs} of the nine data sets (Table~\ref{tab:rolling},
-Figure~\ref{fig:rolling}a). In the other two, analgesics and cheese, LightGBM
+Figure~\ref{fig:heatmaps}a). In the other two, analgesics and cheese, LightGBM
 is lower: \rv{ana}{lgb}{ixs} against \rv{ana}{ens}{ixs} in analgesics, where
 both are in the model confidence set, and \rv{che}{lgb}{ixs} against
 \rv{che}{ens}{ixs} in cheese, the one data set where LightGBM is alone in the
@@ -175,8 +194,36 @@ world model's mean weight is \rw{ana}{total}{world} in analgesics and
 shows the item-by-store error is flat across a wide range of the world model's
 weight on most data sets, which is why fitting the weights gains little.
 
-\subsection{The world model on its own}
+\subsection{The three core models, window by window}
 \label{sec:res-world}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_core.pdf}
+\caption{\textbf{Window by window, the average was more accurate than LightGBM
+item by store in most windows, and the world model and TimesFM with the plan in
+few; both fell further behind LightGBM as the grain coarsened.} \textbf{(a)}
+Item-by-store WRMSSE of the world model, TimesFM with the plan and the average,
+each divided by LightGBM's in the same window, one point per rolling window and
+data set ($n=48$; marker: data source; bar: median; log scale; values above the
+axis written). \textbf{(b, c)} Mean WRMSSE over LightGBM's at four grains, one
+line per data set and the median (thick) for the world model and TimesFM with the
+plan. \textbf{(d)} Total WRMSSE of the world model against LightGBM, one point
+per window, log scales; below the diagonal the world model is more accurate.}
+\label{fig:core}
+\end{figure*}
+
+Figure~\ref{fig:core} shows every rolling window. Item by store, the average had
+a lower error than LightGBM in \rcore{ens}{ixs}{better} of
+\rcore{ens}{ixs}{n} windows (median ratio \rcore{ens}{ixs}{median}), TimesFM with
+the plan in \rcore{tfmplan}{ixs}{better} (median \rcore{tfmplan}{ixs}{median})
+and the world model in \rcore{world}{ixs}{better} (median
+\rcore{world}{ixs}{median}); the world model's worst window, in cheese, was
+\rcore{world}{ixs}{max} times LightGBM's error. At the total the world model was
+more accurate than LightGBM in \rcore{world}{total}{better} of
+\rcore{world}{total}{n} windows and TimesFM with the plan in
+\rcore{tfmplan}{total}{better}, so window by window neither is clearly behind
+LightGBM there, while their means are (Figure~\ref{fig:core}b, c).
 
 On its own the world model is behind LightGBM item by store and level with it
 at the total. By the paired test LightGBM is more accurate item by store on
