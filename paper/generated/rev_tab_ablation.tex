@@ -1,0 +1,32 @@
+\begin{table*}[t]
+\centering
+\caption{\textbf{Removing the world model makes the ensemble less accurate item by store on \rcount{withoutworldmodelixsens}
+data sets and at the total on \rcount{withoutworldmodeltotalens}; replacing it with the lift model, the same network
+without the carried state, does so on \rcount{liftforworldmodelixsens} and \rcount{liftforworldmodeltotalens}.}
+Mean WRMSSE of each variant minus the ensemble's over the rolling windows (study A, added after the rolling results);
+above zero the ensemble is more accurate. Bold: the ensemble is more accurate and the 95\% interval from the bootstrap
+over windows excludes zero; underlined: the variant is, with the same test. No X: the equal-weight mean of the other two
+members ($-$World: without the world model; $-$LGB: without LightGBM; $-$TFM+p: without TimesFM with the plan). Lift:
+the world model replaced by the lift model. Fitted: weights chosen on the earlier
+windows of the data set (lowest mean WRMSSE over all levels), scored on the next, so one window fewer.}
+\label{tab:ablation}
+\footnotesize
+\setlength{\tabcolsep}{3.2pt}
+\begin{tabular}{l*{10}{r}}
+\toprule
+ & \multicolumn{5}{c}{\textbf{Item by store}} & \multicolumn{5}{c}{\textbf{Total}} \\
+\cmidrule(lr){2-6}\cmidrule(lr){7-11}
+\textbf{Data} & $-$World & $-$LGB & $-$TFM+p & Lift & Fitted & $-$World & $-$LGB & $-$TFM+p & Lift & Fitted \\
+\midrule
+Cheese & \textminus 0.328 & \textbf{0.199} & \textbf{0.190} & \textminus 0.196 & \textbf{0.015} & 0.072 & \textbf{0.056} & 0.029 & 0.021 & 0.056 \\
+Snack crackers & 0.002 & \textbf{0.018} & 0.004 & 0.002 & 0.004 & \textminus 0.095 & 0.118 & 0.013 & \textminus 0.145 & \textminus 0.073 \\
+Soft drinks & 0.008 & \textbf{0.023} & 0.009 & \textbf{0.015} & \textminus 0.006 & 0.025 & \textbf{0.045} & \textminus 0.022 & \textminus 0.007 & \textminus 0.008 \\
+Bottled juice & \textbf{0.012} & \textbf{0.016} & \textbf{0.015} & 0.002 & 0.000 & \textbf{0.103} & 0.031 & \textminus 0.042 & 0.051 & \textminus 0.015 \\
+Analgesics & 0.000 & \textbf{0.014} & \textminus 0.001 & \textbf{0.003} & \textbf{0.008} & 0.019 & \textminus 0.006 & 0.038 & \textbf{0.025} & 0.012 \\
+Frozen entrees & \textbf{0.012} & \textbf{0.019} & \textminus 0.002 & 0.005 & \textminus 0.001 & \textbf{0.025} & \textbf{0.034} & \textminus 0.026 & 0.013 & \textminus 0.015 \\
+Frat & 0.002 & \textbf{0.010} & \textbf{0.012} & 0.001 & \textbf{0.007} & \underline{\textminus 0.040} & \textbf{0.021} & \textbf{0.051} & \textminus 0.017 & \underline{\textminus 0.022} \\
+M5 & \textbf{0.005} & 0.003 & \textbf{0.006} & \textminus 0.001 & \textbf{0.013} & \textbf{0.113} & 0.050 & \underline{\textminus 0.112} & 0.000 & \textminus 0.037 \\
+Favorita & \textbf{0.007} & \textbf{0.006} & \textbf{0.007} & \textbf{0.010} & \textbf{0.007} & 0.037 & 0.013 & \underline{\textminus 0.015} & \textbf{0.067} & 0.004 \\
+\bottomrule
+\end{tabular}
+\end{table*}

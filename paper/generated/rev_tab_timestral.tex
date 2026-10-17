@@ -1,0 +1,23 @@
+\begin{table*}[t]
+\centering
+\caption{\textbf{Timestral, released two days before this revision, is behind the ensemble on every data set, and
+putting it in place of TimesFM helps only at the M5 total.} Mean WRMSSE over the rolling windows (Dominick's: mean
+of the six categories). Timestral-28M, zero-shot, the mean of its 21 quantiles as the point forecast; with the plan as
+known future inputs (TS+p) and from history alone (TS); TFM+p: TimesFM with the plan. Ens.: the ensemble; Ens.\,T:
+Timestral with the plan in place of TimesFM with the plan; Ens.\,4: all four together. Study F, written down before it ran.}
+\label{tab:timestral}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{l*{12}{r}}
+\toprule
+ & \multicolumn{6}{c}{\textbf{Item by store}} & \multicolumn{6}{c}{\textbf{Total}} \\
+\cmidrule(lr){2-7}\cmidrule(lr){8-13}
+\textbf{Data} & Ens. & Ens.\,T & Ens.\,4 & TFM+p & TS+p & TS & Ens. & Ens.\,T & Ens.\,4 & TFM+p & TS+p & TS \\
+\midrule
+Dominick's (six) & \textbf{0.612} & 0.916 & 0.821 & 0.613 & 1.565 & 0.728 & \textbf{0.672} & 3.729 & 2.858 & 0.807 & 10.788 & 2.121 \\
+Frat & \textbf{0.549} & 0.623 & 0.595 & 0.578 & 0.864 & 0.792 & 0.337 & 0.501 & 0.407 & \textbf{0.327} & 1.048 & 0.484 \\
+M5 & \textbf{0.834} & 0.846 & 0.842 & 0.842 & 0.894 & 0.861 & 0.706 & \textbf{0.609} & 0.699 & 1.035 & 1.025 & 1.014 \\
+Favorita & \textbf{0.694} & 0.697 & \textbf{0.694} & 0.712 & 0.731 & 0.771 & 0.303 & \textbf{0.298} & 0.313 & 0.397 & 0.403 & 0.430 \\
+\bottomrule
+\end{tabular}
+\end{table*}

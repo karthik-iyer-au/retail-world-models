@@ -6,7 +6,8 @@
 #   make clean      # remove build products (not the sources)
 #
 # Every number, table and figure comes from results/promoted/ and
-# results/records/snapshot.json (read by figs/rwdata.py) through the scripts in figs/.
+# results/records/snapshot.json (read by figs/rwdata.py), and from
+# results/paper1_revision/ (read by figs/make_revision*.py), through the scripts in figs/.
 #
 # Until results/records/snapshot.json has been built from the run folders
 # (scripts/records_snapshot.py, on Colab), the build uses the hand-transcribed
@@ -30,9 +31,11 @@ all: pdf
 
 figures:
 	cd figs && $(PY) make_figures.py
+	cd figs && $(PY) make_revision_figures.py
 
 tables:
 	cd figs && $(PY) make_tables.py
+	cd figs && $(PY) make_revision.py
 
 # Three passes: the second resolves labels and reflows floats, the third
 # settles references that moved.

@@ -1,0 +1,30 @@
+\begin{table}[t]
+\centering
+\caption{\textbf{Reconciled ETS forecasts are far behind the trained models; reconciling a trained model's item
+forecasts with ETS above them helps on Frat and hurts on M5.} Mean WRMSSE over the rolling windows. MinT with a shrunk
+covariance was computed only where the hierarchy has at most 6,000 nodes; on Frat it gave a total WRMSSE of
+\rrec{frat}{etsmintshrink}{total}, a numerical failure not investigated further.}
+\label{tab:reconcile}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{0.42\columnwidth}rrrr}
+\toprule
+ & \multicolumn{2}{c}{\textbf{Frat}} & \multicolumn{2}{c}{\textbf{M5}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+\textbf{Method} & I$\times$S & Total & I$\times$S & Total \\
+\midrule
+ETS, bottom-up & 0.909 & 0.566 & 0.898 & 1.271 \\
+ETS, top-down & 0.806 & 0.487 & 0.917 & 0.902 \\
+ETS, OLS & 0.953 & 0.520 & 0.888 & 0.902 \\
+ETS, WLS structural & 0.912 & 0.538 & 0.885 & 0.908 \\
+ETS, WLS variance & 0.903 & 0.511 & 0.884 & 0.946 \\
+ETS, MinT shrink & 0.926 & 247.170 & -- & -- \\
+LightGBM + ETS, WLS variance & 0.581 & 0.304 & 0.855 & 0.763 \\
+World model + ETS, WLS variance & 0.602 & 0.343 & 0.849 & 0.754 \\
+\midrule
+LightGBM, unreconciled & 0.570 & 0.360 & 0.861 & 0.693 \\
+World model, unreconciled & 0.595 & 0.457 & 0.851 & 0.609 \\
+Ensemble, unreconciled & 0.549 & 0.337 & 0.834 & 0.706 \\
+\bottomrule
+\end{tabular}
+\end{table}

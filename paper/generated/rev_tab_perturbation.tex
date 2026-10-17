@@ -1,0 +1,37 @@
+\begin{table*}[t]
+\centering
+\caption{\textbf{All three trained models use the plan. On the weekly data price carries most of it; on M5 the world
+model relies on event and SNAP days, which LightGBM barely uses.} Input occlusion on the saved models (study B): one plan input is set to
+``nothing planned'' (regular price, lever off) in the forecast periods and the forecast recomputed, with no refitting.
+Change in WRMSSE item by store and at the total, in percent (above zero: the forecast gets worse without the input),
+and the change in forecast units, in percent, in the periods where the input was on. Mean over the rolling windows (LightGBM on M5: the
+last two).}
+\label{tab:perturbation}
+\footnotesize
+\setlength{\tabcolsep}{3.6pt}
+\begin{tabular}{l*{9}{r}}
+\toprule
+ & \multicolumn{3}{c}{\textbf{Item by store (\%)}} & \multicolumn{3}{c}{\textbf{Total (\%)}}
+ & \multicolumn{3}{c}{\textbf{Units where on (\%)}} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}
+\textbf{Input occluded} & World & Lift & LGB & World & Lift & LGB & World & Lift & LGB \\
+\midrule
+\addlinespace[2pt]\multicolumn{10}{l}{\itshape Dominick's} \\
+Whole plan & 15 & 13 & 26 & 116 & 97 & 149 & \textminus{}59 & \textminus{}58 & \textminus{}58 \\
+Price & 8 & 6 & 20 & 75 & 59 & 115 & \textminus{}45 & \textminus{}41 & \textminus{}49 \\
+Promotion & 4 & 2 & 3 & 41 & 38 & 34 & \textminus{}34 & \textminus{}40 & \textminus{}26 \\
+\addlinespace[2pt]\multicolumn{10}{l}{\itshape Frat} \\
+Whole plan & 36 & 36 & 40 & 229 & 268 & 262 & \textminus{}49 & \textminus{}47 & \textminus{}46 \\
+Price & 17 & 16 & 18 & 126 & 152 & 138 & \textminus{}38 & \textminus{}36 & \textminus{}34 \\
+Promotion & \textminus{}1 & 6 & 4 & 20 & 99 & 34 & \textminus{}16 & \textminus{}30 & \textminus{}18 \\
+Feature & 1 & 2 & 4 & 7 & 23 & 16 & \textminus{}28 & \textminus{}28 & \textminus{}29 \\
+Display & 0 & 0 & 2 & 4 & 9 & 4 & \textminus{}18 & \textminus{}19 & \textminus{}17 \\
+Price reduction only & 1 & 1 & 1 & 9 & 10 & 3 & 14 & 16 & 10 \\
+\addlinespace[2pt]\multicolumn{10}{l}{\itshape M5} \\
+Whole plan & 1 & 1 & 1 & 45 & 14 & 15 & \textminus{}8 & \textminus{}19 & \textminus{}4 \\
+Price & 0 & 0 & 0 & 3 & \textminus{}26 & \textminus{}1 & \textminus{}35 & \textminus{}60 & 18 \\
+Event days & 0 & 1 & 0 & 16 & 18 & 0 & 15 & 20 & 2 \\
+SNAP days & 1 & 2 & 0 & 58 & 30 & 16 & \textminus{}14 & \textminus{}14 & \textminus{}6 \\
+\bottomrule
+\end{tabular}
+\end{table*}

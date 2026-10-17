@@ -1,0 +1,40 @@
+\begin{table*}[t]
+\centering
+\caption{\textbf{Over the rolling windows the equal-weight ensemble has the lowest item-by-store error on
+\rcount{enslowestixs} of nine data sets, is in the 90\% model confidence set item by store on \rcount{ensinsetixs}
+and at the total on \rcount{ensinsettotal}.} Mean WRMSSE over the rolling
+windows (lower is better); W: windows. Bold: the lowest in the row. $^{\circ}$: in the 90\% model confidence set of
+the row (Hansen, Lunde and Nason, range statistic, bootstrap over windows; Timestral, added in study F, is not
+in the comparison). Ensemble: the equal-weight mean of the world model, LightGBM and TimesFM with the plan,
+fixed before any rolling result. Neural models are one fit (seed~1). The Temporal Fusion Transformer was not run on M5
+or Favorita, Chronos-Bolt, TimesFM and TFT not on Favorita. Timestral+plan is Timestral-28M with the plan (study F).}
+\label{tab:rolling}
+\footnotesize
+\setlength{\tabcolsep}{3.4pt}
+\begin{tabular}{lc*{10}{r}}
+\toprule
+\textbf{Data} & \textbf{W} & \rotatebox{70}{Ensemble} & \rotatebox{70}{World model} & \rotatebox{70}{Lift model} & \rotatebox{70}{LightGBM} & \rotatebox{70}{TimesFM+plan} & \rotatebox{70}{TimesFM} & \rotatebox{70}{Chronos-Bolt} & \rotatebox{70}{TFT} & \rotatebox{70}{Timestral+plan} & \rotatebox{70}{Seas.\ naive} \\
+\midrule
+\addlinespace[2pt]\multicolumn{12}{l}{\itshape Item by store} \\
+Cheese & 6 & 0.934 & 1.713 & 1.119 & \textbf{0.623}$^{\circ}$ & 0.659 & 0.749 & 0.762 & 0.696 & 1.956 & 1.117 \\
+Snack crackers & 6 & \textbf{0.562}$^{\circ}$ & 0.595 & 0.598 & 0.578 & 0.605 & 0.677 & 0.708 & 0.654 & 1.944 & 1.010 \\
+Soft drinks & 6 & \textbf{0.536}$^{\circ}$ & 0.600 & 0.672 & 0.545$^{\circ}$ & 0.609 & 0.711 & 0.720 & 0.640 & 0.872 & 0.960 \\
+Bottled juice & 6 & \textbf{0.585}$^{\circ}$ & 0.656 & 0.616 & 0.605 & 0.636 & 0.712 & 0.728 & 0.676 & 1.459 & 1.079 \\
+Analgesics & 6 & 0.650$^{\circ}$ & 0.672 & 0.677 & \textbf{0.647}$^{\circ}$ & 0.679 & 0.734 & 0.745 & 0.693 & 2.111 & 0.997 \\
+Frozen entrees & 6 & \textbf{0.408}$^{\circ}$ & 0.433 & 0.449 & 0.410$^{\circ}$ & 0.487 & 0.549 & 0.554 & 0.488 & 1.048 & 0.710 \\
+Frat & 4 & \textbf{0.549}$^{\circ}$ & 0.595 & 0.590 & 0.570 & 0.578 & 0.775 & 0.778 & 0.652 & 0.864 & 1.077 \\
+M5 & 4 & \textbf{0.834}$^{\circ}$ & 0.851 & 0.845 & 0.861 & 0.842 & 0.842 & 0.858 & -- & 0.894 & 1.163 \\
+Favorita & 4 & \textbf{0.694}$^{\circ}$ & 0.726 & 0.744 & 0.719 & 0.712 & -- & -- & -- & 0.731 & 0.992 \\
+\addlinespace[2pt]\multicolumn{12}{l}{\itshape Total} \\
+Cheese & 6 & \textbf{0.371}$^{\circ}$ & 0.585$^{\circ}$ & 0.617$^{\circ}$ & 0.456$^{\circ}$ & 0.584 & 0.718 & 0.790 & 0.481$^{\circ}$ & 4.606 & 1.175 \\
+Snack crackers & 6 & 1.181$^{\circ}$ & 1.454$^{\circ}$ & \textbf{1.026}$^{\circ}$ & 1.097$^{\circ}$ & 1.181$^{\circ}$ & 1.581$^{\circ}$ & 4.410$^{\circ}$ & 1.301$^{\circ}$ & 16.272 & 1.790$^{\circ}$ \\
+Soft drinks & 6 & 0.834$^{\circ}$ & 0.879$^{\circ}$ & 0.965$^{\circ}$ & \textbf{0.831}$^{\circ}$ & 0.977 & 1.157 & 1.270 & 0.971 & 4.181 & 1.035 \\
+Bottled juice & 6 & \textbf{0.525}$^{\circ}$ & 0.613$^{\circ}$ & 0.585$^{\circ}$ & 0.530$^{\circ}$ & 0.766$^{\circ}$ & 0.898 & 0.897 & 0.793 & 6.257 & 1.390 \\
+Analgesics & 6 & \textbf{0.782}$^{\circ}$ & 0.826$^{\circ}$ & 0.868$^{\circ}$ & 0.869$^{\circ}$ & 0.848$^{\circ}$ & 0.900$^{\circ}$ & 0.979 & 1.057$^{\circ}$ & 31.256 & 1.796 \\
+Frozen entrees & 6 & 0.342$^{\circ}$ & 0.338$^{\circ}$ & 0.387$^{\circ}$ & \textbf{0.321}$^{\circ}$ & 0.481 & 0.500 & 0.578 & 0.380 & 2.158 & 0.620 \\
+Frat & 4 & 0.337$^{\circ}$ & 0.457 & 0.405$^{\circ}$ & 0.360$^{\circ}$ & \textbf{0.327}$^{\circ}$ & 0.541 & 0.605 & 0.425 & 1.048 & 0.964 \\
+M5 & 4 & 0.706$^{\circ}$ & \textbf{0.609}$^{\circ}$ & 1.163$^{\circ}$ & 0.693$^{\circ}$ & 1.035 & 1.000 & 1.333 & -- & 1.025 & 1.087 \\
+Favorita & 4 & \textbf{0.303}$^{\circ}$ & 0.341$^{\circ}$ & 0.452 & 0.309$^{\circ}$ & 0.397 & -- & -- & -- & 0.403 & 0.501 \\
+\bottomrule
+\end{tabular}
+\end{table*}

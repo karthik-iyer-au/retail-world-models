@@ -27,6 +27,11 @@ COLOR = {
     "tfm": "#CC79A7",
     "tfm_plan": "#E69F00",
     "naive": "#000000",
+    # revision models (added keys only)
+    "ensemble": ACCENT,
+    "chronos": "#8C8C8C",
+    "tft": "#999933",
+    "timestral": "#882255",
 }
 MARKER = {
     "world": "o",
@@ -36,6 +41,10 @@ MARKER = {
     "tfm": "D",
     "tfm_plan": "P",
     "naive": "X",
+    "ensemble": "*",
+    "chronos": "h",
+    "tft": "<",
+    "timestral": "p",
 }
 LABEL = {
     "world": "World model",
@@ -45,6 +54,10 @@ LABEL = {
     "tfm": "TimesFM",
     "tfm_plan": "TimesFM with the plan",
     "naive": "Seasonal naive",
+    "ensemble": "Ensemble",
+    "chronos": "Chronos-Bolt",
+    "tft": "TFT",
+    "timestral": "Timestral with the plan",
 }
 
 

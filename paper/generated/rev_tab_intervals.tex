@@ -1,0 +1,31 @@
+\begin{table*}[t]
+\centering
+\caption{\textbf{Rolling conformal intervals cover close to their level at item by store and somewhat less at the
+total, and do not separate the models.} Scaled pinball loss (SPL, lower is better) and the share of actual sales
+inside the 80\% and 95\% intervals, mean over the rolling windows after the first. Intervals from each model's own
+scaled errors in the earlier windows of the data set, pooled over horizons where a level has fewer than 50 earlier
+errors per horizon, ends rounded outwards to whole units except on Favorita (interval check of 16 October).}
+\label{tab:intervals}
+\footnotesize
+\setlength{\tabcolsep}{2.6pt}
+\begin{tabular}{l*{18}{r}}
+\toprule
+ & \multicolumn{9}{c}{\textbf{Item by store}} & \multicolumn{9}{c}{\textbf{Total}} \\
+\cmidrule(lr){2-10}\cmidrule(lr){11-19}
+ & \multicolumn{3}{c}{Ensemble} & \multicolumn{3}{c}{World} & \multicolumn{3}{c}{LightGBM}
+ & \multicolumn{3}{c}{Ensemble} & \multicolumn{3}{c}{World} & \multicolumn{3}{c}{LightGBM} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}\cmidrule(lr){14-16}\cmidrule(lr){17-19}
+\textbf{Data} & SPL & 80 & 95 & SPL & 80 & 95 & SPL & 80 & 95 & SPL & 80 & 95 & SPL & 80 & 95 & SPL & 80 & 95 \\
+\midrule
+Cheese & 0.22 & 0.75 & 0.94 & 0.25 & 0.74 & 0.93 & 0.23 & 0.75 & 0.94 & 0.12 & 0.68 & 0.88 & 0.20 & 0.72 & 0.97 & 0.16 & 0.93 & 0.95 \\
+Snack crackers & 0.23 & 0.74 & 0.94 & 0.24 & 0.73 & 0.94 & 0.23 & 0.73 & 0.93 & 0.53 & 0.60 & 0.72 & 0.80 & 0.57 & 0.60 & 0.42 & 0.75 & 0.88 \\
+Soft drinks & 0.23 & 0.75 & 0.94 & 0.25 & 0.74 & 0.94 & 0.23 & 0.75 & 0.93 & 0.27 & 0.68 & 0.80 & 0.28 & 0.80 & 0.82 & 0.26 & 0.65 & 0.85 \\
+Bottled juice & 0.23 & 0.73 & 0.93 & 0.26 & 0.72 & 0.93 & 0.24 & 0.73 & 0.93 & 0.15 & 0.82 & 0.93 & 0.20 & 0.80 & 0.95 & 0.15 & 0.93 & 0.97 \\
+Analgesics & 0.25 & 0.91 & 0.98 & 0.25 & 0.91 & 0.98 & 0.24 & 0.91 & 0.98 & 0.25 & 0.85 & 0.88 & 0.29 & 0.85 & 0.95 & 0.27 & 0.88 & 0.95 \\
+Frozen entrees & 0.18 & 0.69 & 0.93 & 0.18 & 0.69 & 0.93 & 0.17 & 0.70 & 0.93 & 0.12 & 0.90 & 0.97 & 0.12 & 0.88 & 1.00 & 0.10 & 0.82 & 0.90 \\
+Frat & 0.20 & 0.87 & 0.97 & 0.22 & 0.87 & 0.97 & 0.21 & 0.87 & 0.97 & 0.11 & 0.75 & 0.96 & 0.15 & 0.83 & 0.88 & 0.14 & 0.62 & 0.83 \\
+M5 & 0.32 & 0.94 & 0.98 & 0.33 & 0.94 & 0.98 & 0.33 & 0.94 & 0.98 & 0.18 & 0.71 & 0.94 & 0.19 & 0.76 & 0.86 & 0.14 & 0.80 & 0.98 \\
+Favorita & 0.24 & 0.79 & 0.95 & 0.25 & 0.79 & 0.95 & 0.24 & 0.79 & 0.95 & 0.07 & 0.83 & 0.98 & 0.10 & 0.70 & 0.93 & 0.07 & 0.86 & 1.00 \\
+\bottomrule
+\end{tabular}
+\end{table*}
