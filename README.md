@@ -3,11 +3,34 @@
 Forecasting retail demand under price, promotion, display and feature
 decisions, using public data only.
 
-The question this repository answers: which way of representing a retail
-category gives the most accurate and most explainable forecasts when
-commercial decisions change. Several published methods are tested against
-each other and against one new model. The results decide which one is
-reported as best.
+The question this repository answers: at which grain of the product, store
+and time hierarchy do which forecasting models work best, when the price and
+promotion plan is known? Store orders are decided for an item in a store,
+supplier funding for an item across stores, category performance by category
+and store, and the financial plan at the chain total. The work covers price and
+promotion, two of the four Ps, on public data; it does not forecast product or
+place, or solve the four together.
+
+## What was found (Paper 1, on these data sets only)
+
+On M5, six Dominick's categories, Breakfast at the Frat and Corporación
+Favorita, over rolling forecast origins with paired tests:
+
+- **Item by store and item across stores:** an equal-weight average of a world
+  model, LightGBM and TimesFM given the plan had the lowest error on 7 and 8 of
+  9 data sets, with one or two models statistically level with the best.
+- **Category by store, category and chain total:** the lowest-error model
+  changed from data set to data set, and a median of 4 of 9 models could not be
+  told apart.
+- **Over a whole window:** the world model alone had the lowest
+  category-by-store planning cost on 6 of 8 data sets.
+- LightGBM was the strongest single model at the fine grains; averaging added
+  to it, and weights fitted on earlier windows rarely beat equal weights.
+
+A retailer's own data, or a forecast solved across all four Ps, may order the
+models differently. Each claim is linked to its table, script and runs in
+[`docs/RESULTS.md`](docs/RESULTS.md); the manuscript is `paper/main.pdf`.
+Paper 2 (`paper2/`), an audit of plan-lift explanations, is a draft.
 
 ## Layout
 
