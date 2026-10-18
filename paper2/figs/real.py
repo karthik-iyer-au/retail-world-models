@@ -502,6 +502,9 @@ def write_c1_macros(d: pd.DataFrame, gen: Path):
     put("cIfSamePass", int((same["C1"] < 1e-3).sum()))
     put("cIfDiffN", int(len(diff)))
     put("cIfDiffFail", int((diff["C1"] >= 1e-3).sum()))
+    put("cIfDiffPass", int((diff["C1"] < 1e-3).sum()))
+    sm = m[m["sample"].fillna("").astype(str).str.len() > 0] if "sample" in m else m.iloc[:0]
+    put("cIfSampledN", int(len(sm)))
     put("cIfFailN", int((m["C1"] >= 1e-3).sum()))
     put("cIfFailWithDiff", int(((m["C1"] >= 1e-3) & (m["differ"] > 0)).sum()))
     for ds, t in tag.items():
