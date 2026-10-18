@@ -40,6 +40,8 @@ own definition of nothing planned are set aside, both the world model and LightG
 response to Dominick's zone price changes, and the number of checks a version
 passed was not clearly related to its accuracy.
 
+Archived release: [doi:10.5281/zenodo.23448056](https://doi.org/10.5281/zenodo.23448056).
+
 ## Layout
 
 | Folder | What it holds | Rule |
