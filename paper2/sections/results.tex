@@ -9,10 +9,15 @@ many settings at once. No model was refitted or tuned. Table~\ref{tab:realpass}
 gives the pass counts and Figure~\ref{fig:realchecks} every score.
 
 \begin{table*}[t]\centering
-\caption{\textbf{No version passed every check on M5 or Dominick's.} Pass counts
-by check and data set, over version-windows (a check counted only where it
-applies: C3 needs two or more seeds, C6 a LightGBM run on the same window).
-Thresholds in Table~\ref{tab:thresholds}.}\label{tab:realpass}
+\caption{\textbf{No version passed every check on M5 or Dominick's with the
+checks scored as fixed in advance.} Pass counts by check and data set, over
+version-windows (a check counted only where it applies: C3 needs two or more
+seeds, C6 a LightGBM run on the same window). C1 is scored against the audit's
+plan for nothing planned; every C1 failure sits where that plan differs from the
+model's own (\S\ref{sec:results}, C1). With C1 read against the model's own
+plan, the version-windows passing every check are \cIfAllOwnM{} of \cIfWinM{}
+on M5, \cIfAllOwnD{} of \cIfWinD{} on Dominick's and \cIfAllOwnF{} of
+\cIfWinF{} on Frat. Thresholds in Table~\ref{tab:thresholds}.}\label{tab:realpass}
 \footnotesize\setlength{\tabcolsep}{6pt}\input{generated/tab_real_pass}\end{table*}
 
 \begin{figure*}[t]\centering
@@ -32,9 +37,16 @@ C6, rank agreement with LightGBM's on/off contributions (circles) and TreeSHAP
 values (squares), by lever.}\label{fig:realchecks}
 \end{figure*}
 
-\paragraph{No version passes every check on M5 or Dominick's}
-On Frat \rAllF{} of \rWinF{} version-windows pass every check that applies;
-on M5 and Dominick's none do. The checks fail for different reasons on each
+\paragraph{No version passes every check on M5; on Dominick's, few do once C1 is read against the model}
+Scored as fixed in advance, \rAllF{} of \rWinF{} Frat version-windows pass
+every check that applies, and none on M5 or Dominick's. That count includes C1
+failures that come from the audit's interface rather than the models (below).
+With C1 read against each model's own plan for nothing planned, which holds by
+construction except in the new-item versions, \cIfAllOwnF{} of \cIfWinF{} Frat,
+\cIfAllOwnD{} of \cIfWinD{} Dominick's and \cIfAllOwnM{} of \cIfWinM{} M5
+version-windows pass every check: on Dominick's and M5 the price-direction check
+(C4) and agreement with sales (C5) still fail, C4 on \cIfDomCdFail{} of the
+\cIfWinD{} Dominick's version-windows. The checks fail for different reasons on each
 data set, and two of them, C1 and C4, needed a diagnosis before they could be
 read. C4 was rerun on \dRuns{} saved runs (\dWindows{} windows) chosen by a rule
 fixed before the rerun (\texttt{docs/PAPER2\_PLAN.md}, 17 October), and C1 was
@@ -55,12 +67,15 @@ and its own regular price, taken over its history window, from a recorded or a
 held regular price where its configuration says so, and otherwise the series'
 mean price over that window, or 1.0 where the window records no price. Given
 the model's own plan, the lift is zero for every series with history, because
-the plan path and the nothing-planned path then receive identical inputs; on
-saved Frat runs the violation fell from 0.04\% to 0.09\% of the largest
-forecast under the audit's plan to under $10^{-7}$ under the model's.
+the plan path and the nothing-planned path then receive identical inputs. We
+verified this numerically only on two locally saved Frat models, short test
+fits that are not among the audited versions (0.04\% to 0.09\% of the largest
+forecast under the audit's plan, under $10^{-7}$ under the model's), and in a
+unit test; the audited checkpoints were not rescored.
 
-Whether the two plans differ depends on the data and the settings, not on the
-fitted weights, so we compared them for every audited configuration and window
+The comparison below is structural, not a rescoring: whether the two plans
+differ depends on the data and the settings, not on the fitted weights, so we
+compared the plans themselves for every audited configuration and window
 (\cIfN{} of the \cIfOf{} version-windows; \texttt{scripts/c1\_interface.py},
 added after the results). They differ in \cIfAnyD{} Dominick's, \cIfAnyF{}
 Frat and \cIfAnyM{} M5 version-windows (M5 checked on three of its ten
@@ -163,7 +178,7 @@ WRMSSE is \rRhoPassedM{} on M5, \rRhoPassedD{} on Dominick's and \rRhoPassedF{}
 on Frat; pooled, \rRhoPassedPool{} (permutation $p = \rPPassed$;
 Table~\ref{tab:realmain}). Averaged over each version's windows the pooled
 correlation is \rRhoPassedPoolV{} ($p = \rPPassedV$). The answer moves with the
-unit, and neither permutation keeps the dependence in these data: versions that
+unit, and neither permutation allows for the dependence in these data: versions that
 share a configuration, configurations that differ in one setting, and versions
 scored on the same window are not independent, and a window that is easier and
 passes C1 and C4 less often (the second Frat window) enters the
@@ -178,7 +193,10 @@ window the Spearman correlation across configurations is taken, and the
 correlations are pooled weighted by the number of configurations. The
 permutation reassigns whole configurations, with their scores in every window,
 within each set, and the interval comes from resampling configurations within
-each set. No M5 set has four configurations, so M5 drops out. The pooled
+each set. This keeps each configuration's windows together; it does not model
+the dependence between configurations that differ in one setting, which are
+treated as exchangeable, so the interval and $p$-value may still be too narrow
+and too small. No M5 set has four configurations, so M5 drops out. The pooled
 correlation is \rWwRho{} (95\% interval \rWwLo{} to \rWwHi, $p = \rWwP$):
 \rWwRhoD{} on Dominick's and \rWwRhoF{} on Frat. With C5 left out it is
 \rWwNoCeRho{} (\rWwNoCeLo{} to \rWwNoCeHi, $p = \rWwNoCeP$), and with C1 and C5
@@ -204,7 +222,7 @@ accuracy.} Spearman correlation between each score and item-by-store WRMSSE
 (negative: higher scores go with lower error), within each data set and pooled
 by permutation within data set (10,000 permutations). Left: over
 version-windows, the unit fixed in advance. Right: over versions, the mean over
-each version's windows. Both permutations treat their units as independent; the test that holds the data and window fixed and keeps the dependence between related configurations is in the text. $^\dagger$Added after the results.}\label{tab:realmain}
+each version's windows. Both permutations treat their units as independent; the test that holds the data and window fixed and resamples whole configurations is in the text. $^\dagger$Added after the results.}\label{tab:realmain}
 \footnotesize\setlength{\tabcolsep}{6pt}\input{generated/tab_real_main}\end{table*}
 
 \begin{figure*}[t]\centering
