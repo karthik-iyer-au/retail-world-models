@@ -1,0 +1,11 @@
+{
+  "upload_type": "software",
+  "title": "Retail world models: code, configurations and results for two papers on retail forecasting",
+  "description": "<p>Code, experiment configurations, run records and manuscript sources for two papers: <em>World Models, Trees and Foundation Models for Retail Forecasting: Evidence from Four Public Data Sets</em> (K. Iyer and M. Dabbeeru) and <em>Auditing World-Model Explanations in Retail Forecasting: Faithfulness, Accuracy and Causal Validity</em> (K. Iyer). The data sets (M5, Dominick's Finer Foods, Breakfast at the Frat, Corporación Favorita) are not redistributed; the code fetches them from their providers.</p><p>Code under the PolyForm Noncommercial License 1.0.0; manuscript text, figures and tables under the terms stated in the repository. Industry and commercial use of the code, the manuscripts or any part of them, including use inside a company, is prohibited unless approved in writing by the authors.</p>",
+  "creators": [
+    {"name": "Iyer, Karthik", "orcid": "0009-0004-0593-1602"}
+  ],
+  "keywords": ["retail forecasting", "world models", "promotions", "price response", "explanation", "faithfulness", "LightGBM", "foundation models", "M5"],
+  "license": "polyform-noncommercial-1.0.0",
+  "access_right": "open"
+}

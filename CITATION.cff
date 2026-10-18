@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Retail world models: code, configurations and results for two papers on retail forecasting"
+type: software
+authors:
+  - family-names: Iyer
+    given-names: Karthik
+    orcid: "https://orcid.org/0009-0004-0593-1602"
+repository-code: "https://github.com/karthik-iyer-au/retail-world-models"
+license: PolyForm-Noncommercial-1.0.0
+keywords:
+  - retail forecasting
+  - world models
+  - promotions
+  - explanation
