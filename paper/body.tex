@@ -312,11 +312,19 @@ Favorita (daily) & Top 10 stores & Promotion, holidays and events, paydays & Fou
 \paragraph{Measure}
 We use the weighted root mean squared scaled error (WRMSSE) of
 M5~\cite{m5accuracy} at each level of the hierarchy: 12 levels on M5
-(Figure~\ref{fig:cube}b) and six on the others. Each series' error is scaled by
-its own in-sample one-step error, and series are weighted by their dollar sales
-(units on Favorita) over the last weeks of training. We report item by store,
-where orders and promotions are decided, the chain total, which a financial plan
-is set against, and the mean over all levels (the M5 score). Lower is better.
+(Figure~\ref{fig:cube}b) and six on the others. For a level with series $j$,
+history $y_{j,1},\dots,y_{j,T}$ before the window and forecasts $\hat y_{j,t}$
+for the $H$ periods after it,
+\begin{gather}
+\mathrm{RMSSE}_j = \sqrt{\frac{\tfrac1H\sum_{t=T+1}^{T+H}(y_{j,t}-\hat y_{j,t})^2}
+{\tfrac{1}{T-t_j}\sum_{t=t_j+1}^{T}(y_{j,t}-y_{j,t-1})^2}},\\
+\mathrm{WRMSSE} = \textstyle\sum_j w_j\,\mathrm{RMSSE}_j ,
+\end{gather}
+where $t_j$ is the series' first period with sales and $w_j$ is its share of the
+level's dollar sales (units on Favorita) over the last weeks of training. We
+report item by store, where orders and promotions are decided, the chain total,
+which a financial plan is set against, and the mean over all levels (the M5
+score). Lower is better.
 
 % =====================================================================
 \section{Models}
@@ -395,7 +403,17 @@ is taken from the others. Following attraction models~\cite{bell1975,cooper1988}
 the world model fits on the last 8 training weeks one number per run, the share
 $\alpha$ of the summed lift that the category total keeps, and rescales its item
 forecasts in each store and week so that the category total is the baseline
-total plus $\alpha$ times the summed lift. $\alpha$ is a forecast-implied split
+total plus $\alpha$ times the summed lift: with baselines $b_i$, lifts
+$\lambda_i$ and forecasts $\hat y_i = b_i + \lambda_i$ for the items $i$ of one
+store and week,
+\begin{equation}
+\hat y_i' = \hat y_i\,\frac{\sum_k b_k + \alpha\sum_k \lambda_k}{\sum_k \hat y_k},
+\end{equation}
+so each item keeps its share of the category forecast. With $\Lambda_g$ the summed
+lift and $G_g$ the actual minus baseline sales of store-week group $g$ in the
+last 8 training weeks, $\alpha$ is the least-squares slope
+$\sum_g \Lambda_g G_g / \sum_g \Lambda_g^2$, kept between 0 and 1.
+$\alpha$ is a forecast-implied split
 of lift, not an identified estimate of where promoted sales come from, because
 promotions are not assigned at random. On Dominick's three fits with different
 seeds are averaged in each run.
@@ -429,6 +447,56 @@ is the transition ablation. On Frat the lift model's settings, carried over from
 the first version, add readout dropout~\cite{dropout} of 0.2 and decoupled weight
 decay~\cite{adamw} of 0.01 that the world model does not use; study G reruns it
 with the world model's settings (\S\ref{sec:res-adds}).
+
+\subsection{Training losses}
+\label{sec:losses}
+
+\paragraph{The loss used}
+The world model and the lift model are trained on sales relative to the item's
+level, $z = y/\ell_i$, with the Tweedie deviance for a mean $\mu$ and power
+$p = 1.5$,
+\begin{equation}
+L_p(z, \mu) = -\frac{z\,\mu^{1-p}}{1-p} + \frac{\mu^{2-p}}{2-p},
+\end{equation}
+the negative log-likelihood, up to terms free of $\mu$, of a compound
+Poisson--gamma distribution with a point mass at zero~\cite{jorgensen1987}.
+Because the loss is on $z$, every item counts alike whatever its volume.
+LightGBM uses the same deviance with $p = 1.1$ on units, so large items count for
+more, and the Temporal Fusion Transformer a negative binomial likelihood on
+units.
+
+\paragraph{The changes tried}
+Each change below adds to or replaces $L_p$ for one batch $B$ of item, store and
+period examples; Table~\ref{tab:losses} scores every one against the
+configuration it changed. None became a default.
+\begin{itemize}\setlength{\itemsep}{1pt}
+\item \emph{Negative binomial} on units, $-\log\mathrm{NB}(y;\,\mu\ell_i, r)$
+with the spread $r$ learnt.
+\item \emph{Totals term}: the loss adds
+$\lambda_T\,\mathrm{mean}_t\big[(\sum_{b\in B_t}\hat y_b - \sum_{b\in B_t} y_b) /
+\max(1, \sum_{b\in B_t} y_b)\big]^2$, the relative gap between summed forecasts
+and sales over the examples $B_t$ sharing a date, so that a small bias in the
+same direction on many items is penalised ($\lambda_T = 1$).
+\item \emph{Volume and dollar weights}: each example's loss times
+$\ell_i^{\,\gamma}$, or $(\ell_i\bar\pi_i)^{\gamma}$ with $\bar\pi_i$ the item's
+usual price, normalised to mean one in the batch, with $\gamma = 0.9$ and
+$p = 1.1$, which makes the loss close to LightGBM's on units or dollars.
+\item \emph{Peak weight}: each period's loss times
+$1 + \kappa\min(|z_t - 1|, 5)$, normalised to mean one, so that peaks and dips
+count for more ($\kappa = 0.5$, with the dollar weight above).
+\item \emph{After-promotion weight}: each period with no lever on that follows a
+period with one counts $1 + w$ times, normalised to mean one ($w = 2$ or $5$).
+\item \emph{Latent term}: from the state now and the plan, the transition
+predicts the state the encoder gives once those periods are history, against a
+slowly updated copy of the encoder; the loss adds
+$\lambda_Z \sum_h \delta^h \lVert s_{t+h}(p) - \bar s_{t+h}\rVert^2$ with
+$\delta \le 1$ discounting far periods, and optionally a variance and covariance
+penalty on the state~\cite{vicreg}. It was also used alone to pretrain the
+encoder, which was then frozen, trained at a lower rate or trained fully on the
+forecast loss.
+\end{itemize}
+
+\input{generated/rev_tab_losses}
 
 \subsection{Ensemble}
 The equal-weight mean of the forecasts of the world model, LightGBM and TimesFM
@@ -491,15 +559,21 @@ and which, before a fix on 16 October, did not pass the run's seed to the model
 a model already reported, and every model, window and test is reported.
 
 \paragraph{Comparing two models}
-For a window and a level, the difference in WRMSSE between two models gets a
-95\% interval from 1,000 resamples of items: an item drawn twice counts twice in
-every series and aggregate it feeds, with the weights recomputed. Across
-windows, the mean difference gets a 95\% interval from 5,000 resamples of
-windows. A model is said to beat another only when that interval excludes zero;
+For models $A$ and $B$, window $k$ and a level, let $d_k = \mathrm{WRMSSE}_k(A) -
+\mathrm{WRMSSE}_k(B)$. Within a window, $d_k$ gets a 95\% interval from 1,000
+resamples of items: an item drawn twice counts twice in every series and
+aggregate it feeds, with the weights recomputed. Across the $K$ windows, the
+mean $\bar d = \frac1K\sum_k d_k$ gets a 95\% interval from the 2.5\% and 97.5\%
+quantiles of $\bar d^{*}$ over 5,000 resamples of windows with replacement. A
+model is said to beat another only when that interval excludes zero;
 when it does not, we say no difference was detected, which is not a finding that
 the two are equal. For each data set and level we report the 90\% model
-confidence set~\cite{hansen2011} by the range statistic with a bootstrap over
-windows. With four to six windows these tests have little power, and adjacent
+confidence set~\cite{hansen2011}: starting from all models $\mathcal M$, the range
+statistic $T = \max_{a,b\in\mathcal M} |\bar d_{ab}|/\hat\sigma_{ab}$, with
+$\hat\sigma_{ab}$ from the bootstrap over windows, is compared with its
+bootstrap distribution under equal expected loss (5,000 resamples); while the
+$p$-value is below 0.10 the model whose standardised losses against the others
+are largest is removed, and the models left form the set. With four to six windows these tests have little power, and adjacent
 windows are dependent: each is forecast from all data before it, so they share
 most of their training history, and an error tied to a season or a stretch of
 trading can recur in neighbouring windows. A bootstrap that resamples whole
@@ -509,9 +583,13 @@ interval where it matters (\S\ref{sec:res-world}).
 
 \paragraph{Intervals}
 Each model's interval forecasts come from its own errors in the earlier rolling
-windows of the same data set: errors scaled by each series' scale are pooled,
-and their quantiles (2.5\% to 97.5\%) are added to the point forecast, a rolling
-form of conformal calibration~\cite{vovk2005}. Where a level has fewer than 50
+windows of the same data set, a rolling form of conformal
+calibration~\cite{vovk2005}. With $e_{j,h} = (y_{j,t+h} - \hat y_{j,t+h})/\sigma_j$
+the scaled errors of the earlier windows at horizon $h$ ($\sigma_j$ the series'
+one-step scale), the interval at level $1-\alpha$ is
+$\big[\hat y_{j,t+h} + \sigma_j q_{\alpha/2,h},\ \hat y_{j,t+h} + \sigma_j
+q_{1-\alpha/2,h}\big]$, with $q_{\cdot,h}$ the empirical quantiles of the pooled
+$e_{\cdot,h}$. Where a level has fewer than 50
 earlier errors for each horizon, all horizons are pooled into one set of
 quantiles, and interval ends are rounded outwards to whole units except on
 Favorita; this fix was added on 16 October after the first intervals covered
@@ -526,9 +604,12 @@ over every window.
 Three simulations turn forecasts into costs. \emph{Store orders}: for each
 item-store-period, order the model's interval quantile at a critical ratio $r$
 of 0.5, 0.8 or 0.95; each unit over costs 1 and each unit short $r/(1-r)$.
-\emph{Category plan}: the absolute error of each category-by-store total in each
-period, in dollars (each node's units valued at its average price before the
-window), summed over the window and divided by sales in dollars; study G checks
+\emph{Category plan}: for category-by-store nodes $n$ with sales $y_{n,t}$,
+forecast $\hat y_{n,t}$ and average price $\bar\pi_n$ before the window,
+\begin{equation}
+C = \frac{\sum_n \bar\pi_n \sum_{t} |y_{n,t} - \hat y_{n,t}|}{\sum_n \bar\pi_n \sum_t y_{n,t}},
+\end{equation}
+the absolute error in dollars over sales in dollars; study G checks
 it against the first half of the window, the error of the whole window's total,
 units in place of dollars and equal node weights. \emph{Promotion decisions}: in the generated
 store worlds of the companion paper~\cite{paper2}, where each promotion's true
@@ -541,9 +622,17 @@ costs, not business results.
 Base forecasts at every node come from AutoETS fitted on the history before each
 window (seasonal at the aggregate nodes, non-seasonal item by store). They are
 reconciled bottom-up, top-down by historical proportions, and by the MinT
-family~\cite{mint}: ordinary least squares, weighted least squares with
-structural weights and with in-sample variances, and MinT with a shrunk
-covariance where the hierarchy has at most 6,000 nodes (Frat); nodes with no
+family~\cite{mint}. With $S$ the summing matrix (nodes by item-store series) and
+$\hat{\mathbf y}$ the base forecasts at every node, the reconciled item-store
+forecasts are
+\begin{equation}
+\tilde{\mathbf b} = (S^\top W^{-1} S)^{-1} S^\top W^{-1}\hat{\mathbf y},
+\end{equation}
+with $W = I$ (ordinary least squares), $W = \mathrm{diag}(S\mathbf 1)$ (structural
+weights), $W$ the diagonal of in-sample error variances, or $W = \lambda
+\mathrm{diag}(\hat\Sigma) + (1-\lambda)\hat\Sigma$ with the Sch\"afer--Strimmer
+intensity $\lambda$ (MinT-shrink, where the hierarchy has at most 6,000 nodes:
+Frat); nodes with no
 in-sample error are given the smallest variance of the others, a fix made after
 the first run failed (\S\ref{sec:res-recon}). Each model's own
 item-by-store forecasts are also combined with ETS above them by weighted least
