@@ -30,7 +30,9 @@ recorded as a mean only.}
 \end{figure*}
 
 \paragraph{What helped and what did not}
-Figure~\ref{fig:fratdev} shows every configuration screened on Frat. Our item
+Figure~\ref{fig:fratdev} shows the configurations of the main comparisons on
+Frat; Table~\ref{tab:record} lists the eleven other Frat configurations
+screened, including the worst (0.458) and the best (0.400). Our item
 encoder with a direct readout scored 0.424, level with LightGBM (0.421).
 Building the forecast as a baseline under the nothing-planned plan times a lift
 (the lift model) brought it to 0.406, better than LightGBM in all five runs and
@@ -78,7 +80,8 @@ Table~\ref{tab:tests} reports four further tests. \emph{New items}: with one
 product in ten held out of training, the lift model borrowing the state and
 level of the ten known items in the same store with the most labels in common
 scored 0.890 on the new items, against 1.310 for LightGBM fitted on labels,
-price and plan, and 1.510 for a forecast of zero. On Dominick's analgesics,
+price and plan, and 1.510 for a forecast of zero; hiding the item label in a tenth of training
+examples changed this little (0.879). On Dominick's analgesics,
 where items carry no category or maker labels, borrowing failed (2.999 against
 0.923): the method needs item attributes. \emph{Combination}: weighting the lift
 model and LightGBM on a validation window gave the best Frat result of the study
@@ -87,8 +90,10 @@ make different errors in promoted weeks; on analgesics the combination was
 level. Combinations were not carried to the final tests, which compare single
 models. \emph{Plan A against plan B}: for pairs of weeks of the same item and
 store with different plans, every model picked the week that sold more about
-78\% of the time; LightGBM was marginally ahead. \emph{Unusual plans}: on lever
-mixes an item had run in under 2\% of its weeks, no model degraded much and
+78\% of the time; LightGBM was marginally ahead. \emph{Unusual plans}: the
+test as first defined, a lever mix under 2\% of all training rows, found no
+such week in the windows, so it was redefined after that run as a mix the item
+itself had run in under 2\% of its weeks. On those, no model degraded much and
 LightGBM stayed ahead. The world model's ability to roll a plan forward did not
 show as an advantage on these tests.
 
@@ -99,10 +104,16 @@ show as an advantage on these tests.
 On analgesics, seasonal naive scored 1.274, the average of the last 8 weeks
 0.723 and LightGBM 0.715. The lift model scored 0.676 on three seeds, and the
 world model 0.667 once a totals term was removed from its loss: that term made
-the total worse, pulling forecasts 9\% low (0.819 for the lift model). Training
+the total worse, pulling forecasts 8\% low (0.819 for the lift model). Training
 four times longer without a stop broke the summed levels (1.473) while
 item-by-store error barely moved, so a small bias in the same direction on
-every item added up at the category total. Five seeds changed the picture: the
+every item added up at the category total. The seasonal calendar with
+promotion crowding made LightGBM worse (0.715 to 0.734) and, with a held price
+as the regular price, took the lift model to 0.919 by the same route; the held
+price alone was level (0.674). Item-to-item links did not help (0.697). Of the
+world-model ideas that failed on Frat, the plan split improved item-by-store
+error (0.707 to 0.693) and broke the total (0.687 to 0.793), and all three
+together scored 0.730 against 0.667. Five seeds changed the picture: the
 world model held (0.666) and LightGBM scored 0.702, but the lift model fell to
 0.718, so a three-seed figure had flattered it.
 
@@ -128,16 +139,23 @@ in 24 of 27 (Figure~\ref{fig:dom28}, Table~\ref{tab:dom28}). Analgesics did not
 generalise, which is why the paper reports every category. The failures (snack
 crackers 1.463, bath soap 1.465, the lift model on soft drinks 1.406) sat at the
 category total: item-by-store error was close to LightGBM's. On a six-store
-sample of snack crackers the cause was in-and-out and seasonal lines: items
+sample of snack crackers (one seed, 800 training steps, recorded in
+\texttt{docs/PAPER\_NOTES.md}) the cause was in-and-out and seasonal lines: items
 recorded in 8 to 20 of the last 26 weeks were 8\% of sales and the lift model
 forecast them at 9 times their sales, because the model set each item's level from its 26-week
 average after the item had fallen away. Capping extreme weeks did little; taking
 the level from the last 8 weeks removed most of it. On all 28 categories the
-8-week level brought the world model's mean to 0.717, removed the large failures
-(snack crackers 1.463 to 0.874, bath soap 1.465 to 1.195) and gave a little back
-in categories that had been fine, so it beat LightGBM in 10 categories against
-14 before. LightGBM, which sees short recent averages directly, does not have the
-problem.
+8-week level brought the world model's mean from 0.747 to 0.717 by removing the
+large failures (snack crackers 1.463 to 0.874, bath soap 1.465 to 1.195), but it
+was worse than the 26-week level in 15 of the 28 categories (cheese 0.996 to
+1.116, cereals 0.673 to 0.805), the median rose from 0.689 to 0.736, and it beat
+LightGBM in 10 categories against 14 before. It became the Dominick's default
+because it removed the failures that decided the mean, not because it was
+better in most categories. On eight categories the 8-week level beat a 4-week level in five for the world
+model, and the 4-week level was better in five for the lift model, which shares
+the setting; the lift model with an 8-week level broke bath soap (1.568 to
+2.203), and with a 4-week level cigarettes (0.918 to 1.245). LightGBM, which sees short recent averages directly, does not have
+the problem.
 
 \input{generated/tab_dom28}
 
@@ -154,7 +172,12 @@ sales forecast into the roll-forward, so that a promotion's sales could shape th
 weeks after it, fixed the soft-drink dip (1.32 to 1.00) and made the overall
 score worse in four of six categories. Weighting the loss by dollar sales and by
 how far a week sits from the item's usual level fixed cheese promoted weeks
-(1.21 to 1.00) and was worse overall in three categories. In frozen entrees every
+(1.21 to 1.00) and was worse overall in three categories. Both together were
+worse overall than the world model in four categories (snack crackers 0.874 to
+1.294, bottled juice 1.100 to 1.222, analgesics 0.679 to 0.901) and the best of
+all models only in frozen entrees (0.377). Adding the normalised roll-forward to
+the sales feedback put the snack-cracker forecast after a promotion right (0.97
+of sales) and broke its category total (1.60; overall 1.268). In frozen entrees every
 model, LightGBM included, forecast about 0.7 of sales after a promotion: there the
 week after is stronger than any model expected.
 
@@ -178,15 +201,26 @@ its range within a category was 0.04 to 0.38, against under 0.03 for LightGBM,
 and on the mean LightGBM was ahead in five of six. Brand switching fixed what it
 was built for: in snack crackers and soft drinks, where promoted weeks broke the
 total, it was better on every seed (0.813 to 0.752, 0.902 to 0.789) and
-item-by-store error improved too. The fitted share of the summed lift that the category total keeps
+item-by-store error improved too. Elsewhere it did not help: it was better on
+no seed in cheese and frozen entrees and on one of three in bottled juice and
+analgesics, and the mean was worse in cheese (1.088 to 1.111) and frozen
+entrees (0.406 to 0.416). It was kept for all six. The fitted share of the summed lift that the category total keeps
 (Figure~\ref{fig:ladder}g) is 0.00 to 0.66 in snack crackers, against about 0.9
 in bottled juice, analgesics and frozen entrees: in snack crackers the summed
 item lifts overstated the category total, and the fit took most of it back.
 Where it comes out at 1.0 the step changes nothing, a built-in check. The
 direction agrees with van Heerde, Gupta and Wittink's household
 estimates~\cite{vanheerde2003}, but the share is fitted to make totals right; it
-is not an estimate of switching. Normalising the rolled state narrowed the seed range in five of six
-categories, and averaging three fits per run with normalisation gave the
+is not an estimate of switching. Normalising the rolled state, tried first on
+one seed, was better in two categories, worse in three (analgesics 0.679 to
+0.790, soft drinks 0.747 to 0.882) and level in one, and the record ruled it
+out as a general fix. With switching and three seeds it narrowed the seed
+range in five of six categories, but the mean was worse than switching alone in
+snack crackers (0.752 to 0.830) and soft drinks (0.789 to 0.827). Added to
+switching with three fits averaged (seed 1), it was better in four categories
+and worse in cheese (0.921 to 0.983) and snack crackers (0.722 to 1.806); three
+fits averaged without it had broken bottled juice (1.170). It was kept because
+the combination was the steadiest version. Averaging three fits per run with normalisation gave the
 steadiest version (range 0.05 or less in five categories) and the candidate for
 the final test: better than LightGBM on the three-seed mean in analgesics (0.621
 against 0.701), frozen entrees (0.391 against 0.419) and soft drinks (0.743
@@ -235,8 +269,9 @@ lift and world models were level with LightGBM over three seeds (0.713 and
 0.707). Normalising the rolled state was the one change that separated the world
 model: 0.656, with its worst seed (0.675) better than the best seed without it
 (0.679), all of the gain at the totals and the seed range cut from 0.071 to
-0.029. It helped on M5's 28 daily steps and not on Dominick's 8 weekly steps,
-which fits the reading that it stops the state drifting over a long roll.
+0.029. On Dominick's 8 weekly steps it was worse in three of six categories
+at one seed (\S\ref{sec:dev-dom}), which fits the reading that it stops the
+state drifting over a long roll and has little to stop over a short one.
 Averaging three fits did not help on M5 (0.665), where single fits were already
 steady.
 
@@ -253,5 +288,57 @@ every version under-forecast by 4\% to 6\%, while on the test month the world
 model over-forecast by 2.6\%: the sign of the level error changed between
 adjacent months, so a fix tuned on one would not carry to the next. That
 finding is what led to the confirmation months of \S\ref{sec:res-final}.
+
+\subsection{Every change and run in the record}
+\label{sec:dev-record}
+
+Every run is recorded in \texttt{results/README.md}, with its configuration and
+run folders. Table~\ref{tab:changes} scores every change to a model setting
+that has saved runs against the configuration it changed: \rcount{changen}
+changes over \rcount{changepairs} comparisons. Several changes that were kept
+won about half their comparisons or fewer; the text above gives the reason each
+was kept. Table~\ref{tab:record} lists the results in the record not shown in
+the figures and tables above, and the configurations that were written and
+never run on full data.
+
+\input{generated/rev_tab_changes}
+
+\begin{table*}[t]
+\centering
+\caption{\textbf{Results in the record not shown elsewhere in the paper, and
+configurations never run on full data.} Overall WRMSSE on the development
+windows, lower is better; ``against'' gives the configuration it changed. Frat:
+five seeds; analgesics: three seeds; other Dominick's rows: one seed. Values
+transcribed from \texttt{results/README.md}.}
+\label{tab:record}
+\footnotesize
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{p{0.50\textwidth}p{0.12\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}}
+\toprule
+\textbf{Run} & \textbf{Where} & \textbf{Result} \\
+\midrule
+Item encoder and readout, whole stores drawn in training & Frat & 0.430 against 0.424 \\
+Item encoder and readout, 10,000 steps & Frat & 0.432 against 0.424 \\
+Lever step with the latent loss alone & Frat & 0.428 against 0.429 \\
+Lift model, 52 weeks of history & Frat & 0.413 against 0.406 \\
+Lift model, plan of the four weeks before and the same week last year & Frat & 0.418 against 0.406 \\
+LightGBM with the seasonal calendar and promotion crowding & Frat & 0.426 against 0.421 \\
+Lift model with validation stop, totals term, dropout and weight decay together & Frat & 0.445 against 0.406 \\
+Lift model, latent pretraining, encoder at a tenth of the rate, latent loss kept on & Frat & 0.415 against 0.406 \\
+World model, long latent pretraining, with validation stop and totals term & Frat & 0.458 against 0.408 \\
+LightGBM, average of five fits & Frat & 0.417 against 0.421 \\
+Lift model, average of five fits & Frat & 0.400 against 0.406; the best Frat result of any single model family, not carried to the final tests (the record gives no reason) \\
+\midrule
+Lift model, all training fixes with long training & Analgesics & 0.716 against 0.676 \\
+World model with the totals term, and with the best Frat recipe & Analgesics & 0.732 and 0.729 against 0.667 \\
+World model, latent check, VICReg penalty and near-week weighting & Analgesics & 0.685 against 0.667 \\
+\midrule
+World model with switching, three fits averaged, without the normalised roll-forward & 6 categories & Bottled juice 1.170 against 1.066 \\
+\midrule
+World model, full-length training, with seasonal inputs, and with a dollar-weighted loss & 4 categories & Configured (job \texttt{dominicks\_seasonal\_long}); not run on full data \\
+World model, unit-volume weighted loss & 8 categories & Configured (job \texttt{dominicks\_units\_loss}); not run on full data. On a six-store sample (lift model, 800 steps) it cut the snack-cracker over-forecast from 1.63 to 1.39 \\
+\bottomrule
+\end{tabular}
+\end{table*}
 
 % =====================================================================

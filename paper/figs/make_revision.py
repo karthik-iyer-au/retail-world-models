@@ -1015,6 +1015,50 @@ not run were configured but have no full-data run in the records. Built by \\tex
     (GEN / "rev_tab_losses.tex").write_text(tex)
 
 
+def tab_changes():
+    """Every one-setting change to the world or lift model with saved runs, against the configuration it changed
+    (scripts/change_ledger.py)."""
+    d = read("change_ledger.csv")
+    dsname = {"dominicks": "Dominick's", "breakfast_at_the_frat": "Frat", "m5": "M5"}
+    kept = {"Roll-forward through the plan (world model against lift model)": "Yes (world model)",
+            "Normalised roll-forward": "Yes (M5, Dominick's)",
+            "Brand switching": "Yes (Dominick's)",
+            "Item level from the last 8 periods, against the whole history window": "Yes (Dominick's)",
+            "Readout dropout and weight decay": "Yes (Frat lift model)",
+            "New-item start from similar items": "New-item test only"}
+    g = (d.groupby("change").agg(n=("diff", "size"), lower=("diff", lambda x: int((x < 0).sum())),
+                                 w=("wrmsse", "mean"), wo=("wrmsse_ref", "mean"),
+                                 ds=("dataset", lambda x: ", ".join(sorted({dsname.get(v, v) for v in x}))))
+         .reset_index().sort_values(["n", "change"], ascending=[False, True]))
+    lines = [f"{r.change.replace('&', 'and')} & {r.ds} & {r.n} & {r.lower} & {f3(r.w)} & {f3(r.wo)} & "
+             f"{kept.get(r.change, 'No')} \\\\" for r in g.itertuples()]
+    put("rcount", "changen", value=str(len(g)))
+    put("rcount", "changepairs", value=str(int(g.n.sum())))
+    tex = f"""\\begin{{table*}}[t]
+\\centering
+\\caption{{\\textbf{{Every change to a model setting with saved runs, scored against the configuration it changed;
+most were lower in error in at most half their comparisons, including some that were kept.}} A comparison is two
+configurations with the same data, windows and every other setting, scored on the windows and seeds both ran
+(overall WRMSSE, development windows, from the audit of the saved runs). Comparisons: the number of such pairs
+(categories, data sets or base configurations); lower: how many the change won. With it and without: mean WRMSSE
+over the pairs. Kept: whether the change is in the models of the main text. Loss changes are in
+Table~\\ref{{tab:losses}}; averaging fits, the stock term and runs without saved models are in the text and
+Table~\\ref{{tab:record}}. Built by \\texttt{{scripts/change\\_ledger.py}}.}}
+\\label{{tab:changes}}
+\\footnotesize
+\\begin{{tabular}}{{p{{0.36\\textwidth}}p{{0.15\\textwidth}}rrrrl}}
+\\toprule
+\\textbf{{Change}} & \\textbf{{Tested on}} & \\textbf{{Comparisons}} & \\textbf{{Lower}} & \\textbf{{With it}} &
+\\textbf{{Without}} & \\textbf{{Kept}} \\\\
+\\midrule
+{chr(10).join(lines)}
+\\bottomrule
+\\end{{tabular}}
+\\end{{table*}}
+"""
+    (GEN / "rev_tab_changes.tex").write_text(tex)
+
+
 def core_values():
     """Per-window comparison of the core models with LightGBM (results/paper1_revision/scores)."""
     word = {i: w for i, w in enumerate(["none", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"])}
@@ -1084,6 +1128,7 @@ def main():
     studyg_values()
     catcost_values()
     tab_losses()
+    tab_changes()
     tab_grain(gt)
     tab_rolling(acc, sets)
     tab_ablation(ab)

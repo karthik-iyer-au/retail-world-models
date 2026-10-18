@@ -23,6 +23,10 @@ comparison on that month alone would have ranked it first. Run on the final
 windows (Table~\ref{tab:finalsnew}), the ensemble is lowest or within
 \rcount{finalsgap} of the lowest item by store on every data set, which agrees
 with the rolling windows.
+One final run did not finish as first started: the frozen-entrees world model,
+seed 3, stopped when the runtime dropped, could not be resumed because of a
+fault in restoring its random state (since fixed), and was run again from the
+start with the same settings (0.476 overall).
 
 \begin{figure*}[t]
 \centering
@@ -71,6 +75,33 @@ forecast almost nothing: LightGBM \cutLgb{} units across seeds, TimesFM
 \cutWorld; the graph model \cutGraph; the lift model \cutLift. How large the
 response should be is not fixed by the data: the world-model seeds differ by a
 factor of five, and one lift-model seed forecast over 200,000 units.
+
+\paragraph{Items with no recent sales}
+On M5 the error at the chain total followed the error in the overall level
+(correlation \biasErrCorr{} over \biasErrN{} runs of every model on the four windows,
+Figure~\ref{fig:levelscatter}a). Grouping April's item-stores by their sales in
+March (Figure~\ref{fig:levelscatter}b), both models were within 6\% of sales in
+every group that sold in March, and the world model was closer on 50.6\% to
+54.2\% of item-stores in each. On item-stores that sold nothing in March, which
+sold 14,102 units in April, the world model forecast 62\% too much and LightGBM
+5\% too little: the world model's weakest group. A first grouping by sales in the
+scored window itself had shown LightGBM's under-forecast growing with the sales
+rate, to 18\% on the fastest items; that pattern came from grouping by the
+outcome being scored and is not reported as a finding.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_level_scatter.pdf}
+\caption{\textbf{On M5 the error at the total followed the error in the level,
+and the world model over-forecast item-stores that sold nothing the month
+before.} \textbf{(a)} Total forecast against total sales and WRMSSE at the chain
+total, every model and seed on the four M5 windows (the failed April lift seed
+left out). \textbf{(b)} April forecast against April sales by the item-store's
+sales a day in March (April units in brackets), world model and LightGBM, three
+seeds averaged; right: the share of item-stores where the world model was
+closer.}
+\label{fig:levelscatter}
+\end{figure*}
 
 
 \subsection{What the first version tried and dropped}
