@@ -153,19 +153,20 @@ window the Spearman correlation across configurations is taken, and the
 correlations are pooled weighted by the number of configurations. The
 permutation reassigns whole configurations, with their scores in every window,
 within each set, and the interval comes from resampling configurations within
-each set. The pooled correlation is \rWwRho{} (95\% interval \rWwLo{} to
-\rWwHi, $p = \rWwP$): \rWwRhoD{} on Dominick's, \rWwRhoF{} on Frat and
-\rWwRhoM{} on M5. With C5 left out it is \rWwNoCeRho{} (\rWwNoCeLo{} to
-\rWwNoCeHi, $p = \rWwNoCeP$), and with C1 and C5 left out \rWwNoCaCeRho{}
-(\rWwNoCaCeLo{} to \rWwNoCaCeHi). C5 compares the forecast with sales over the
-same baseline and so shares information with accuracy; it is the one check that
-goes clearly with accuracy in every analysis (rank of predicted with observed
-lift \rRhoCeRankPool, bias \rRhoCeBiasPool, on the unit fixed in advance).
+each set. No M5 set has four configurations, so M5 drops out. The pooled
+correlation is \rWwRho{} (95\% interval \rWwLo{} to \rWwHi, $p = \rWwP$):
+\rWwRhoD{} on Dominick's and \rWwRhoF{} on Frat. With C5 left out it is
+\rWwNoCeRho{} (\rWwNoCeLo{} to \rWwNoCeHi, $p = \rWwNoCeP$), and with C1 and C5
+left out \rWwNoCaCeRho{} (\rWwNoCaCeLo{} to \rWwNoCaCeHi, $p = \rWwNoCaCeP$).
+C5 compares the forecast with sales over the same baseline and so shares
+information with accuracy; on the unit fixed in advance it is the check most
+strongly related to accuracy (rank of predicted with observed lift
+\rRhoCeRankPool, bias \rRhoCeBiasPool).
 
 What these data support is narrow. On these saved versions, configurations
-compared on the same data and window that passed more of the checks that do not
-compare the forecast with sales did not forecast better or worse, and the
-interval excludes a correlation stronger than about 0.1 in either direction.
+compared on the same data and window that passed more checks did not clearly
+forecast better or worse. The intervals run from about $-0.25$ to $0.12$: they
+exclude a strong relation in either direction, not a weak one.
 They do not show that faithfulness and accuracy are unrelated in general: the
 versions are development variants of two model families, the checks measure
 faithfulness only in part, and a stronger relation could hold across more
