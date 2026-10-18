@@ -213,3 +213,24 @@ one version are not independent and differ in difficulty. Pass counts with C5
 left out, and with C1 and C5 left out, are added as exploratory: C5 compares the
 forecast with sales over the same baseline and so shares information with
 accuracy.
+
+**18 October 2026, after a review of the audit: C1 resolved, the benchmark
+reworded, and the main test rerun with dependence kept. Added after the
+results.** (1) C1. With the plan the model itself treats as nothing planned
+(new `StateModel.nothing_planned`: levers off, price at the model's own regular
+price over its own history window), the lift is zero to rounding for every
+series with history, because the plan path and the nothing-planned path then
+receive identical inputs; checked on saved Frat runs (0.0004 to 0.0009 of the
+largest forecast under the audit's plan, under 1e-7 under the model's). The
+earlier diagnosis took the regular price from the model's whole stored history,
+not from its history window, which is why it did not remove the violation.
+`scripts/c1_interface.py` finds, for every audited configuration and window,
+the series-periods where the two plans differ and why; the difference depends on
+the data and settings only, so each model is fitted for one step to build its
+inputs. The audit's C1 scores are reported unchanged, beside C1 under the
+model's own plan. (2) The zone deviations are described as a noisy
+observational benchmark, not a ground truth. (3) The checks-against-accuracy
+test is rerun comparing only configurations fitted on the same data and scored
+on the same window, seeds averaged, with a permutation that moves whole
+configurations within each data and a bootstrap over configurations. The tests
+fixed in advance are reported unchanged beside it.

@@ -1198,6 +1198,41 @@ class StateModel(Forecaster):
     def predict(self, future: pd.DataFrame) -> np.ndarray:
         return self._predict(future, "log_mu")
 
+    def nothing_planned(self, future: pd.DataFrame) -> pd.DataFrame:
+        """The plan this model treats as "nothing planned" for `future`: every
+        lever off, and, where the plan records a price, the regular price the
+        model itself uses for that series and period (its rule over its own
+        history window, the recorded regular column, or a held price). Columns
+        that are not levers are left as planned. Given this plan, `breakdown`
+        returns a lift of zero for every series the model has history for. Rows
+        of series without history (new items) keep their plan price: their
+        baseline borrows several other series' regular prices, so no single
+        plan matches it."""
+        import torch
+
+        fut_dates, fut = self._future(future)
+        off_price = np.full((len(self._names), self.horizon), np.nan)
+        with torch.no_grad():
+            for rows, picked in self._batches():
+                start = torch.full_like(rows, self._past["price"].shape[1])
+                _, _, _, on_sale, _, fut_off = self._window(
+                    self._past, {**fut, "start": torch.zeros_like(rows)}, rows, start)
+                p = (fut_off[..., 0] * self._price_level).cpu().numpy()
+                real = (torch.ones_like(rows, dtype=torch.bool) if picked is None
+                        else picked.reshape(-1) >= 0).cpu().numpy()
+                p = np.where(on_sale.cpu().numpy(), p, np.nan)
+                off_price[rows.cpu().numpy()[real]] = p[real]
+        out = future.drop(columns=[UNITS], errors="ignore").copy()
+        for name in self.levers:
+            if name in out.columns:
+                out[name] = np.where(out[name].notna(), 0, out[name])
+        r = series_rows(out[SERIES], self._names)
+        c = pd.Index(fut_dates).get_indexer(out[DATE])
+        model_price = np.where(r >= 0, off_price[np.clip(r, 0, None), c], np.nan)
+        if PRICE in out.columns:
+            out[PRICE] = np.where(out[PRICE].notna() & ~np.isnan(model_price), model_price, out[PRICE])
+        return out
+
     def breakdown(self, future: pd.DataFrame) -> pd.DataFrame:
         """Each forecast split in two: `baseline`, what the item would sell at
         its regular price with no levers, and `lift`, what the plan adds or
