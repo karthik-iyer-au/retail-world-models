@@ -122,6 +122,9 @@ def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True)
     ap.add_argument("--only", nargs="*")
+    ap.add_argument("--stores", nargs="*", help="M5 only: load these stores (for memory)")
+    ap.add_argument("--sample-series", type=int, default=0,
+                    help="keep this many series drawn at random (for memory); recorded in the output")
     a = ap.parse_args(argv)
     v = pd.read_csv(ROOT / "results" / "paper2" / "summary" / "versions.csv")
     audited = set(v["config"].str.replace(r"_seed\d+$", "", regex=True))
@@ -136,11 +139,20 @@ def main(argv=None):
         if names[0] in done:
             continue
         cfg = yaml.safe_load(open(ROOT / "configs" / "experiments" / f"{names[0]}.yaml"))
+        sample = ""
+        if a.stores and cfg["dataset"]["name"] == "m5":
+            cfg["dataset"].setdefault("params", {})["stores"] = a.stores
+            sample = "stores " + " ".join(a.stores)
         for origin, train, test in windows(cfg):
+            if a.sample_series:
+                keep = pd.Series(train[SERIES].unique()).sample(
+                    min(a.sample_series, train[SERIES].nunique()), random_state=0)
+                train, test = train[train[SERIES].isin(keep)], test[test[SERIES].isin(keep)].reset_index(drop=True)
+                sample = (sample + f" {len(keep)} series").strip()
             m = one_step_model(cfg, train)
             res = compare(cfg, m, train, test)
             for n in names:
-                rows.append({"group": names[0], "config": n, "origin": origin, **res})
+                rows.append({"group": names[0], "config": n, "origin": origin, "sample": sample, **res})
             print(names[0], origin, {k: round(x, 4) for k, x in res.items()}, flush=True)
         pd.DataFrame(rows).to_csv(out, index=False, float_format="%.6g")
 
