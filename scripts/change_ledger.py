@@ -32,15 +32,17 @@ CHANGES = {
     "Own forecast fed into the roll-forward": ({"feedback"}, "feedback"),
     "Brand switching": ({"switching"}, "switching"),
     "Averaging three fits": ({"seed_average"}, "seed_average"),
-    "Longer item level window (8 against 4 periods)": ({"scale_window"}, "scale_window"),
-    "Level window set by item role": ({"scale_window", "scale_window_by"}, "scale_window_by"),
-    "Recent and longer level together": ({"scale_window", "level_views"}, "level_views"),
+    "Item level window": ({"scale_window"}, "scale_window"),
+    "Level window set by the item's role": ({"scale_window", "scale_window_by"}, "scale_window_by"),
+    "Both levels as inputs, scaled by the 26-week level (against the 8-week level)": ({"scale_window", "level_views"},
+                                                                                       "level_views"),
     "Past-year level": ({"long_level"}, "long_level"),
     "Year-ago sales as an input": ({"year_ago"}, "year_ago"),
     "Plan of earlier periods as inputs": ({"plan_lags"}, "plan_lags"),
     "Plan split into regular and promoted parts": ({"plan_split"}, "plan_split"),
     "Weekday as seven inputs": ({"weekday_flags"}, "weekday_flags"),
-    "Event kinds as inputs": ({"extra", "weekday_flags"}, "extra"),
+    "Event kinds as inputs": ({"extra"}, "extra"),
+    "Weekday and event kinds as inputs": ({"extra", "weekday_flags"}, "weekday_flags"),
     "More training steps": ({"steps"}, "steps"),
     "Regular price held for more periods": ({"regular_hold"}, "regular_hold"),
     "Readout dropout and weight decay": ({"readout_dropout", "weight_decay"}, "readout_dropout"),
@@ -88,13 +90,19 @@ def main():
             for name, (allowed, key) in CHANGES.items():
                 if not moved or not moved <= allowed or key not in moved:
                     continue
-                if key in ("scale_window", "steps", "history"):
+                if key == "extra":
+                    on, off = (a, b) if len(pa.get(key) or []) > len(pb.get(key) or []) else (b, a)
+                elif key in ("scale_window", "steps", "history"):
                     on, off = (a, b) if (pa.get(key) or 0) > (pb.get(key) or 0) else (b, a)
                 else:
                     on, off = (a, b) if has(pa.get(key)) else (b, a)
                 m = v[v["base"] == on].merge(v[v["base"] == off], on=["seed", "origin"], suffixes=("", "_ref"))
                 if m.empty:
                     continue
+                if name == "Item level window":
+                    lo = cfg[off][2].get(key)
+                    name = (f"Item level from the last {cfg[on][2][key]} periods, against "
+                            + (f"the last {lo}" if lo else "the whole history window"))
                 rows.append({"change": name, "with": on, "without": off, "dataset": ds,
                              "setting": f"{key}={cfg[on][2].get(key)} against {cfg[off][2].get(key)}",
                              "runs": len(m), "wrmsse": m["wrmsse"].mean(), "wrmsse_ref": m["wrmsse_ref"].mean()})

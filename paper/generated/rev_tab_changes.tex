@@ -1,0 +1,43 @@
+\begin{table*}[t]
+\centering
+\caption{\textbf{Every change to a model setting with saved runs, scored against the configuration it changed;
+most were lower in error in at most half their comparisons, including some that were kept.} A comparison is two
+configurations with the same data, windows and every other setting, scored on the windows and seeds both ran
+(overall WRMSSE, development windows, from the audit of the saved runs). Comparisons: the number of such pairs
+(categories, data sets or base configurations); lower: how many the change won. With it and without: mean WRMSSE
+over the pairs. Kept: whether the change is in the models of the main text. Loss changes are in
+Table~\ref{tab:losses}; averaging fits, the stock term and runs without saved models are in the text and
+Table~\ref{tab:record}. Built by \texttt{scripts/change\_ledger.py}.}
+\label{tab:changes}
+\footnotesize
+\begin{tabular}{p{0.36\textwidth}p{0.15\textwidth}rrrrl}
+\toprule
+\textbf{Change} & \textbf{Tested on} & \textbf{Comparisons} & \textbf{Lower} & \textbf{With it} &
+\textbf{Without} & \textbf{Kept} \\
+\midrule
+Item level from the last 8 periods, against the whole history window & Dominick's & 36 & 17 & 0.799 & 0.804 & Yes (Dominick's) \\
+Normalised roll-forward & Dominick's, M5 & 19 & 10 & 0.845 & 0.832 & Yes (M5, Dominick's) \\
+Own forecast fed into the roll-forward & Dominick's & 18 & 4 & 0.910 & 0.816 & No \\
+Item level from the last 4 periods, against the whole history window & Dominick's & 16 & 12 & 0.938 & 0.987 & No \\
+Item level from the last 8 periods, against the last 4 & Dominick's & 16 & 8 & 0.966 & 0.938 & No \\
+Brand switching & Dominick's & 12 & 7 & 0.797 & 0.832 & Yes (Dominick's) \\
+Both levels as inputs, scaled by the 26-week level (against the 8-week level) & Dominick's & 6 & 2 & 0.946 & 0.818 & No \\
+Level window set by the item's role & Dominick's & 6 & 1 & 1.125 & 0.884 & No \\
+Roll-forward through the plan (world model against lift model) & Dominick's, Frat, M5 & 6 & 2 & 0.504 & 0.504 & Yes (world model) \\
+Plan split into regular and promoted parts & Dominick's, Frat & 5 & 1 & 0.538 & 0.520 & No \\
+More training steps & Dominick's, Frat, M5 & 3 & 1 & 0.844 & 0.578 & No \\
+Plan of earlier periods as inputs & Frat & 2 & 0 & 0.414 & 0.407 & No \\
+Year-ago sales as an input & Frat & 2 & 0 & 0.413 & 0.409 & No \\
+Event kinds as inputs & M5 & 1 & 1 & 0.646 & 0.653 & No \\
+Longer history and training period & Frat & 1 & 0 & 0.413 & 0.406 & No \\
+New-item start from similar items & Frat & 1 & 1 & 0.461 & 0.594 & New-item test only \\
+Past-year level & M5 & 1 & 0 & 0.680 & 0.646 & No \\
+Readout dropout and weight decay & Frat & 1 & 0 & 0.409 & 0.406 & Yes (Frat lift model) \\
+Recorded base price as the regular price & Frat & 1 & 0 & 0.434 & 0.406 & No \\
+Regular price held for more periods & Dominick's & 1 & 1 & 0.674 & 0.676 & No \\
+Unknown-item labels in training & Frat & 1 & 1 & 0.459 & 0.461 & No \\
+Weekday and event kinds as inputs & M5 & 1 & 1 & 0.646 & 0.646 & No \\
+Weekday as seven inputs & M5 & 1 & 0 & 0.653 & 0.646 & No \\
+\bottomrule
+\end{tabular}
+\end{table*}

@@ -585,7 +585,16 @@ comparison on that month alone would have ranked it first.
 
 Table~\ref{tab:dropped} lists what this revision tried and did not keep;
 Table~\ref{tab:ledger} in Supplement~\ref{sec:supplementfinal} lists what the
-first version tried, with its failures.
+first version tried, with its failures. Supplement~\ref{sec:dev-record}
+scores every change to a model setting with saved runs against the
+configuration it changed (Table~\ref{tab:changes}), every change to the loss
+(Table~\ref{tab:losses}), and lists every other result in the record
+(Table~\ref{tab:record}). Some changes that were kept won half their
+comparisons or fewer: the 8-week item level on Dominick's was worse than the
+26-week level in 15 of 28 categories and was kept because it removed the
+failures that decided the mean, and the normalised roll-forward was worse in
+three of six Dominick's categories at one seed and was kept for the steadiness
+it gave with averaging.
 
 \begin{table*}[t]
 \centering
@@ -602,7 +611,7 @@ after a promotion.}
 \midrule
 Stock term on the world model (study C) & Dominick's dev., seed 1 & Overall worse than the world model in three of six categories \\
 Plan of the two periods before, on the lift model (study C) & Dominick's dev., seed 1 & Overall worse than the world model in three of six \\
-Stock term on the lift model (study C) & Dominick's dev., then rolling & Passed on development (after promotion \rpan{dev}{sdr}{liftstock}{mean}{afterpromofa} soft drinks, \rpan{dev}{sna}{liftstock}{mean}{afterpromofa} snack crackers); on the rolling windows \rpan{rol}{sdr}{liftstock}{roll}{afterpromofa} and \rpan{rol}{sna}{liftstock}{roll}{afterpromofa}, against \rpan{rol}{sdr}{worldmodel}{roll}{afterpromofa} and \rpan{rol}{sna}{worldmodel}{roll}{afterpromofa} for the world model \\
+Stock term on the lift model (study C) & Dominick's dev., then rolling & Passed on development on the mean of the runs only; the second-runtime repeat alone failed (after promotion \rpan{dev}{sdr}{liftstock}{mean}{afterpromofa} soft drinks, \rpan{dev}{sna}{liftstock}{mean}{afterpromofa} snack crackers); on the rolling windows \rpan{rol}{sdr}{liftstock}{roll}{afterpromofa} and \rpan{rol}{sna}{liftstock}{roll}{afterpromofa}, against \rpan{rol}{sdr}{worldmodel}{roll}{afterpromofa} and \rpan{rol}{sna}{worldmodel}{roll}{afterpromofa} for the world model \\
 Loss weight $1+w$, $w=2$, after a promotion (study E) & Dominick's dev., seed 1 & Error after promotion lower in all six (soft drinks \raft{sdr}{worldmodel}{afterpromoerr} to \raft{sdr}{afterpromow2}{afterpromoerr}); overall worse in four (snack crackers \raft{sna}{worldmodel}{overall} to \raft{sna}{afterpromow2}{overall}) \\
 Loss weight $1+w$, $w=5$ (study E) & Dominick's dev., seed 1 & Overall worse in four; snack crackers after promotion \raft{sna}{afterpromow5}{afterpromofa} \\
 Fitted ensemble weights (study A) & All nine, rolling & Better than equal weights in \rcount{fittedwins} of \rcount{fittedn} comparisons, worse in \rcount{fittedlosses} \\
@@ -620,10 +629,16 @@ route. A stock term, one number per item that builds with sales above the
 item's level, decays by a learnt share and lowers later sales by a learnt amount
 that cannot be negative, made the world model worse overall in three of six
 categories on the development windows. On the lift model it passed the
-development rule, but on the rolling windows it did not fix the after-promotion
+development rule only on the mean of the runs: the repeat on the second
+runtime alone was worse overall than the world model in four categories and
+would have failed. On the rolling windows it did not fix the after-promotion
 forecast (soft drinks \rpan{rol}{sdr}{liftstock}{roll}{afterpromofa} with it,
 \rpan{rol}{sdr}{lift}{roll}{afterpromofa} for the plain lift model,
-\rpan{rol}{sdr}{worldmodel}{roll}{afterpromofa} for the world model). A loss
+\rpan{rol}{sdr}{worldmodel}{roll}{afterpromofa} for the world model), it made
+the snack-cracker total worse than the plain lift model's
+(\rpan{rol}{sna}{liftstock}{roll}{total} against
+\rpan{rol}{sna}{lift}{roll}{total}), and its total error was higher than
+LightGBM's in all six categories. A loss
 weight on the periods after a promotion lowered the error there in all six
 categories and made the overall score worse in four. None became a default. The
 reason given for study C also needed a correction: the 1.32 and 1.33
