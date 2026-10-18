@@ -391,6 +391,7 @@ def make(out: Path, measured):
     write_tables(d, dv, mt, gen, mtv)
     write_macros(d, dv, mt, z, rows, gen, mtv, ww)
     write_diag_macros(gen)
+    write_c1_macros(d, gen)
     return d, mt, rows
 
 
@@ -476,6 +477,47 @@ def write_macros(d, dv, mt, z, rows, gen: Path, mtv=None, ww=None):
             put(f"rZSlope{t}Lo", f2(sl - 1.96 * se))
             put(f"rZSlope{t}Hi", f2(sl + 1.96 * se))
     (gen / "real_macros.tex").write_text("\n".join(out) + "\n")
+
+
+def write_c1_macros(d: pd.DataFrame, gen: Path):
+    """C1 against the two definitions of nothing planned
+    (results/paper2/diagnose/c1_interface.csv, scripts/c1_interface.py)."""
+    f = ROOT / "results" / "paper2" / "diagnose" / "c1_interface.csv"
+    if not f.exists():
+        return None
+    c = pd.read_csv(f).rename(columns={"config": "base", "rows": "plan_rows"}).drop(columns="group")
+    m = d.merge(c, on=["base", "origin"], how="inner")
+    out = []
+
+    def put(name, value):
+        out.append(f"\\newcommand{{\\{name}}}{{{value}}}")
+
+    pc = lambda v: f"{100 * v:.1f}" if pd.notna(v) else "n/a"  # noqa: E731
+    tag = {"m5": "M", "dominicks": "D", "frat": "F"}
+    put("cIfN", int(len(m)))
+    put("cIfOf", int(len(d)))
+    same, diff = m[m["differ"] == 0], m[m["differ"] > 0]
+    put("cIfSameN", int(len(same)))
+    put("cIfSameMaxCa", f"{same['C1'].max():.0e}".replace("e-0", "e-") if len(same) else "n/a")
+    put("cIfSamePass", int((same["C1"] < 1e-3).sum()))
+    put("cIfDiffN", int(len(diff)))
+    put("cIfDiffFail", int((diff["C1"] >= 1e-3).sum()))
+    put("cIfFailN", int((m["C1"] >= 1e-3).sum()))
+    put("cIfFailWithDiff", int(((m["C1"] >= 1e-3) & (m["differ"] > 0)).sum()))
+    for ds, t in tag.items():
+        g = m[m["dataset"] == ds]
+        put(f"cIfAny{t}", f"{int((g['differ'] > 0).sum())} of {len(g)}" if len(g) else "none")
+        put(f"cIfMed{t}", pc(g["differ"].median()) if len(g) else "n/a")
+        put(f"cIfMax{t}", pc(g["differ"].max()) if len(g) else "n/a")
+    tot = (m["plan_rows"] * m["differ"]).sum()
+    for col, nm in (("audit_no_regular", "NoReg"), ("rule_differs", "Rule"), ("new_item", "New"),
+                    ("lever_differs", "Lever"), ("model_price_one", "One")):
+        put(f"cIfShare{nm}", f"{100 * (m['plan_rows'] * m[col]).sum() / tot:.0f}" if tot else "0")
+    put("cIfGap", f"{np.exp(m.loc[m['differ'] > 0, 'median_log_gap'].median()):.1f}")
+    r = spearmanr(diff["differ"], diff["C1"]).statistic if len(diff) > 3 else np.nan
+    put("cIfRho", f"{r:.2f}" if pd.notna(r) else "n/a")
+    (gen / "c1_macros.tex").write_text("\n".join(out) + "\n")
+    return m
 
 
 def write_diag_macros(gen: Path):

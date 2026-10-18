@@ -36,28 +36,51 @@ values (squares), by lever.}\label{fig:realchecks}
 On Frat \rAllF{} of \rWinF{} version-windows pass every check that applies;
 on M5 and Dominick's none do. The checks fail for different reasons on each
 data set, and two of them, C1 and C4, needed a diagnosis before they could be
-read. We reran both on \dRuns{} saved runs (\dWindows{} windows) chosen by a rule
-fixed before the rerun (\texttt{docs/PAPER2\_PLAN.md}, 17 October); the
-diagnosis is reported as added after the results.
+read. C4 was rerun on \dRuns{} saved runs (\dWindows{} windows) chosen by a rule
+fixed before the rerun (\texttt{docs/PAPER2\_PLAN.md}, 17 October), and C1 was
+traced for every audited configuration (18 October); both diagnoses are
+reported as added after the results.
 
-\paragraph{C1: the parts add up, but the lift with nothing planned is often not zero}
+\paragraph{C1: the parts add up, and every failure traces to what ``nothing planned'' means}
 In every version baseline plus lift equals the forecast (largest violation
 \rCaPartsMax{} of the largest forecast), and the baseline moves with the plan by
-at most \rCaBaseMax\% of it. What fails is the lift when nothing is planned: it
-passes on all \rVerM{} M5 versions, but only on \rPassDCa{} Dominick's and
-\rPassFCa{} Frat version-windows, with a median violation of \rMedDCaPct\% and
-\rMedFCaPct\% of the largest forecast. In the rerun, using the regular price the
-model stores (its highest price over the last 12 periods), or leaving a missing
-price missing, did not remove the violation in any of the \dRuns{} runs. It is
-largest in two groups: the Frat development configurations that read a recorded
-base price as the regular price (\dFratLo\% to \dFratHi\% of the largest
-forecast, on \dFratRowsLo\% to \dFratRowsHi\% of item-weeks), where the audit's
-regular price may differ from the model's, which the rerun did not test; and the
-Dominick's configurations built for new items (\dNewLo\% to \dNewHi\%).
-Elsewhere on Dominick's it is \dDomLo\% to \dDomHi\% of the largest forecast on
-at most \dDomRows\% of item-weeks. We have not found the cause, so the C1
-failures on real data may come from the audit's definition of nothing planned
-as much as from the models.
+at most \rCaBaseMax\% of it. The lift when nothing is planned passes on all
+\rVerM{} M5 versions, but only on \rPassDCa{} Dominick's and \rPassFCa{} Frat
+version-windows, with a median violation of \rMedDCaPct\% and \rMedFCaPct\% of
+the largest forecast. These failures come from two definitions of nothing
+planned. The audit's plan turns the levers off and sets each price to the
+series' highest price over the last 12 training periods, keeping the planned
+price where the series has none. Each model has its own plan: the levers off
+and its own regular price, taken over its history window, from a recorded or a
+held regular price where its configuration says so, and otherwise the series'
+mean price over that window, or 1.0 where the window records no price. Given
+the model's own plan, the lift is zero for every series with history, because
+the plan path and the nothing-planned path then receive identical inputs; on
+saved Frat runs the violation fell from 0.04\% to 0.09\% of the largest
+forecast under the audit's plan to under $10^{-7}$ under the model's.
+
+Whether the two plans differ depends on the data and the settings, not on the
+fitted weights, so we compared them for every audited configuration and window
+(\cIfN{} of the \cIfOf{} version-windows; \texttt{scripts/c1\_interface.py},
+added after the results). They differ in \cIfAnyD{} Dominick's, \cIfAnyF{}
+Frat and \cIfAnyM{} M5 version-windows, on a median of \cIfMedD\% of
+series-periods on Dominick's and \cIfMedF\% on Frat. Every one of the
+\cIfFailN{} version-windows that fail C1 has a difference; all \cIfSameN{} in
+which the plans agree pass, with violations no larger than \cIfSameMaxCa{} of
+the largest forecast. Of the series-periods that differ, \cIfShareNoReg\% are
+series with no price in the audit's last 12 periods, where the model uses its
+fallback (a price of 1.0 in \cIfShareOne\% of all differing series-periods);
+\cIfShareRule\% are configurations whose regular price comes from a held or a
+recorded price; and \cIfShareNew\% are new items, whose baseline borrows several
+other series' regular prices, so that no single plan matches it. Where the two
+prices differ they are a median \cIfGap{} times apart.
+
+C1 under the audit's plan therefore measures the interface between the audit
+and the model, not a broken decomposition. It also shows a fault a merchant
+would care about: for an item with no recent price, the model's baseline is
+computed at a price nobody would plan, and the lift absorbs the difference. The
+audit's C1 scores and pass counts are reported unchanged in
+Table~\ref{tab:realpass} and the main test.
 
 \paragraph{C2 and C3: the lifts depend on what was learned, and agree across seeds where the data are rich}
 After the lift readout is re-initialised the lifts' rank agreement with the
