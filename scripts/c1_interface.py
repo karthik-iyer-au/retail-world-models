@@ -76,6 +76,7 @@ def one_step_model(cfg: dict, train: pd.DataFrame):
 
     p = {k: v for k, v in model_params(cfg).items() if k not in ("seed",)}
     p.update(steps=1, batch=min(int(p.get("batch", 256)), 64), validation_periods=0, mixed_precision=False)
+    p.pop("switching", None)  # rescales forecasts across a store; does not change either plan
     m = StateModel(**p)
     m.fit(train)
     return m

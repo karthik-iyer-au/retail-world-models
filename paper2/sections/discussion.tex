@@ -65,7 +65,8 @@ is wide. The real versions also showed two things the generated data did not.
 First, the lift was not zero when the audit planned nothing on most Dominick's
 and Frat versions. Every such violation traces to series and periods where the
 audit's plan differs from the model's own; under the model's own plan the lift
-is zero. The fault is in the baseline: for an item with no recent price the
+is zero. Part of the difference is the regular-price rule a configuration
+chose; the rest is a fault in the baseline: for an item with no recent price the
 model computes its baseline at the item's mean price, or at a price of 1.0,
 which no merchant would call nothing planned. An audit has to read the model's
 own definition of nothing planned, and check it, before C1 means anything.

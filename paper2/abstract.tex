@@ -34,8 +34,10 @@ our companion paper on M5, Dominick's and Breakfast at the Frat. No version
 passed every check on M5 or Dominick's. The baseline and lift add up to the
 forecast in every version, and under the model's own plan for nothing planned
 the lift is zero; under the audit's plan it was not, on most Dominick's and
-Frat versions, because for items with no recent price the models compute the
-baseline at the item's mean price or at 1.0, not at a regular price. On
+Frat versions, and every such failure sits where the two plans differ: some
+configurations take the regular price from a held or recorded price, and for
+items with no recent price the models compute the baseline at the item's mean
+price or at 1.0. On
 Dominick's and M5 a deeper price cut
 lowered the forecast in about half the item-weeks or more; and on M5 the lifts
 agreed poorly between seeds although the forecasts agreed. Both models state
