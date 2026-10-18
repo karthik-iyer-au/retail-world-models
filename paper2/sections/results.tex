@@ -146,13 +146,14 @@ version-window correlation as a relation between checks and error.
 
 We therefore reran the test, as an analysis added after the results, on
 comparisons that hold the data and the window fixed. Seeds of a configuration
-are averaged, so a configuration counts once per window; within each data
-(\rWwData{} Dominick's categories, Frat and M5, \rWwConfigs{} configurations)
-and window, the Spearman correlation across configurations is taken, and the
+are averaged, so a configuration counts once per window. Configurations scored
+on the same series and windows form a set (\rWwData{} sets with at least four
+configurations, \rWwConfigs{} configurations in all); within each set and
+window the Spearman correlation across configurations is taken, and the
 correlations are pooled weighted by the number of configurations. The
 permutation reassigns whole configurations, with their scores in every window,
-within each data, and the interval comes from resampling configurations within
-each data. The pooled correlation is \rWwRho{} (95\% interval \rWwLo{} to
+within each set, and the interval comes from resampling configurations within
+each set. The pooled correlation is \rWwRho{} (95\% interval \rWwLo{} to
 \rWwHi, $p = \rWwP$): \rWwRhoD{} on Dominick's, \rWwRhoF{} on Frat and
 \rWwRhoM{} on M5. With C5 left out it is \rWwNoCeRho{} (\rWwNoCeLo{} to
 \rWwNoCeHi, $p = \rWwNoCeP$), and with C1 and C5 left out \rWwNoCaCeRho{}

@@ -272,9 +272,18 @@ def fig_real_c7(z, measured_slope, measured_lo, measured_hi, out: Path):
 
 
 def category_of(config: str) -> str:
-    """The data a version was fitted on: the Dominick's category, or the data set."""
-    parts = config.split("_")
-    return f"dominicks_{parts[1]}" if parts[0] == "dominicks" else dataset_of(config)
+    """The data and weeks a version was scored on: its configuration's data set
+    (with the Dominick's category) and evaluation windows. Versions with the same
+    value were scored on the same series and weeks."""
+    import json
+
+    import yaml
+
+    f = ROOT / "configs" / "experiments" / f"{base(config)}.yaml"
+    if not f.exists():
+        return f"unknown:{base(config)}"
+    c = yaml.safe_load(open(f))
+    return json.dumps([c["dataset"], c["evaluation"]], sort_keys=True, default=str)
 
 
 def within_window_test(d: pd.DataFrame, col: str = "passed", n_perm: int = 5000, n_boot: int = 2000,
