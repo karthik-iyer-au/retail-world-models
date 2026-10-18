@@ -1,0 +1,21 @@
+change,pairs,lower,mean_diff,datasets
+Longer item level window (8 against 4 periods),68,37,-0.007414,dominicks
+Normalised roll-forward,19,10,0.01308,"dominicks, m5"
+Own forecast fed into the roll-forward,18,4,0.09449,dominicks
+Brand switching,12,7,-0.0352,dominicks
+Roll-forward through the plan (world model against lift model),6,2,-0.0008359,"breakfast_at_the_frat, dominicks, m5"
+Recent and longer level together,6,2,0.1273,dominicks
+Level window set by item role,6,1,0.2419,dominicks
+Plan split into regular and promoted parts,5,1,0.01823,"breakfast_at_the_frat, dominicks"
+More training steps,3,1,0.2667,"breakfast_at_the_frat, dominicks, m5"
+Event kinds as inputs,2,0,0.003746,m5
+Year-ago sales as an input,2,0,0.003997,breakfast_at_the_frat
+Plan of earlier periods as inputs,2,0,0.007495,breakfast_at_the_frat
+Longer history and training period,1,0,0.006094,breakfast_at_the_frat
+New-item start from similar items,1,1,-0.1329,breakfast_at_the_frat
+Past-year level,1,0,0.03438,m5
+Readout dropout and weight decay,1,0,0.002348,breakfast_at_the_frat
+Regular price held for more periods,1,1,-0.002551,dominicks
+Recorded base price as the regular price,1,0,0.02766,breakfast_at_the_frat
+Unknown-item labels in training,1,1,-0.002278,breakfast_at_the_frat
+Weekday as seven inputs,1,0,0.00689,m5
