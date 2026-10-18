@@ -131,28 +131,44 @@ slope across episodes with a 95\% interval robust to unequal variances.}
 \label{fig:realc7}
 \end{figure*}
 
-\paragraph{The main test: passing more checks did not go with forecasting better}
+\paragraph{The main test: on these versions, passing more checks did not clearly go with forecasting better}
 On the unit fixed before any result, a version and window, the correlation
 across version-windows between the number of checks passed and item-by-store
 WRMSSE is \rRhoPassedM{} on M5, \rRhoPassedD{} on Dominick's and \rRhoPassedF{}
-on Frat; pooled, \rRhoPassedPool{} (permutation $p = \rPPassed$), so we did not
-detect a relation (Table~\ref{tab:realmain}). Averaged over each version's
-windows the pooled correlation is \rRhoPassedPoolV{} ($p = \rPPassedV$),
-negative, so versions passing more checks forecast slightly better. The two
-differ because a version's windows differ in difficulty and in which checks
-pass: on Frat the second window is both easier and passes C1 and C4 less often,
-which the version-window correlation reads as passing fewer checks with lower
-error. The one check that goes clearly with accuracy is C5 (rank of predicted
-with observed lift \rRhoCeRankPool, bias \rRhoCeBiasPool, both $p < 0.001$), and
-C5 compares the forecast with sales over the same baseline, so it shares
-information with accuracy by construction. Leaving C5 out, an analysis added
-after the results, the pooled correlation is \rRhoPassedNoCePool{}
-($p = \rPPassedNoCe$) by version-window and \rRhoPassedNoCePoolV{}
-($p = \rPPassedNoCeV$) by version. Versions that share a configuration are not
-independent, so these $p$-values are optimistic. On these versions, how well an
-explanation passed checks against the model, its seeds, common sense and
-another model told us little about how well the model forecast
-(Figure~\ref{fig:realmain}).
+on Frat; pooled, \rRhoPassedPool{} (permutation $p = \rPPassed$;
+Table~\ref{tab:realmain}). Averaged over each version's windows the pooled
+correlation is \rRhoPassedPoolV{} ($p = \rPPassedV$). The answer moves with the
+unit, and neither permutation keeps the dependence in these data: versions that
+share a configuration, configurations that differ in one setting, and versions
+scored on the same window are not independent, and a window that is easier and
+passes C1 and C4 less often (the second Frat window) enters the
+version-window correlation as a relation between checks and error.
+
+We therefore reran the test, as an analysis added after the results, on
+comparisons that hold the data and the window fixed. Seeds of a configuration
+are averaged, so a configuration counts once per window; within each data
+(\rWwData{} Dominick's categories, Frat and M5, \rWwConfigs{} configurations)
+and window, the Spearman correlation across configurations is taken, and the
+correlations are pooled weighted by the number of configurations. The
+permutation reassigns whole configurations, with their scores in every window,
+within each data, and the interval comes from resampling configurations within
+each data. The pooled correlation is \rWwRho{} (95\% interval \rWwLo{} to
+\rWwHi, $p = \rWwP$): \rWwRhoD{} on Dominick's, \rWwRhoF{} on Frat and
+\rWwRhoM{} on M5. With C5 left out it is \rWwNoCeRho{} (\rWwNoCeLo{} to
+\rWwNoCeHi, $p = \rWwNoCeP$), and with C1 and C5 left out \rWwNoCaCeRho{}
+(\rWwNoCaCeLo{} to \rWwNoCaCeHi). C5 compares the forecast with sales over the
+same baseline and so shares information with accuracy; it is the one check that
+goes clearly with accuracy in every analysis (rank of predicted with observed
+lift \rRhoCeRankPool, bias \rRhoCeBiasPool, on the unit fixed in advance).
+
+What these data support is narrow. On these saved versions, configurations
+compared on the same data and window that passed more of the checks that do not
+compare the forecast with sales did not forecast better or worse, and the
+interval excludes a correlation stronger than about 0.1 in either direction.
+They do not show that faithfulness and accuracy are unrelated in general: the
+versions are development variants of two model families, the checks measure
+faithfulness only in part, and a stronger relation could hold across more
+different models.
 
 \begin{table*}[t]\centering
 \caption{\textbf{Across versions, the number of checks passed was not clearly
@@ -161,7 +177,7 @@ accuracy.} Spearman correlation between each score and item-by-store WRMSSE
 (negative: higher scores go with lower error), within each data set and pooled
 by permutation within data set (10,000 permutations). Left: over
 version-windows, the unit fixed in advance. Right: over versions, the mean over
-each version's windows. $^\dagger$Added after the results.}\label{tab:realmain}
+each version's windows. Both permutations treat their units as independent; the test that holds the data and window fixed and keeps the dependence between related configurations is in the text. $^\dagger$Added after the results.}\label{tab:realmain}
 \footnotesize\setlength{\tabcolsep}{6pt}\input{generated/tab_real_main}\end{table*}
 
 \begin{figure*}[t]\centering

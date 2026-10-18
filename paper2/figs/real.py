@@ -271,6 +271,61 @@ def fig_real_c7(z, measured_slope, measured_lo, measured_hi, out: Path):
     return rows
 
 
+def category_of(config: str) -> str:
+    """The data a version was fitted on: the Dominick's category, or the data set."""
+    parts = config.split("_")
+    return f"dominicks_{parts[1]}" if parts[0] == "dominicks" else dataset_of(config)
+
+
+def within_window_test(d: pd.DataFrame, col: str = "passed", n_perm: int = 5000, n_boot: int = 2000,
+                       seed: int = 0) -> dict:
+    """Checks passed against accuracy, comparing only configurations fitted on the
+    same data and scored on the same window (added after the results,
+    docs/PAPER2_PLAN.md, 18 October 2026).
+
+    Seeds of a configuration are averaged first, so a configuration counts once
+    per window. Within each data (Dominick's category, Frat, M5) and window,
+    the Spearman correlation across configurations of checks passed with
+    item-by-store WRMSSE; pooled as the mean weighted by the number of
+    configurations. Inference keeps the dependence: the permutation reassigns
+    whole configurations (their scores in every window together) within each
+    data, and the bootstrap resamples configurations within each data."""
+    rng = np.random.default_rng(seed)
+    x = d.assign(cat=d["config"].map(category_of))
+    x = x.groupby(["dataset", "cat", "base", "origin"], as_index=False)[[col, "item_by_store"]].mean()
+    blocks = []  # one per data: configurations by windows, for the score and the error
+    for (ds, cat), g in x.groupby(["dataset", "cat"]):
+        s = g.pivot(index="base", columns="origin", values=col)
+        e = g.pivot(index="base", columns="origin", values="item_by_store")
+        if len(s) >= 4:
+            blocks.append((ds, cat, s.to_numpy(), e.to_numpy()))
+
+    def stat(bl, perms=None, picks=None):
+        num, den, per_ds = 0.0, 0.0, {}
+        for i, (ds, _, s, e) in enumerate(bl):
+            if perms is not None:
+                s = s[perms[i]]
+            if picks is not None:
+                s, e = s[picks[i]], e[picks[i]]
+            for w in range(s.shape[1]):
+                ok = ~np.isnan(s[:, w]) & ~np.isnan(e[:, w])
+                if ok.sum() >= 4 and np.unique(s[ok, w]).size > 1 and np.unique(e[ok, w]).size > 1:
+                    r = spearmanr(s[ok, w], e[ok, w]).statistic
+                    num, den = num + r * ok.sum(), den + ok.sum()
+                    a = per_ds.setdefault(ds, [0.0, 0.0])
+                    a[0], a[1] = a[0] + r * ok.sum(), a[1] + ok.sum()
+        return num / den if den else np.nan, {k: v[0] / v[1] for k, v in per_ds.items()}
+
+    obs, per_ds = stat(blocks)
+    null = np.array([stat(blocks, perms=[rng.permutation(len(b[2])) for b in blocks])[0] for _ in range(n_perm)])
+    boot = np.array([stat(blocks, picks=[rng.integers(0, len(b[2]), len(b[2])) for b in blocks])[0]
+                     for _ in range(n_boot)])
+    return {"score": col, "rho": obs, "p": float((np.abs(null) >= abs(obs)).mean()),
+            "lo": float(np.nanquantile(boot, 0.025)), "hi": float(np.nanquantile(boot, 0.975)),
+            "configs": int(sum(len(b[2]) for b in blocks)), "data": len(blocks),
+            **{f"rho_{k}": v for k, v in per_ds.items()}}
+
+
 def write_tables(d, dv, mt, gen: Path, mtv=None):
     lines = ["\\begin{tabular}{@{}lrrrrrrrrr@{}}", "\\toprule",
              "Data & Versions & Windows & C1 & C2 & C3 & C4 & C5 & C6 & All \\\\", "\\midrule"]
@@ -319,16 +374,18 @@ def make(out: Path, measured):
     mt.to_csv(gen / "real_main_test.csv", index=False)
     mtv = main_test(dv)
     mtv.to_csv(gen / "real_main_test_by_version.csv", index=False)
+    ww = pd.DataFrame([within_window_test(d, c) for c in ("passed", "passed_no_c5", "passed_no_c1_c5")])
+    ww.to_csv(gen / "real_within_window.csv", index=False)
     fig_real_checks(d, st, ag, out)
     fig_real_main(dv, out)
     rows = fig_real_c7(z, *measured, out) if len(z) else []
     write_tables(d, dv, mt, gen, mtv)
-    write_macros(d, dv, mt, z, rows, gen, mtv)
+    write_macros(d, dv, mt, z, rows, gen, mtv, ww)
     write_diag_macros(gen)
     return d, mt, rows
 
 
-def write_macros(d, dv, mt, z, rows, gen: Path, mtv=None):
+def write_macros(d, dv, mt, z, rows, gen: Path, mtv=None, ww=None):
     """Every number the audit section quotes, as LaTeX macros (generated/real_macros.tex)."""
     out = []
 
@@ -384,6 +441,17 @@ def write_macros(d, dv, mt, z, rows, gen: Path, mtv=None):
             put(f"rP{key}V", f"{q['p']:.3f}")
             for ds, t in tag.items():
                 put(f"rRho{key}{t}V", f2(q.get(f"rho_{ds}")))
+    if ww is not None:
+        for _, r in ww.iterrows():
+            key = {"passed": "", "passed_no_c5": "NoCe", "passed_no_c1_c5": "NoCaCe"}[r["score"]]
+            put(f"rWw{key}Rho", f2(r["rho"]))
+            put(f"rWw{key}Lo", f2(r["lo"]))
+            put(f"rWw{key}Hi", f2(r["hi"]))
+            put(f"rWw{key}P", f"{r['p']:.2f}")
+            for ds, t in tag.items():
+                put(f"rWw{key}Rho{t}", f2(r.get(f"rho_{ds}")))
+        put("rWwConfigs", int(ww["configs"].iloc[0]))
+        put("rWwData", int(ww["data"].iloc[0]))
     if len(z):
         put("rZEpisodes", int(len(z)))
         inside = ((z["world_implied"] >= z["did_lo"]) & (z["world_implied"] <= z["did_hi"])).sum()

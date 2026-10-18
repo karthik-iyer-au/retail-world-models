@@ -1,4 +1,4 @@
-\section{A ground truth from zone price deviations}
+\section{An observational benchmark from zone price deviations}
 \label{sec:zones}
 
 \subsection{Finding the deviations}
@@ -96,7 +96,7 @@ fixed in advance; panels (a) and (d) were added after the placebo was seen.}
 \end{figure*}
 
 Three robustness analyses, fixed in advance, and two added after seeing them
-qualify this ground truth (Figure~\ref{fig:zonechecks}).
+qualify this benchmark (Figure~\ref{fig:zonechecks}).
 
 \paragraph{Prices move before the detected start}
 The detector dates an episode from the first week in which most of the store's
@@ -148,10 +148,16 @@ temporary cut, an elasticity several times larger, from one that does not; it is
 not enough to tell a model with no price response from a correct one. That is
 the comparison C7 can make on public data.
 
-\paragraph{What this ground truth is, and is not}
-These deviations may include zone moves that were not experiments, and the
-models were trained on data that include earlier deviations. The ground truth
-is the response of a store's category units to a sustained change in its
+\paragraph{What this benchmark is, and is not}
+It is not a ground truth. Which stores and weeks were treated is inferred from
+prices, not recorded; prices move before the detected start; and the placebo at
+false start dates gives a pooled slope ($\zPlaceboSlope$) close to the 8-week
+estimate ($\zSlope$), so the 8-week estimate cannot be told from what the
+estimator finds where nothing happened. The full-spell estimate
+($\zFullSlope$, $\zFullLo$ to $\zFullHi$) has an interval that excludes zero,
+but it too overlaps the placebo's ($\zPlaceboLo$ to $\zPlaceboHi$). These deviations may include zone moves that
+were not experiments, and the models were trained on data that include earlier
+deviations. What the benchmark measures, noisily, is the response of a store's category units to a sustained change in its
 regular prices relative to its zone, over eight weeks. It is not the response
 to a temporary cut, which the companion paper's models mostly learn from, and a
 model can be right about one and wrong about the other. The known-answer study

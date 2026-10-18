@@ -1,9 +1,13 @@
 \section{Limitations and threats to validity}
 \label{sec:limits}
 
-\paragraph{The ground truth covers one effect on one data set}
-C7 measures the response of a store's category units to a sustained change in
-its regular prices, on Dominick's. It says nothing directly about promotions,
+\paragraph{The benchmark is observational and covers one effect on one data set}
+C7 compares a model with a response estimated from observational data: the
+treated stores and weeks are inferred, and the 8-week estimate is close to a
+placebo at false dates. The causal failure C7 is meant to catch is shown in the
+known-answer study, where the truth is known; on Dominick's, C7 can only tell a
+response several times too large from a plausible one. It measures the response
+of a store's category units to a sustained change in its regular prices. It says nothing directly about promotions,
 displays or temporary cuts, or about M5 and Frat, where no such variation is used. A model can be right about regular prices and wrong about
 promotions; the known-answer study shows how far the other checks go in
 covering the rest.
@@ -36,12 +40,14 @@ version differ in difficulty, so the result depends on whether version-windows
 or versions are the unit. Both are reported.
 
 \paragraph{The audit's definition of nothing planned}
-The audit built ``nothing planned'' from each run's configuration. Using the
-regular price the model stores did not remove the C1 violations in the
-fourteen rerun runs, and configurations that read a recorded regular price or
-contain new items were not tested further. We did not find the cause, so C1
-failures on real data may come from the audit's definition as much as from the
-models.
+The audit builds ``nothing planned'' from the data: levers off, the price at
+the series' highest price over the last 12 training periods, and the planned
+price where the series has no price in those periods. The models build their
+own from their history window and fall back to the series' mean price over that
+window, or to 1.0 where it records no price. C1 under the audit's plan therefore
+measures the distance between two definitions as much as the model; under the
+model's own plan it holds by construction (\S\ref{sec:results}). Neither
+definition is the retailer's regular price, which these data do not record.
 
 \paragraph{Refitted versions}
 The Dominick's final world models are refits with unchanged settings, not the

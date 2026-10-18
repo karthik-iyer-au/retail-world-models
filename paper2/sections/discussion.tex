@@ -46,9 +46,10 @@ missing price response from a correct one. We expect that a measured promotion
 effect would be needed to find the bias from planning into strong weeks; we did
 not test this, and public retail data offer none.
 
-\paragraph{Ground truth on public data is scarce and noisy}
-Dominick's zone price deviations give a pooled
-response in line with the one the chain's own experiments reported, but single episodes are noise, intervals
+\paragraph{Measured causes on public data are scarce and noisy}
+Dominick's zone price deviations give a pooled 8-week response close to a
+placebo at false dates and a full-spell response in line with the chain's own
+experiments; single episodes are noise, intervals
 clustered by a handful of stores are far too narrow, and prices start moving
 before the detector sees them. A retailer running its own tests would do better
 with the design under its control: stores assigned at random, a known start
@@ -62,8 +63,12 @@ measured cause found both models stating a larger price response than the
 measured one, as the known-answer world model did, though the measured interval
 is wide. The real versions also showed two things the generated data did not.
 First, the lift was not zero when the audit planned nothing on most Dominick's
-and Frat versions, and we could not fully trace why, so an audit's definition
-of nothing planned needs checking against the model's before C1 is read.
+and Frat versions. Every such violation traces to series and periods where the
+audit's plan differs from the model's own; under the model's own plan the lift
+is zero. The fault is in the baseline: for an item with no recent price the
+model computes its baseline at the item's mean price, or at a price of 1.0,
+which no merchant would call nothing planned. An audit has to read the model's
+own definition of nothing planned, and check it, before C1 means anything.
 Second, the price-direction check failed on most Dominick's and M5 versions
 because their forecasts fall after a deeper cut in about half the item-weeks or
 more, a fault no accuracy score revealed and one a merchant setting prices from
@@ -89,7 +94,8 @@ near the chain's experiments over the full spell, but imprecise.
 In the audit of \rVersions{} saved versions on public data, no version passed
 every check on M5 or Dominick's, both the world model and LightGBM stated about
 twice the measured response to a regular price change (the measured interval is
-wide and overlaps both), and the number of checks
-a version passed was not clearly related to how well it forecast. On these
+wide and overlaps both), and, among configurations compared on the same data
+and window, the number of checks passed was not clearly related to how well
+they forecast. On these
 models and data sets, an accurate forecast was not evidence of a correct
 explanation, and the explanation has to be tested on its own.
