@@ -47,6 +47,11 @@ class SeedAverage(Forecaster):
         parts = [m.breakdown(future) for m in self.models]
         return sum(parts) / len(parts)
 
+    def nothing_planned(self, future: pd.DataFrame) -> pd.DataFrame:
+        """The members' "nothing planned" plan. Every member is fitted on the
+        same data with the same settings, so they share it."""
+        return self.models[0].nothing_planned(future)
+
     def save(self, path) -> None:
         """All members in one file, each as its own model would save it."""
         import io

@@ -32,8 +32,8 @@ Favorita, over rolling forecast origins with paired tests:
 
 A retailer's own data, or a forecast solved across all four Ps, may order the
 models differently. Each claim is linked to its table, script and runs in
-[`docs/RESULTS.md`](docs/RESULTS.md); the manuscript is `paper/main.pdf`.
-Paper 2 (`paper2/main.pdf`) audits the plan-lift explanations of the 494 saved
+[`docs/RESULTS.md`](docs/RESULTS.md); the manuscript is `paper/main.pdf`, *World Models, Trees and Foundation Models for Retail Forecasting: Evidence from Four Public Data Sets*.
+Paper 2 (`paper2/main.pdf`), *Auditing World-Model Explanations in Retail Forecasting: Faithfulness, Accuracy and Causal Validity*, audits the plan-lift explanations of the 494 saved
 world-model and lift-model versions: no version passed every check on M5 or
 Dominick's, both the world model and LightGBM state about twice the measured
 response to Dominick's zone price changes, and the number of checks a version

@@ -38,10 +38,14 @@ any model that reads the plan, and eight checks on it
 \item A known-answer study: generated store data in which the effect of every
 part of the plan is known, with failures planted on purpose, to measure which
 checks catch which failure before they are trusted on real data.
-\item A ground truth on public retail data: \zEpisodes{} spells in six Dominick's
-categories where one store's regular prices sat apart from its zone peers,
-\zScored{} of them scored, with their measured effect on sales by difference in
-differences, an event study, a placebo and a sensitivity analysis.
+\item A noisy observational benchmark on public retail data: \zEpisodes{} spells
+in six Dominick's categories where one store's regular prices sat apart from
+its zone peers, \zScored{} of them scored, with their effect on sales measured
+by difference in differences, an event study, a placebo and a sensitivity
+analysis. Which stores were treated is inferred, prices move before the
+detected start, and a placebo at false dates gives a slope close to the
+estimate, so it is not a ground truth; the causal failure is established in the
+known-answer study.
 \item An audit of every saved world-model and lift-model version of the
 companion paper on M5, Dominick's and Frat, against LightGBM, and the test of
 whether faithful explanations go with accurate forecasts.
@@ -55,15 +59,20 @@ question about the regular price with what it learned from temporary cuts.
 The cheap price-direction check and a lever-by-lever comparison with a second
 model catch the cruder failures; the randomisation check does not test an
 explanation built into the model; and only a measured cause finds the error in
-kind (\S\ref{sec:known}). On Dominick's, zone price deviations give a pooled measured response in line
-with the chain's own experiments, but imprecise, and single episodes are noise
+kind (\S\ref{sec:known}). On Dominick's, zone price deviations give a pooled 8-week response close to a
+placebo at false dates, a larger full-spell response whose interval excludes
+zero, and single episodes that are noise: a noisy benchmark, not a ground truth
 (\S\ref{sec:zones}). In the audit of the companion paper's \rVersions{} saved
 versions (\S\ref{sec:results}), no version passed every check on M5 or
 Dominick's; on those data sets a deeper price cut lowered the forecast in about
 half the item-weeks or more; both the world model and LightGBM stated about
 twice the measured response to a regular price change, though the measured
-interval is wide; and the number of checks
-a version passed was not clearly related to its accuracy. These are findings
+interval is wide; every failure of the lift to be zero with nothing planned
+sits where the audit's plan for nothing planned differs from the model's own,
+including items whose baseline the models compute at a price no merchant would
+call regular; and, among configurations compared on
+the same data and window, the number of checks passed was not clearly related to
+accuracy; the intervals exclude a strong relation, not a weak one. These are findings
 for these models on these public data sets.
 
 \begin{figure*}[t]
