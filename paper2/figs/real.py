@@ -519,6 +519,20 @@ def write_c1_macros(d: pd.DataFrame, gen: Path):
     put("cIfGap", f"{np.exp(m.loc[m['differ'] > 0, 'median_log_gap'].median()):.1f}")
     r = spearmanr(diff["differ"], diff["C1"]).statistic if len(diff) > 3 else np.nan
     put("cIfRho", f"{r:.2f}" if pd.notna(r) else "n/a")
+    # every check passed, with C1 read against the model's own plan for nothing planned:
+    # it holds by construction for every series with history, so it passes except in
+    # the new-item versions, whose audited C1 is kept
+    new = d["config"].str.contains("new_items")
+    p = d[[f"C{k}_pass" for k in range(1, 7)]].astype(float)
+    own = p.copy()
+    own["C1_pass"] = own["C1_pass"].where(own["C1_pass"].isna() | new, 1.0)
+    every = lambda q: q.sum(axis=1, skipna=True) == q.notna().sum(axis=1)  # noqa: E731
+    for ds, t in tag.items():
+        g = d["dataset"] == ds
+        put(f"cIfAllAudit{t}", int(every(p)[g].sum()))
+        put(f"cIfAllOwn{t}", int(every(own)[g].sum()))
+        put(f"cIfWin{t}", int(g.sum()))
+    put("cIfDomCdFail", int((p.loc[d["dataset"] == "dominicks", "C4_pass"] == 0).sum()))
     (gen / "c1_macros.tex").write_text("\n".join(out) + "\n")
     return m
 

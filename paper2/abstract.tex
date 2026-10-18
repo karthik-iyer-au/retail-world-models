@@ -30,8 +30,12 @@ treated stores are inferred, prices move before the detected start, and a
 placebo at false start dates gives $\zPlaceboSlope$ ($\zPlaceboLo$ to
 $\zPlaceboHi$), close to the 8-week estimate.
 We then audited all \rVersions{} saved world-model and lift-model versions of
-our companion paper on M5, Dominick's and Breakfast at the Frat. No version
-passed every check on M5 or Dominick's. The baseline and lift add up to the
+our companion paper on M5, Dominick's and Breakfast at the Frat. With C1 scored
+against the audit's own plan for nothing planned, no version passed every check
+on M5 or Dominick's; with C1 read against each model's own plan, which removes
+failures of the audit's interface rather than of the models, none did on M5 and
+\cIfAllOwnD{} of \cIfWinD{} Dominick's version-windows did, the rest failing
+other checks, most often price direction. The baseline and lift add up to the
 forecast in every version, and under the model's own plan for nothing planned
 the lift is zero; under the audit's plan it was not, on most Dominick's and
 Frat versions, and every such failure sits where the two plans differ: some
@@ -43,7 +47,7 @@ lowered the forecast in about half the item-weeks or more; and on M5 the lifts
 agreed poorly between seeds although the forecasts agreed. Both models state
 about twice the measured response to the zone price deviations, though the
 measured interval is wide and overlaps both. Comparing configurations on the
-same data and window, with the dependence between related configurations kept,
+same data and window, resampling whole configurations,
 the number of checks passed was not clearly related to accuracy (pooled
 Spearman \rWwRho, 95\% interval \rWwLo{} to \rWwHi); with C5, which compares the
 forecast with sales, left out, \rWwNoCeRho{} (\rWwNoCeLo{} to \rWwNoCeHi). These
