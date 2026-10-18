@@ -468,3 +468,17 @@ m5_validation_lift,m5_validation_world_model,0,256116,0,0,0,0,0,0,0,0,stores CA_
 m5_validation_lift,m5_validation_world_model_roll_norm,0,256116,0,0,0,0,0,0,0,0,stores CA_1 TX_1 WI_1
 m5_validation_lift,m5_validation_world_model_v2_long_level,0,256116,0,0,0,0,0,0,0,0,stores CA_1 TX_1 WI_1
 m5_validation_lift,m5_validation_world_model_v2_weekday,0,256116,0,0,0,0,0,0,0,0,stores CA_1 TX_1 WI_1
+m5_test_lift,m5_test_lift,0,256116,0,0,0,0,0,0,0,0,stores CA_1 TX_1 WI_1
+m5_test_lift,m5_test_world_model_roll_norm,0,256116,0,0,0,0,0,0,0,0,stores CA_1 TX_1 WI_1
+m5_confirm_mar_lift,m5_confirm_mar_lift,0,256116,0,0,0,0,0,0,0,0,stores CA_1 TX_1 WI_1
+m5_confirm_mar_lift,m5_confirm_mar_world_model_v1,0,256116,0,0,0,0,0,0,0,0,stores CA_1 TX_1 WI_1
+m5_confirm_apr_lift,m5_confirm_apr_lift,0,256116,0,0,0,0,0,0,0,0,stores CA_1 TX_1 WI_1
+m5_confirm_apr_lift,m5_confirm_apr_world_model_v1,0,256116,0,0,0,0,0,0,0,0,stores CA_1 TX_1 WI_1
+m5_validation_world_model_v2_weekday_events,m5_validation_world_model_v2_weekday_events,0,256116,0,0,0,0,0,0,0,0,stores CA_1 TX_1 WI_1
+m5_validation_world_model_v2_weekday_events,m5_validation_world_model_v2_weekday_events_60k,0,256116,0,0,0,0,0,0,0,0,stores CA_1 TX_1 WI_1
+paper2_refit_dominicks_ana_final_world_model,paper2_refit_dominicks_ana_final_world_model,0,170016,0.00052348,0.00052348,0,0,0,0.000751774,0.000311735,1.52388,
+paper2_refit_dominicks_bjc_final_world_model,paper2_refit_dominicks_bjc_final_world_model,0,130918,0.00710368,0.00710368,0,0,0,0.00951112,0.0059732,0.81093,
+paper2_refit_dominicks_che_final_world_model,paper2_refit_dominicks_che_final_world_model,0,206272,0.000610844,0.000610844,0,0,0,0.00100456,0.000198767,0.582216,
+paper2_refit_dominicks_fre_final_world_model,paper2_refit_dominicks_fre_final_world_model,0,260504,0.00360455,0.00360455,0,0,0,0.00422859,0.00359687,0.524729,
+paper2_refit_dominicks_sdr_final_world_model,paper2_refit_dominicks_sdr_final_world_model,0,524114,0.012089,0.012089,0,0,0,0.0141747,0.0118352,0.178983,
+paper2_refit_dominicks_sna_final_world_model,paper2_refit_dominicks_sna_final_world_model,0,120848,0.000496491,0.000496491,0,0,0,0.000726936,0.000297895,0.783902,
