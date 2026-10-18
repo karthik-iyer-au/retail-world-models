@@ -25,23 +25,29 @@ apart from its zone peers, most between April 1993 and April 1994. Over the
 pooled effect on category units is $\zSlope$ over eight weeks (95\% interval
 $\zSlopeLo$ to $\zSlopeHi$) and $\zFullSlope$ over the full spell ($\zFullLo$ to
 $\zFullHi$), in line with the elasticity near $-0.3$ the chain's experiments
-implied. These pooled intervals were added after a placebo at false start dates
-gave $\zPlaceboSlope$ ($\zPlaceboLo$ to $\zPlaceboHi$) and showed single
-episodes to be noise.
+implied. This is a noisy observational benchmark, not a ground truth: the
+treated stores are inferred, prices move before the detected start, and a
+placebo at false start dates gives $\zPlaceboSlope$ ($\zPlaceboLo$ to
+$\zPlaceboHi$), close to the 8-week estimate.
 We then audited all \rVersions{} saved world-model and lift-model versions of
 our companion paper on M5, Dominick's and Breakfast at the Frat. No version
 passed every check on M5 or Dominick's. The baseline and lift add up to the
-forecast in every version, but the lift was not zero when the audit planned
-nothing on most Dominick's and Frat versions, for reasons we could not fully
-trace; on Dominick's and M5 a deeper price cut
+forecast in every version, and under the model's own plan for nothing planned
+the lift is zero; under the audit's plan it was not, on most Dominick's and
+Frat versions, and every such failure sits where the two plans differ: some
+configurations take the regular price from a held or recorded price, and for
+items with no recent price the models compute the baseline at the item's mean
+price or at 1.0. On
+Dominick's and M5 a deeper price cut
 lowered the forecast in about half the item-weeks or more; and on M5 the lifts
 agreed poorly between seeds although the forecasts agreed. Both models state
 about twice the measured response to the zone price deviations, though the
-measured interval is wide and overlaps both. Across versions,
+measured interval is wide and overlaps both. Comparing configurations on the
+same data and window, with the dependence between related configurations kept,
 the number of checks passed was not clearly related to accuracy (pooled
-Spearman \rRhoPassedPool, $p = \rPPassed$, on the unit fixed in advance); the
-check most strongly related to accuracy (C5) compares the forecast with sales. These results
-hold for these models and data sets.
+Spearman \rWwRho, 95\% interval \rWwLo{} to \rWwHi); with C5, which compares the
+forecast with sales, left out, \rWwNoCeRho{} (\rWwNoCeLo{} to \rWwNoCeHi). These
+results hold for these models and data sets.
 
 \vspace{4pt}
 \textbf{Keywords:} retail forecasting; explanation; faithfulness; promotions;

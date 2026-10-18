@@ -85,3 +85,25 @@ def test_lightgbm_shap_adds_up_to_the_forecast(split):
     raw = shap.sum(axis=1).to_numpy()
     np.testing.assert_allclose(np.exp(raw), m.predict(fut), rtol=1e-6, atol=1e-6)
     assert "promo" in shap.columns
+
+
+def test_nothing_planned_is_the_models_own(split):
+    """Given the model's own "nothing planned" plan the lift is zero, also for a
+    series with no price in its recent history, where the audit's plan keeps the
+    planned price and so leaves a lift."""
+    from rwm.audit.lifts import off_plan
+    from rwm.data.schema import PRICE, SERIES
+
+    train, test = split
+    gap = train[SERIES].iloc[0]
+    recent = np.sort(train[DATE].unique())[-30:]
+    train = train.copy()
+    train.loc[(train[SERIES] == gap) & train[DATE].isin(recent), PRICE] = np.nan  # no price in the history window
+    m = build_model("state_model", **{**SETTINGS, "steps": 20}).fit(train)
+    plan = test.drop(columns=[UNITS])
+    own = m.nothing_planned(plan)
+    assert (own["promo"].fillna(0) == 0).all()
+    top = m.predict(plan).max()
+    assert np.abs(m.breakdown(own)["lift"]).max() < 1e-5 * top
+    audit = m.breakdown(off_plan(plan, regular_prices(train, 12), ["promo"]))
+    assert np.abs(audit.loc[plan[SERIES] == gap, "lift"]).max() > 1e-5 * top

@@ -271,6 +271,70 @@ def fig_real_c7(z, measured_slope, measured_lo, measured_hi, out: Path):
     return rows
 
 
+def category_of(config: str) -> str:
+    """The data and weeks a version was scored on: its configuration's data set
+    (with the Dominick's category) and evaluation windows. Versions with the same
+    value were scored on the same series and weeks."""
+    import json
+
+    import yaml
+
+    f = ROOT / "configs" / "experiments" / f"{base(config)}.yaml"
+    if not f.exists():
+        return f"unknown:{base(config)}"
+    c = yaml.safe_load(open(f))
+    return json.dumps([c["dataset"], c["evaluation"]], sort_keys=True, default=str)
+
+
+def within_window_test(d: pd.DataFrame, col: str = "passed", n_perm: int = 5000, n_boot: int = 2000,
+                       seed: int = 0) -> dict:
+    """Checks passed against accuracy, comparing only configurations fitted on the
+    same data and scored on the same window (added after the results,
+    docs/PAPER2_PLAN.md, 18 October 2026).
+
+    Seeds of a configuration are averaged first, so a configuration counts once
+    per window. Within each data (Dominick's category, Frat, M5) and window,
+    the Spearman correlation across configurations of checks passed with
+    item-by-store WRMSSE; pooled as the mean weighted by the number of
+    configurations. Inference keeps the dependence: the permutation reassigns
+    whole configurations (their scores in every window together) within each
+    data, and the bootstrap resamples configurations within each data."""
+    rng = np.random.default_rng(seed)
+    x = d.assign(cat=d["config"].map(category_of))
+    x = x.groupby(["dataset", "cat", "base", "origin"], as_index=False)[[col, "item_by_store"]].mean()
+    blocks = []  # one per data: configurations by windows, for the score and the error
+    for (ds, cat), g in x.groupby(["dataset", "cat"]):
+        s = g.pivot(index="base", columns="origin", values=col)
+        e = g.pivot(index="base", columns="origin", values="item_by_store")
+        if len(s) >= 4:
+            blocks.append((ds, cat, s.to_numpy(), e.to_numpy()))
+
+    def stat(bl, perms=None, picks=None):
+        num, den, per_ds = 0.0, 0.0, {}
+        for i, (ds, _, s, e) in enumerate(bl):
+            if perms is not None:
+                s = s[perms[i]]
+            if picks is not None:
+                s, e = s[picks[i]], e[picks[i]]
+            for w in range(s.shape[1]):
+                ok = ~np.isnan(s[:, w]) & ~np.isnan(e[:, w])
+                if ok.sum() >= 4 and np.unique(s[ok, w]).size > 1 and np.unique(e[ok, w]).size > 1:
+                    r = spearmanr(s[ok, w], e[ok, w]).statistic
+                    num, den = num + r * ok.sum(), den + ok.sum()
+                    a = per_ds.setdefault(ds, [0.0, 0.0])
+                    a[0], a[1] = a[0] + r * ok.sum(), a[1] + ok.sum()
+        return num / den if den else np.nan, {k: v[0] / v[1] for k, v in per_ds.items()}
+
+    obs, per_ds = stat(blocks)
+    null = np.array([stat(blocks, perms=[rng.permutation(len(b[2])) for b in blocks])[0] for _ in range(n_perm)])
+    boot = np.array([stat(blocks, picks=[rng.integers(0, len(b[2]), len(b[2])) for b in blocks])[0]
+                     for _ in range(n_boot)])
+    return {"score": col, "rho": obs, "p": float((np.abs(null) >= abs(obs)).mean()),
+            "lo": float(np.nanquantile(boot, 0.025)), "hi": float(np.nanquantile(boot, 0.975)),
+            "configs": int(sum(len(b[2]) for b in blocks)), "data": len(blocks),
+            **{f"rho_{k}": v for k, v in per_ds.items()}}
+
+
 def write_tables(d, dv, mt, gen: Path, mtv=None):
     lines = ["\\begin{tabular}{@{}lrrrrrrrrr@{}}", "\\toprule",
              "Data & Versions & Windows & C1 & C2 & C3 & C4 & C5 & C6 & All \\\\", "\\midrule"]
@@ -319,16 +383,19 @@ def make(out: Path, measured):
     mt.to_csv(gen / "real_main_test.csv", index=False)
     mtv = main_test(dv)
     mtv.to_csv(gen / "real_main_test_by_version.csv", index=False)
+    ww = pd.DataFrame([within_window_test(d, c) for c in ("passed", "passed_no_c5", "passed_no_c1_c5")])
+    ww.to_csv(gen / "real_within_window.csv", index=False)
     fig_real_checks(d, st, ag, out)
     fig_real_main(dv, out)
     rows = fig_real_c7(z, *measured, out) if len(z) else []
     write_tables(d, dv, mt, gen, mtv)
-    write_macros(d, dv, mt, z, rows, gen, mtv)
+    write_macros(d, dv, mt, z, rows, gen, mtv, ww)
     write_diag_macros(gen)
+    write_c1_macros(d, gen)
     return d, mt, rows
 
 
-def write_macros(d, dv, mt, z, rows, gen: Path, mtv=None):
+def write_macros(d, dv, mt, z, rows, gen: Path, mtv=None, ww=None):
     """Every number the audit section quotes, as LaTeX macros (generated/real_macros.tex)."""
     out = []
 
@@ -384,6 +451,17 @@ def write_macros(d, dv, mt, z, rows, gen: Path, mtv=None):
             put(f"rP{key}V", f"{q['p']:.3f}")
             for ds, t in tag.items():
                 put(f"rRho{key}{t}V", f2(q.get(f"rho_{ds}")))
+    if ww is not None:
+        for _, r in ww.iterrows():
+            key = {"passed": "", "passed_no_c5": "NoCe", "passed_no_c1_c5": "NoCaCe"}[r["score"]]
+            put(f"rWw{key}Rho", f2(r["rho"]))
+            put(f"rWw{key}Lo", f2(r["lo"]))
+            put(f"rWw{key}Hi", f2(r["hi"]))
+            put(f"rWw{key}P", f"{r['p']:.2f}")
+            for ds, t in tag.items():
+                put(f"rWw{key}Rho{t}", f2(r.get(f"rho_{ds}")))
+        put("rWwConfigs", int(ww["configs"].iloc[0]))
+        put("rWwData", int(ww["data"].iloc[0]))
     if len(z):
         put("rZEpisodes", int(len(z)))
         inside = ((z["world_implied"] >= z["did_lo"]) & (z["world_implied"] <= z["did_hi"])).sum()
@@ -399,6 +477,50 @@ def write_macros(d, dv, mt, z, rows, gen: Path, mtv=None):
             put(f"rZSlope{t}Lo", f2(sl - 1.96 * se))
             put(f"rZSlope{t}Hi", f2(sl + 1.96 * se))
     (gen / "real_macros.tex").write_text("\n".join(out) + "\n")
+
+
+def write_c1_macros(d: pd.DataFrame, gen: Path):
+    """C1 against the two definitions of nothing planned
+    (results/paper2/diagnose/c1_interface.csv, scripts/c1_interface.py)."""
+    f = ROOT / "results" / "paper2" / "diagnose" / "c1_interface.csv"
+    if not f.exists():
+        return None
+    c = pd.read_csv(f).rename(columns={"config": "base", "rows": "plan_rows"}).drop(columns="group")
+    m = d.merge(c, on=["base", "origin"], how="inner")
+    out = []
+
+    def put(name, value):
+        out.append(f"\\newcommand{{\\{name}}}{{{value}}}")
+
+    pc = lambda v: f"{100 * v:.1f}" if pd.notna(v) else "n/a"  # noqa: E731
+    tag = {"m5": "M", "dominicks": "D", "frat": "F"}
+    put("cIfN", int(len(m)))
+    put("cIfOf", int(len(d)))
+    same, diff = m[m["differ"] == 0], m[m["differ"] > 0]
+    put("cIfSameN", int(len(same)))
+    put("cIfSameMaxCa", f"{same['C1'].max():.0e}".replace("e-0", "e-") if len(same) else "n/a")
+    put("cIfSamePass", int((same["C1"] < 1e-3).sum()))
+    put("cIfDiffN", int(len(diff)))
+    put("cIfDiffFail", int((diff["C1"] >= 1e-3).sum()))
+    put("cIfDiffPass", int((diff["C1"] < 1e-3).sum()))
+    sm = m[m["sample"].fillna("").astype(str).str.len() > 0] if "sample" in m else m.iloc[:0]
+    put("cIfSampledN", int(len(sm)))
+    put("cIfFailN", int((m["C1"] >= 1e-3).sum()))
+    put("cIfFailWithDiff", int(((m["C1"] >= 1e-3) & (m["differ"] > 0)).sum()))
+    for ds, t in tag.items():
+        g = m[m["dataset"] == ds]
+        put(f"cIfAny{t}", f"{int((g['differ'] > 0).sum())} of {len(g)}" if len(g) else "none")
+        put(f"cIfMed{t}", pc(g["differ"].median()) if len(g) else "n/a")
+        put(f"cIfMax{t}", pc(g["differ"].max()) if len(g) else "n/a")
+    tot = (m["plan_rows"] * m["differ"]).sum()
+    for col, nm in (("audit_no_regular", "NoReg"), ("rule_differs", "Rule"), ("new_item", "New"),
+                    ("lever_differs", "Lever"), ("model_price_one", "One")):
+        put(f"cIfShare{nm}", f"{100 * (m['plan_rows'] * m[col]).sum() / tot:.0f}" if tot else "0")
+    put("cIfGap", f"{np.exp(m.loc[m['differ'] > 0, 'median_log_gap'].median()):.1f}")
+    r = spearmanr(diff["differ"], diff["C1"]).statistic if len(diff) > 3 else np.nan
+    put("cIfRho", f"{r:.2f}" if pd.notna(r) else "n/a")
+    (gen / "c1_macros.tex").write_text("\n".join(out) + "\n")
+    return m
 
 
 def write_diag_macros(gen: Path):
