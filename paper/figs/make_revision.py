@@ -960,6 +960,61 @@ over nodes of each node's error over its sales. Study G.}}
     (GEN / "rev_tab_catcost.tex").write_text(tex)
 
 
+def tab_losses():
+    """Every training-loss change against the configuration it changed (scripts/loss_ledger.py)."""
+    word = {i: w for i, w in enumerate(["none", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+                                        "ten", "eleven", "twelve"])}
+    d = read("loss_ledger.csv")
+    dsname = {"dominicks": "Dominick's", "breakfast_at_the_frat": "Frat", "m5": "M5"}
+    order = ["Negative binomial likelihood", "Totals term", "Unit-volume weight and Tweedie power 1.1",
+             "Dollar-volume weight and Tweedie power 1.1", "Peak weight, dollar weight and Tweedie power 1.1",
+             "Weight 3 on the periods after a promotion", "Weight 6 on the periods after a promotion",
+             "Latent term, weight 0.1", "Latent term, weight 0.5", "Latent term, weight 2",
+             "Latent term with a spread penalty and discount", "Latent pretraining, encoder frozen afterwards",
+             "Latent pretraining, encoder full afterwards", "Latent pretraining, encoder low lr afterwards",
+             "Latent pretraining, then forecast with the latent term",
+             "Latent pretraining, then forecast with a totals term"]
+    lines = []
+    for ch in order + [c for c in d.change.unique() if c not in order]:
+        g = d[d.change == ch]
+        if g.empty:
+            continue
+        sc = g[g.status == "scored"]
+        where = ", ".join(sorted({dsname.get(x, x) for x in g.dataset}))
+        label = ch.replace("low lr", "at a lower rate")
+        if sc.empty:
+            lines.append(f"{label} & {where} & -- & -- & Not run on full data \\\\")
+            continue
+        n, better = len(sc), int((sc["diff"] < 0).sum())
+        lines.append(f"{label} & {where} & {f3(sc.wrmsse.mean())} & {f3(sc.wrmsse_ref.mean())} & "
+                     f"Lower in {better} of {n} \\\\")
+    sc = d[d.status == "scored"]
+    put("rcount", "lossn", value=str(len(sc)))
+    put("rcount", "lossbetter", value=str(int((sc["diff"] < 0).sum())))
+    put("rcount", "losschanges", value=word.get(d.change.nunique(), str(d.change.nunique())))
+    tex = f"""\\begin{{table*}}[t]
+\\centering
+\\caption{{\\textbf{{No change to the training loss became a default: each was lower in error than the configuration
+it changed in at most half its comparisons.}} Each row is one change to the Tweedie loss of the world model or lift
+model, scored on the development windows against the configuration with the same data, windows and every other
+setting. WRMSSE: overall (mean of the hierarchy levels), averaged over the seeds and windows both ran and over the
+data sets in the row. Lower: the number of data sets (or category and model pairs) in which the change had the lower
+error. The weight after a promotion comes from study E, where the world model was rerun in the same job. Rows marked
+not run were configured but have no full-data run in the records. Built by \\texttt{{scripts/loss\\_ledger.py}}.}}
+\\label{{tab:losses}}
+\\footnotesize
+\\begin{{tabular}}{{p{{0.36\\textwidth}}p{{0.17\\textwidth}}rrl}}
+\\toprule
+\\textbf{{Change to the loss}} & \\textbf{{Tested on}} & \\textbf{{With it}} & \\textbf{{Without}} & \\textbf{{Result}} \\\\
+\\midrule
+{chr(10).join(lines)}
+\\bottomrule
+\\end{{tabular}}
+\\end{{table*}}
+"""
+    (GEN / "rev_tab_losses.tex").write_text(tex)
+
+
 def core_values():
     """Per-window comparison of the core models with LightGBM (results/paper1_revision/scores)."""
     word = {i: w for i, w in enumerate(["none", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"])}
@@ -1028,6 +1083,7 @@ def main():
     core_values()
     studyg_values()
     catcost_values()
+    tab_losses()
     tab_grain(gt)
     tab_rolling(acc, sets)
     tab_ablation(ab)

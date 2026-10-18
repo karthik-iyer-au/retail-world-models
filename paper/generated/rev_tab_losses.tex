@@ -1,0 +1,34 @@
+\begin{table*}[t]
+\centering
+\caption{\textbf{No change to the training loss became a default: each was lower in error than the configuration
+it changed in at most half its comparisons.} Each row is one change to the Tweedie loss of the world model or lift
+model, scored on the development windows against the configuration with the same data, windows and every other
+setting. WRMSSE: overall (mean of the hierarchy levels), averaged over the seeds and windows both ran and over the
+data sets in the row. Lower: the number of data sets (or category and model pairs) in which the change had the lower
+error. The weight after a promotion comes from study E, where the world model was rerun in the same job. Rows marked
+not run were configured but have no full-data run in the records. Built by \texttt{scripts/loss\_ledger.py}.}
+\label{tab:losses}
+\footnotesize
+\begin{tabular}{p{0.36\textwidth}p{0.17\textwidth}rrl}
+\toprule
+\textbf{Change to the loss} & \textbf{Tested on} & \textbf{With it} & \textbf{Without} & \textbf{Result} \\
+\midrule
+Negative binomial likelihood & Dominick's, Frat & 0.537 & 0.541 & Lower in 1 of 2 \\
+Totals term & Dominick's, Frat & 0.655 & 0.583 & Lower in 0 of 3 \\
+Unit-volume weight and Tweedie power 1.1 & Dominick's & -- & -- & Not run on full data \\
+Dollar-volume weight and Tweedie power 1.1 & Dominick's & -- & -- & Not run on full data \\
+Peak weight, dollar weight and Tweedie power 1.1 & Dominick's & 0.853 & 0.856 & Lower in 5 of 12 \\
+Weight 3 on the periods after a promotion & Dominick's & 0.834 & 0.832 & Lower in 2 of 6 \\
+Weight 6 on the periods after a promotion & Dominick's & 0.810 & 0.832 & Lower in 2 of 6 \\
+Latent term, weight 0.1 & Frat & 0.411 & 0.406 & Lower in 0 of 1 \\
+Latent term, weight 0.5 & Frat & 0.414 & 0.407 & Lower in 0 of 2 \\
+Latent term, weight 2 & Frat & 0.410 & 0.406 & Lower in 0 of 1 \\
+Latent term with a spread penalty and discount & Dominick's, Frat & 0.567 & 0.549 & Lower in 0 of 4 \\
+Latent pretraining, encoder frozen afterwards & Frat & 0.428 & 0.406 & Lower in 0 of 1 \\
+Latent pretraining, encoder full afterwards & Frat & 0.407 & 0.406 & Lower in 0 of 1 \\
+Latent pretraining, encoder at a lower rate afterwards & Frat & 0.411 & 0.407 & Lower in 0 of 3 \\
+Latent pretraining, then forecast with the latent term & Frat & 0.415 & 0.406 & Lower in 0 of 1 \\
+Latent pretraining, then forecast with a totals term & Dominick's, Frat & 0.729 & 0.667 & Lower in 0 of 1 \\
+\bottomrule
+\end{tabular}
+\end{table*}

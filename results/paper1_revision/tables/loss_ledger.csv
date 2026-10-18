@@ -1,0 +1,61 @@
+change,config,dataset,category,settings,status,reference,runs,wrmsse,wrmsse_ref,diff
+Totals term,dominicks_ana_dev_lift_fixes_long,dominicks,,total_weight=1.0,no matched reference,,,,,
+Negative binomial likelihood,dominicks_ana_dev_lift_negative_binomial,dominicks,,likelihood=negative_binomial,scored,dominicks_ana_dev_state_model_lift,6,0.66507,0.67609,-0.011017
+Totals term,dominicks_ana_dev_lift_totals_loss,dominicks,,total_weight=1.0,scored,dominicks_ana_dev_state_model_lift,6,0.819,0.67609,0.14291
+"Peak weight, dollar weight and Tweedie power 1.1",dominicks_ana_dev_peaks_feedback_weighted,dominicks,,peak_weight=0.5; volume_weight=0.9; tweedie_power=1.1; volume_by=dollars,scored,dominicks_ana_dev_peaks_feedback,2,0.90082,0.83791,0.062917
+"Peak weight, dollar weight and Tweedie power 1.1",dominicks_ana_dev_peaks_weighted,dominicks,,peak_weight=0.5; volume_weight=0.9; tweedie_power=1.1; volume_by=dollars,scored,dominicks_ana_dev_peaks_world_model,2,0.82653,0.67928,0.14725
+"Latent pretraining, then forecast with a totals term",dominicks_ana_dev_world_model_best_recipe_fixes,dominicks,,pretrain_steps=10000; total_weight=1.0; finetune=low_lr,scored,dominicks_ana_dev_world_model_plain,6,0.7289,0.66682,0.062075
+Latent term with a spread penalty and discount,dominicks_ana_dev_world_model_checked,dominicks,,latent_weight=0.5; state_spread_weight=0.1; rollout_discount=0.8,scored,dominicks_ana_dev_world_model_plain,6,0.68504,0.66682,0.018216
+Totals term,dominicks_ana_dev_world_model_fixes,dominicks,,total_weight=1.0,scored,dominicks_ana_dev_world_model_plain,6,0.73236,0.66682,0.065534
+Dollar-volume weight and Tweedie power 1.1,dominicks_ana_dev_world_model_level8_long_seasonal_dollars,dominicks,,volume_weight=0.9; tweedie_power=1.1; volume_by=dollars,not run on full data,,,,,
+Unit-volume weight and Tweedie power 1.1,dominicks_ana_dev_world_model_level8_units_loss,dominicks,,volume_weight=0.9; tweedie_power=1.1,not run on full data,,,,,
+Latent term with a spread penalty and discount,dominicks_ana_dev_world_model_plan_split_checked,dominicks,,latent_weight=0.5; state_spread_weight=0.1; rollout_discount=0.8,scored,dominicks_ana_dev_world_model_plan_split,6,0.73022,0.70365,0.026569
+Unit-volume weight and Tweedie power 1.1,dominicks_bat_dev_world_model_level8_units_loss,dominicks,,volume_weight=0.9; tweedie_power=1.1,not run on full data,,,,,
+"Peak weight, dollar weight and Tweedie power 1.1",dominicks_bjc_dev_peaks_feedback_weighted,dominicks,,peak_weight=0.5; volume_weight=0.9; tweedie_power=1.1; volume_by=dollars,scored,dominicks_bjc_dev_peaks_feedback,2,1.2215,1.0457,0.1758
+"Peak weight, dollar weight and Tweedie power 1.1",dominicks_bjc_dev_peaks_weighted,dominicks,,peak_weight=0.5; volume_weight=0.9; tweedie_power=1.1; volume_by=dollars,scored,dominicks_bjc_dev_peaks_world_model,2,1.0625,1.0998,-0.037263
+Unit-volume weight and Tweedie power 1.1,dominicks_bjc_dev_world_model_level8_units_loss,dominicks,,volume_weight=0.9; tweedie_power=1.1,not run on full data,,,,,
+"Peak weight, dollar weight and Tweedie power 1.1",dominicks_che_dev_peaks_feedback_weighted,dominicks,,peak_weight=0.5; volume_weight=0.9; tweedie_power=1.1; volume_by=dollars,scored,dominicks_che_dev_peaks_feedback,2,0.86969,1.0721,-0.20242
+"Peak weight, dollar weight and Tweedie power 1.1",dominicks_che_dev_peaks_weighted,dominicks,,peak_weight=0.5; volume_weight=0.9; tweedie_power=1.1; volume_by=dollars,scored,dominicks_che_dev_peaks_world_model,2,0.81365,1.1163,-0.30266
+Dollar-volume weight and Tweedie power 1.1,dominicks_che_dev_world_model_level8_long_seasonal_dollars,dominicks,,volume_weight=0.9; tweedie_power=1.1; volume_by=dollars,not run on full data,,,,,
+Unit-volume weight and Tweedie power 1.1,dominicks_che_dev_world_model_level8_units_loss,dominicks,,volume_weight=0.9; tweedie_power=1.1,not run on full data,,,,,
+Unit-volume weight and Tweedie power 1.1,dominicks_cig_dev_world_model_level8_units_loss,dominicks,,volume_weight=0.9; tweedie_power=1.1,not run on full data,,,,,
+"Peak weight, dollar weight and Tweedie power 1.1",dominicks_fre_dev_peaks_feedback_weighted,dominicks,,peak_weight=0.5; volume_weight=0.9; tweedie_power=1.1; volume_by=dollars,scored,dominicks_fre_dev_peaks_feedback,2,0.37692,0.41125,-0.034336
+"Peak weight, dollar weight and Tweedie power 1.1",dominicks_fre_dev_peaks_weighted,dominicks,,peak_weight=0.5; volume_weight=0.9; tweedie_power=1.1; volume_by=dollars,scored,dominicks_fre_dev_peaks_world_model,2,0.4001,0.39322,0.0068798
+Unit-volume weight and Tweedie power 1.1,dominicks_fre_dev_world_model_level8_units_loss,dominicks,,volume_weight=0.9; tweedie_power=1.1,not run on full data,,,,,
+"Peak weight, dollar weight and Tweedie power 1.1",dominicks_sdr_dev_peaks_feedback_weighted,dominicks,,peak_weight=0.5; volume_weight=0.9; tweedie_power=1.1; volume_by=dollars,scored,dominicks_sdr_dev_peaks_feedback,2,0.78139,1.0499,-0.26851
+"Peak weight, dollar weight and Tweedie power 1.1",dominicks_sdr_dev_peaks_weighted,dominicks,,peak_weight=0.5; volume_weight=0.9; tweedie_power=1.1; volume_by=dollars,scored,dominicks_sdr_dev_peaks_world_model,2,0.77672,0.74668,0.030044
+Dollar-volume weight and Tweedie power 1.1,dominicks_sdr_dev_world_model_level8_long_seasonal_dollars,dominicks,,volume_weight=0.9; tweedie_power=1.1; volume_by=dollars,not run on full data,,,,,
+Unit-volume weight and Tweedie power 1.1,dominicks_sdr_dev_world_model_level8_units_loss,dominicks,,volume_weight=0.9; tweedie_power=1.1,not run on full data,,,,,
+"Peak weight, dollar weight and Tweedie power 1.1",dominicks_sna_dev_peaks_feedback_weighted,dominicks,,peak_weight=0.5; volume_weight=0.9; tweedie_power=1.1; volume_by=dollars,scored,dominicks_sna_dev_peaks_feedback,2,1.2938,0.94093,0.35288
+"Peak weight, dollar weight and Tweedie power 1.1",dominicks_sna_dev_peaks_weighted,dominicks,,peak_weight=0.5; volume_weight=0.9; tweedie_power=1.1; volume_by=dollars,scored,dominicks_sna_dev_peaks_world_model,2,0.9079,0.87425,0.03365
+Dollar-volume weight and Tweedie power 1.1,dominicks_sna_dev_world_model_level8_long_seasonal_dollars,dominicks,,volume_weight=0.9; tweedie_power=1.1; volume_by=dollars,not run on full data,,,,,
+Unit-volume weight and Tweedie power 1.1,dominicks_sna_dev_world_model_level8_units_loss,dominicks,,volume_weight=0.9; tweedie_power=1.1,not run on full data,,,,,
+Totals term,frat_dev_lift_all_three_fixes,breakfast_at_the_frat,,total_weight=1.0,no matched reference,,,,,
+Negative binomial likelihood,frat_dev_lift_negative_binomial,breakfast_at_the_frat,,likelihood=negative_binomial,scored,frat_dev_state_model_lift,10,0.40953,0.40644,0.0030942
+Totals term,frat_dev_lift_totals_loss,breakfast_at_the_frat,,total_weight=1.0,scored,frat_dev_state_model_lift,10,0.41364,0.40644,0.0072036
+"Latent term, weight 0.5",frat_dev_state_model_latent,breakfast_at_the_frat,,latent_weight=0.5,not run on full data,,,,,
+"Latent term, weight 2",frat_dev_state_model_lift_jepa_joint_heavy,breakfast_at_the_frat,,latent_weight=2.0,scored,frat_dev_state_model_lift,10,0.41044,0.40644,0.0040042
+"Latent term, weight 0.1",frat_dev_state_model_lift_jepa_joint_light,breakfast_at_the_frat,,latent_weight=0.1,scored,frat_dev_state_model_lift,10,0.411,0.40644,0.0045679
+"Latent pretraining, encoder frozen afterwards",frat_dev_state_model_lift_jepa_pretrain_frozen,breakfast_at_the_frat,,pretrain_steps=3000; finetune=frozen,scored,frat_dev_state_model_lift,10,0.42761,0.40644,0.021171
+"Latent pretraining, encoder full afterwards",frat_dev_state_model_lift_jepa_pretrain_full,breakfast_at_the_frat,,pretrain_steps=3000; finetune=full,scored,frat_dev_state_model_lift,10,0.40684,0.40644,0.00040391
+"Latent pretraining, encoder low lr afterwards",frat_dev_state_model_lift_jepa_pretrain_long_low_lr,breakfast_at_the_frat,,pretrain_steps=10000; finetune=low_lr,scored,frat_dev_state_model_lift,10,0.40804,0.40644,0.0016067
+"Latent pretraining, encoder low lr afterwards",frat_dev_state_model_lift_jepa_pretrain_low_lr,breakfast_at_the_frat,,pretrain_steps=3000; finetune=low_lr,scored,frat_dev_state_model_lift,10,0.41356,0.40644,0.0071235
+"Latent pretraining, then forecast with the latent term",frat_dev_state_model_lift_jepa_pretrain_low_lr_joint,breakfast_at_the_frat,,pretrain_steps=3000; latent_weight=0.5; finetune=low_lr,scored,frat_dev_state_model_lift,10,0.41468,0.40644,0.0082401
+"Latent term, weight 0.5",frat_dev_state_model_lift_latent,breakfast_at_the_frat,,latent_weight=0.5,scored,frat_dev_state_model_lift,10,0.41068,0.40644,0.0042442
+"Latent pretraining, encoder low lr afterwards",frat_dev_world_model_best_recipe,breakfast_at_the_frat,,pretrain_steps=10000; finetune=low_lr,scored,frat_dev_world_model_plain,10,0.41081,0.4081,0.0027085
+"Latent pretraining, then forecast with a totals term",frat_dev_world_model_best_recipe_fixes,breakfast_at_the_frat,,pretrain_steps=10000; total_weight=1.0; finetune=low_lr,no matched reference,,,,,
+Latent term with a spread penalty and discount,frat_dev_world_model_checked,breakfast_at_the_frat,,latent_weight=0.5; state_spread_weight=0.1; rollout_discount=0.8,scored,frat_dev_world_model_plain,10,0.42716,0.4081,0.019051
+"Latent term, weight 0.5",frat_dev_world_model_latent,breakfast_at_the_frat,,latent_weight=0.5,scored,frat_dev_world_model_plain,10,0.41728,0.4081,0.0091768
+Latent term with a spread penalty and discount,frat_dev_world_model_plan_split_checked,breakfast_at_the_frat,,latent_weight=0.5; state_spread_weight=0.1; rollout_discount=0.8,scored,frat_dev_world_model_plan_split,10,0.42367,0.41707,0.0066051
+Weight 3 on the periods after a promotion,dominicks_ana_dev_afterpromo_w2,dominicks,ana,after_promo_weight=2,scored,"world model, same job",1,0.6994,0.6532,0.0462
+Weight 3 on the periods after a promotion,dominicks_bjc_dev_afterpromo_w2,dominicks,bjc,after_promo_weight=2,scored,"world model, same job",1,1.0836,1.092,-0.0084
+Weight 3 on the periods after a promotion,dominicks_che_dev_afterpromo_w2,dominicks,che,after_promo_weight=2,scored,"world model, same job",1,1.0943,1.2812,-0.1869
+Weight 3 on the periods after a promotion,dominicks_fre_dev_afterpromo_w2,dominicks,fre,after_promo_weight=2,scored,"world model, same job",1,0.4113,0.3868,0.0245
+Weight 3 on the periods after a promotion,dominicks_sdr_dev_afterpromo_w2,dominicks,sdr,after_promo_weight=2,scored,"world model, same job",1,0.8608,0.8286,0.0322
+Weight 3 on the periods after a promotion,dominicks_sna_dev_afterpromo_w2,dominicks,sna,after_promo_weight=2,scored,"world model, same job",1,0.8566,0.7489,0.1077
+Weight 6 on the periods after a promotion,dominicks_ana_dev_afterpromo_w5,dominicks,ana,after_promo_weight=5,scored,"world model, same job",1,0.6906,0.6532,0.0374
+Weight 6 on the periods after a promotion,dominicks_bjc_dev_afterpromo_w5,dominicks,bjc,after_promo_weight=5,scored,"world model, same job",1,1.0304,1.092,-0.0616
+Weight 6 on the periods after a promotion,dominicks_che_dev_afterpromo_w5,dominicks,che,after_promo_weight=5,scored,"world model, same job",1,1.0432,1.2812,-0.238
+Weight 6 on the periods after a promotion,dominicks_fre_dev_afterpromo_w5,dominicks,fre,after_promo_weight=5,scored,"world model, same job",1,0.4079,0.3868,0.0211
+Weight 6 on the periods after a promotion,dominicks_sdr_dev_afterpromo_w5,dominicks,sdr,after_promo_weight=5,scored,"world model, same job",1,0.8331,0.8286,0.0045
+Weight 6 on the periods after a promotion,dominicks_sna_dev_afterpromo_w5,dominicks,sna,after_promo_weight=5,scored,"world model, same job",1,0.8542,0.7489,0.1053
