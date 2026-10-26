@@ -21,6 +21,20 @@ class Forecaster(ABC):
     def predict(self, future: pd.DataFrame) -> np.ndarray:
         """One forecast per row of `future`, in the same row order."""
 
+    # A model whose fit only stores history (the naive and zero-shot models)
+    # learns nothing from it, so taking in new history is fitting again.
+    stores_history_only = False
+
+    def refresh(self, history: pd.DataFrame) -> "Forecaster":
+        """Take in `history`, which may hold series the model was not trained
+        on, for forecasting from the end of it, without learning from it: the
+        fitted weights stay as they are. Used by the transfer test, which
+        trains without some stores or items and then forecasts them from their
+        own history."""
+        if self.stores_history_only:
+            return self.fit(history)
+        raise NotImplementedError(f"{type(self).__name__} cannot take in new history without training")
+
 
 def register_model(name: str):
     def wrap(cls):

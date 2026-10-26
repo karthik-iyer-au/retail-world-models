@@ -22,6 +22,7 @@ def _period(dates: np.ndarray) -> np.timedelta64:
 class SeasonalNaive(Forecaster):
     """Forecast = sales one season earlier. season=7 for daily data, 52 for weekly.
     Beyond one season ahead it repeats the last season. No record means zero."""
+    stores_history_only = True  # fit keeps history and learns nothing from it
 
     def __init__(self, season: int = 7):
         self.season = season
@@ -46,6 +47,7 @@ class SeasonalNaive(Forecaster):
 @register_model("recent_average")
 class RecentAverage(Forecaster):
     """Forecast = average over the last `window` periods, held flat."""
+    stores_history_only = True  # fit keeps history and learns nothing from it
 
     def __init__(self, window: int = 28):
         self.window = window

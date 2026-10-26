@@ -1,0 +1,44 @@
+# Study I (plan entry of 27 October 2026): transfer to stores not trained on, from rev_m5_rolling_world_model; written by scripts/make_transfer_configs.py.
+name: transfer_m5_store_world_model_trained_on_all
+seed: 0
+dataset:
+  name: m5
+model:
+  name: state_model
+  params:
+    horizon: 28
+    history: 112
+    train_periods: 730
+    categorical:
+    - item_id
+    - dept_id
+    - cat_id
+    - store_id
+    - state_id
+    extra:
+    - event
+    - snap
+    d_model: 128
+    layers: 3
+    heads: 4
+    steps: 30000
+    batch: 1024
+    lr: 0.001
+    seed: 0
+    mixed_precision: true
+    regular_price: true
+    lift_readout: true
+    rollout: true
+    roll_norm: true
+evaluation:
+  horizon: 28
+  n_origins: 4
+  scale_lag: 1
+  weight_window: 28
+  holdout_periods: 84
+  step: 28
+  transfer:
+    by: store_id
+    share: 0.2
+    seed: 0
+    trained_on_all: true

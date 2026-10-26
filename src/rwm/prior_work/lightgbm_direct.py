@@ -215,6 +215,32 @@ class LightGBMDirect(Forecaster):
             self._groups[key] = {"booster": booster, "names": names, **state}
         return self
 
+    def refresh(self, history: pd.DataFrame) -> "LightGBMDirect":
+        """Forecast from the end of `history`, which may hold series not trained
+        on, with the trees as fitted. A label not seen in training (a held-out
+        store or item) is coded as missing, as for cold start. With `group_by`,
+        a group that had no trees of its own (a store held out of training when
+        there is one model per store) cannot be forecast and stays at zero; its
+        name is kept in `unserved`."""
+        dates = np.sort(history[DATE].unique())[-self.history:]
+        recent = history[history[DATE] >= dates[0]]
+        recent = recent.assign(**{SERIES: recent[SERIES].astype(str)})
+        keys = recent[self.group_by].to_numpy() if self.group_by else np.full(len(recent), "all")
+        self.unserved = []
+        for key in pd.unique(keys):
+            part = recent[keys == key]
+            if key not in self._groups:
+                self.unserved.append(key)
+                continue
+            names = pd.Index(part[SERIES].unique()).sort_values()
+            units, price, extra = self._prepare(part, names, dates)
+            first = part.drop_duplicates(SERIES).set_index(SERIES).loc[names]
+            self._groups[key].update(
+                names=names, dates=dates, units=np.nan_to_num(units), price=price, extra=extra,
+                cats={c: self._cat_levels[c].get_indexer(first[c].astype(str)) for c in self.categorical},
+            )
+        return self
+
     def shap(self, future: pd.DataFrame) -> pd.DataFrame:
         """TreeSHAP contribution of each input to each forecast, on the model's
         raw (log) scale, one row per row of `future`; `bias` is the expected

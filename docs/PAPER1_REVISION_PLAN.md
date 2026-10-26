@@ -516,3 +516,27 @@ changed after the fact. The earlier versions' results stay in the paper,
 labelled with their versions. The `foundation` dependencies move from
 `timesfm` 2.0.2 to 3.0.2, which still holds TimesFM 2.5; each manifest records
 the version used.
+
+**27 October 2026, study I, transfer to stores and items not trained on, written down before it runs.**
+A merchant adds a range or opens a store, and the forecast has to work for
+lines and stores the model was not trained on. A trained network reads any
+series' state from its own history, while trees that split on a store's or
+item's code have nothing to go on for a code they never saw. Study I tests
+that on public data. In every rolling window a fifth of stores, or a fifth of
+items (seed 0, the same fifth in every window), is kept out of training; the
+fitted model then reads the kept-out series' own history without learning
+from it (`refresh`; no weight changes) and forecasts them. Each kept-out run
+has a comparison run trained on everything and scored on the same fifth.
+Data: M5 and Dominick's cheese and snacks, the rolling windows and settings of
+each data set's revision configs. Models: the world model (three seeds),
+LightGBM as in the paper for items, and for stores one LightGBM over all
+stores with the store as an input (one model per store cannot forecast a store
+it never saw), and seasonal naive, which learns nothing and so marks what the
+history alone gives. The measure is the cost of not training on a series: the
+kept-out score minus the comparison run's score on the same fifth (WRMSSE,
+lower is better, so a smaller cost is better). Question and pass rule: is the
+world model's cost smaller than LightGBM's, judged on the mean over windows
+(and seeds) with a paired interval over windows that excludes zero, on each
+data set and for stores and items separately. Reported whatever it shows,
+with forecast over actual on the kept-out fifth. The world model is not
+changed for this study; it runs at the revision settings.

@@ -35,6 +35,7 @@ import time
 from pathlib import Path
 
 import modal
+import yaml
 
 REPO_URL = "https://github.com/karthik-iyer-au/retail-world-models"
 LOCAL_REPO = Path(__file__).resolve().parents[1]
@@ -93,10 +94,27 @@ def _job(*args: str) -> subprocess.CompletedProcess:
 
 @app.function(image=image, volumes={DATA: data_volume}, secrets=[modal.Secret.from_name("kaggle")],
               cpu=4, memory=16384, timeout=4 * 3600)
-def fetch(job_file: str, commit: str) -> None:
+def fetch(job, commit: str) -> None:
+    """The data a job names: a job file in the repository, or a job's dataset list itself."""
     _checkout(commit)
-    _job("--job", job_file, "--fetch-only")
+    if isinstance(job, str):
+        _job("--job", job, "--fetch-only")
+    else:
+        sys.path.insert(0, f"{CHECKOUT}/src")
+        os.chdir(CHECKOUT)
+        from rwm.experiments.job import fetch_datasets
+
+        fetch_datasets(job)
     data_volume.commit()
+
+
+def _dataset_job(config: dict) -> dict:
+    """The datasets entry of a job for one config: its data set, and its categories for Dominick's."""
+    d = config["dataset"]
+    entry = {"name": d["name"]}
+    if d["name"] == "dominicks" and d.get("params", {}).get("categories"):
+        entry["codes"] = list(d["params"]["categories"])
+    return {"datasets": [entry]}
 
 
 @app.function(image=image, volumes={DATA: data_volume, RESULTS: results_volume},
@@ -124,11 +142,54 @@ def run_entry(job_file: str, index: int, commit: str, out: str) -> int:
     return done.returncode
 
 
+@app.function(image=image, volumes={DATA: data_volume, RESULTS: results_volume},
+              timeout=TIMEOUT_S, retries=modal.Retries(max_retries=2, initial_delay=10.0))
+def run_config(config: dict, commit: str, out: str) -> dict | None:
+    """One run of a config made by the research loop, strict, at `commit`.
+    Returns its metrics, or None if it failed. A run already saved for exactly
+    this config is read back, not repeated."""
+    import json
+    import traceback
+
+    _checkout(commit)
+    data_volume.reload()
+    sys.path.insert(0, f"{CHECKOUT}/src")
+    from rwm.experiments.job import finished_run
+    from rwm.experiments.run import run
+
+    folder = Path(RESULTS) / out
+    folder.mkdir(parents=True, exist_ok=True)
+    try:
+        done = finished_run(folder, config) or run(config, strict=True, out_root=folder)
+    except Exception:
+        traceback.print_exc()
+        return None
+    finally:
+        results_volume.commit()
+    return json.loads((done / "metrics.json").read_text())
+
+
+def _git_state() -> tuple[str, bool] | None:
+    """The local commit and whether the tree has changes, or None inside a machine (no checkout there)."""
+    try:
+        git = lambda *a: subprocess.run(["git", "-C", str(LOCAL_REPO), *a], capture_output=True, text=True, check=True).stdout.strip()
+        return git("rev-parse", "HEAD"), bool(git("status", "--porcelain"))
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return None
+
+
+# Taken when the launch starts, before the image is built, so edits made while
+# it builds cannot change which code the runs are checked against.
+LAUNCH = _git_state()
+
+
 def _local_commit() -> str:
     git = lambda *a: subprocess.run(["git", "-C", str(LOCAL_REPO), *a], capture_output=True, text=True, check=True).stdout.strip()
-    if git("status", "--porcelain"):
+    if LAUNCH is None or LAUNCH[1]:
         raise SystemExit("Commit your changes first: cloud runs are strict and use the committed code only.")
-    commit = git("rev-parse", "HEAD")
+    commit = LAUNCH[0]
+    if git("rev-parse", "HEAD") != commit or git("status", "--porcelain"):
+        raise SystemExit("The code changed while the launch was starting; launch again from a clean tree.")
     if commit not in git("ls-remote", REPO_URL):
         git("fetch", "-q", REPO_URL)
         if not git("branch", "-r", "--contains", commit):
@@ -198,3 +259,43 @@ def main(job: str, out: str = "runs", gpu: str = DEFAULT_GPU, list: bool = False
     _summary(job, out, [runs[i]["config"] for i in chosen])
     if failed:
         print("\nDid not finish:\n  " + "\n  ".join(failed))
+
+
+@app.local_entrypoint()
+def research(spec: str, gpu: str = DEFAULT_GPU, max_rounds: int = 0):
+    """The research loop (src/rwm/research/loop.py) with every try on its own
+    machine. The log is written to results/research/<name>/log.jsonl, to be
+    committed with the paper's records.
+
+      modal run cloud/modal_app.py::research --spec configs/research/<name>.yaml
+    """
+    sys.path.insert(0, str(LOCAL_REPO / "src"))
+    from rwm.experiments import plan
+    from rwm.research import loop
+
+    os.chdir(LOCAL_REPO)
+    commit = _local_commit()
+    s = loop.load_spec(spec)
+    base = yaml.safe_load((LOCAL_REPO / s["base"]).read_text())
+    fetch.remote(_dataset_job(base), commit)
+    out = f"research/{s['name']}"
+
+    def evaluate(configs):
+        calls = []
+        for c in configs:
+            on_gpu = plan.machine(c) == "gpu"
+            options = dict(gpu=gpu if on_gpu else None, cpu=GPU_CPUS if on_gpu else CPU_CPUS,
+                           memory=plan.memory_gb(c) * 1024)
+            calls.append(run_config.with_options(**options).spawn(c, commit, out))
+        got = []
+        for call in calls:
+            try:
+                got.append(call.get())
+            except Exception as e:
+                print(f"a try failed: {e}", flush=True)
+                got.append(None)
+        return got
+
+    log = loop.Log(LOCAL_REPO / "results" / "research" / s["name"] / "log.jsonl")
+    best = loop.search(s, evaluate, log, max_rounds=max_rounds or None)
+    print(f"kept: {best['kept']}; score {best['score']:.4f}; held out {best['held_out']:.4f}")

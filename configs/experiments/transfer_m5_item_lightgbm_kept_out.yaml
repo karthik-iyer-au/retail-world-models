@@ -1,0 +1,33 @@
+# Study I (plan entry of 27 October 2026): transfer to items not trained on, from rev_m5_rolling_lightgbm; written by scripts/make_transfer_configs.py.
+name: transfer_m5_item_lightgbm_kept_out
+seed: 0
+dataset:
+  name: m5
+model:
+  name: lightgbm_direct
+  params:
+    horizon: 28
+    train_periods: 730
+    group_by: store_id
+    categorical:
+    - item_id
+    - dept_id
+    - cat_id
+    extra:
+    - event
+    - snap
+    rounds: 800
+    seed: 0
+    threads: 2
+evaluation:
+  horizon: 28
+  n_origins: 4
+  scale_lag: 1
+  weight_window: 28
+  holdout_periods: 84
+  step: 28
+  transfer:
+    by: item_id
+    share: 0.2
+    seed: 0
+    trained_on_all: false

@@ -81,3 +81,9 @@ class Combination(Forecaster):
 
     def predict(self, future: pd.DataFrame) -> np.ndarray:
         return sum(w * m.predict(future) for w, m in zip(self.weights, self.models))
+
+    def refresh(self, history: pd.DataFrame) -> "Combination":
+        """The members take in the history; the weights stay as fitted."""
+        for m in self.models:
+            m.refresh(history)
+        return self
