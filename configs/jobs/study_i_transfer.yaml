@@ -1,0 +1,86 @@
+# Study I, transfer to stores and items not trained on.
+datasets:
+- name: m5
+- name: dominicks
+  codes:
+  - che
+  - sna
+runs:
+- config: configs/experiments/transfer_m5_store_world_model_kept_out.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/transfer_m5_store_world_model_trained_on_all.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/transfer_m5_store_lightgbm_pooled_kept_out.yaml
+- config: configs/experiments/transfer_m5_store_lightgbm_pooled_trained_on_all.yaml
+- config: configs/experiments/transfer_m5_store_seasonal_naive_kept_out.yaml
+- config: configs/experiments/transfer_m5_item_world_model_kept_out.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/transfer_m5_item_world_model_trained_on_all.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/transfer_m5_item_lightgbm_kept_out.yaml
+- config: configs/experiments/transfer_m5_item_lightgbm_trained_on_all.yaml
+- config: configs/experiments/transfer_m5_item_seasonal_naive_kept_out.yaml
+- config: configs/experiments/transfer_dominicks_che_store_world_model_kept_out.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/transfer_dominicks_che_store_world_model_trained_on_all.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/transfer_dominicks_che_store_lightgbm_pooled_kept_out.yaml
+- config: configs/experiments/transfer_dominicks_che_store_lightgbm_pooled_trained_on_all.yaml
+- config: configs/experiments/transfer_dominicks_che_store_seasonal_naive_kept_out.yaml
+- config: configs/experiments/transfer_dominicks_che_item_world_model_kept_out.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/transfer_dominicks_che_item_world_model_trained_on_all.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/transfer_dominicks_che_item_lightgbm_kept_out.yaml
+- config: configs/experiments/transfer_dominicks_che_item_lightgbm_trained_on_all.yaml
+- config: configs/experiments/transfer_dominicks_che_item_seasonal_naive_kept_out.yaml
+- config: configs/experiments/transfer_dominicks_sna_store_world_model_kept_out.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/transfer_dominicks_sna_store_world_model_trained_on_all.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/transfer_dominicks_sna_store_lightgbm_pooled_kept_out.yaml
+- config: configs/experiments/transfer_dominicks_sna_store_lightgbm_pooled_trained_on_all.yaml
+- config: configs/experiments/transfer_dominicks_sna_store_seasonal_naive_kept_out.yaml
+- config: configs/experiments/transfer_dominicks_sna_item_world_model_kept_out.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/transfer_dominicks_sna_item_world_model_trained_on_all.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/transfer_dominicks_sna_item_lightgbm_kept_out.yaml
+- config: configs/experiments/transfer_dominicks_sna_item_lightgbm_trained_on_all.yaml
+- config: configs/experiments/transfer_dominicks_sna_item_seasonal_naive_kept_out.yaml

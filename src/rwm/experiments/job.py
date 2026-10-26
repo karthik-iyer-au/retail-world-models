@@ -67,6 +67,8 @@ def summary_row(folder: Path) -> str:
         row += f" | plan pairs right {mean([s['plan_pair_order'] for s in m['splits']]):.3f} change error {mean([s['plan_pair_change_error'] for s in m['splits']]):.3f}"
     if "rare_plans" in m["splits"][0]:
         row += f" | rare plans {mean([s['rare_plans'] for s in m['splits']]):.3f} usual {mean([s['usual_plans'] for s in m['splits']]):.3f}"
+    if "kept_out" in m["splits"][0]:
+        row += f" | kept out {mean([s['kept_out'] for s in m['splits']]):.3f} trained on {mean([s['trained_on'] for s in m['splits']]):.3f}"
     if "new_items" in m["splits"][0]:
         row += f" | new items {mean([s['new_items'] for s in m['splits']]):.3f} known {mean([s['known_items'] for s in m['splits']]):.3f}"
     if "forecast_to_actual" in m["splits"][0]:

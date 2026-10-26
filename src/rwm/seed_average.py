@@ -42,6 +42,11 @@ class SeedAverage(Forecaster):
     def predict(self, future: pd.DataFrame) -> np.ndarray:
         return np.mean([m.predict(future) for m in self.models], axis=0)
 
+    def refresh(self, history: pd.DataFrame) -> "SeedAverage":
+        for m in self.models:
+            m.refresh(history)
+        return self
+
     def breakdown(self, future: pd.DataFrame) -> pd.DataFrame:
         """Baseline and lift averaged over the members, as the forecast is."""
         parts = [m.breakdown(future) for m in self.models]

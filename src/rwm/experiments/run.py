@@ -108,6 +108,18 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
         n_held = max(1, int(round(ev["new_items"]["share"] * len(products))))
         held = set(rng.choice(products, n_held, replace=False))
         is_new = panel.drop_duplicates(SERIES).set_index(SERIES)[ITEM].astype(str).isin(held).reindex(names).to_numpy()
+    # Transfer test: a random share of stores (or items) is kept out of training,
+    # in every window; the model then takes in their history without learning from
+    # it (`refresh`) and forecasts them. With `trained_on_all` the same share is
+    # scored but the model is trained on everything: the comparison run.
+    transfer = ev.get("transfer")
+    if transfer:
+        by = transfer["by"]
+        values = np.sort(panel[by].astype(str).unique())
+        rng = np.random.default_rng(transfer.get("seed", 0))
+        n_out = max(1, int(round(transfer["share"] * len(values))))
+        kept_out = set(rng.choice(values, n_out, replace=False))
+        is_out = panel.drop_duplicates(SERIES).set_index(SERIES)[by].astype(str).isin(kept_out).reindex(names).to_numpy()
     # Training saves partway through, so a run cut short goes on from there when
     # started again. Kept per config and per version of the code folder (not
     # the whole commit, so a results-only commit does not lose them); removed once the run is saved.
@@ -122,7 +134,11 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
         model = build_model(config["model"]["name"], **config["model"].get("params", {}))
         fit_started = time.time()
         with resume.scope(partial, f"origin{sp.origin}"):
-            model.fit(train if held is None else train[~train[ITEM].astype(str).isin(held)])
+            if transfer and not transfer.get("trained_on_all"):
+                model.fit(train[~train[transfer["by"]].astype(str).isin(kept_out)])
+                model.refresh(train)
+            else:
+                model.fit(train if held is None else train[~train[ITEM].astype(str).isin(held)])
         fit_seconds = time.time() - fit_started
         # wall-clock seconds per window, kept in the manifest (not the scores) so scores stay
         # identical between repeats; a fit that went on from a partway save counts only the time after the restart
@@ -262,6 +278,15 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
                         "known_items": rmsse_where(units[:, :t0], units[:, t0:t1], made, there & ~is_new[:, None], revenue, ev.get("scale_lag", 1))["wrmsse"],
                     }
                     if held is not None
+                    else {}
+                ),
+                **(
+                    {
+                        "kept_out": rmsse_where(units[:, :t0], units[:, t0:t1], made, there & is_out[:, None], revenue, ev.get("scale_lag", 1))["wrmsse"],
+                        "trained_on": rmsse_where(units[:, :t0], units[:, t0:t1], made, there & ~is_out[:, None], revenue, ev.get("scale_lag", 1))["wrmsse"],
+                        "kept_out_forecast_to_actual": float(made[there & is_out[:, None]].sum() / max(float(np.nansum(units[:, t0:t1][there & is_out[:, None]])), 1e-9)),
+                    }
+                    if transfer
                     else {}
                 ),
             }

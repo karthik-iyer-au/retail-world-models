@@ -1062,6 +1062,50 @@ class StateModel(Forecaster):
         }
         return self
 
+    def refresh(self, history: pd.DataFrame) -> "StateModel":
+        """Forecast from the end of `history`, which may hold series not trained
+        on, with the network as fitted: each series' state is read by the
+        encoder from its own latest periods. A label not seen in training (a
+        held-out store or item) is "not seen" (0), as the network was built for.
+        Not with `neighbours`, whose item positions exist only for trained items."""
+        import torch
+
+        if self._net.neighbours:
+            raise NotImplementedError("refresh with neighbours: new items have no learnt position")
+        dates = np.sort(history[DATE].unique())[-self._keep:]
+        history = history[history[DATE] >= dates[0]]
+        self._names = pd.Index(history[SERIES].unique().astype(str)).sort_values()
+        first = history.drop_duplicates(SERIES)
+        first = first.set_index(first[SERIES].astype(str)).loc[self._names]
+        cats = np.stack(
+            [self._levels[c].get_indexer(first[c].astype(str)) + 1 for c in self.categorical], axis=1
+        ) if self.categorical else np.zeros((len(self._names), 0), dtype=np.int64)
+        self._cats = torch.as_tensor(cats, device=self._dev, dtype=torch.long)
+        if self.scale_window_by:
+            picked = first[self.scale_window_by["label"]].astype(str).map(self.scale_window_by["windows"])
+            picked = picked.fillna(self.scale_window or self.history).clip(upper=self.history).to_numpy(dtype=np.int64).copy()
+            self._row_window = torch.as_tensor(picked, device=self._dev, dtype=torch.long)
+        if self.switching:
+            key = first[self.switching].astype(str).agg("|".join, axis=1)
+            self._group = torch.as_tensor(pd.factorize(key)[0], device=self._dev, dtype=torch.long)
+        self._stores = first[STORE].astype(str).to_numpy()
+        self._product = torch.as_tensor(self._products.get_indexer(first[ITEM].astype(str)), device=self._dev)
+        self._members = None
+        if self.group_by:
+            key = first[self.group_by].astype(str).agg("|".join, axis=1).to_numpy()
+            lists = [np.flatnonzero(key == k) for k in np.unique(key)]
+            members = np.full((len(lists), max(map(len, lists))), -1, dtype=np.int64)
+            for i, m in enumerate(lists):
+                members[i, : len(m)] = m
+            self._members = torch.as_tensor(members, device=self._dev)
+        data = self._tensors(history, dates, with_units=True)
+        self._past = {
+            "units": data["units"], "price": data["price"], "extra": data["extra"],
+            **({"regular": data["regular"]} if self.regular_column else {}),
+            "calendar": data["calendar"],
+        }
+        return self
+
     def _adapt(self, data, t: int) -> None:
         """Test-time adaptation at the plan date (column `t`, just after the
         training data): `adapt_steps` steps on the latest `adapt_periods`

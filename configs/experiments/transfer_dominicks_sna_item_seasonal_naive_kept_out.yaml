@@ -1,0 +1,30 @@
+# Study I (plan entry of 27 October 2026): transfer to items not trained on, from rev_dominicks_sna_rolling_seasonal_naive; written by scripts/make_transfer_configs.py.
+name: transfer_dominicks_sna_item_seasonal_naive_kept_out
+seed: 0
+dataset:
+  name: dominicks
+  params:
+    categories:
+    - sna
+model:
+  name: seasonal_naive
+  params:
+    season: 52
+evaluation:
+  horizon: 8
+  n_origins: 6
+  holdout_periods: 24
+  scale_lag: 1
+  weight_window: 13
+  conditions:
+  - promo
+  after_promo:
+    levers:
+    - promo
+    periods: 2
+  step: 8
+  transfer:
+    by: item_id
+    share: 0.2
+    seed: 0
+    trained_on_all: false

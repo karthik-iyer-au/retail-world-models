@@ -54,6 +54,7 @@ class TimesFMZeroShot(Forecaster):
     no row count as zero sales, as in the other models. A series with no
     record in the context window is forecast at zero.
     """
+    stores_history_only = True  # fit keeps history and learns nothing from it
 
     def __init__(self, context: int = 512, batch_size: int = 256, point: str = "median",
                  plan: list[str] | None = None, price_plan: bool = False, ridge: float = 1.0,
