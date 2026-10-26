@@ -154,6 +154,13 @@ in `levers` set to zero.
   them, in training as when forecasting), decays by a learnt share each
   period, and lowers later sales by a learnt amount that cannot be negative,
   so it can only produce a dip after a promotion (pantry loading).
+- `adapt_steps`: test-time adaptation at the plan date (AdaJEPA, arXiv
+  2606.32026). After training, this many gradient steps on the latest
+  `adapt_periods` periods of sales: each item is forecast from that many
+  periods back, scored on the periods that are now history, and only the
+  transition and the encoder's top layer are updated, at `adapt_lr_scale`
+  times the learning rate. Needs `rollout`. Off (0) by default, when the
+  model is exactly the one trained.
 - `year_ago`: each forecast period also sees the item's sales and levers the
   same period a year ago (`year_ago: 52` for weekly data) and
   `year_ago_window` periods either side.
@@ -481,6 +488,9 @@ class StateModel(Forecaster):
         cold_neighbours: int = 10,
         unknown_label_rate: float = 0.0,
         stock: bool = False,
+        adapt_steps: int = 0,
+        adapt_periods: int = 4,
+        adapt_lr_scale: float = 0.1,
     ):
         self._settings = {k: v for k, v in locals().items() if k not in ("self", "__class__")}
         self.horizon, self.history, self.train_periods = horizon, history, train_periods
@@ -537,6 +547,11 @@ class StateModel(Forecaster):
             raise ValueError("cold_start with neighbours is not supported yet")
         self.cold_start, self.cold_neighbours = cold_start, cold_neighbours
         self.unknown_label_rate = unknown_label_rate
+        if adapt_steps and not rollout:
+            raise ValueError("adapt_steps adapts the transition, so it needs rollout")
+        if adapt_steps and not 1 <= adapt_periods <= horizon:
+            raise ValueError("adapt_periods must be between 1 and the horizon")
+        self.adapt_steps, self.adapt_periods, self.adapt_lr_scale = adapt_steps, adapt_periods, adapt_lr_scale
         self.weight_decay = weight_decay
         if finetune not in ("full", "low_lr", "frozen"):
             raise ValueError("finetune must be full, low_lr or frozen")
@@ -1030,6 +1045,9 @@ class StateModel(Forecaster):
         if best["weights"] is not None:  # go back to the point that did best on the validation periods
             self._net.load_state_dict(best["weights"])
         self.best_step = best["step"]
+        self.adapt_log = []
+        if self.adapt_steps:
+            self._adapt(data, t)
         if self.switching:
             self.new_share = self._learn_new_share(data, t - V)
             print(f"share of forecast lift that is new sales for the group: {self.new_share:.3f}", flush=True)
@@ -1043,6 +1061,56 @@ class StateModel(Forecaster):
             "calendar": data["calendar"][tail],
         }
         return self
+
+    def _adapt(self, data, t: int) -> None:
+        """Test-time adaptation at the plan date (column `t`, just after the
+        training data): `adapt_steps` steps on the latest `adapt_periods`
+        periods, forecast from that many periods back. Only the transition
+        (and the plan's own carried part, with `plan_split`) and the top layer
+        of the encoder move; every other weight stays as trained."""
+        import torch
+
+        k, H, p = self.adapt_periods, self.horizon, self.power
+        # the inputs run `H - k` periods past the data; those periods are marked
+        # as not on sale, so they are never targets
+        pad = lambda a: torch.cat([a, torch.full((a.shape[0], H - k), float("nan"), device=self._dev, dtype=a.dtype)], dim=1)
+        ext = {
+            "units": torch.nan_to_num(pad(data["units"])),
+            "price": pad(data["price"]),
+            "extra": [pad(e) for e in data["extra"]],
+            "calendar": torch.cat([data["calendar"], data["calendar"][-1:].expand(H - k, -1)], dim=0),
+            **({"regular": pad(data["regular"])} if self.regular_column else {}),
+        }
+        moving = list(self._net.cell.parameters()) + list(self._net.roll_norm.parameters())
+        if self._net.plan_split:
+            moving += list(self._net.effect.parameters()) + list(self._net.effect_in.parameters())
+        moving += list(self._net.encoder.layers[-1].parameters())
+        ids = {id(q) for q in moving}
+        frozen = [q for q in self._net.parameters() if id(q) not in ids]
+        for q in frozen:
+            q.requires_grad_(False)
+        opt = torch.optim.SGD(moving, lr=self.lr * self.adapt_lr_scale)
+        self._net.eval()  # no dropout: the step follows the forecast the model will make
+        try:
+            for _ in range(self.adapt_steps):
+                total = 0.0
+                opt.zero_grad(set_to_none=True)
+                for rows, picked in self._batches():
+                    start = torch.full_like(rows, t - k)
+                    log_mu, scale, on_sale, ahead = self._forward(ext, {**ext, "start": start}, rows, start, picked)
+                    seen = on_sale & (ahead < t)
+                    target = ext["units"][rows[:, None], ahead] / scale
+                    log_mu = log_mu.float()
+                    each = -target * torch.exp((1 - p) * log_mu) / (1 - p) + torch.exp((2 - p) * log_mu) / (2 - p)
+                    loss = (each * seen).sum() / max(1, len(self._names))
+                    loss.backward()
+                    total += loss.item()
+                torch.nn.utils.clip_grad_norm_(moving, 1.0)
+                opt.step()
+                self.adapt_log.append(total)
+        finally:
+            for q in frozen:
+                q.requires_grad_(True)
 
     def _validate(self, data, origin: int) -> float:
         """Error on the `horizon` periods from column `origin`, which training
