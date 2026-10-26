@@ -33,3 +33,13 @@ The evaluation approach (leakage-resistant splits, sanity checks on
 explanations) follows the author's earlier work on molecular representation
 learning (M-JEPA, github.com/Kar488/M-JEPA). The method carries over. No
 weights or data do.
+
+## Foundation models (study H, 27 October 2026)
+
+| Model | Source | Version | Licence |
+|---|---|---|---|
+| TimesFM 3.0 | huggingface.co/google/timesfm-3.0-pytorch, via the `timesfm` package | `timesfm` 3.0.2 | Weights non-commercial |
+| Chronos-2 | huggingface.co/amazon/chronos-2, via `chronos-forecasting` | 2.3.2 | Apache 2.0 |
+| Timestral-209M | huggingface.co/mistralai/Timestral-209M, code github.com/mistralai/timestral | commit a534bdb | As published by Mistral |
+
+Each run's manifest records the installed package versions.

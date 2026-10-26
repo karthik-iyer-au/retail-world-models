@@ -490,3 +490,29 @@ The first cost is kept in the table as `as_first_run`. The sensitivity variants
 fixed before the run (first half, window total, unit weights, equal weights)
 are computed on the corrected cost; equal weights become the mean over nodes
 that sold in the window of each node's error over its sales.
+
+**27 October 2026, study H, the latest foundation models, written down before it runs.**
+The comparison gave the foundation models unequal footing. TimesFM ran as
+version 2.5 (September 2025), which takes the plan only through a separate
+linear model fitted in context; Chronos ran as Chronos-Bolt (2024) on unit
+history alone; Timestral 1.0 (October 2026) read the plan itself, but as its
+28M model, because 209M needed about a day of GPU time run by run (study F).
+Since then TimesFM 3.0 (August 2026) reads past and future covariates itself,
+and Chronos-2 (October 2025) reads known-future covariates; and runs now go
+to one machine each (`cloud/modal_app.py`), so the larger Timestral is
+affordable. Study H runs, zero-shot on the rolling windows of every data set,
+each with the windows, context and plan inputs of the matching TimesFM config:
+TimesFM 3.0 history only and with the plan (`timesfm3_mean`, `timesfm3_plan`),
+Chronos-2 likewise (`chronos2_mean`, `chronos2_plan`), and Timestral-209M with
+the plan (`timestral209_plan`). Each forecast is the mean of the model's
+quantiles. Questions and pass rules, judged on the mean over rolling windows
+with the paired item bootstrap, at the total and at item by store, as in
+study F: (1) does the strongest foundation model with the plan beat the
+ensemble on its own; (2) does the ensemble with that model in place of
+TimesFM 2.5 beat the current ensemble. If the ensemble still beats every
+foundation model alone, the main result stands. If the swapped ensemble is
+better, it is reported as a robustness result and the paper's ensemble is not
+changed after the fact. The earlier versions' results stay in the paper,
+labelled with their versions. The `foundation` dependencies move from
+`timesfm` 2.0.2 to 3.0.2, which still holds TimesFM 2.5; each manifest records
+the version used.

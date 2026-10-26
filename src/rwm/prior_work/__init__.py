@@ -5,6 +5,8 @@ Nothing in here is our contribution. See README.md in this folder.
 from rwm.prior_work import naive  # noqa: F401
 from rwm.prior_work import timesfm_zero_shot  # noqa: F401  (imports timesfm only when used)
 from rwm.prior_work import timestral_zero_shot  # noqa: F401  (imports timestral only when used)
+from rwm.prior_work import timesfm3_zero_shot  # noqa: F401  (imports timesfm only when used)
+from rwm.prior_work import chronos2_zero_shot  # noqa: F401  (imports chronos only when used)
 
 try:  # needs the optional `trees` dependencies
     from rwm.prior_work import lightgbm_direct  # noqa: F401

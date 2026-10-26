@@ -1,0 +1,15 @@
+# Study H, the latest foundation models (daily data).
+datasets:
+- name: m5
+- name: favorita
+runs:
+- config: configs/experiments/rev_m5_rolling_timesfm3_mean.yaml
+- config: configs/experiments/rev_m5_rolling_timesfm3_plan.yaml
+- config: configs/experiments/rev_m5_rolling_chronos2_mean.yaml
+- config: configs/experiments/rev_m5_rolling_chronos2_plan.yaml
+- config: configs/experiments/rev_m5_rolling_timestral209_plan.yaml
+- config: configs/experiments/rev_favorita_rolling_timesfm3_mean.yaml
+- config: configs/experiments/rev_favorita_rolling_timesfm3_plan.yaml
+- config: configs/experiments/rev_favorita_rolling_chronos2_mean.yaml
+- config: configs/experiments/rev_favorita_rolling_chronos2_plan.yaml
+- config: configs/experiments/rev_favorita_rolling_timestral209_plan.yaml
