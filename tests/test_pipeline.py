@@ -284,7 +284,9 @@ def test_a_failed_run_does_not_stop_the_queue(tmp_path, monkeypatch, capsys):
 
     import yaml
 
-    from rwm.experiments import job
+    import pytest
+
+    from rwm.experiments import job, plan
 
     good = {"name": "ok", "seed": 0, "dataset": {"name": "synthetic", "params": {"n_periods": 120}},
             "model": {"name": "recent_average", "params": {"window": 7}}, "evaluation": {"horizon": 7, "n_origins": 1}}
@@ -292,10 +294,12 @@ def test_a_failed_run_does_not_stop_the_queue(tmp_path, monkeypatch, capsys):
     for c in (bad, good):
         (tmp_path / f"{c['name']}.yaml").write_text(yaml.safe_dump(c))
     (tmp_path / "job.yaml").write_text(yaml.safe_dump({"runs": [{"config": "broken.yaml"}, {"config": "ok.yaml"}]}))
-    monkeypatch.setattr(job, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(plan, "REPO_ROOT", tmp_path)
     monkeypatch.setattr(job, "run", lambda config, strict, out_root: __import__("rwm.experiments.run", fromlist=["run"]).run(config, strict=False, out_root=out_root))
     monkeypatch.setattr(sys, "argv", ["job", "--job", str(tmp_path / "job.yaml"), "--out", str(tmp_path / "out")])
-    job.main()
+    with pytest.raises(SystemExit) as ended:  # the queue goes on, then reports the failure
+        job.main()
+    assert ended.value.code == 1
     text = capsys.readouterr().out
     assert "FAILED broken" in text and "finished" in text and "FAILED, see the error above" in text
 
@@ -352,3 +356,25 @@ def test_run_times_table_lists_each_saved_run(tmp_path):
                    cwd=Path(__file__).resolve().parents[1])
     text = out.read_text()
     assert folder.name in text and "recorded" in text
+
+
+def test_a_job_can_run_one_entry_of_its_list(tmp_path, monkeypatch, capsys):
+    """The cloud launcher gives each machine one entry with --index."""
+    import sys
+
+    import yaml
+
+    from rwm.experiments import job, plan
+
+    base = {"seed": 0, "dataset": {"name": "synthetic", "params": {"n_periods": 120}},
+            "model": {"name": "recent_average", "params": {"window": 7}}, "evaluation": {"horizon": 7, "n_origins": 1}}
+    for name in ("first", "second"):
+        (tmp_path / f"{name}.yaml").write_text(yaml.safe_dump({**base, "name": name}))
+    (tmp_path / "job.yaml").write_text(yaml.safe_dump({"runs": [{"config": "first.yaml"}, {"config": "second.yaml"}]}))
+    monkeypatch.setattr(plan, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(job, "run", lambda config, strict, out_root: __import__("rwm.experiments.run", fromlist=["run"]).run(config, strict=False, out_root=out_root))
+    monkeypatch.setattr(sys, "argv", ["job", "--job", str(tmp_path / "job.yaml"), "--out", str(tmp_path / "out"),
+                                      "--no-fetch", "--index", "1"])
+    job.main()
+    saved = [p.name for p in (tmp_path / "out").iterdir() if not p.name.startswith("_")]
+    assert len(saved) == 1 and "_second_" in saved[0]
