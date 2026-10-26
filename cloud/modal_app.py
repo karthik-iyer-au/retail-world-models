@@ -1,7 +1,7 @@
 """Run a job file on Modal, every run on its own machine, all at once.
 
-  modal run cloud/modal_app.py --job configs/jobs/paper1_revision_m5.yaml --out paper1_revision
-  modal run cloud/modal_app.py --job <job file> --list        # what would run, and where; nothing starts
+  modal run cloud/modal_app.py::main --job configs/jobs/paper1_revision_m5.yaml --out paper1_revision
+  modal run cloud/modal_app.py::main --job <job file> --list        # what would run, and where; nothing starts
 
 This file holds no model or data code. Like the Colab notebook, it checks out
 one commit of this repository and calls the repository's own commands:

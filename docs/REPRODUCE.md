@@ -35,8 +35,8 @@ rather than the sum of all of them. Like the Colab notebook, it holds no model
 or data code: it checks out one commit and calls `rwm.experiments.job`.
 
 ```
-modal run cloud/modal_app.py --job configs/jobs/paper1_revision_m5.yaml --list   # plan only
-modal run cloud/modal_app.py --job configs/jobs/paper1_revision_m5.yaml --out paper1_revision
+modal run cloud/modal_app.py::main --job configs/jobs/paper1_revision_m5.yaml --list   # plan only
+modal run cloud/modal_app.py::main --job configs/jobs/paper1_revision_m5.yaml --out paper1_revision
 modal volume get rwm-results paper1_revision results/paper1_revision_runs
 ```
 
