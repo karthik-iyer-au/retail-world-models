@@ -1,0 +1,45 @@
+# The research loop on the world model, Dominick's cheese (src/rwm/research/loop.py).
+# Fixed before the first try and never changed by the loop. The windows lie
+# before every window the paper reports: holdout_periods skips the final window,
+# the two development windows and the six rolling windows (72 weeks). Of the four
+# windows here, the latest is the held-out window, scored but never used to decide.
+name: dominicks_che_world_model
+base: configs/experiments/rev_dominicks_che_rolling_world_model.yaml
+evaluation:
+  horizon: 8
+  n_origins: 4
+  holdout_periods: 72
+  step: 8
+  scale_lag: 1
+  weight_window: 13
+  after_promo:
+    levers: [promo]
+    periods: 2
+seeds: [1, 2, 3]
+rung_fraction: 0.3333
+promote_share: 0.3333
+menu:
+  # loss and weighting
+  - {name: volume_weight_0.25, change: {volume_weight: 0.25}}
+  - {name: volume_weight_0.5, change: {volume_weight: 0.5}}
+  - {name: peak_weight_0.5, change: {peak_weight: 0.5}}
+  - {name: after_promo_weight_0.5, change: {after_promo_weight: 0.5}}
+  - {name: total_weight_0.1, change: {total_weight: 0.1}}
+  # the state and its roll-forward
+  - {name: plan_split, change: {plan_split: true}}
+  - {name: feedback, change: {feedback: true}}
+  - {name: level_views_4_8, change: {level_views: [4, 8]}}
+  - {name: long_level_level, change: {scale_window: null, level_views: [4, 8]}}
+  - {name: latent_check, change: {latent_weight: 0.1}}
+  - {name: latent_overshooting, change: {latent_weight: 0.1, latent_checks: 7}}
+  - {name: state_spread, change: {state_spread_weight: 0.01}}
+  # training
+  - {name: lr_0.0005, change: {lr: 0.0005}}
+  - {name: lr_0.002, change: {lr: 0.002}}
+  - {name: batch_256, change: {batch: 256}}
+  - {name: steps_1.5x, change: {steps: 9000}}
+  - {name: weight_average_0.999, change: {weight_average: 0.999}}
+  - {name: width_96, change: {d_model: 96}}
+  # at the plan date
+  - {name: adajepa_1, change: {adapt_steps: 1}}
+  - {name: adajepa_3, change: {adapt_steps: 3}}

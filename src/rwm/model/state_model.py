@@ -154,6 +154,15 @@ in `levers` set to zero.
   them, in training as when forecasting), decays by a learnt share each
   period, and lowers later sales by a learnt amount that cannot be negative,
   so it can only produce a dip after a promotion (pantry loading).
+- `weight_average`: a running average of the weights during training (an
+  exponential moving average with this decay, e.g. 0.999; Izmailov et al.
+  2018, Wortsman et al. 2022), used for forecasting in place of the last
+  weights, and the one scored for the validation stop. Steadier from seed to
+  seed. 0 (off) by default.
+- `latent_checks`: how many steps on the way the latent check compares each
+  rolled state with the encoded one, besides the last (2 by default; the
+  horizon minus one checks every step, latent overshooting as in PlaNet,
+  Hafner et al. 2019).
 - `adapt_steps`: test-time adaptation at the plan date (AdaJEPA, arXiv
   2606.32026). After training, this many gradient steps on the latest
   `adapt_periods` periods of sales: each item is forecast from that many
@@ -491,6 +500,8 @@ class StateModel(Forecaster):
         adapt_steps: int = 0,
         adapt_periods: int = 4,
         adapt_lr_scale: float = 0.1,
+        weight_average: float = 0.0,
+        latent_checks: int = 2,
     ):
         self._settings = {k: v for k, v in locals().items() if k not in ("self", "__class__")}
         self.horizon, self.history, self.train_periods = horizon, history, train_periods
@@ -552,6 +563,12 @@ class StateModel(Forecaster):
         if adapt_steps and not 1 <= adapt_periods <= horizon:
             raise ValueError("adapt_periods must be between 1 and the horizon")
         self.adapt_steps, self.adapt_periods, self.adapt_lr_scale = adapt_steps, adapt_periods, adapt_lr_scale
+        if not 0.0 <= weight_average < 1.0:
+            raise ValueError("weight_average is a decay between 0 (off) and 1")
+        self.weight_average = weight_average
+        if latent_checks < 0:
+            raise ValueError("latent_checks cannot be negative")
+        self.latent_checks = latent_checks
         self.weight_decay = weight_decay
         if finetune not in ("full", "low_lr", "frozen"):
             raise ValueError("finetune must be full, low_lr or frozen")
@@ -844,6 +861,7 @@ class StateModel(Forecaster):
         if last < L:
             raise ValueError("not enough history left to train on after the validation periods")
         best = {"score": float("inf"), "step": 0, "weights": None}
+        ema = {}  # running average of the weights, with weight_average
 
         def train(steps, forecast, latent_weight, encoder_lr, label):
             """One stretch of training. `forecast` switches the forecast loss
@@ -863,6 +881,9 @@ class StateModel(Forecaster):
             shape = lambda k: (k + 1) / warm if k < warm else 0.5 * (1 + np.cos(np.pi * (k - warm) / max(1, steps - warm)))
             sched = torch.optim.lr_scheduler.LambdaLR(opt, shape)
             scaler = torch.amp.GradScaler("cuda", enabled=amp)
+            if forecast and self.weight_average > 0:
+                ema.clear()
+                ema.update({k: v.detach().clone().float() for k, v in self._net.state_dict().items()})
             with_latent = latent_weight > 0
             every = max(1, steps // 20)
             first = 0
@@ -881,6 +902,9 @@ class StateModel(Forecaster):
                 torch.set_rng_state(saved["rng"].cpu())
                 if saved["cuda_rng"] is not None and torch.cuda.is_available():
                     torch.cuda.set_rng_state_all([s.cpu() for s in saved["cuda_rng"]])
+                if saved.get("ema"):
+                    ema.clear()
+                    ema.update(saved["ema"])
                 self.loss_log[:], self.validation_log[:] = saved["loss_log"], saved["validation_log"]
                 first = saved["step"]
                 print(f"{label}: going on from the save at step {first} of {steps}", flush=True)
@@ -893,6 +917,7 @@ class StateModel(Forecaster):
                     "best": dict(best), "gen": gen.get_state(), "rng": torch.get_rng_state(),
                     "cuda_rng": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None,
                     "loss_log": list(self.loss_log), "validation_log": list(self.validation_log),
+                    "ema": dict(ema),
                 }, label)
 
             self._net.train()
@@ -936,7 +961,13 @@ class StateModel(Forecaster):
                             # with a discount below 1, near periods count for more than far ones
                             rho = self.rollout_discount
                             latent, weight = rho ** (H - 1) * far(out["rolled"][:, H - 1], want), rho ** (H - 1)
-                            for k in torch.randint(1, H, (2,), generator=gen).tolist() if H > 1 else []:
+                            if H <= 1 or self.latent_checks == 0:
+                                ks = []
+                            elif self.latent_checks >= H - 1:
+                                ks = list(range(1, H))  # every step: latent overshooting
+                            else:
+                                ks = torch.randint(1, H, (self.latent_checks,), generator=gen).tolist()
+                            for k in ks:
                                 with torch.no_grad():
                                     seen = slow.state(self._window(data, {**data, "start": start}, rows, start + k)[0])
                                 latent = latent + rho ** (k - 1) * far(out["rolled"][:, k - 1], seen)
@@ -1021,14 +1052,27 @@ class StateModel(Forecaster):
                     with torch.no_grad():
                         for a, b in zip(slow.parameters(), self._net.parameters()):
                             a.lerp_(b, 1 - self.latent_ema)
+                if ema:
+                    with torch.no_grad():
+                        for k, v in self._net.state_dict().items():
+                            if v.dtype.is_floating_point:
+                                ema[k].lerp_(v.float(), 1 - self.weight_average)
+                            else:
+                                ema[k].copy_(v)
                 if step % 50 == 0 or step == steps - 1:
                     self.loss_log.append((label, step, loss.item()))
                 if forecast and V and ((step + 1) % max(1, steps // 20) == 0 or step == steps - 1):
+                    raw = None
+                    if ema:  # the averaged weights are the ones scored and kept
+                        raw = {k: v.detach().clone() for k, v in self._net.state_dict().items()}
+                        self._net.load_state_dict({k: v.to(raw[k].dtype) for k, v in ema.items()})
                     score = self._validate(data, t - V)
                     self.validation_log.append((step + 1, score))
                     if score < best["score"]:
                         best.update(score=score, step=step + 1,
                                     weights={k: v.detach().clone() for k, v in self._net.state_dict().items()})
+                    if raw is not None:
+                        self._net.load_state_dict(raw)
                     print(f"validation after step {step + 1}: {score:.4f} (best {best['score']:.4f} at {best['step']})", flush=True)
                     self._net.train()
                 if (step + 1) % every == 0:
@@ -1044,6 +1088,9 @@ class StateModel(Forecaster):
             q.requires_grad_(True)
         if best["weights"] is not None:  # go back to the point that did best on the validation periods
             self._net.load_state_dict(best["weights"])
+        elif ema:  # forecast with the averaged weights
+            current = self._net.state_dict()
+            self._net.load_state_dict({k: v.to(current[k].dtype) for k, v in ema.items()})
         self.best_step = best["step"]
         self.adapt_log = []
         if self.adapt_steps:

@@ -540,3 +540,23 @@ world model's cost smaller than LightGBM's, judged on the mean over windows
 data set and for stores and items separately. Reported whatever it shows,
 with forecast over actual on the kept-out fifth. The world model is not
 changed for this study; it runs at the revision settings.
+
+**27 October 2026, study J, the research loop on the world model, written down before it runs.**
+The world model ran at settings chosen by hand during development. Study J
+searches its settings with a fixed procedure (`src/rwm/research/loop.py`,
+spec `configs/research/dominicks_che_world_model.yaml`): one change at a time
+from a menu fixed in the spec (20 changes: loss weights, the roll-forward,
+training, weight averaging, latent overshooting and test-time adaptation),
+each tried on top of the best settings so far; the best is kept only if its
+mean over three seeds beats the best's mean by at least the seed spread of the
+starting settings; the loop stops when no change clears that bar. Changes are
+screened at a third of the training steps on one seed, and the best third go
+on to full steps on every seed (successive halving). The score is the mean
+WRMSSE over three windows that lie before every window the paper reports; a
+fourth, later window is scored for every kept change and never used to decide.
+Every try is logged with its config (`results/research/<spec>/log.jsonl`) and
+published with the paper. The settings the loop keeps are then run, unchanged,
+on the paper's rolling windows beside the revision settings, and both are
+reported; the paper's other results are not changed after the fact. The loop
+is run on Dominick's cheese first; whether the kept settings carry over to the
+other categories and data sets is tested, not assumed.
