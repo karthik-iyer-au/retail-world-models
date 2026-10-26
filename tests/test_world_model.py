@@ -175,3 +175,20 @@ def test_test_time_adaptation_moves_only_the_transition_and_top_encoder_layer(sp
 def test_test_time_adaptation_needs_the_rollout():
     with pytest.raises(ValueError, match="needs rollout"):
         build_model("state_model", **{**SETTINGS, "rollout": False}, adapt_steps=1)
+
+
+def test_weight_average_forecasts_with_the_averaged_weights(split, fitted):
+    avg = build_model("state_model", **SETTINGS, weight_average=0.99).fit(split[0])
+    test = split[1].drop(columns=[UNITS])
+    f = avg.predict(test)
+    assert np.all(np.isfinite(f)) and not np.allclose(f, fitted.predict(test))
+
+
+def test_weight_average_with_the_validation_stop_keeps_averaged_weights(split):
+    m = build_model("state_model", **{**SETTINGS, "steps": 200}, weight_average=0.9, validation_periods=7).fit(split[0])
+    assert m.best_step > 0 and len(m.validation_log) > 0
+
+
+def test_latent_overshooting_checks_every_step(split):
+    m = build_model("state_model", **{**SETTINGS, "steps": 100}, latent_weight=0.1, latent_checks=6).fit(split[0])
+    assert np.isfinite(m.loss_log[-1][2])
