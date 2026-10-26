@@ -18,6 +18,10 @@ and not repeated, so a job that was cut short can be started again. A run cut
 off partway goes on from its last training save (kept in <out>/_partial, about
 every 5% of training steps, for models that save; removed once the run is saved). The job
 ends by printing one summary line per run.
+
+`--index` runs chosen entries of the run list only, and `--fetch-only` /
+`--no-fetch` split fetching from running; the cloud launcher
+(`cloud/modal_app.py`) uses them to fetch once and give each run its own machine.
 """
 import argparse
 import json
@@ -27,9 +31,10 @@ from pathlib import Path
 import yaml
 
 from rwm.data import fetch
-from rwm.experiments.run import run, with_seed
+from rwm.experiments import plan
+from rwm.experiments.run import run
 from rwm.utils.hashing import sha256_obj
-from rwm.utils.paths import REPO_ROOT, RESULTS
+from rwm.utils.paths import RESULTS
 
 
 def finished_run(out: Path, config: dict) -> Path | None:
@@ -74,47 +79,65 @@ def summary_row(folder: Path) -> str:
     return row
 
 
+def fetch_datasets(job: dict) -> None:
+    """Fetch the data a job names, one part at a time, so a download that fails
+    does not stop the others; runs that needed the missing part fail on their own."""
+    for d in job.get("datasets", []):
+        for codes in [[c] for c in d.get("codes", [])] or [[]]:
+            source = d.get("from")
+            try:
+                fetch.main([d["name"], *codes, *(["--from", source] if source else [])])
+            except BaseException:  # includes a download tool exiting
+                print(f"COULD NOT FETCH {d['name']} {' '.join(codes)}", flush=True)
+                traceback.print_exc()
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--job", required=True, nargs="+", help="one or more job files, run in order")
     ap.add_argument("--out", default=None)
+    ap.add_argument("--fetch-only", action="store_true", help="fetch the job's data and stop")
+    ap.add_argument("--no-fetch", action="store_true", help="skip fetching; the data is already in place")
+    ap.add_argument("--index", type=int, nargs="+", default=None,
+                    help="run only these entries of the job's run list (from 0, seeds counted separately); "
+                         "how a cloud launcher gives each machine one run")
     args = ap.parse_args()
     out = Path(args.out) if args.out else RESULTS
+    any_failed = False
     for job_file in args.job:
         job = yaml.safe_load(Path(job_file).read_text())
-        for d in job.get("datasets", []):
-            # one part at a time, so a download that fails does not stop the others;
-            # runs that needed the missing part fail on their own and the queue goes on
-            for codes in [[c] for c in d.get("codes", [])] or [[]]:
-                try:
-                    fetch.main([d["name"], *codes, *(["--from", d["from"]] if d.get("from") else [])])
-                except BaseException:  # includes a download tool exiting
-                    print(f"COULD NOT FETCH {d['name']} {' '.join(codes)}", flush=True)
-                    traceback.print_exc()
+        if not args.no_fetch:
+            fetch_datasets(job)
+        if args.fetch_only:
+            continue
         folders, failed = [], []
-        for r in job["runs"]:
-            base = yaml.safe_load((REPO_ROOT / r["config"]).read_text())
-            for seed in r.get("seeds", [None]):
-                config = with_seed(base, seed)
-                # A run already saved for this exact config is kept, not repeated.
-                folder = finished_run(out, config)
-                if folder is None:
-                    try:
-                        folder = run(config, strict=True, out_root=out)
-                    except Exception:  # one broken run must not stop the rest of the queue
-                        failed.append(config["name"])
-                        print(f"FAILED {config['name']}", flush=True)
-                        traceback.print_exc()
-                        continue
-                    print(f"finished {folder.name}", flush=True)
-                else:
-                    print(f"already saved {folder.name}", flush=True)
-                folders.append(folder)
+        planned_runs = plan.expand(job)
+        if args.index is not None:
+            planned_runs = [planned_runs[i] for i in args.index]
+        for planned in planned_runs:
+            config = planned["config"]
+            # A run already saved for this exact config is kept, not repeated.
+            folder = finished_run(out, config)
+            if folder is None:
+                try:
+                    folder = run(config, strict=True, out_root=out)
+                except Exception:  # one broken run must not stop the rest of the queue
+                    failed.append(config["name"])
+                    print(f"FAILED {config['name']}", flush=True)
+                    traceback.print_exc()
+                    continue
+                print(f"finished {folder.name}", flush=True)
+            else:
+                print(f"already saved {folder.name}", flush=True)
+            folders.append(folder)
         print(f"\nSummary of {job_file} (average over each run's windows; lower is better)")
         for folder in folders:
             print(summary_row(folder), flush=True)
         for name in failed:
             print(f"{name:<48} FAILED, see the error above", flush=True)
+        any_failed = any_failed or bool(failed)
+    if any_failed:
+        raise SystemExit(1)  # so a launcher can tell a failed run from a finished one
 
 
 if __name__ == "__main__":

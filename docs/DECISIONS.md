@@ -63,3 +63,11 @@ uses the windows before the test period.
 **Compute.** Tree models run on CPU. Deep models run on a Colab GPU through
 `notebooks/colab_run.ipynb`, which calls the repository's commands and holds
 no model or data code.
+
+**Compute on Modal (27 October 2026).** Jobs run one after another on Colab
+took up to two days (44.7 hours for the paper 1 runs in `tab_compute`). Jobs
+now also run through `cloud/modal_app.py`, which gives each run its own
+machine at the same time: an L4 GPU with 8 cores for deep and foundation
+models, 16 cores and no GPU for LightGBM and the naive models. The launcher
+runs committed, pushed code only, and reads job files through the same
+`rwm.experiments.plan` as the job runner. Colab stays available.

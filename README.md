@@ -55,6 +55,7 @@ Archived release: [doi:10.5281/zenodo.23448056](https://doi.org/10.5281/zenodo.2
 | `configs/` | One file per dataset, per experiment, and per job (a list of runs) | A result is defined by its config |
 | `results/` | Run outputs | Each run has a manifest that lets it be repeated |
 | `notebooks/` | A launcher for running a config on Colab | Calls the repository's commands only; holds no model or data code |
+| `cloud/` | A launcher for running a job on Modal, one machine per run | Calls the repository's commands only; holds no model or data code |
 | `docs/` | Decision log, provenance, protocol, how to reproduce | Updated in the same commit as the change |
 | `tests/` | Checks on every piece above | Must pass before any commit |
 
