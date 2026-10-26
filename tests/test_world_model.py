@@ -154,3 +154,24 @@ def test_after_promotion_weight_trains_learns_the_dip_and_saves(split, tmp_path)
     assert b[second].sum() / a[second].sum() < 0.8
     model.save(tmp_path / "ap.pt")
     np.testing.assert_array_equal(b, StateModel.load(tmp_path / "ap.pt", device="cpu").predict(on))
+
+
+def test_test_time_adaptation_moves_only_the_transition_and_top_encoder_layer(split, fitted):
+    adapted = build_model("state_model", **SETTINGS, adapt_steps=3, adapt_periods=4).fit(split[0])
+    plain = fitted._net.state_dict()
+    after = adapted._net.state_dict()
+    top = f"encoder.layers.{len(adapted._net.encoder.layers) - 1}."
+    moved = {k for k in plain if not torch.equal(plain[k], after[k])}
+    assert moved, "adaptation changed nothing"
+    assert all(k.startswith(("cell.", "roll_norm.", top)) for k in moved), moved
+    assert len(adapted.adapt_log) == 3 and all(np.isfinite(adapted.adapt_log))
+    # the same seed and settings without adaptation is the model as trained
+    again = build_model("state_model", **SETTINGS).fit(split[0])
+    test = split[1].drop(columns=[UNITS])
+    assert np.allclose(again.predict(test), fitted.predict(test))
+    assert not np.allclose(adapted.predict(test), fitted.predict(test))
+
+
+def test_test_time_adaptation_needs_the_rollout():
+    with pytest.raises(ValueError, match="needs rollout"):
+        build_model("state_model", **{**SETTINGS, "rollout": False}, adapt_steps=1)
