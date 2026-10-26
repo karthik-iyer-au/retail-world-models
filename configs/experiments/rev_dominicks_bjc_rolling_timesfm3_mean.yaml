@@ -1,0 +1,26 @@
+# Study H (plan entry of 27 October 2026): TimesFM 3.0, windows and inputs of rev_dominicks_bjc_rolling_timesfm_plan; written by scripts/make_latest_foundation_configs.py.
+name: rev_dominicks_bjc_rolling_timesfm3_mean
+seed: 0
+dataset:
+  name: dominicks
+  params:
+    categories:
+    - bjc
+model:
+  name: timesfm3
+  params:
+    context: 512
+    batch_size: 256
+evaluation:
+  horizon: 8
+  n_origins: 6
+  holdout_periods: 24
+  scale_lag: 1
+  weight_window: 13
+  conditions:
+  - promo
+  after_promo:
+    levers:
+    - promo
+    periods: 2
+  step: 8

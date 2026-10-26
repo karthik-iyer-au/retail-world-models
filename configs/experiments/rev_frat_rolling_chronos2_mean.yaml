@@ -1,0 +1,22 @@
+# Study H (plan entry of 27 October 2026): Chronos-2, windows and inputs of rev_frat_rolling_timesfm_plan; written by scripts/make_latest_foundation_configs.py.
+name: rev_frat_rolling_chronos2_mean
+seed: 0
+dataset:
+  name: breakfast_at_the_frat
+model:
+  name: chronos2
+  params:
+    context: 512
+    batch_size: 256
+evaluation:
+  horizon: 8
+  n_origins: 4
+  holdout_periods: 24
+  scale_lag: 1
+  weight_window: 13
+  conditions:
+  - promo
+  - display
+  - feature
+  - tpr_only
+  step: 8

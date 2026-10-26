@@ -1,0 +1,17 @@
+# Study H (plan entry of 27 October 2026): TimesFM 3.0, windows and inputs of rev_favorita_rolling_timesfm_plan; written by scripts/make_latest_foundation_configs.py.
+name: rev_favorita_rolling_timesfm3_mean
+seed: 0
+dataset:
+  name: favorita
+model:
+  name: timesfm3
+  params:
+    context: 512
+    batch_size: 256
+evaluation:
+  horizon: 28
+  n_origins: 4
+  scale_lag: 1
+  weight_window: 28
+  holdout_periods: 0
+  step: 28

@@ -1,0 +1,17 @@
+# Study H (plan entry of 27 October 2026): Chronos-2, windows and inputs of rev_m5_rolling_timesfm_plan; written by scripts/make_latest_foundation_configs.py.
+name: rev_m5_rolling_chronos2_mean
+seed: 0
+dataset:
+  name: m5
+model:
+  name: chronos2
+  params:
+    context: 512
+    batch_size: 256
+evaluation:
+  horizon: 28
+  n_origins: 4
+  scale_lag: 1
+  weight_window: 28
+  holdout_periods: 84
+  step: 28
