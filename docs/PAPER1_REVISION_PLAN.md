@@ -560,3 +560,43 @@ on the paper's rolling windows beside the revision settings, and both are
 reported; the paper's other results are not changed after the fact. The loop
 is run on Dominick's cheese first; whether the kept settings carry over to the
 other categories and data sets is tested, not assumed.
+
+**27 October 2026, study H result, M5.** Mean over the four rolling windows,
+WRMSSE averaged over levels (lower is better): TimesFM 3.0 0.963 history only
+and 0.976 with the plan, against TimesFM 2.5 0.964 and 0.982; Chronos-2 1.058
+and 1.054, against Chronos-Bolt 1.184; Timestral-209M with the plan 2.845,
+forecasting 17% to 61% above actual sales in every window, against
+Timestral-28M 1.038. The world model scores 0.745, LightGBM 0.751 and the
+ensemble 0.760. At the total the foundation models score 1.00 to 1.13 (and
+Timestral-209M 3.14) against 0.61 to 0.71 for the trained models. Per the rule
+above the main result stands on M5: no foundation model with the plan comes
+near the ensemble. Timestral-209M's over-forecast is checked against its
+authors' instructions for covariates before it is reported as its accuracy.
+The swapped ensembles and the other data sets follow.
+
+**27 October 2026, study I result, Dominick's cheese and snacks.** The cost of
+not training on a series (kept-out score minus the comparison run's score on the
+same fifth, mean over six windows and three seeds) and the world model's cost
+against LightGBM's, paired by window with a 90% bootstrap interval:
+
+| Data | Kept out | World model | LightGBM | Difference (90% interval) |
+|---|---|---|---|---|
+| Cheese | items | 0.014 | 0.065 | -0.050 (-0.080 to -0.013) |
+| Cheese | stores | see below | 0.049 | see below |
+| Snacks | items | 0.012 | 0.152 | -0.140 (-0.176 to -0.108) |
+| Snacks | stores | -0.003 | 0.069 | -0.072 (-0.095 to -0.050) |
+
+By the rule fixed before the run, the world model's cost is smaller in all
+four. In the earliest cheese window the world model failed in every one of its
+runs at seeds 1 to 3, trained on everything or not (WRMSSE 35 to 1,481,
+forecasts up to 215 times actual sales; identical between the store and item
+comparison runs, so a property of the model in that window, not of the test).
+That window decides the cheese-stores row on its own, so the row is not read
+as a result; over the five other windows the world model's cost is 0.029
+against LightGBM's 0.049. On the kept-out fifth LightGBM under-forecasts
+(forecast over actual 0.69 to 0.94) while the world model stays near actual
+(0.98 to 1.08). The failure in the earliest cheese window, and the high scores
+in the last two snacks windows (2.7 and 1.1 to 2.4 against 0.4 to 0.7 in the
+others, seeds 1 to 3), are a reliability problem of the world model at the
+revision settings and are reported as such; study J is where settings that
+remove them are searched for. M5 is not yet run.
