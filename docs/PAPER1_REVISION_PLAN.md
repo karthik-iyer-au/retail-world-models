@@ -630,3 +630,35 @@ set; the numbers are reported as they come. If a variant removes the failures
 and is no worse elsewhere, it becomes a candidate for a confirmatory run on
 data sets it was not chosen on (M5, Favorita, the other Dominick's
 categories), written down before that run.
+
+**28 October 2026, study K result (exploratory).** Rolling windows of
+Dominick's cheese and snacks, three seeds, 18 window-seed runs per variant; a
+failure is WRMSSE above 2 (`results/paper1_revision/tables/reliability.csv`).
+
+| Data | Variant | Failures | Worst | Mean | Mean where no variant failed |
+|---|---|---|---|---|---|
+| Cheese | as it is | 3 | 1481.3 | 90.48 | 0.566 |
+| Cheese | volume weighting with plan split | 0 | 1.92 | 0.599 | 0.503 |
+| Cheese | the same with weight averaging | 0 | 0.90 | 0.490 | 0.446 |
+| Cheese | weight averaging alone | 3 | 84.2 | 8.00 | 0.510 |
+| Snacks | as it is | 5 | 2.79 | 1.131 | 0.534 |
+| Snacks | volume weighting with plan split | 3 | 2.84 | 0.977 | 0.492 |
+| Snacks | the same with weight averaging | 3 | 2.81 | 0.889 | 0.491 |
+| Snacks | weight averaging alone | 3 | 2.76 | 1.038 | 0.520 |
+
+Volume weighting with the plan split and weight averaging together remove
+the cheese failure (worst window 0.90 against 1481) and the failure in the
+last snacks window (0.60 against 2.41), and are lower than the settings as
+they are in every other window but the first snacks window (0.75 against
+0.70). The three failures left on snacks are all in one window (July 1996),
+where every model in study F scores 2.6 to 3.5, LightGBM 2.83 and seasonal
+naive 2.74, and every variant here forecasts about 56% to 59% of what sold:
+a jump in sales no model saw coming, not a failure of the world model. On the
+same windows study F's LightGBM scored 0.518 on cheese and 0.870 on snacks,
+against 0.490 and 0.889 for this variant. One AdaJEPA step, as set (one
+plain gradient step at a tenth of the learning rate), changed no score by
+more than 0.04, and by at most 0.0001 on top of volume weighting with the
+split: at this strength it does nothing, so study K says nothing about
+test-time adaptation as such. These variants were chosen on these two
+categories; a confirmatory run on data they were not chosen on follows,
+written down before it runs.
