@@ -1,0 +1,52 @@
+# Study K (plan entry of 27 October 2026, exploratory): fix_weight_average, on the settings and windows of rev_dominicks_che_rolling_world_model; written by scripts/make_reliability_configs.py.
+name: reliability_dominicks_che_fix_weight_average
+seed: 0
+dataset:
+  name: dominicks
+  params:
+    categories:
+    - che
+model:
+  name: state_model
+  params:
+    horizon: 8
+    history: 26
+    train_periods: 156
+    categorical:
+    - item_id
+    - store_id
+    extra:
+    - promo
+    - cost
+    levers:
+    - promo
+    d_model: 64
+    layers: 2
+    heads: 4
+    steps: 6000
+    batch: 512
+    lr: 0.001
+    regular_price: true
+    lift_readout: true
+    rollout: true
+    validation_periods: 8
+    scale_window: 8
+    switching:
+    - store_id
+    roll_norm: true
+    volume_weight: 0.5
+    plan_split: true
+    weight_average: 0.999
+evaluation:
+  horizon: 8
+  n_origins: 6
+  holdout_periods: 24
+  scale_lag: 1
+  weight_window: 13
+  conditions:
+  - promo
+  after_promo:
+    levers:
+    - promo
+    periods: 2
+  step: 8

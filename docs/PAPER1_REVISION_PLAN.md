@@ -600,3 +600,33 @@ in the last two snacks windows (2.7 and 1.1 to 2.4 against 0.4 to 0.7 in the
 others, seeds 1 to 3), are a reliability problem of the world model at the
 revision settings and are reported as such; study J is where settings that
 remove them are searched for. M5 is not yet run.
+
+**27 October 2026, study J result.** The loop stopped after its first round
+with no change kept: the starting settings scored 0.429 (seeds 0.413 to
+0.452, so a keep bar of 0.040), and the best changes scored 0.406 to 0.407
+(a higher learning rate, and loss weighted by volume at 0.5), short of the
+bar. On the held-out window, never used to decide, the starting settings
+scored 1.65; volume weighting 0.82 and the plan split 0.77, with seed ranges
+of 0.014 and 0.008 on the development windows against 0.039; the higher
+learning rate 3.93. One weakness of the design is recorded: changes were
+screened at a third of the training steps, which disadvantages weight
+averaging (a decay of 0.999 averages over most of a short run), so it was not
+fairly tested.
+
+**27 October 2026, study K, the world model's failures, exploratory, written down before it runs.**
+Study K comes from looking at study I and study J's results, so it is
+exploratory and is reported as such; it does not change any result fixed
+before. Question: do the changes that study J pointed to remove the world
+model's failures in the rolling windows (the earliest cheese window, the last
+two snacks windows), without making the other windows worse? On the paper's
+rolling windows of Dominick's cheese and snacks, three seeds each, at full
+training steps: the revision settings as they are; volume weighting at 0.5
+with the plan split (`fix`); `fix` with weight averaging (decay 0.999);
+`fix` with one AdaJEPA step; and weight averaging and AdaJEPA alone.
+Measures, per data set and variant: the number of window-seed runs with WRMSSE
+above 2 (a failure), the worst window-seed score, the mean over windows and
+seeds, and the mean over the windows where no variant failed. No pass rule is
+set; the numbers are reported as they come. If a variant removes the failures
+and is no worse elsewhere, it becomes a candidate for a confirmatory run on
+data sets it was not chosen on (M5, Favorita, the other Dominick's
+categories), written down before that run.
