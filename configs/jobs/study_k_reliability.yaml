@@ -1,0 +1,67 @@
+# Study K, the world model's failures with and without the study J changes.
+datasets:
+- name: dominicks
+  codes:
+  - che
+  - sna
+runs:
+- config: configs/experiments/reliability_dominicks_che_as_is.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/reliability_dominicks_che_fix.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/reliability_dominicks_che_fix_weight_average.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/reliability_dominicks_che_fix_adajepa.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/reliability_dominicks_che_weight_average.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/reliability_dominicks_che_adajepa.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/reliability_dominicks_sna_as_is.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/reliability_dominicks_sna_fix.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/reliability_dominicks_sna_fix_weight_average.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/reliability_dominicks_sna_fix_adajepa.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/reliability_dominicks_sna_weight_average.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/reliability_dominicks_sna_adajepa.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
