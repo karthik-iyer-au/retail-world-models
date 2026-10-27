@@ -261,23 +261,20 @@ def main(job: str, out: str = "runs", gpu: str = DEFAULT_GPU, list: bool = False
         print("\nDid not finish:\n  " + "\n  ".join(failed))
 
 
-@app.local_entrypoint()
-def research(spec: str, gpu: str = DEFAULT_GPU, max_rounds: int = 0):
-    """The research loop (src/rwm/research/loop.py) with every try on its own
-    machine. The log is written to results/research/<name>/log.jsonl, to be
-    committed with the paper's records.
-
-      modal run cloud/modal_app.py::research --spec configs/research/<name>.yaml
-    """
-    sys.path.insert(0, str(LOCAL_REPO / "src"))
+@app.function(image=image, volumes={DATA: data_volume, RESULTS: results_volume}, cpu=1, memory=4096,
+              timeout=24 * 3600)
+def research_loop(spec: str, commit: str, gpu: str, max_rounds: int) -> dict:
+    """The research loop itself, on a small machine of its own, so it runs to the
+    end whether or not the launching computer stays connected. Every try is
+    handed to `run_config` on a machine of its own. The log is written to the
+    results volume as research/<name>/log.jsonl and saved after every row."""
+    _checkout(commit)
+    sys.path.insert(0, f"{CHECKOUT}/src")
+    os.chdir(CHECKOUT)
     from rwm.experiments import plan
     from rwm.research import loop
 
-    os.chdir(LOCAL_REPO)
-    commit = _local_commit()
     s = loop.load_spec(spec)
-    base = yaml.safe_load((LOCAL_REPO / s["base"]).read_text())
-    fetch.remote(_dataset_job(base), commit)
     out = f"research/{s['name']}"
 
     def evaluate(configs):
@@ -296,6 +293,33 @@ def research(spec: str, gpu: str = DEFAULT_GPU, max_rounds: int = 0):
                 got.append(None)
         return got
 
-    log = loop.Log(LOCAL_REPO / "results" / "research" / s["name"] / "log.jsonl")
-    best = loop.search(s, evaluate, log, max_rounds=max_rounds or None)
-    print(f"kept: {best['kept']}; score {best['score']:.4f}; held out {best['held_out']:.4f}")
+    class SavedLog(loop.Log):
+        def write(self, row):
+            super().write(row)
+            print(row, flush=True)
+            results_volume.commit()
+
+    best = loop.search(s, evaluate, SavedLog(Path(RESULTS) / out / "log.jsonl"), max_rounds=max_rounds or None)
+    return {k: best[k] for k in ("kept", "score", "held_out")}
+
+
+@app.local_entrypoint()
+def research(spec: str, gpu: str = DEFAULT_GPU, max_rounds: int = 0):
+    """Start the research loop (src/rwm/research/loop.py) on Modal. Run with
+    --detach so it goes on after this computer disconnects:
+
+      modal run --detach cloud/modal_app.py::research --spec configs/research/<name>.yaml
+
+    Every try runs on its own machine. Get the log, to commit with the paper's
+    records, with
+      modal volume get rwm-results research/<name>/log.jsonl results/research/<name>/log.jsonl
+    """
+    sys.path.insert(0, str(LOCAL_REPO / "src"))
+    from rwm.research import loop
+
+    os.chdir(LOCAL_REPO)
+    commit = _local_commit()
+    s = loop.load_spec(spec)
+    base = yaml.safe_load((LOCAL_REPO / s["base"]).read_text())
+    fetch.remote(_dataset_job(base), commit)
+    print(research_loop.remote(spec, commit, gpu, max_rounds))
