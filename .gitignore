@@ -16,3 +16,5 @@ results/*
 !results/promoted/
 # The snapshot of recorded numbers the paper reads (scripts/records_snapshot.py).
 !results/records/
+# Every try of the research loop, published with the paper (src/rwm/research/loop.py).
+!results/research/

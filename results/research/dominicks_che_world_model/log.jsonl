@@ -1,0 +1,26 @@
+{"kind": "start", "score": 0.4294463648501723, "held_out": 1.651941937580238, "seed_scores": [0.4231114236698515, 0.4524172249857548, 0.4128104458949106], "keep_bar": 0.0396067790908442, "config_sha256": "41ca22ec304c6e3573f1d1103390649ed86fb1f4b3df09389e7992ecce9823f5"}
+{"kind": "rung", "round": 1, "change": "volume_weight_0.25", "params_changed": {"volume_weight": 0.25}, "score": 0.39528007861810416}
+{"kind": "rung", "round": 1, "change": "volume_weight_0.5", "params_changed": {"volume_weight": 0.5}, "score": 0.40709686305604925}
+{"kind": "rung", "round": 1, "change": "peak_weight_0.5", "params_changed": {"peak_weight": 0.5}, "score": 0.46045703198171717}
+{"kind": "rung", "round": 1, "change": "after_promo_weight_0.5", "params_changed": {"after_promo_weight": 0.5}, "score": 0.4363053573117681}
+{"kind": "rung", "round": 1, "change": "total_weight_0.1", "params_changed": {"total_weight": 0.1}, "score": 0.44222987267056685}
+{"kind": "rung", "round": 1, "change": "plan_split", "params_changed": {"plan_split": true}, "score": 0.41386980197114004}
+{"kind": "rung", "round": 1, "change": "feedback", "params_changed": {"feedback": true}, "score": 0.43143359913892426}
+{"kind": "rung", "round": 1, "change": "level_views_4_8", "params_changed": {"level_views": [4, 8]}, "score": 0.413007160340272}
+{"kind": "rung", "round": 1, "change": "long_level_level", "params_changed": {"scale_window": null, "level_views": [4, 8]}, "score": 0.41895143192458856}
+{"kind": "rung", "round": 1, "change": "latent_check", "params_changed": {"latent_weight": 0.1}, "score": 0.5318862369362652}
+{"kind": "rung", "round": 1, "change": "latent_overshooting", "params_changed": {"latent_weight": 0.1, "latent_checks": 7}, "score": 0.43518638440969887}
+{"kind": "rung", "round": 1, "change": "state_spread", "params_changed": {"state_spread_weight": 0.01}, "score": 0.4230614054827256}
+{"kind": "rung", "round": 1, "change": "lr_0.0005", "params_changed": {"lr": 0.0005}, "score": 0.48183762241692935}
+{"kind": "rung", "round": 1, "change": "lr_0.002", "params_changed": {"lr": 0.002}, "score": 0.4246105914393392}
+{"kind": "rung", "round": 1, "change": "batch_256", "params_changed": {"batch": 256}, "score": 0.4517361213989226}
+{"kind": "rung", "round": 1, "change": "steps_1.5x", "params_changed": {"steps": 9000}, "score": 0.4447692282330928}
+{"kind": "rung", "round": 1, "change": "weight_average_0.999", "params_changed": {"weight_average": 0.999}, "score": 0.5346672873119062}
+{"kind": "rung", "round": 1, "change": "width_96", "params_changed": {"d_model": 96}, "score": 0.4357629491179537}
+{"kind": "rung", "round": 1, "change": "adajepa_1", "params_changed": {"adapt_steps": 1}, "score": 0.4322677617881061}
+{"kind": "rung", "round": 1, "change": "adajepa_3", "params_changed": {"adapt_steps": 3}, "score": 0.4322047794052985}
+{"kind": "try", "round": 1, "change": "volume_weight_0.25", "params_changed": {"volume_weight": 0.25}, "score": 0.4280790293504508, "held_out": 2.1598096349146734, "seed_scores": [0.41877613145156717, 0.4023623812706103, 0.4630985753291747], "gain": 0.0013673354997215115, "keep_bar": 0.0396067790908442}
+{"kind": "try", "round": 1, "change": "volume_weight_0.5", "params_changed": {"volume_weight": 0.5}, "score": 0.4065790271078249, "held_out": 0.8170500731147085, "seed_scores": [0.413960889322323, 0.4059206062084642, 0.3998555857926876], "gain": 0.022867337742347393, "keep_bar": 0.0396067790908442}
+{"kind": "try", "round": 1, "change": "level_views_4_8", "params_changed": {"level_views": [4, 8]}, "score": 0.415041812156858, "held_out": 1.1906242149459745, "seed_scores": [0.39577363810568583, 0.45087369721629483, 0.3984781011485932], "gain": 0.01440455269331431, "keep_bar": 0.0396067790908442}
+{"kind": "try", "round": 1, "change": "plan_split", "params_changed": {"plan_split": true}, "score": 0.4141864634532186, "held_out": 0.7707258005634223, "seed_scores": [0.4133361056490182, 0.4187120751862796, 0.41051120952435793], "gain": 0.015259901396953712, "keep_bar": 0.0396067790908442}
+{"kind": "try", "round": 1, "change": "long_level_level", "params_changed": {"scale_window": null, "level_views": [4, 8]}, "score": 0.5246723350772932, "held_out": 1.755366962155346, "seed_scores": [0.39654745012539716, 0.7545536576796829, 0.42291589742679947], "gain": -0.09522597022712087, "keep_bar": 0.0396067790908442}
