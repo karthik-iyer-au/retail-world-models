@@ -142,9 +142,7 @@ def run_entry(job_file: str, index: int, commit: str, out: str) -> int:
     return done.returncode
 
 
-@app.function(image=image, volumes={DATA: data_volume, RESULTS: results_volume},
-              timeout=TIMEOUT_S, retries=modal.Retries(max_retries=2, initial_delay=10.0))
-def run_config(config: dict, commit: str, out: str) -> dict | None:
+def _run_config(config: dict, commit: str, out: str) -> dict | None:
     """One run of a config made by the research loop, strict, at `commit`.
     Returns its metrics, or None if it failed. A run already saved for exactly
     this config is read back, not repeated."""
@@ -167,6 +165,43 @@ def run_config(config: dict, commit: str, out: str) -> dict | None:
     finally:
         results_volume.commit()
     return json.loads((done / "metrics.json").read_text())
+
+
+# One function per kind of machine, with its resources fixed here: the research
+# loop hands tries out from a machine of its own, where a function's resources
+# cannot be changed per call.
+_TRY = dict(image=image, volumes={DATA: data_volume, RESULTS: results_volume},
+            timeout=TIMEOUT_S, retries=modal.Retries(max_retries=2, initial_delay=10.0))
+
+
+@app.function(**_TRY, gpu=DEFAULT_GPU, cpu=GPU_CPUS, memory=16 * 1024)
+def try_gpu(config: dict, commit: str, out: str) -> dict | None:
+    return _run_config(config, commit, out)
+
+
+@app.function(**_TRY, gpu=DEFAULT_GPU, cpu=GPU_CPUS, memory=64 * 1024)
+def try_gpu_large(config: dict, commit: str, out: str) -> dict | None:
+    return _run_config(config, commit, out)
+
+
+@app.function(**_TRY, cpu=CPU_CPUS, memory=16 * 1024)
+def try_cpu(config: dict, commit: str, out: str) -> dict | None:
+    return _run_config(config, commit, out)
+
+
+@app.function(**_TRY, cpu=CPU_CPUS, memory=64 * 1024)
+def try_cpu_large(config: dict, commit: str, out: str) -> dict | None:
+    return _run_config(config, commit, out)
+
+
+def _try_function(config: dict):
+    sys.path.insert(0, str(LOCAL_REPO / "src") if LAUNCH else f"{CHECKOUT}/src")
+    from rwm.experiments import plan
+
+    large = plan.memory_gb(config) > 16
+    if plan.machine(config) == "gpu":
+        return try_gpu_large if large else try_gpu
+    return try_cpu_large if large else try_cpu
 
 
 def _git_state() -> tuple[str, bool] | None:
@@ -263,27 +298,21 @@ def main(job: str, out: str = "runs", gpu: str = DEFAULT_GPU, list: bool = False
 
 @app.function(image=image, volumes={DATA: data_volume, RESULTS: results_volume}, cpu=1, memory=4096,
               timeout=24 * 3600)
-def research_loop(spec: str, commit: str, gpu: str, max_rounds: int) -> dict:
+def research_loop(spec: str, commit: str, max_rounds: int) -> dict:
     """The research loop itself, on a small machine of its own, so it runs to the
     end whether or not the launching computer stays connected. Every try is
-    handed to `run_config` on a machine of its own. The log is written to the
+    handed to a try function (`try_gpu` and the others) on a machine of its own. The log is written to the
     results volume as research/<name>/log.jsonl and saved after every row."""
     _checkout(commit)
     sys.path.insert(0, f"{CHECKOUT}/src")
     os.chdir(CHECKOUT)
-    from rwm.experiments import plan
     from rwm.research import loop
 
     s = loop.load_spec(spec)
     out = f"research/{s['name']}"
 
     def evaluate(configs):
-        calls = []
-        for c in configs:
-            on_gpu = plan.machine(c) == "gpu"
-            options = dict(gpu=gpu if on_gpu else None, cpu=GPU_CPUS if on_gpu else CPU_CPUS,
-                           memory=plan.memory_gb(c) * 1024)
-            calls.append(run_config.with_options(**options).spawn(c, commit, out))
+        calls = [_try_function(c).spawn(c, commit, out) for c in configs]
         got = []
         for call in calls:
             try:
@@ -304,7 +333,7 @@ def research_loop(spec: str, commit: str, gpu: str, max_rounds: int) -> dict:
 
 
 @app.local_entrypoint()
-def research(spec: str, gpu: str = DEFAULT_GPU, max_rounds: int = 0):
+def research(spec: str, max_rounds: int = 0):
     """Start the research loop (src/rwm/research/loop.py) on Modal. Run with
     --detach so it goes on after this computer disconnects:
 
@@ -322,4 +351,4 @@ def research(spec: str, gpu: str = DEFAULT_GPU, max_rounds: int = 0):
     s = loop.load_spec(spec)
     base = yaml.safe_load((LOCAL_REPO / s["base"]).read_text())
     fetch.remote(_dataset_job(base), commit)
-    print(research_loop.remote(spec, commit, gpu, max_rounds))
+    print(research_loop.remote(spec, commit, max_rounds))
