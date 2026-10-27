@@ -66,3 +66,12 @@ Run times on Modal differ from the Colab times in the papers (`tab_compute`)
 because the machines differ; each manifest records its machine. GPU results
 can differ slightly between GPU types, so runs compared in one table should
 use one GPU type.
+
+**The research loop** (`src/rwm/research/loop.py`) runs for hours and hands its
+tries to other machines, so it runs on the deployed app rather than from a
+`modal run` session:
+
+```
+python cloud/start_research.py configs/research/dominicks_che_world_model.yaml
+modal volume get rwm-results research/dominicks_che_world_model/log.jsonl results/research/dominicks_che_world_model/log.jsonl
+```

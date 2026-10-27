@@ -334,10 +334,11 @@ def research_loop(spec: str, commit: str, max_rounds: int) -> dict:
 
 @app.local_entrypoint()
 def research(spec: str, max_rounds: int = 0):
-    """Start the research loop (src/rwm/research/loop.py) on Modal. Run with
-    --detach so it goes on after this computer disconnects:
+    """Run the research loop (src/rwm/research/loop.py) from this session, for
+    short loops: it stops if this computer disconnects. For a full loop use
+    `python cloud/start_research.py <spec>`, which runs it on the deployed app.
 
-      modal run --detach cloud/modal_app.py::research --spec configs/research/<name>.yaml
+      modal run cloud/modal_app.py::research --spec configs/research/<name>.yaml --max-rounds 1
 
     Every try runs on its own machine. Get the log, to commit with the paper's
     records, with
