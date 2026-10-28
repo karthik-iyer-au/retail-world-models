@@ -19,8 +19,10 @@ from rwm.utils.paths import REPO_ROOT
 CPU_MODELS = {"lightgbm_direct", "seasonal_naive", "recent_average"}
 
 # Memory per dataset on a cloud machine, in GB. M5 and Favorita hold tens of
-# millions of rows; the others fit easily in less.
-MEMORY_GB = {"m5": 64, "favorita": 64}
+# millions of rows; the others fit easily in less. A world-model run on M5 peaked
+# at 11.1 GB (measured 28 October 2026 with cloud/modal_app.py's peak_memory);
+# Favorita is not yet measured.
+MEMORY_GB = {"m5": 32, "favorita": 64}
 DEFAULT_MEMORY_GB = 16
 
 
