@@ -1,0 +1,26 @@
+# Study L (transfer).
+datasets:
+- name: dominicks
+  codes:
+  - che
+  - sna
+runs:
+- config: configs/experiments/transfer_dominicks_che_store_world_model_kept_out_fix.yaml
+  seeds: &id001
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/transfer_dominicks_che_store_world_model_trained_on_all_fix.yaml
+  seeds: *id001
+- config: configs/experiments/transfer_dominicks_che_item_world_model_kept_out_fix.yaml
+  seeds: *id001
+- config: configs/experiments/transfer_dominicks_che_item_world_model_trained_on_all_fix.yaml
+  seeds: *id001
+- config: configs/experiments/transfer_dominicks_sna_store_world_model_kept_out_fix.yaml
+  seeds: *id001
+- config: configs/experiments/transfer_dominicks_sna_store_world_model_trained_on_all_fix.yaml
+  seeds: *id001
+- config: configs/experiments/transfer_dominicks_sna_item_world_model_kept_out_fix.yaml
+  seeds: *id001
+- config: configs/experiments/transfer_dominicks_sna_item_world_model_trained_on_all_fix.yaml
+  seeds: *id001
