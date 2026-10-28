@@ -78,3 +78,21 @@ def test_at_full_steps_the_screening_run_is_the_first_seeds_run(tmp_path):
     loop.search(spec, _fake({"a": 0.2}, calls=calls), loop.Log(tmp_path / "l.jsonl"), max_rounds=1)
     names = [c["name"] for c in calls]
     assert names.count("research_t_r1_a_s0_seed0") == 2  # screened, then read back as seed 0 of the full run
+
+
+def test_beats_best_promotes_only_changes_better_on_the_first_seed(tmp_path):
+    calls = []
+    menu = [{"name": "good", "change": {"good": True}}, {"name": "bad", "change": {"bad": True}}]
+    spec = {**_spec(tmp_path, menu), "rung_fraction": 1.0, "promote": "beats_best"}
+    best = loop.search(spec, _fake({"good": 0.2, "bad": -0.2}, calls=calls), loop.Log(tmp_path / "l.jsonl"), max_rounds=1)
+    names = [c["name"] for c in calls]
+    assert "research_t_r1_good_s2_seed2" in names and "research_t_r1_bad_s2_seed2" not in names
+    assert best["kept"] == ["good"]
+
+
+def test_beats_best_needs_full_step_screening(tmp_path):
+    import pytest
+
+    spec = {**_spec(tmp_path, [{"name": "a", "change": {"a": True}}]), "rung_fraction": 0.5, "promote": "beats_best"}
+    with pytest.raises(ValueError):
+        loop.search(spec, _fake({}), loop.Log(tmp_path / "l.jsonl"))

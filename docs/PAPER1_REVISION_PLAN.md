@@ -709,3 +709,33 @@ them missed badly there (kept-out WRMSSE 2.4 to 12.9 by seed, against 0.7 to
 that window (study K) but not when a fifth of the stores is kept out of
 training. Forecast over actual on the kept-out fifth: fixed world model 0.86
 to 1.07, LightGBM 0.69 to 0.94.
+
+**28 October 2026, a correction, and study M, the research loop as it was meant to run, written down before it runs.**
+Studies K and L tested three changes as one bundle (volume weighting, the plan
+split and weight averaging), chosen on two categories. That broke the rule the
+research loop exists to keep, that every change earns its place on its own, and
+when the bundle did worse on M5 it could not say which change was responsible.
+The bundle's results stay in this record as exploratory; no setting is taken
+from them. Study J's loop also screened changes at a third of the training
+steps, which did not give weight averaging (or test-time adaptation, run with
+a step too small to move a forecast) a fair test.
+
+Study M runs the loop as the companion work ran it, on M5 and on each of the
+six Dominick's categories, each data set on its own
+(`configs/research/pure_*.yaml`, written by `scripts/make_research_specs.py`):
+one change at a time from a fixed menu of 19 (M5) or 20 (Dominick's) changes,
+each tried on top of the best settings so far at full training length on seed
+1; every change that beats the best settings on seed 1 is run on seeds 2 and 3;
+the best of those is kept if its mean over the three seeds beats the best's mean
+by at least the seed spread of the starting settings; the loop stops when none
+does. Test-time adaptation is in its published form (AdaJEPA: Adam steps at
+learning rate 1e-4 on the latest four weeks, one or three steps, moving only the
+transition and the encoder's top layer). Latent overshooting checks up to seven
+rolled steps per batch, every step on the weekly data and seven of the 27 on
+M5, which keeps an M5 run within a day. The windows lie before every window the
+paper reports; the latest of the four is held out, scored for every kept change
+and never used to decide. Every try is logged and published with the paper.
+The settings each loop keeps are then run, unchanged, on that data set's
+rolling windows beside the revision settings and reported beside them, and the
+settings kept on different data sets are compared; nothing is carried from
+one data set to another without a test there.

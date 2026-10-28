@@ -106,7 +106,13 @@ class Log:
 def search(spec: dict, evaluate: Evaluate, log: Log, max_rounds: int | None = None) -> dict:
     seeds = list(spec["seeds"])
     rung = float(spec.get("rung_fraction", 1 / 3))
-    promote = float(spec.get("promote_share", 1 / 3))
+    # which screened changes go on to every seed: a share of them, best first, or
+    # (with "beats_best") every change whose first-seed score beats the best
+    # settings' first-seed score, the rule of the companion work's loop; that rule
+    # needs screening at full steps, so the two scores compare like with like
+    promote = spec.get("promote", spec.get("promote_share", 1 / 3))
+    if promote == "beats_best" and rung < 1.0:
+        raise ValueError("promote: beats_best needs rung_fraction 1 (screening at full steps)")
     base_params = yaml.safe_load((REPO_ROOT / spec["base"]).read_text())["model"].get("params", {})
 
     def full(params: dict, label: str) -> tuple[float, float, list] | None:
@@ -121,7 +127,7 @@ def search(spec: dict, evaluate: Evaluate, log: Log, max_rounds: int | None = No
     if start is None:
         raise RuntimeError("the starting settings did not run")
     bar = max(float(np.ptp(start[2])), float(spec.get("min_bar", 0.0)))
-    best = {"params": base_params, "score": start[0], "held_out": start[1], "kept": []}
+    best = {"params": base_params, "score": start[0], "held_out": start[1], "kept": [], "first": start[2][0]}
     log.write({"kind": "start", "score": start[0], "held_out": start[1], "seed_scores": start[2], "keep_bar": bar,
                "config_sha256": sha256_obj(base_params)})
     open_menu = list(spec["menu"])
@@ -143,10 +149,16 @@ def search(spec: dict, evaluate: Evaluate, log: Log, max_rounds: int | None = No
             log.write({**row, "score": s})
             ranked.append((s, c, p))
         ranked.sort(key=lambda r: r[0])
-        n_up = max(1, int(np.ceil(promote * len(ranked)))) if ranked else 0
-        # rung 2: full steps, every seed, for the best of rung 1
+        if promote == "beats_best":
+            up = [r for r in ranked if r[0] < best["first"]]
+        else:
+            up = ranked[: max(1, int(np.ceil(float(promote) * len(ranked))))] if ranked else []
+        if not up:
+            log.write({"kind": "stop", "round": round_no, "reason": "no change beat the best on the first seed"})
+            break
+        # rung 2: full steps, every seed, for the changes promoted from rung 1
         results = []
-        for s_cheap, c, p in ranked[:n_up]:
+        for s_cheap, c, p in up:
             got = full(p, f"r{round_no}_{c['name']}")
             row = {"kind": "try", "round": round_no, "change": c["name"], "params_changed": c["change"]}
             if got is None:
@@ -162,7 +174,7 @@ def search(spec: dict, evaluate: Evaluate, log: Log, max_rounds: int | None = No
         if best["score"] - score < bar:
             log.write({"kind": "stop", "round": round_no, "reason": "no change beat the best by the keep bar"})
             break
-        best = {"params": p, "score": score, "held_out": held, "kept": best["kept"] + [c["name"]]}
+        best = {"params": p, "score": score, "held_out": held, "kept": best["kept"] + [c["name"]], "first": seed_scores[0]}
         log.write({"kind": "kept", "round": round_no, "change": c["name"], "score": score, "held_out": held})
         # forward selection: every other change is tried again, on top of the new best
         open_menu = [m for m in open_menu if m["name"] != c["name"]]
