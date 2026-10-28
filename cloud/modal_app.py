@@ -194,6 +194,21 @@ def try_cpu_large(config: dict, commit: str, out: str) -> dict | None:
     return _run_config(config, commit, out)
 
 
+@app.function(**_TRY, gpu=DEFAULT_GPU, cpu=GPU_CPUS, memory=64 * 1024)
+def peak_memory(config: dict, commit: str) -> float:
+    """Peak memory, in GB, of one run of `config` (not saved as a result), to
+    size the machines a data set needs. Run it with few steps and one window."""
+    import resource
+    import tempfile
+
+    _checkout(commit)
+    sys.path.insert(0, f"{CHECKOUT}/src")
+    from rwm.experiments.run import run
+
+    run(config, strict=False, out_root=Path(tempfile.mkdtemp()))
+    return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024**2
+
+
 def _try_function(config: dict):
     sys.path.insert(0, str(LOCAL_REPO / "src") if LAUNCH else f"{CHECKOUT}/src")
     from rwm.experiments import plan
