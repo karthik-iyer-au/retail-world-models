@@ -1,0 +1,26 @@
+{"kind": "start", "score": 0.6293729596809016, "held_out": 0.6480999113705391, "seed_scores": [0.680613201577232, 0.5994190853709157, 0.6080865920945572], "keep_bar": 0.08119411620631634, "config_sha256": "41ca22ec304c6e3573f1d1103390649ed86fb1f4b3df09389e7992ecce9823f5"}
+{"kind": "rung", "round": 1, "change": "volume_weight_0.25", "params_changed": {"volume_weight": 0.25}, "score": 0.675519074188352}
+{"kind": "rung", "round": 1, "change": "volume_weight_0.5", "params_changed": {"volume_weight": 0.5}, "score": 0.7076119263770503}
+{"kind": "rung", "round": 1, "change": "peak_weight_0.5", "params_changed": {"peak_weight": 0.5}, "score": 0.7353845735055852}
+{"kind": "rung", "round": 1, "change": "after_promo_weight_0.5", "params_changed": {"after_promo_weight": 0.5}, "score": 0.7613094027005802}
+{"kind": "rung", "round": 1, "change": "total_weight_0.1", "params_changed": {"total_weight": 0.1}, "score": 0.576828296997621}
+{"kind": "rung", "round": 1, "change": "plan_split", "params_changed": {"plan_split": true}, "score": 0.7046938596334494}
+{"kind": "rung", "round": 1, "change": "feedback", "params_changed": {"feedback": true}, "score": 0.7719898264622781}
+{"kind": "rung", "round": 1, "change": "level_views", "params_changed": {"level_views": [4, 8]}, "score": 0.6893992291476474}
+{"kind": "rung", "round": 1, "change": "latent_check", "params_changed": {"latent_weight": 0.1}, "score": 0.719003015385533}
+{"kind": "rung", "round": 1, "change": "latent_overshooting", "params_changed": {"latent_weight": 0.1, "latent_checks": 7}, "score": 0.7853950632276399}
+{"kind": "rung", "round": 1, "change": "state_spread", "params_changed": {"state_spread_weight": 0.01}, "score": 0.7888436557918851}
+{"kind": "rung", "round": 1, "change": "lr_half", "params_changed": {"lr": 0.0005}, "score": 0.8567183429853918}
+{"kind": "rung", "round": 1, "change": "lr_double", "params_changed": {"lr": 0.002}, "score": 0.7720717247638497}
+{"kind": "rung", "round": 1, "change": "batch_half", "params_changed": {"batch": 256}, "score": 0.6710052080296814}
+{"kind": "rung", "round": 1, "change": "steps_1.5x", "params_changed": {"steps": 9000}, "score": 0.7901807710546155}
+{"kind": "rung", "round": 1, "change": "weight_average_0.999", "params_changed": {"weight_average": 0.999}, "score": 0.6128823539529539}
+{"kind": "rung", "round": 1, "change": "width_1.5x", "params_changed": {"d_model": 96}, "score": 0.8484338757564958}
+{"kind": "rung", "round": 1, "change": "adajepa_1", "params_changed": {"adapt_steps": 1, "adapt_optimizer": "adam", "adapt_lr": 0.0001, "adapt_periods": 4}, "score": 0.6791679439554742}
+{"kind": "rung", "round": 1, "change": "adajepa_3", "params_changed": {"adapt_steps": 3, "adapt_optimizer": "adam", "adapt_lr": 0.0001, "adapt_periods": 4}, "score": 0.6765837925871523}
+{"kind": "rung", "round": 1, "change": "level_from_all_history", "params_changed": {"scale_window": null}, "score": 0.6619246297484719}
+{"kind": "try", "round": 1, "change": "total_weight_0.1", "params_changed": {"total_weight": 0.1}, "score": 0.6837806797724534, "held_out": 0.6659476290965104, "seed_scores": [0.576828296997621, 0.7414625249589744, 0.7330512173607647], "gain": -0.054407720091551814, "keep_bar": 0.08119411620631634}
+{"kind": "try", "round": 1, "change": "weight_average_0.999", "params_changed": {"weight_average": 0.999}, "score": 0.6171826385339249, "held_out": 0.6582797524167138, "seed_scores": [0.6128823539529539, 0.6209387495794426, 0.617726812069378], "gain": 0.012190321146976713, "keep_bar": 0.08119411620631634}
+{"kind": "try", "round": 1, "change": "level_from_all_history", "params_changed": {"scale_window": null}, "score": 0.6304325479572213, "held_out": 0.6299400956668938, "seed_scores": [0.6619246297484719, 0.6150828263197571, 0.6142901878034349], "gain": -0.0010595882763196895, "keep_bar": 0.08119411620631634}
+{"kind": "try", "round": 1, "change": "batch_half", "params_changed": {"batch": 256}, "score": 0.7095263445899188, "held_out": 0.6366662452366212, "seed_scores": [0.6710052080296814, 0.7378951127948198, 0.7196787129452554], "gain": -0.08015338490901724, "keep_bar": 0.08119411620631634}
+{"kind": "try", "round": 1, "change": "volume_weight_0.25", "params_changed": {"volume_weight": 0.25}, "score": 0.6233215362429062, "held_out": 0.671345991102959, "seed_scores": [0.675519074188352, 0.5685279609150878, 0.6259175736252789], "gain": 0.006051423437995362, "keep_bar": 0.08119411620631634}
