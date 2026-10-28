@@ -760,3 +760,22 @@ not adopted as the world model's settings: it was chosen as a bundle, so which
 of its three changes carries the gain, and which costs M5, is not known. Study
 M answers that one change at a time. On the same windows study F's LightGBM
 scored 0.751 on M5 and 0.452 on Favorita.
+
+**29 October 2026, study N, the same research loop on LightGBM, written down before it runs.**
+Study M searches the world model's settings on each data set. If LightGBM
+keeps the one set of settings fixed before the first runs while the world model
+gets that search, any lead the world model then shows over LightGBM partly
+comes from the extra search. Study N gives LightGBM the same search: the loop,
+its rules, windows and seeds exactly as in study M
+(`configs/research/pure_lightgbm_*.yaml`, written by
+`scripts/make_research_specs.py`), from each data set's revision LightGBM
+config, over a menu of 20 changes to the trees, their inputs and their training
+(rounds, learning rate, leaves, minimum leaf size, feature and row sampling,
+Tweedie power and a Poisson objective, L2 penalty, bins, more lags, a longer
+trailing window, a shorter training span). Every run uses all 16 cores of its
+machine (`threads: 16`, against 2 in the revision runs); this changes how fast a
+run is, not what it models. The seed spread that sets the keep bar comes from
+LightGBM's row and feature sampling. The settings each loop keeps are run on
+that data set's rolling windows beside the world model's kept settings, and the
+comparison the paper makes between the two models uses the tuned forms of both,
+with the untuned forms reported beside them.
