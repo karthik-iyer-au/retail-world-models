@@ -60,14 +60,26 @@ def load_spec(path: str | Path) -> dict:
 
 def merge(params: dict, change: dict) -> dict:
     """The model settings with one change applied: keys are model parameters,
-    and a value of None removes that parameter (back to the model's default)."""
+    and a value of None removes that parameter (back to the model's default).
+    A change to a parameter that holds settings of its own (LightGBM's `params`)
+    is merged into it, so it keeps what earlier kept changes set there."""
     out = copy.deepcopy(params)
     for k, v in change.items():
         if v is None:
             out.pop(k, None)
+        elif isinstance(v, dict) and isinstance(out.get(k), dict):
+            out[k] = merge(out[k], v)
         else:
             out[k] = copy.deepcopy(v)
     return out
+
+
+def base_params(spec: dict) -> dict:
+    """The starting settings: the base config's model settings, with the spec's
+    `base_overrides` (settings that change how a run is computed, not what it
+    models, such as LightGBM's threads)."""
+    base = yaml.safe_load((REPO_ROOT / spec["base"]).read_text())["model"].get("params", {})
+    return merge(base, spec.get("base_overrides", {}))
 
 
 def config_for(spec: dict, params: dict, seed: int, label: str, step_fraction: float = 1.0) -> dict:
@@ -113,7 +125,7 @@ def search(spec: dict, evaluate: Evaluate, log: Log, max_rounds: int | None = No
     promote = spec.get("promote", spec.get("promote_share", 1 / 3))
     if promote == "beats_best" and rung < 1.0:
         raise ValueError("promote: beats_best needs rung_fraction 1 (screening at full steps)")
-    base_params = yaml.safe_load((REPO_ROOT / spec["base"]).read_text())["model"].get("params", {})
+    start_params = base_params(spec)
 
     def full(params: dict, label: str) -> tuple[float, float, list] | None:
         """Mean locked score and held-out score over every seed, at full steps."""
@@ -123,13 +135,13 @@ def search(spec: dict, evaluate: Evaluate, log: Log, max_rounds: int | None = No
         each = [scores(g) for g in got]
         return float(np.mean([e[0] for e in each])), float(np.mean([e[1] for e in each])), [e[0] for e in each]
 
-    start = full(base_params, "start")
+    start = full(start_params, "start")
     if start is None:
         raise RuntimeError("the starting settings did not run")
     bar = max(float(np.ptp(start[2])), float(spec.get("min_bar", 0.0)))
-    best = {"params": base_params, "score": start[0], "held_out": start[1], "kept": [], "first": start[2][0]}
+    best = {"params": start_params, "score": start[0], "held_out": start[1], "kept": [], "first": start[2][0]}
     log.write({"kind": "start", "score": start[0], "held_out": start[1], "seed_scores": start[2], "keep_bar": bar,
-               "config_sha256": sha256_obj(base_params)})
+               "config_sha256": sha256_obj(start_params)})
     open_menu = list(spec["menu"])
     round_no = 0
     while open_menu and (max_rounds is None or round_no < max_rounds):

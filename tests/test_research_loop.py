@@ -96,3 +96,10 @@ def test_beats_best_needs_full_step_screening(tmp_path):
     spec = {**_spec(tmp_path, [{"name": "a", "change": {"a": True}}]), "rung_fraction": 0.5, "promote": "beats_best"}
     with pytest.raises(ValueError):
         loop.search(spec, _fake({}), loop.Log(tmp_path / "l.jsonl"))
+
+
+def test_a_change_inside_a_settings_dict_keeps_the_rest():
+    base = {"rounds": 500, "params": {"num_leaves": 63, "min_data_in_leaf": 50}}
+    out = loop.merge(base, {"params": {"learning_rate": 0.1}})
+    assert out["params"] == {"num_leaves": 63, "min_data_in_leaf": 50, "learning_rate": 0.1}
+    assert base["params"] == {"num_leaves": 63, "min_data_in_leaf": 50}
