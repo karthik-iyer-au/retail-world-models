@@ -45,5 +45,5 @@ def test_deep_models_and_wrappers_holding_one_get_a_gpu():
 
 
 def test_large_data_sets_get_more_memory():
-    assert plan.memory_gb({"dataset": {"name": "m5"}}) == 64
+    assert plan.memory_gb({"dataset": {"name": "m5"}}) == 32
     assert plan.memory_gb({"dataset": {"name": "dominicks"}}) == 16

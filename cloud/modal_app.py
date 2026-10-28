@@ -179,8 +179,13 @@ def try_gpu(config: dict, commit: str, out: str) -> dict | None:
     return _run_config(config, commit, out)
 
 
-@app.function(**_TRY, gpu=DEFAULT_GPU, cpu=GPU_CPUS, memory=64 * 1024)
+@app.function(**_TRY, gpu=DEFAULT_GPU, cpu=GPU_CPUS, memory=32 * 1024)
 def try_gpu_large(config: dict, commit: str, out: str) -> dict | None:
+    return _run_config(config, commit, out)
+
+
+@app.function(**_TRY, gpu=DEFAULT_GPU, cpu=GPU_CPUS, memory=64 * 1024)
+def try_gpu_xlarge(config: dict, commit: str, out: str) -> dict | None:
     return _run_config(config, commit, out)
 
 
@@ -213,9 +218,10 @@ def _try_function(config: dict):
     sys.path.insert(0, str(LOCAL_REPO / "src") if LAUNCH else f"{CHECKOUT}/src")
     from rwm.experiments import plan
 
-    large = plan.memory_gb(config) > 16
+    gb = plan.memory_gb(config)
+    large = gb > 16
     if plan.machine(config) == "gpu":
-        return try_gpu_large if large else try_gpu
+        return try_gpu_xlarge if gb > 32 else try_gpu_large if large else try_gpu
     return try_cpu_large if large else try_cpu
 
 

@@ -30,7 +30,11 @@ def main(job_file: str, out: str) -> None:
     modal.Function.from_name("retail-world-models", "fetch").remote({"datasets": job.get("datasets", [])}, commit)
     for r in runs:
         c = r["config"]
-        kind = ("try_gpu" if plan.machine(c) == "gpu" else "try_cpu") + ("_large" if plan.memory_gb(c) > 16 else "")
+        gb = plan.memory_gb(c)
+        if plan.machine(c) == "gpu":
+            kind = "try_gpu_xlarge" if gb > 32 else "try_gpu_large" if gb > 16 else "try_gpu"
+        else:
+            kind = "try_cpu_large" if gb > 16 else "try_cpu"
         call = modal.Function.from_name("retail-world-models", kind).spawn(r["config"], commit, out)
         print(f"{r['config']['name']:<56} {kind:<15} {call.object_id}")
     print(f"{len(runs)} runs started at commit {commit[:8]}; results in rwm-results/{out}")
