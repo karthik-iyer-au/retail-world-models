@@ -70,3 +70,11 @@ def test_cheap_rung_runs_fewer_steps_on_one_seed(tmp_path):
 
 def test_a_change_of_none_goes_back_to_the_default():
     assert loop.merge({"a": 1, "b": 2}, {"a": None, "c": 3}) == {"b": 2, "c": 3}
+
+
+def test_at_full_steps_the_screening_run_is_the_first_seeds_run(tmp_path):
+    calls = []
+    spec = {**_spec(tmp_path, [{"name": "a", "change": {"a": True}}]), "rung_fraction": 1.0, "promote_share": 1.0}
+    loop.search(spec, _fake({"a": 0.2}, calls=calls), loop.Log(tmp_path / "l.jsonl"), max_rounds=1)
+    names = [c["name"] for c in calls]
+    assert names.count("research_t_r1_a_s0_seed0") == 2  # screened, then read back as seed 0 of the full run

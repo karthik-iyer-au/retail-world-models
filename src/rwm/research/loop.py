@@ -130,7 +130,9 @@ def search(spec: dict, evaluate: Evaluate, log: Log, max_rounds: int | None = No
         round_no += 1
         trials = [(c, merge(best["params"], c["change"])) for c in open_menu]
         # rung 1: a share of the steps, one seed
-        cheap = evaluate([config_for(spec, p, seeds[0], f"r{round_no}_{c['name']}_rung", rung) for c, p in trials])
+        # at full steps the screening run is the first seed's full run, named the same, so it is read back and not repeated
+        rung_label = (lambda c: f"r{round_no}_{c['name']}_s{seeds[0]}") if rung >= 1.0 else (lambda c: f"r{round_no}_{c['name']}_rung")
+        cheap = evaluate([config_for(spec, p, seeds[0], rung_label(c), rung) for c, p in trials])
         ranked = []
         for (c, p), g in zip(trials, cheap):
             row = {"kind": "rung", "round": round_no, "change": c["name"], "params_changed": c["change"]}
