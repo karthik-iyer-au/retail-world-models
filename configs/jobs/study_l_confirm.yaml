@@ -1,0 +1,38 @@
+# Study L (confirm).
+datasets:
+- name: m5
+- name: favorita
+- name: dominicks
+  codes:
+  - ana
+  - bjc
+  - fre
+  - sdr
+runs:
+- config: configs/experiments/confirm_m5_as_is.yaml
+  seeds: &id001
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/confirm_m5_fix.yaml
+  seeds: *id001
+- config: configs/experiments/confirm_favorita_as_is.yaml
+  seeds: *id001
+- config: configs/experiments/confirm_favorita_fix.yaml
+  seeds: *id001
+- config: configs/experiments/confirm_dominicks_ana_as_is.yaml
+  seeds: *id001
+- config: configs/experiments/confirm_dominicks_ana_fix.yaml
+  seeds: *id001
+- config: configs/experiments/confirm_dominicks_bjc_as_is.yaml
+  seeds: *id001
+- config: configs/experiments/confirm_dominicks_bjc_fix.yaml
+  seeds: *id001
+- config: configs/experiments/confirm_dominicks_fre_as_is.yaml
+  seeds: *id001
+- config: configs/experiments/confirm_dominicks_fre_fix.yaml
+  seeds: *id001
+- config: configs/experiments/confirm_dominicks_sdr_as_is.yaml
+  seeds: *id001
+- config: configs/experiments/confirm_dominicks_sdr_fix.yaml
+  seeds: *id001

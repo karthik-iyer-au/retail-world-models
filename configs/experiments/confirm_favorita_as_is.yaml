@@ -1,0 +1,42 @@
+# Study L (plan entry of 28 October 2026): world model as_is, on the settings and windows of rev_favorita_rolling_world_model; written by scripts/make_confirm_configs.py.
+name: confirm_favorita_as_is
+seed: 0
+dataset:
+  name: favorita
+model:
+  name: state_model
+  params:
+    horizon: 28
+    history: 112
+    train_periods: 730
+    categorical:
+    - item_id
+    - class
+    - family
+    - store_id
+    - city
+    extra:
+    - promo
+    - event
+    - payday
+    d_model: 128
+    layers: 3
+    heads: 4
+    steps: 30000
+    batch: 1024
+    lr: 0.001
+    seed: 0
+    mixed_precision: true
+    regular_price: true
+    lift_readout: true
+    rollout: true
+    roll_norm: true
+    levers:
+    - promo
+evaluation:
+  horizon: 28
+  n_origins: 4
+  scale_lag: 1
+  weight_window: 28
+  holdout_periods: 0
+  step: 28

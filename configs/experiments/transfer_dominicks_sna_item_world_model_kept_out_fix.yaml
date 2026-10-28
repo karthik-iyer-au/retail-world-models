@@ -1,0 +1,57 @@
+# Study L (plan entry of 28 October 2026): world model with the fix, on the settings and windows of transfer_dominicks_sna_item_world_model_kept_out; written by scripts/make_confirm_configs.py.
+name: transfer_dominicks_sna_item_world_model_kept_out_fix
+seed: 0
+dataset:
+  name: dominicks
+  params:
+    categories:
+    - sna
+model:
+  name: state_model
+  params:
+    horizon: 8
+    history: 26
+    train_periods: 156
+    categorical:
+    - item_id
+    - store_id
+    extra:
+    - promo
+    - cost
+    levers:
+    - promo
+    d_model: 64
+    layers: 2
+    heads: 4
+    steps: 6000
+    batch: 512
+    lr: 0.001
+    regular_price: true
+    lift_readout: true
+    rollout: true
+    validation_periods: 8
+    scale_window: 8
+    switching:
+    - store_id
+    roll_norm: true
+    volume_weight: 0.5
+    plan_split: true
+    weight_average: 0.999
+evaluation:
+  horizon: 8
+  n_origins: 6
+  holdout_periods: 24
+  scale_lag: 1
+  weight_window: 13
+  conditions:
+  - promo
+  after_promo:
+    levers:
+    - promo
+    periods: 2
+  step: 8
+  transfer:
+    by: item_id
+    share: 0.2
+    seed: 0
+    trained_on_all: false

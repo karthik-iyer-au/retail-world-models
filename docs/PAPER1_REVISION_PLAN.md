@@ -662,3 +662,27 @@ split: at this strength it does nothing, so study K says nothing about
 test-time adaptation as such. These variants were chosen on these two
 categories; a confirmatory run on data they were not chosen on follows,
 written down before it runs.
+
+**28 October 2026, study L, the world-model fix confirmed on data it was not chosen on, written down before it runs.**
+Study K chose a fix on Dominick's cheese and snacks: loss weighted by volume
+(0.5), the plan's part kept apart (plan split), and weight averaging (decay
+0.999). Study L tests it, unchanged, on six data sets it was not chosen on:
+M5, Favorita, and Dominick's analgesics, bottled juice, frozen entrees and
+soft drinks. On each, the world model at the revision settings (`as_is`) and
+with the fix (`fix`) run on the paper's rolling windows, seeds 1 to 3.
+Measures per data set and variant, as in study K: failures (window-seed runs
+with WRMSSE above 2), the worst window-seed score, and the mean over windows
+and seeds. Pass rule, per data set: the fix has no more failures than `as_is`,
+and its mean over the window-seed runs where neither variant failed is not
+higher, judged by the paired difference (fix minus as_is, paired by window and
+seed) with a 90% bootstrap interval whose upper end is below 0.02. The fix is
+confirmed if it passes on at least five of the six data sets; whatever the
+outcome, all six are reported. Each data set's result is also set beside study
+F's LightGBM and ensemble on the same windows, descriptively.
+
+Then the transfer test (study I) is rerun with the fixed world model on
+Dominick's cheese and snacks, kept-out and comparison runs, seeds 1 to 3, with
+study I's measure and pass rule; LightGBM's runs from study I are reused, as
+nothing about them changes. If study L does not confirm the fix, the transfer
+rerun is still reported, and the paper says the fix was chosen on those two
+categories.
