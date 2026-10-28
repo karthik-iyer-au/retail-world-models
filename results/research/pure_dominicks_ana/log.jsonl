@@ -1,0 +1,25 @@
+{"kind": "start", "score": 0.5715984389652631, "held_out": 0.6476070811741873, "seed_scores": [0.5811271563063555, 0.5775598848830674, 0.5561082757063661], "keep_bar": 0.025018880599989357, "config_sha256": "41ca22ec304c6e3573f1d1103390649ed86fb1f4b3df09389e7992ecce9823f5"}
+{"kind": "rung", "round": 1, "change": "volume_weight_0.25", "params_changed": {"volume_weight": 0.25}, "score": 0.5283864688097569}
+{"kind": "rung", "round": 1, "change": "volume_weight_0.5", "params_changed": {"volume_weight": 0.5}, "score": 0.5734060019996402}
+{"kind": "rung", "round": 1, "change": "peak_weight_0.5", "params_changed": {"peak_weight": 0.5}, "score": 0.6152686400474945}
+{"kind": "rung", "round": 1, "change": "after_promo_weight_0.5", "params_changed": {"after_promo_weight": 0.5}, "score": 0.5861744984089485}
+{"kind": "rung", "round": 1, "change": "total_weight_0.1", "params_changed": {"total_weight": 0.1}, "score": 0.552537725810977}
+{"kind": "rung", "round": 1, "change": "plan_split", "params_changed": {"plan_split": true}, "score": 0.584439782705949}
+{"kind": "rung", "round": 1, "change": "feedback", "params_changed": {"feedback": true}, "score": 0.5583521690708128}
+{"kind": "rung", "round": 1, "change": "level_views", "params_changed": {"level_views": [4, 8]}, "score": 0.6039243994271151}
+{"kind": "rung", "round": 1, "change": "latent_check", "params_changed": {"latent_weight": 0.1}, "score": 0.6115801138493536}
+{"kind": "rung", "round": 1, "change": "latent_overshooting", "params_changed": {"latent_weight": 0.1, "latent_checks": 7}, "score": 0.547489248710017}
+{"kind": "rung", "round": 1, "change": "state_spread", "params_changed": {"state_spread_weight": 0.01}, "score": 0.5396710864561877}
+{"kind": "rung", "round": 1, "change": "lr_half", "params_changed": {"lr": 0.0005}, "score": 0.5632184222063557}
+{"kind": "rung", "round": 1, "change": "lr_double", "params_changed": {"lr": 0.002}, "score": 0.5329544152941782}
+{"kind": "rung", "round": 1, "change": "batch_half", "params_changed": {"batch": 256}, "score": 0.5877906788486414}
+{"kind": "rung", "round": 1, "change": "steps_1.5x", "params_changed": {"steps": 9000}, "score": 0.5619306764790023}
+{"kind": "rung", "round": 1, "change": "weight_average_0.999", "params_changed": {"weight_average": 0.999}, "score": 0.5358275327451114}
+{"kind": "rung", "round": 1, "change": "width_1.5x", "params_changed": {"d_model": 96}, "score": 0.5905953064444431}
+{"kind": "rung", "round": 1, "change": "adajepa_1", "params_changed": {"adapt_steps": 1, "adapt_optimizer": "adam", "adapt_lr": 0.0001, "adapt_periods": 4}, "score": 0.577259021176197}
+{"kind": "rung", "round": 1, "change": "adajepa_3", "params_changed": {"adapt_steps": 3, "adapt_optimizer": "adam", "adapt_lr": 0.0001, "adapt_periods": 4}, "score": 0.5682575793351714}
+{"kind": "rung", "round": 1, "change": "level_from_all_history", "params_changed": {"scale_window": null}, "score": 0.5586606562582398}
+{"kind": "try", "round": 1, "change": "volume_weight_0.25", "params_changed": {"volume_weight": 0.25}, "score": 0.5740559451053238, "held_out": 0.6534319418198286, "seed_scores": [0.5283864688097569, 0.6221653058428571, 0.5716160606633571], "gain": -0.0024575061400606835, "keep_bar": 0.025018880599989357}
+{"kind": "try", "round": 1, "change": "lr_double", "params_changed": {"lr": 0.002}, "score": 0.5576540597963436, "held_out": 0.6705016323979233, "seed_scores": [0.5329544152941782, 0.5901394817143037, 0.5498682823805486], "gain": 0.01394437916891944, "keep_bar": 0.025018880599989357}
+{"kind": "try", "round": 1, "change": "weight_average_0.999", "params_changed": {"weight_average": 0.999}, "score": 0.5287780463205495, "held_out": 0.6425150018007577, "seed_scores": [0.5358275327451114, 0.5272055823496822, 0.5233010238668548], "gain": 0.0428203926447136, "keep_bar": 0.025018880599989357}
+{"kind": "try", "round": 1, "change": "state_spread", "params_changed": {"state_spread_weight": 0.01}, "score": 0.5856854722793576, "held_out": 0.6441773714680289, "seed_scores": [0.5396710864561877, 0.5924031963079591, 0.6249821340739262], "gain": -0.014087033314094555, "keep_bar": 0.025018880599989357}

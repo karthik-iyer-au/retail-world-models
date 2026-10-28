@@ -739,3 +739,24 @@ The settings each loop keeps are then run, unchanged, on that data set's
 rolling windows beside the revision settings and reported beside them, and the
 settings kept on different data sets are compared; nothing is carried from
 one data set to another without a test there.
+
+**29 October 2026, study L result.** By the rule fixed before the run, the
+bundled fix passes on five of the six data sets and fails on M5 (mean over
+windows and seeds, fix against the settings as they are; paired difference
+with a 90% bootstrap interval; no failures in either version on any of the six;
+`results/paper1_revision/tables/confirm_fix.csv`):
+
+| Data | As they are | Fix | Difference (90% interval) | Passes |
+|---|---|---|---|---|
+| Dominick's analgesics | 0.744 | 0.692 | -0.052 (-0.084 to -0.023) | yes |
+| Dominick's bottled juice | 0.620 | 0.574 | -0.046 (-0.122 to 0.016) | yes |
+| Dominick's frozen entrees | 0.372 | 0.344 | -0.029 (-0.043 to -0.015) | yes |
+| Dominick's soft drinks | 0.796 | 0.763 | -0.033 (-0.053 to -0.012) | yes |
+| Favorita | 0.507 | 0.476 | -0.030 (-0.068 to -0.002) | yes |
+| M5 | 0.737 | 0.757 | 0.020 (-0.007 to 0.048) | no |
+
+The bundle is confirmed by the rule. Per the correction of 28 October it is
+not adopted as the world model's settings: it was chosen as a bundle, so which
+of its three changes carries the gain, and which costs M5, is not known. Study
+M answers that one change at a time. On the same windows study F's LightGBM
+scored 0.751 on M5 and 0.452 on Favorita.
