@@ -686,3 +686,26 @@ study I's measure and pass rule; LightGBM's runs from study I are reused, as
 nothing about them changes. If study L does not confirm the fix, the transfer
 rerun is still reported, and the paper says the fix was chosen on those two
 categories.
+
+**28 October 2026, study L, transfer rerun with the fixed world model.** Cost
+of not training on a fifth of stores or items, mean over six windows and
+seeds 1 to 3, paired against study I's LightGBM by window with a 90%
+bootstrap interval (`results/paper1_revision/tables/transfer*.csv`):
+
+| Data | Kept out | World model, fixed | LightGBM | Difference (90% interval) |
+|---|---|---|---|---|
+| Cheese | items | 0.032 | 0.065 | -0.033 (-0.058 to -0.004) |
+| Cheese | stores | 0.775 | 0.049 | 0.726 (-0.045 to 2.238) |
+| Snacks | items | 0.042 | 0.152 | -0.111 (-0.151 to -0.074) |
+| Snacks | stores | 0.011 | 0.069 | -0.058 (-0.079 to -0.040) |
+
+By study I's rule the fixed world model's cost is smaller than LightGBM's on
+three of four, and not on cheese stores. That row is decided by the earliest
+cheese window: with stores kept out, the fixed world model's forecast for
+them missed badly there (kept-out WRMSSE 2.4 to 12.9 by seed, against 0.7 to
+2.0 when trained on everything, and a whole-category WRMSSE of 3.04 for seed
+1), while over the other five windows its cost is 0.016 against LightGBM's
+0.049. The fix removes the failure of the world model trained on everything in
+that window (study K) but not when a fifth of the stores is kept out of
+training. Forecast over actual on the kept-out fifth: fixed world model 0.86
+to 1.07, LightGBM 0.69 to 0.94.

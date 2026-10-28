@@ -21,7 +21,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "results" / "paper1_revision" / "tables"
 NAME = re.compile(r"transfer_(?P<data>m5|dominicks_[a-z]+)_(?P<kind>store|item)_(?P<model>world_model|lightgbm_pooled|lightgbm|seasonal_naive)"
-                  r"_(?P<form>kept_out|trained_on_all)(?:_seed(?P<seed>\d+))?$")
+                  r"_(?P<form>kept_out|trained_on_all)(?P<fix>_fix)?(?:_seed(?P<seed>\d+))?$")
 
 
 def runs(folder: Path) -> pd.DataFrame:
@@ -33,8 +33,11 @@ def runs(folder: Path) -> pd.DataFrame:
         got = NAME.match(m["config"]["name"])
         if not got:
             continue
+        g = got.groupdict()
+        if g.pop("fix"):  # the world model with study K's fix (study L)
+            g["model"] += "_fix"
         for s in json.loads((d / "metrics.json").read_text())["splits"]:
-            rows.append({**got.groupdict(), "seed": int(got["seed"] or 0), "window": s["test_start"],
+            rows.append({**g, "seed": int(got["seed"] or 0), "window": s["test_start"],
                          "kept_out": s["kept_out"], "trained_on": s["trained_on"],
                          "kept_out_forecast_to_actual": s["kept_out_forecast_to_actual"]})
     return pd.DataFrame(rows)
@@ -57,14 +60,15 @@ def paired(c: pd.DataFrame, reps: int = 10000, seed: int = 0) -> pd.DataFrame:
     for (data, kind), g in c.groupby(["data", "kind"]):
         trees = "lightgbm_pooled" if kind == "store" else "lightgbm"
         w = g.pivot(index="window", columns="model", values="cost")
-        if not {"world_model", trees} <= set(w.columns):
-            continue
-        d = (w["world_model"] - w[trees]).dropna().to_numpy()
-        boot = rng.choice(d, (reps, len(d))).mean(axis=1)
-        lo, hi = np.quantile(boot, [0.05, 0.95])
-        rows.append({"data": data, "kind": kind, "windows": len(d), "world_model_cost": w["world_model"].mean(),
-                     "lightgbm_cost": w[trees].mean(), "difference": d.mean(), "low_90": lo, "high_90": hi,
-                     "world_model_loses_less": hi < 0})
+        for wm in ("world_model", "world_model_fix"):
+            if not {wm, trees} <= set(w.columns):
+                continue
+            d = (w[wm] - w[trees]).dropna().to_numpy()
+            boot = rng.choice(d, (reps, len(d))).mean(axis=1)
+            lo, hi = np.quantile(boot, [0.05, 0.95])
+            rows.append({"data": data, "kind": kind, "world_model": wm, "windows": len(d), "world_model_cost": w[wm].mean(),
+                         "lightgbm_cost": w[trees].mean(), "difference": d.mean(), "low_90": lo, "high_90": hi,
+                         "world_model_loses_less": hi < 0})
     return pd.DataFrame(rows)
 
 
