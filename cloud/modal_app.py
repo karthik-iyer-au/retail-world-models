@@ -189,7 +189,9 @@ def try_gpu_xlarge(config: dict, commit: str, out: str) -> dict | None:
     return _run_config(config, commit, out)
 
 
-@app.function(**_TRY, cpu=CPU_CPUS, memory=16 * 1024)
+# At most 40 at once: the Starter plan allows 100 containers in all, and a burst
+# of short LightGBM runs would otherwise leave none for the GPU runs.
+@app.function(**_TRY, cpu=CPU_CPUS, memory=16 * 1024, max_containers=40)
 def try_cpu(config: dict, commit: str, out: str) -> dict | None:
     return _run_config(config, commit, out)
 
