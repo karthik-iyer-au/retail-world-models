@@ -168,8 +168,9 @@ in `levers` set to zero.
   `adapt_periods` periods of sales: each item is forecast from that many
   periods back, scored on the periods that are now history, and only the
   transition and the encoder's top layer are updated, at `adapt_lr_scale`
-  times the learning rate. Needs `rollout`. Off (0) by default, when the
-  model is exactly the one trained.
+  times the learning rate (or at `adapt_lr`), with plain gradient steps or,
+  with `adapt_optimizer: adam`, Adam steps as in AdaJEPA. Needs `rollout`.
+  Off (0) by default, when the model is exactly the one trained.
 - `year_ago`: each forecast period also sees the item's sales and levers the
   same period a year ago (`year_ago: 52` for weekly data) and
   `year_ago_window` periods either side.
@@ -500,6 +501,8 @@ class StateModel(Forecaster):
         adapt_steps: int = 0,
         adapt_periods: int = 4,
         adapt_lr_scale: float = 0.1,
+        adapt_optimizer: str = "sgd",
+        adapt_lr: float | None = None,
         weight_average: float = 0.0,
         latent_checks: int = 2,
     ):
@@ -563,6 +566,9 @@ class StateModel(Forecaster):
         if adapt_steps and not 1 <= adapt_periods <= horizon:
             raise ValueError("adapt_periods must be between 1 and the horizon")
         self.adapt_steps, self.adapt_periods, self.adapt_lr_scale = adapt_steps, adapt_periods, adapt_lr_scale
+        if adapt_optimizer not in ("sgd", "adam"):
+            raise ValueError("adapt_optimizer must be sgd or adam")
+        self.adapt_optimizer, self.adapt_lr = adapt_optimizer, adapt_lr
         if not 0.0 <= weight_average < 1.0:
             raise ValueError("weight_average is a decay between 0 (off) and 1")
         self.weight_average = weight_average
@@ -1180,7 +1186,12 @@ class StateModel(Forecaster):
         frozen = [q for q in self._net.parameters() if id(q) not in ids]
         for q in frozen:
             q.requires_grad_(False)
-        opt = torch.optim.SGD(moving, lr=self.lr * self.adapt_lr_scale)
+        lr = self.adapt_lr if self.adapt_lr is not None else self.lr * self.adapt_lr_scale
+        # Adam, as in AdaJEPA and the companion work: its step size does not
+        # shrink with the gradient, which a plain step on a loss averaged over
+        # every series does (a plain step at a tenth of the learning rate moved
+        # no forecast measurably, study K)
+        opt = (torch.optim.Adam if self.adapt_optimizer == "adam" else torch.optim.SGD)(moving, lr=lr)
         self._net.eval()  # no dropout: the step follows the forecast the model will make
         try:
             for _ in range(self.adapt_steps):

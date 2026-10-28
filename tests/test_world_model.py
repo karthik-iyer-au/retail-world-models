@@ -192,3 +192,10 @@ def test_weight_average_with_the_validation_stop_keeps_averaged_weights(split):
 def test_latent_overshooting_checks_every_step(split):
     m = build_model("state_model", **{**SETTINGS, "steps": 100}, latent_weight=0.1, latent_checks=6).fit(split[0])
     assert np.isfinite(m.loss_log[-1][2])
+
+
+def test_adajepa_with_adam_moves_the_forecast(split, fitted):
+    adapted = build_model("state_model", **SETTINGS, adapt_steps=1, adapt_optimizer="adam", adapt_lr=1e-3).fit(split[0])
+    test = split[1].drop(columns=[UNITS])
+    gap = np.abs(adapted.predict(test) - fitted.predict(test)).mean()
+    assert gap > 1e-3
