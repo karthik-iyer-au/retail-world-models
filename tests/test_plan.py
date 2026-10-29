@@ -32,6 +32,7 @@ def _model(name, **params):
 
 def test_processor_models_run_without_a_gpu():
     assert plan.machine(_model("lightgbm_direct")) == "cpu"
+    assert plan.machine(_model("seed_average", model="lightgbm_direct", params={})) == "cpu"
     assert plan.machine(_model("seasonal_naive")) == "cpu"
 
 
