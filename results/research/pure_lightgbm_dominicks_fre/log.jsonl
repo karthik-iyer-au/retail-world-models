@@ -1,0 +1,61 @@
+{"kind": "start", "score": 0.2164540841750868, "held_out": 0.18634659275790966, "seed_scores": [0.2164425357882782, 0.21733762372458498, 0.2155820930123972], "keep_bar": 0.0017555307121877861, "config_sha256": "61ab3bb5a5a2b03550e0a9a24b608e9491b77c74a4c1ab3ed47810c74253dfeb"}
+{"kind": "rung", "round": 1, "change": "rounds_half", "params_changed": {"rounds": 250}, "score": 0.2253234774428848}
+{"kind": "rung", "round": 1, "change": "rounds_1.5x", "params_changed": {"rounds": 750}, "score": 0.20607556386879167}
+{"kind": "rung", "round": 1, "change": "rounds_double", "params_changed": {"rounds": 1000}, "score": 0.20458650658225475}
+{"kind": "rung", "round": 1, "change": "learning_rate_half", "params_changed": {"params": {"learning_rate": 0.025}}, "score": 0.23948520101684476}
+{"kind": "rung", "round": 1, "change": "learning_rate_double", "params_changed": {"params": {"learning_rate": 0.1}}, "score": 0.19307545325113787}
+{"kind": "rung", "round": 1, "change": "num_leaves_quarter", "params_changed": {"params": {"num_leaves": 15}}, "score": 0.27042480301871996}
+{"kind": "rung", "round": 1, "change": "num_leaves_4x", "params_changed": {"params": {"num_leaves": 252}}, "score": 0.17834283719781877}
+{"kind": "rung", "round": 1, "change": "min_data_in_leaf_quarter", "params_changed": {"params": {"min_data_in_leaf": 12}}, "score": 0.23050293702867122}
+{"kind": "rung", "round": 1, "change": "min_data_in_leaf_4x", "params_changed": {"params": {"min_data_in_leaf": 200}}, "score": 0.20557585403383014}
+{"kind": "rung", "round": 1, "change": "feature_fraction_0.8", "params_changed": {"params": {"feature_fraction": 0.8}}, "score": 0.21449605681144393}
+{"kind": "rung", "round": 1, "change": "bagging_fraction_0.8", "params_changed": {"params": {"bagging_fraction": 0.8}}, "score": 0.19857229375017058}
+{"kind": "rung", "round": 1, "change": "tweedie_power_1.3", "params_changed": {"params": {"tweedie_variance_power": 1.3}}, "score": 0.21536952530515172}
+{"kind": "rung", "round": 1, "change": "tweedie_power_1.5", "params_changed": {"params": {"tweedie_variance_power": 1.5}}, "score": 0.23886428086149414}
+{"kind": "rung", "round": 1, "change": "l2_1", "params_changed": {"params": {"lambda_l2": 1.0}}, "score": 0.210665345071815}
+{"kind": "rung", "round": 1, "change": "max_bin_255", "params_changed": {"params": {"max_bin": 255}}, "score": 0.20234443754948964}
+{"kind": "rung", "round": 1, "change": "more_lags", "params_changed": {"lags": [0, 1, 2, 4, 5, 6]}, "score": 0.20236049015822247}
+{"kind": "rung", "round": 1, "change": "longer_windows", "params_changed": {"windows": [4, 8, 13, 26, 52]}, "score": 0.23411582410550727}
+{"kind": "rung", "round": 1, "change": "train_periods_half", "params_changed": {"train_periods": 78}, "score": 0.1916987584527453}
+{"kind": "rung", "round": 1, "change": "objective_poisson", "params_changed": {"params": {"objective": "poisson"}}, "score": 0.22273167190013768}
+{"kind": "rung", "round": 1, "change": "seed_bagging_off", "params_changed": {"params": {"bagging_fraction": 1.0, "bagging_freq": 0}}, "score": 0.21520111000618972}
+{"kind": "try", "round": 1, "change": "num_leaves_4x", "params_changed": {"params": {"num_leaves": 252}}, "score": 0.18057173152273276, "held_out": 0.19367041217833628, "seed_scores": [0.17834283719781877, 0.18651014338968172, 0.17686221398069776], "gain": 0.03588235265235404, "keep_bar": 0.0017555307121877861}
+{"kind": "try", "round": 1, "change": "train_periods_half", "params_changed": {"train_periods": 78}, "score": 0.1850307194939811, "held_out": 0.20187194981117684, "seed_scores": [0.1916987584527453, 0.18464595576328977, 0.17874744426590813], "gain": 0.03142336468110571, "keep_bar": 0.0017555307121877861}
+{"kind": "try", "round": 1, "change": "learning_rate_double", "params_changed": {"params": {"learning_rate": 0.1}}, "score": 0.21090490511837137, "held_out": 0.18973149721971003, "seed_scores": [0.19307545325113787, 0.2344979403791034, 0.20514132172487284], "gain": 0.005549179056715425, "keep_bar": 0.0017555307121877861}
+{"kind": "try", "round": 1, "change": "bagging_fraction_0.8", "params_changed": {"params": {"bagging_fraction": 0.8}}, "score": 0.21408857554457938, "held_out": 0.18526304407273278, "seed_scores": [0.19857229375017058, 0.2137528904376537, 0.22994054244591391], "gain": 0.0023655086305074124, "keep_bar": 0.0017555307121877861}
+{"kind": "try", "round": 1, "change": "max_bin_255", "params_changed": {"params": {"max_bin": 255}}, "score": 0.21413993541959545, "held_out": 0.18138716926175172, "seed_scores": [0.20234443754948964, 0.2166871007568005, 0.2233882679524962], "gain": 0.002314148755491352, "keep_bar": 0.0017555307121877861}
+{"kind": "try", "round": 1, "change": "more_lags", "params_changed": {"lags": [0, 1, 2, 4, 5, 6]}, "score": 0.22029304552579945, "held_out": 0.18469427357003376, "seed_scores": [0.20236049015822247, 0.23225355868168607, 0.22626508773748988], "gain": -0.003838961350712655, "keep_bar": 0.0017555307121877861}
+{"kind": "try", "round": 1, "change": "rounds_double", "params_changed": {"rounds": 1000}, "score": 0.20451209171101067, "held_out": 0.18559756942014807, "seed_scores": [0.20458650658225475, 0.20362436180163165, 0.20532540674914554], "gain": 0.011941992464076123, "keep_bar": 0.0017555307121877861}
+{"kind": "try", "round": 1, "change": "min_data_in_leaf_4x", "params_changed": {"params": {"min_data_in_leaf": 200}}, "score": 0.21295417990363116, "held_out": 0.1817706447474695, "seed_scores": [0.20557585403383014, 0.2139286026241043, 0.21935808305295904], "gain": 0.003499904271455634, "keep_bar": 0.0017555307121877861}
+{"kind": "try", "round": 1, "change": "rounds_1.5x", "params_changed": {"rounds": 750}, "score": 0.20759485425314286, "held_out": 0.18524147594598758, "seed_scores": [0.20607556386879167, 0.20814164100094346, 0.20856735788969352], "gain": 0.008859229921943934, "keep_bar": 0.0017555307121877861}
+{"kind": "try", "round": 1, "change": "l2_1", "params_changed": {"params": {"lambda_l2": 1.0}}, "score": 0.21328388461293002, "held_out": 0.18406186282114648, "seed_scores": [0.210665345071815, 0.20929398098014593, 0.21989232778682907], "gain": 0.003170199562156778, "keep_bar": 0.0017555307121877861}
+{"kind": "try", "round": 1, "change": "feature_fraction_0.8", "params_changed": {"params": {"feature_fraction": 0.8}}, "score": 0.22459876992848385, "held_out": 0.19251534178736715, "seed_scores": [0.21449605681144393, 0.22105930051420075, 0.2382409524598069], "gain": -0.008144685753397052, "keep_bar": 0.0017555307121877861}
+{"kind": "try", "round": 1, "change": "seed_bagging_off", "params_changed": {"params": {"bagging_fraction": 1.0, "bagging_freq": 0}}, "score": 0.2152661689162588, "held_out": 0.18569747916392484, "seed_scores": [0.21520111000618972, 0.2124655572376751, 0.21813183950491152], "gain": 0.0011879152588279984, "keep_bar": 0.0017555307121877861}
+{"kind": "try", "round": 1, "change": "tweedie_power_1.3", "params_changed": {"params": {"tweedie_variance_power": 1.3}}, "score": 0.2259432143512475, "held_out": 0.18107093298198118, "seed_scores": [0.21536952530515172, 0.2408933645750564, 0.2215667531735344], "gain": -0.00948913017616071, "keep_bar": 0.0017555307121877861}
+{"kind": "kept", "round": 1, "change": "num_leaves_4x", "score": 0.18057173152273276, "held_out": 0.19367041217833628}
+{"kind": "rung", "round": 2, "change": "rounds_half", "params_changed": {"rounds": 250}, "score": 0.17969350651259752}
+{"kind": "rung", "round": 2, "change": "rounds_1.5x", "params_changed": {"rounds": 750}, "score": 0.18109923523544294}
+{"kind": "rung", "round": 2, "change": "rounds_double", "params_changed": {"rounds": 1000}, "score": 0.18331522816497917}
+{"kind": "rung", "round": 2, "change": "learning_rate_half", "params_changed": {"params": {"learning_rate": 0.025}}, "score": 0.19480763947829216}
+{"kind": "rung", "round": 2, "change": "learning_rate_double", "params_changed": {"params": {"learning_rate": 0.1}}, "score": 0.17905186410587706}
+{"kind": "rung", "round": 2, "change": "num_leaves_quarter", "params_changed": {"params": {"num_leaves": 15}}, "score": 0.27042480301871996}
+{"kind": "rung", "round": 2, "change": "min_data_in_leaf_quarter", "params_changed": {"params": {"min_data_in_leaf": 12}}, "score": 0.1921434631451688}
+{"kind": "rung", "round": 2, "change": "min_data_in_leaf_4x", "params_changed": {"params": {"min_data_in_leaf": 200}}, "score": 0.18041453300134078}
+{"kind": "rung", "round": 2, "change": "feature_fraction_0.8", "params_changed": {"params": {"feature_fraction": 0.8}}, "score": 0.19154807456521641}
+{"kind": "rung", "round": 2, "change": "bagging_fraction_0.8", "params_changed": {"params": {"bagging_fraction": 0.8}}, "score": 0.1783015617521665}
+{"kind": "rung", "round": 2, "change": "tweedie_power_1.3", "params_changed": {"params": {"tweedie_variance_power": 1.3}}, "score": 0.1760296724703956}
+{"kind": "rung", "round": 2, "change": "tweedie_power_1.5", "params_changed": {"params": {"tweedie_variance_power": 1.5}}, "score": 0.18552165717679459}
+{"kind": "rung", "round": 2, "change": "l2_1", "params_changed": {"params": {"lambda_l2": 1.0}}, "score": 0.1765204773236181}
+{"kind": "rung", "round": 2, "change": "max_bin_255", "params_changed": {"params": {"max_bin": 255}}, "score": 0.17785945678789616}
+{"kind": "rung", "round": 2, "change": "more_lags", "params_changed": {"lags": [0, 1, 2, 4, 5, 6]}, "score": 0.17547228110564547}
+{"kind": "rung", "round": 2, "change": "longer_windows", "params_changed": {"windows": [4, 8, 13, 26, 52]}, "score": 0.1921830148651215}
+{"kind": "rung", "round": 2, "change": "train_periods_half", "params_changed": {"train_periods": 78}, "score": 0.21450466607475882}
+{"kind": "rung", "round": 2, "change": "objective_poisson", "params_changed": {"params": {"objective": "poisson"}}, "score": 0.18673263663798068}
+{"kind": "rung", "round": 2, "change": "seed_bagging_off", "params_changed": {"params": {"bagging_fraction": 1.0, "bagging_freq": 0}}, "score": 0.18302732409713093}
+{"kind": "try", "round": 2, "change": "more_lags", "params_changed": {"lags": [0, 1, 2, 4, 5, 6]}, "score": 0.1806778789346891, "held_out": 0.19749634395250573, "seed_scores": [0.17547228110564547, 0.18276054646961937, 0.1838008092288024], "gain": -0.00010614741195633104, "keep_bar": 0.0017555307121877861}
+{"kind": "try", "round": 2, "change": "tweedie_power_1.3", "params_changed": {"params": {"tweedie_variance_power": 1.3}}, "score": 0.18544945313128391, "held_out": 0.18775446592000386, "seed_scores": [0.1760296724703956, 0.19470718877023518, 0.18561149815322098], "gain": -0.0048777216085511554, "keep_bar": 0.0017555307121877861}
+{"kind": "try", "round": 2, "change": "l2_1", "params_changed": {"params": {"lambda_l2": 1.0}}, "score": 0.18050070126021336, "held_out": 0.19069900537053266, "seed_scores": [0.1765204773236181, 0.18734687187132962, 0.17763475458569236], "gain": 7.103026251939482e-05, "keep_bar": 0.0017555307121877861}
+{"kind": "try", "round": 2, "change": "max_bin_255", "params_changed": {"params": {"max_bin": 255}}, "score": 0.18444987446238126, "held_out": 0.19702725196656554, "seed_scores": [0.17785945678789616, 0.19391191245761996, 0.18157825414162768], "gain": -0.003878142939648499, "keep_bar": 0.0017555307121877861}
+{"kind": "try", "round": 2, "change": "bagging_fraction_0.8", "params_changed": {"params": {"bagging_fraction": 0.8}}, "score": 0.17920589782650684, "held_out": 0.19216246888436175, "seed_scores": [0.1783015617521665, 0.18464744745845127, 0.1746686842689027], "gain": 0.001365833696225921, "keep_bar": 0.0017555307121877861}
+{"kind": "stop", "round": 2, "reason": "no change beat the best by the keep bar"}
+{"kind": "end", "kept": ["num_leaves_4x"], "score": 0.18057173152273276, "held_out": 0.19367041217833628}
