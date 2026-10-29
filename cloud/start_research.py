@@ -34,7 +34,8 @@ def start_only(spec: str) -> None:
     commit = modal_app._local_commit()
     s = loop.load_spec(spec)
     base = yaml.safe_load((modal_app.LOCAL_REPO / s["base"]).read_text())
-    subprocess.run(["modal", "deploy", str(HERE / "modal_app.py")], check=True)
+    if "--no-deploy" not in sys.argv:
+        subprocess.run(["modal", "deploy", str(HERE / "modal_app.py")], check=True)
     modal.Function.from_name("retail-world-models", "fetch").remote(modal_app._dataset_job(base), commit)
     for seed in s["seeds"]:
         c = loop.config_for(s, loop.base_params(s), seed, f"start_s{seed}")
@@ -56,14 +57,19 @@ def main(spec: str) -> None:
     commit = modal_app._local_commit()
     s = loop.load_spec(spec)
     base = yaml.safe_load((modal_app.LOCAL_REPO / s["base"]).read_text())
-    subprocess.run(["modal", "deploy", str(HERE / "modal_app.py")], check=True)
+    if "--no-deploy" not in sys.argv:
+        # A deploy stops the loops already running on the app; restarted, a loop reads
+        # back every run it saved, but the run in progress is lost. Use --no-deploy
+        # while other loops run and the deployed app is already current.
+        subprocess.run(["modal", "deploy", str(HERE / "modal_app.py")], check=True)
     modal.Function.from_name("retail-world-models", "fetch").remote(modal_app._dataset_job(base), commit)
     call = modal.Function.from_name("retail-world-models", "research_loop").spawn(spec, commit, 0)
     print(f"research loop started at commit {commit[:8]} ({call.object_id}); log at rwm-results research/{s['name']}/log.jsonl")
 
 
 if __name__ == "__main__":
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
     if "--start-only" in sys.argv:
-        start_only([a for a in sys.argv[1:] if a != "--start-only"][0])
+        start_only(args[0])
     else:
-        main(sys.argv[1])
+        main(args[0])
