@@ -822,3 +822,26 @@ the world model is lower on bottled juice and analgesics and LightGBM on the
 other four. Per the plan, stage 2 (the loops on the averaged models) runs only
 when written down again with its cost; the world model's spreads, now 0.006 to
 0.030, set its keep bars.
+
+**30 October 2026, studies M and N, interim result on Dominick's.** All twelve
+Dominick's loops have ended (`results/research/pure_*/log.jsonl`). Score is the
+locked score on the search windows; the keep bar is the starting settings'
+seed spread.
+
+| Category | World model: start (bar) | kept | end | LightGBM: start (bar) | kept | end |
+|---|---|---|---|---|---|---|
+| Cheese | 0.429 (0.040) | nothing | 0.429 | 0.356 (0.004) | nothing | 0.356 |
+| Snacks | 0.470 (0.098) | nothing | 0.470 | 0.358 (0.001) | more trees, column sampling 0.8, larger leaves | 0.347 |
+| Soft drinks | 0.682 (0.095) | nothing | 0.682 | 0.559 (0.010) | smaller trees | 0.538 |
+| Bottled juice | 0.629 (0.081) | nothing | 0.629 | 0.709 (0.006) | Poisson loss, column sampling 0.8 | 0.680 |
+| Analgesics | 0.572 (0.025) | weight averaging | 0.529 | 0.551 (0.010) | smaller trees | 0.529 |
+| Frozen entrees | 0.242 (0.041) | nothing | 0.242 | 0.216 (0.002) | larger trees | 0.181 |
+
+The world model's bars are 0.025 to 0.098 and LightGBM's 0.001 to 0.010: under
+one rule, the loop could keep a change for LightGBM that was a fortieth of the
+size it needed for the world model. Study O stage 1 shows the world model's
+bars fall to 0.006 to 0.030 when it is an average of five copies. The
+analgesics loop was restarted once after an app redeploy stopped it, so its log
+holds its start and its kept row twice; the second of each is the restart
+reading back saved runs. The M5 loops are still running (LightGBM's has ended:
+smaller trees, 0.603 to 0.556).
