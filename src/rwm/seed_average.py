@@ -57,6 +57,11 @@ class SeedAverage(Forecaster):
         same data with the same settings, so they share it."""
         return self.models[0].nothing_planned(future)
 
+    @property
+    def saveable(self) -> bool:
+        """Whether every member can be saved (LightGBM members cannot)."""
+        return all(hasattr(m, "save") for m in self.models)
+
     def save(self, path) -> None:
         """All members in one file, each as its own model would save it."""
         import io
