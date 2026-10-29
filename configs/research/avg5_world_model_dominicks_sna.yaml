@@ -1,0 +1,113 @@
+# Study O (docs/PAPER1_REVISION_PLAN.md, entry of 29 October 2026), on the five-copy average: the research loop
+# (src/rwm/research/loop.py) as the companion work ran it. Fixed before the first try and
+# never changed by the loop. Every change is tried alone on top of the best settings so far,
+# at full training length on seed 1; a change that beats the best on seed 1 is run on seeds
+# 2 and 3, and the best such change is kept if its mean over the three seeds beats the best's
+# mean by at least the seed spread of the starting settings. The windows lie before every
+# window the paper reports; the latest of the four is held out, scored but never used to decide.
+# Written by scripts/make_research_specs.py.
+name: avg5_world_model_dominicks_sna
+base: configs/experiments/avg5_dominicks_sna_rolling_world_model.yaml
+evaluation:
+  horizon: 8
+  n_origins: 4
+  holdout_periods: 72
+  step: 8
+  scale_lag: 1
+  weight_window: 13
+  after_promo:
+    levers:
+    - promo
+    periods: 2
+seeds:
+- 1
+- 2
+- 3
+rung_fraction: 1.0
+promote: beats_best
+menu:
+- name: volume_weight_0.25
+  change:
+    params:
+      volume_weight: 0.25
+- name: volume_weight_0.5
+  change:
+    params:
+      volume_weight: 0.5
+- name: peak_weight_0.5
+  change:
+    params:
+      peak_weight: 0.5
+- name: after_promo_weight_0.5
+  change:
+    params:
+      after_promo_weight: 0.5
+- name: total_weight_0.1
+  change:
+    params:
+      total_weight: 0.1
+- name: plan_split
+  change:
+    params:
+      plan_split: true
+- name: feedback
+  change:
+    params:
+      feedback: true
+- name: level_views
+  change:
+    params:
+      level_views:
+      - 4
+      - 8
+- name: latent_check
+  change:
+    params:
+      latent_weight: 0.1
+- name: latent_overshooting
+  change:
+    params:
+      latent_weight: 0.1
+      latent_checks: 7
+- name: state_spread
+  change:
+    params:
+      state_spread_weight: 0.01
+- name: lr_half
+  change:
+    params:
+      lr: 0.0005
+- name: lr_double
+  change:
+    params:
+      lr: 0.002
+- name: batch_half
+  change:
+    params:
+      batch: 256
+- name: steps_1.5x
+  change:
+    params:
+      steps: 9000
+- name: width_1.5x
+  change:
+    params:
+      d_model: 96
+- name: adajepa_1
+  change:
+    params:
+      adapt_steps: 1
+      adapt_optimizer: adam
+      adapt_lr: 0.0001
+      adapt_periods: 4
+- name: adajepa_3
+  change:
+    params:
+      adapt_steps: 3
+      adapt_optimizer: adam
+      adapt_lr: 0.0001
+      adapt_periods: 4
+- name: level_from_all_history
+  change:
+    params:
+      scale_window: null
