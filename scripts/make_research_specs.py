@@ -124,5 +124,48 @@ def main():
         (OUT / f"pure_lightgbm_{key}.yaml").write_text(HEADER_N + yaml.safe_dump(s, sort_keys=False))
 
 
+HEADER_O = HEADER.replace("Study M (docs/PAPER1_REVISION_PLAN.md, entry of 28 October 2026)",
+                          "Study O (docs/PAPER1_REVISION_PLAN.md, entry of 29 October 2026), on the five-copy average")
+EXP = ROOT / "configs" / "experiments"
+MEMBERS = 5
+
+
+def averaged(base_path: str, extra: dict) -> dict:
+    """The model of `base_path` as an average of five copies fitted with different seeds."""
+    base = yaml.safe_load((ROOT / base_path).read_text())
+    inner = {k: v for k, v in base["model"]["params"].items() if k != "seed"}
+    inner.update(extra)
+    base["model"] = {"name": "seed_average",
+                     "params": {"model": base["model"]["name"], "members": MEMBERS, "seed": 0, "params": inner}}
+    return base
+
+
+def wrapped(items: list[dict], drop: tuple = ()) -> list[dict]:
+    """A menu for the five-copy average: each change applies to the copies' own settings."""
+    return [{"name": m["name"], "change": {"params": m["change"]}} for m in items if m["name"] not in drop]
+
+
+def write_study_o():
+    """Study O: the world model as an average of five copies with weight averaging,
+    and LightGBM as an average of five copies, each with the same loop as study M."""
+    for c in CATS:
+        key = f"dominicks_{c}"
+        for model, src, extra in (("world_model", f"rev_{key}_rolling_world_model", {"weight_average": 0.999}),
+                                  ("lightgbm", f"rev_{key}_rolling_lightgbm", {"threads": 16})):
+            cfg = averaged(f"configs/experiments/{src}.yaml", extra)
+            name = f"avg5_{key}_rolling_{model}"
+            cfg["name"] = name
+            (EXP / f"{name}.yaml").write_text(
+                f"# Study O (plan entry of 29 October 2026): {src} as an average of {MEMBERS} copies; written by scripts/make_research_specs.py.\n"
+                + yaml.safe_dump(cfg, sort_keys=False))
+            plain = yaml.safe_load((ROOT / f"configs/experiments/{src}.yaml").read_text())
+            items = menu(plain, True) if model == "world_model" else lightgbm_menu(plain, True)
+            spec = {"name": f"avg5_{model}_{key}", "base": f"configs/experiments/{name}.yaml", "evaluation": WEEKLY,
+                    "seeds": [1, 2, 3], "rung_fraction": 1.0, "promote": "beats_best",
+                    "menu": wrapped(items, drop=("weight_average_0.999",))}
+            (OUT / f"avg5_{model}_{key}.yaml").write_text(HEADER_O + yaml.safe_dump(spec, sort_keys=False))
+
+
 if __name__ == "__main__":
     main()
+    write_study_o()

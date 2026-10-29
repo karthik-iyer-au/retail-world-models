@@ -779,3 +779,24 @@ LightGBM's row and feature sampling. The settings each loop keeps are run on
 that data set's rolling windows beside the world model's kept settings, and the
 comparison the paper makes between the two models uses the tuned forms of both,
 with the untuned forms reported beside them.
+
+**29 October 2026, study O, the five-copy average, written down before it runs.**
+Studies M and N found that the world model's score moves by 0.04 to 0.10
+between training seeds on the Dominick's categories, against 0.001 to 0.01 for
+LightGBM, so the keep bar (the seed spread) let only large changes through for
+the world model. The standard remedy for seed variance in neural networks is to
+average several copies fitted with different seeds (deep ensembles,
+Lakshminarayanan et al. 2017), with the weights of each averaged over training
+(Izmailov et al. 2018). The paper's original Dominick's final runs already
+averaged three copies; the revision's rolling runs and studies M and N used one.
+Study O makes the average the base form of both models: the world model as an
+average of five copies, each with weight averaging (decay 0.999), and LightGBM
+as an average of five copies, so both get the same treatment
+(`configs/experiments/avg5_*`, `configs/research/avg5_*`, written by
+`scripts/make_research_specs.py`). Stage 1: the starting settings of each, on
+the six Dominick's categories, on the search windows of studies M and N, seeds
+1 to 3, to measure the seed spread. Reported against the single-copy spreads of
+studies M and N. Stage 2, the loop of study M on each (same menu, less weight
+averaging for the world model, which is in the base; same rules), runs only if
+stage 1 shows the spread falls, and is written down again before it runs with
+its cost.
