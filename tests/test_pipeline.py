@@ -378,3 +378,21 @@ def test_a_job_can_run_one_entry_of_its_list(tmp_path, monkeypatch, capsys):
     job.main()
     saved = [p.name for p in (tmp_path / "out").iterdir() if not p.name.startswith("_")]
     assert len(saved) == 1 and "_second_" in saved[0]
+
+
+def test_an_average_of_models_that_cannot_be_saved_still_saves_its_run(tmp_path):
+    """An average of LightGBM copies has no checkpoint to save; the run is saved without one."""
+    import json
+
+    import pytest
+
+    pytest.importorskip("lightgbm")
+    from rwm.experiments.run import run
+
+    inner = {"horizon": 7, "train_periods": 120, "categorical": ["item_id"], "extra": ["promo"], "lags": [0, 7],
+             "windows": [7, 14], "spread_window": 7, "price_window": 14, "price_lag": 7, "rounds": 10}
+    config = {"name": "avg_lgbm", "seed": 0, "dataset": {"name": "synthetic", "params": {"n_periods": 200}},
+              "model": {"name": "seed_average", "params": {"model": "lightgbm_direct", "members": 2, "params": inner}},
+              "evaluation": {"horizon": 7, "n_origins": 1}}
+    out = run(config, out_root=tmp_path)
+    assert json.loads((out / "metrics.json").read_text())["checkpoints"] == []

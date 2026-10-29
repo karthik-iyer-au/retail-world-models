@@ -310,7 +310,7 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
     # Models that can be saved are saved, one file per window, with their checksums.
     checkpoints = []
     for origin, model in sorted(fitted, key=lambda f: f[0]):
-        if hasattr(model, "save"):
+        if hasattr(model, "save") and getattr(model, "saveable", True):
             path = run_dir / f"checkpoint_origin{origin}.pt"
             model.save(path)
             checkpoints.append({"file": path.name, "bytes": path.stat().st_size, "sha256": sha256_file(path)})
