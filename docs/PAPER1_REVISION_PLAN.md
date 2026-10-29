@@ -800,3 +800,25 @@ studies M and N. Stage 2, the loop of study M on each (same menu, less weight
 averaging for the world model, which is in the base; same rules), runs only if
 stage 1 shows the spread falls, and is written down again before it runs with
 its cost.
+
+**30 October 2026, study O stage 1 result.** Locked score (mean WRMSSE over
+the search windows but the held-out one), mean over seeds 1 to 3 and its
+spread, the five-copy average against the single copy of studies M and N
+(`results/paper1_revision/tables/averaging_stage1.csv`):
+
+| Category | World model, single | World model, average of 5 | LightGBM, single | LightGBM, average of 5 |
+|---|---|---|---|---|
+| Cheese | 0.429 (spread 0.040) | 0.397 (0.018) | 0.356 (0.004) | 0.354 (0.004) |
+| Snacks | 0.470 (0.098) | 0.440 (0.017) | 0.358 (0.001) | 0.358 (0.004) |
+| Soft drinks | 0.682 (0.095) | 0.586 (0.030) | 0.559 (0.010) | 0.553 (0.003) |
+| Bottled juice | 0.629 (0.081) | 0.591 (0.030) | 0.709 (0.006) | 0.708 (0.008) |
+| Analgesics | 0.572 (0.025) | 0.508 (0.006) | 0.551 (0.010) | 0.548 (0.001) |
+| Frozen entrees | 0.242 (0.041) | 0.246 (0.006) | 0.216 (0.002) | 0.223 (0.012) |
+
+Averaging cuts the world model's seed spread on all six categories, by 56% to
+84%, and lowers its mean on five (by 0.030 to 0.096; frozen entrees 0.004
+higher). LightGBM, already steady, changes little. Averaged against averaged,
+the world model is lower on bottled juice and analgesics and LightGBM on the
+other four. Per the plan, stage 2 (the loops on the averaged models) runs only
+when written down again with its cost; the world model's spreads, now 0.006 to
+0.030, set its keep bars.
