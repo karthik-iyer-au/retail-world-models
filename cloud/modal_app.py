@@ -179,7 +179,8 @@ def try_gpu(config: dict, commit: str, out: str) -> dict | None:
     return _run_config(config, commit, out)
 
 
-@app.function(**_TRY, gpu=DEFAULT_GPU, cpu=GPU_CPUS, memory=32 * 1024)
+# At most 5 at once, so the long M5 runs leave half the plan's 10 GPUs for the rest.
+@app.function(**_TRY, gpu=DEFAULT_GPU, cpu=GPU_CPUS, memory=32 * 1024, max_containers=5)
 def try_gpu_large(config: dict, commit: str, out: str) -> dict | None:
     return _run_config(config, commit, out)
 

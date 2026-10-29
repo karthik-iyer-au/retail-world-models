@@ -56,8 +56,12 @@ def model_names(model: dict) -> set[str]:
     return names
 
 
+# Models that only hold others; the machine is decided by what they hold.
+WRAPPERS = {"seed_average", "combination"}
+
+
 def machine(config: dict) -> str:
-    return "cpu" if model_names(config["model"]) <= CPU_MODELS else "gpu"
+    return "cpu" if model_names(config["model"]) - WRAPPERS <= CPU_MODELS else "gpu"
 
 
 def memory_gb(config: dict) -> int:
