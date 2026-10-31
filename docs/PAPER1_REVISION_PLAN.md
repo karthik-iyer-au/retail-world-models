@@ -845,3 +845,20 @@ analgesics loop was restarted once after an app redeploy stopped it, so its log
 holds its start and its kept row twice; the second of each is the restart
 reading back saved runs. The M5 loops are still running (LightGBM's has ended:
 smaller trees, 0.603 to 0.556).
+
+**31 October 2026, study O stage 2, written down before it runs, with its cost.**
+Karthik approved resuming the Modal runs on 31 October ("proceed either way the
+research on modal", "use it wisely"). Stage 2 runs the loop of study M,
+unchanged in its rules, windows, seeds and menus, on the five-copy averages of
+both models on the six Dominick's categories (`configs/research/avg5_*.yaml`).
+Each loop reads back its stage 1 starting runs, so the keep bars are the stage 1
+spreads (world model 0.006 to 0.030, LightGBM 0.001 to 0.012). The M5 world-model
+loop of study M (`configs/research/pure_m5.yaml`) is resumed in its single-copy
+form: its seed spread is 0.013, already in the range the average brings the
+Dominick's categories to, and a five-copy M5 run would take five times as long.
+It reads back every run it saved before it was stopped on 30 October. Nothing
+else runs. Estimated cost, from the October runs: US$650 to 1,000 for the twelve
+Dominick's loops (almost all of it the world model's; LightGBM runs on
+processors) and US$300 to 500 for M5. Spend is checked daily; if it passes the
+top of the estimate, the runs stop and the result so far is reported. The
+settings each loop keeps are reported as in studies M and N.
