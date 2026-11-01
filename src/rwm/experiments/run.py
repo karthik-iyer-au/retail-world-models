@@ -25,10 +25,11 @@ import yaml
 
 from rwm.data import load_dataset
 from rwm.data import manifest as data_manifest
+from rwm.data.aggregate import aggregate_panel
 from rwm.data.calendar import add_calendar, add_season
 from rwm.data.crowding import add_crowding
 from rwm.data.roles import add_roles
-from rwm.data.schema import ITEM, DATE, PRICE, SERIES, UNITS
+from rwm.data.schema import ITEM, DATE, PRICE, SERIES, STORE, UNITS
 from rwm.evaluation.hierarchy import rmsse_where, to_matrix, wrmsse
 from rwm.evaluation.splits import rolling_origins
 from rwm.forecaster import build_model
@@ -72,6 +73,11 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
         every = np.sort(panel[DATE].unique())
         back = ev.get("holdout_periods", 0) + ev["horizon"] + (ev["n_origins"] - 1) * (ev.get("step") or ev["horizon"])
         add_roles(panel, until=every[-back - 1], **(extras["roles"] or {}))
+    if "aggregate" in extras:
+        # forecast a higher level directly (study P): one series per store, say
+        by = list(extras["aggregate"].get("by", [STORE]))
+        panel = aggregate_panel(panel, **extras["aggregate"])
+        ds.hierarchy = [lv for lv in (ds.hierarchy or []) if set(lv) <= set(by)]
     dates = np.sort(panel[DATE].unique())
     if ev.get("holdout_periods"):
         # The last periods are set aside for the final test and are not loaded into this run.

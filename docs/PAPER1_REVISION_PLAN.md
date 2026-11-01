@@ -862,3 +862,30 @@ Dominick's loops (almost all of it the world model's; LightGBM runs on
 processors) and US$300 to 500 for M5. Spend is checked daily; if it passes the
 top of the estimate, the runs stop and the result so far is reported. The
 settings each loop keeps are reported as in studies M and N.
+
+**1 November 2026, study P, each model's own store totals reconciled with its item forecasts, written down before it runs.**
+Karthik asked whether the world model's loss to LightGBM on four Dominick's
+categories is real or an effect of adding up. The error breakdown of the same
+day (`scripts/eda_shared_error.py`, `results/paper1_revision/eda/`) shows that
+for both models 95% to 99.8% of the category-total error on the search windows
+comes from items being wrong in the same direction in the same week, so the
+category result is a real miss of the week, not cancellation; the world model
+misses most in weeks when the top sellers are on promotion. The reconciliation
+of 17 October combined each model's item forecasts with ETS above them and made
+the totals worse in all six categories, because the ETS totals are weak. Study P
+tests the same idea with a stronger view of the totals: each model forecasts the
+85 store totals of a category directly (`src/rwm/data/aggregate.py`: units summed;
+price, cost and promotion as shares of the items' regular prices and of the items),
+with the settings of its study O starting runs (five-copy average) and on the same
+search windows and seeds 1 to 3 (`configs/experiments/agg_store_*`, written by
+`scripts/make_reconcile_configs.py`, job `study_p_store_totals`). Its store
+forecasts are reconciled with its own item-by-store forecasts from those starting
+runs by WLS on the two-level hierarchy (`rwm.evaluation.reconcile.gls_bottom`),
+each node weighted by its mean squared one-step change in training
+(`scripts/study_p_reconcile.py`). Scored by WRMSSE at every level. Rule, fixed now:
+for each model and category, reconciled against as is, mean over the three
+development windows and three seeds; the reconciliation helps a model if it is
+lower on at least four of the six categories, and the held-out window is reported
+beside it and never used to decide. Both models get the same treatment; the paper
+reports the four forecasts (each model as is and reconciled) side by side.
+Estimated cost on Modal: US$20 to 50.
