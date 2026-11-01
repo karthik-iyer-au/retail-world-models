@@ -889,3 +889,29 @@ lower on at least four of the six categories, and the held-out window is reporte
 beside it and never used to decide. Both models get the same treatment; the paper
 reports the four forecasts (each model as is and reconciled) side by side.
 Estimated cost on Modal: US$20 to 50.
+
+**1 November 2026, study P result.** By the rule fixed before the run, reconciling
+each model's item forecasts with its own store-total forecasts does not help either
+model: the reconciled forecast is lower on 1 of 6 categories for the world model
+(frozen entrees) and 2 of 6 for LightGBM (frozen entrees, bottled juice), on the
+development windows, mean of seeds 1 to 3
+(`results/paper1_revision/tables/study_p_*.csv`). Locked score, as is against
+reconciled:
+
+| Category | World model | LightGBM |
+|---|---|---|
+| Analgesics | 0.508, 0.518 | 0.548, 0.575 |
+| Bottled juice | 0.591, 0.636 | 0.708, 0.694 |
+| Cheese | 0.397, 0.598 | 0.354, 0.544 |
+| Frozen entrees | 0.246, 0.237 | 0.223, 0.209 |
+| Soft drinks | 0.586, 0.980 | 0.553, 0.874 |
+| Snacks | 0.440, 0.442 | 0.358, 0.401 |
+
+The loss comes from the store totals forecast directly, which are worse than the
+item forecasts added up (cheese total, world model: 0.263 added up, 0.600
+reconciled; soft drinks: 0.598 and 1.247). A model trained on 85 store totals,
+with the plan reduced to shares, sees far less than the same model trained on
+every item and store. With the reconciliation of 17 October this is the second
+test in which forecasting the totals separately does worse than adding up the
+item forecasts. The item-by-store forecasts of both models are kept as they are.
+The "as is" scores reproduce the study O starting runs' logged scores exactly.
