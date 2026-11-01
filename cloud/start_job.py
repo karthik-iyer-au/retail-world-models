@@ -1,7 +1,7 @@
 """Start every run of a job file on the deployed Modal app, so the runs go on
 to the end whatever happens to the computer that started them.
 
-  python cloud/start_job.py configs/jobs/<job>.yaml <out folder on the results volume>
+  python cloud/start_job.py configs/jobs/<job>.yaml <out folder on the results volume> [--deploy]
 
 Deploys the app, fetches the job's data, and hands each run (each seed
 separately) to the machine kind it needs (`try_gpu`, `try_cpu` and their large
@@ -26,7 +26,10 @@ def main(job_file: str, out: str) -> None:
     commit = modal_app._local_commit()
     job = plan.load(job_file)
     runs = plan.expand(job)
-    subprocess.run(["modal", "deploy", str(HERE / "modal_app.py")], check=True)
+    if "--deploy" in sys.argv:
+        # A deploy stops every research loop running on the app (1 November 2026: a
+        # job launched with a deploy stopped seven loops), so it is asked for, not done by default.
+        subprocess.run(["modal", "deploy", str(HERE / "modal_app.py")], check=True)
     modal.Function.from_name("retail-world-models", "fetch").remote({"datasets": job.get("datasets", [])}, commit)
     for r in runs:
         c = r["config"]
@@ -41,4 +44,5 @@ def main(job_file: str, out: str) -> None:
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    main(args[0], args[1])
