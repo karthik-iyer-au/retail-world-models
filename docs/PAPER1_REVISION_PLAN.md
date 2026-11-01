@@ -932,3 +932,19 @@ public download). Estimated cost under US$100: Frat has about 4,300 item-by-stor
 series against 16,000 to 61,000 for a Dominick's category. Favorita is left out of
 this round: its runs need 64 GB machines and several hours each, so its loops would
 cost several hundred dollars on Modal; it waits for Karthik's decision or local compute.
+
+**1 November 2026, study R, studies O and the loop on Favorita, written down before it runs.**
+Karthik asked for Favorita too (1 November: "I also want favorita"). Study R runs
+study O on Favorita unchanged in its rules: each model as an average of five copies
+(the world model with weight averaging 0.999, LightGBM with 16 threads), the loop of
+study M with the same menus less weight averaging, seeds 1 to 3, keep bar the starting
+settings' seed spread (`configs/research/avg5_{world_model,lightgbm}_favorita.yaml`).
+The search windows lie before the paper's Favorita rolling windows: 112 days held back
+(the four rolling windows of 28), then four windows of 28 days, the latest held out
+and never used to decide. The averaging is needed here as on Dominick's: the single
+world model's score on Favorita ranged 0.480 to 0.542 over three seeds (study L).
+A five-copy Favorita world-model run takes about 25 hours of an L4 (one copy took 4.8
+to 5.7 hours), so the loops are to run on rented RTX 4090 machines (Vast.ai) rather
+than Modal, at an estimated US$200 to 400 against US$1,300 to 2,500 on Modal; the
+launcher is tested on one small run before the loops start. Every run records its
+machine in its manifest, so the GPU each result came from is known.
