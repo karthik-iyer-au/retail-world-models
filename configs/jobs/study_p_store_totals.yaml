@@ -1,0 +1,62 @@
+# Study P: store totals for the six Dominick's categories, both models, seeds 1 to 3.
+runs:
+- config: configs/experiments/agg_store_world_model_dominicks_che.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/agg_store_lightgbm_dominicks_che.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/agg_store_world_model_dominicks_sna.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/agg_store_lightgbm_dominicks_sna.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/agg_store_world_model_dominicks_sdr.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/agg_store_lightgbm_dominicks_sdr.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/agg_store_world_model_dominicks_bjc.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/agg_store_lightgbm_dominicks_bjc.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/agg_store_world_model_dominicks_ana.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/agg_store_lightgbm_dominicks_ana.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/agg_store_world_model_dominicks_fre.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
+- config: configs/experiments/agg_store_lightgbm_dominicks_fre.yaml
+  seeds:
+  - 1
+  - 2
+  - 3
