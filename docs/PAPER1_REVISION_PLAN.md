@@ -915,3 +915,20 @@ every item and store. With the reconciliation of 17 October this is the second
 test in which forecasting the totals separately does worse than adding up the
 item forecasts. The item-by-store forecasts of both models are kept as they are.
 The "as is" scores reproduce the study O starting runs' logged scores exactly.
+
+**1 November 2026, study Q, studies O and the loop on Breakfast at the Frat, written down before it runs.**
+Studies M, N and O searched both models on M5 and the six Dominick's categories only;
+Frat and Favorita had no search, and on Frat LightGBM leads the world model at every
+level of the rolling windows (results/paper1_revision/tables/accuracy.csv). Study Q
+runs study O on Frat unchanged in its rules: each model as an average of five copies
+(the world model with weight averaging 0.999, LightGBM with 16 threads), the loop of
+study M with the same menus less weight averaging, seeds 1 to 3, keep bar the
+starting settings' seed spread (`configs/research/avg5_{world_model,lightgbm}_frat.yaml`,
+written by `scripts/make_research_specs.py`). The search windows lie before the
+paper's Frat rolling windows: 56 periods held back (the 24 held-out periods and the
+four rolling windows of 8), then four windows of 8, the latest held out and never
+used to decide. It runs once the Frat file is on the Modal data volume (it has no
+public download). Estimated cost under US$100: Frat has about 4,300 item-by-store
+series against 16,000 to 61,000 for a Dominick's category. Favorita is left out of
+this round: its runs need 64 GB machines and several hours each, so its loops would
+cost several hundred dollars on Modal; it waits for Karthik's decision or local compute.
