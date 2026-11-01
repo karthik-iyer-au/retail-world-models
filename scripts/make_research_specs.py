@@ -191,7 +191,33 @@ def write_study_q():
         (OUT / f"avg5_{model}_{key}.yaml").write_text(header + yaml.safe_dump(spec, sort_keys=False))
 
 
+FAVORITA_DAILY = {"horizon": 28, "n_origins": 4, "holdout_periods": 112, "step": 28, "scale_lag": 1, "weight_window": 28}
+
+
+def write_study_r():
+    """Study R (plan entry of 1 November 2026): study O on Favorita. The search windows
+    lie before the paper's Favorita rolling windows (the last four windows of 28 days)."""
+    key = "favorita"
+    for model, src, extra in (("world_model", f"rev_{key}_rolling_world_model", {"weight_average": 0.999}),
+                              ("lightgbm", f"rev_{key}_rolling_lightgbm", {"threads": 16})):
+        cfg = averaged(f"configs/experiments/{src}.yaml", extra)
+        name = f"avg5_{key}_rolling_{model}"
+        cfg["name"] = name
+        (EXP / f"{name}.yaml").write_text(
+            f"# Study R (plan entry of 1 November 2026): {src} as an average of {MEMBERS} copies; written by scripts/make_research_specs.py.\n"
+            + yaml.safe_dump(cfg, sort_keys=False))
+        plain = yaml.safe_load((ROOT / f"configs/experiments/{src}.yaml").read_text())
+        items = menu(plain, False) if model == "world_model" else lightgbm_menu(plain, False)
+        spec = {"name": f"avg5_{model}_{key}", "base": f"configs/experiments/{name}.yaml", "evaluation": FAVORITA_DAILY,
+                "seeds": [1, 2, 3], "rung_fraction": 1.0, "promote": "beats_best",
+                "menu": wrapped(items, drop=("weight_average_0.999",))}
+        header = HEADER_O.replace("Study O (docs/PAPER1_REVISION_PLAN.md, entry of 29 October 2026)",
+                                  "Study R (docs/PAPER1_REVISION_PLAN.md, entry of 1 November 2026)")
+        (OUT / f"avg5_{model}_{key}.yaml").write_text(header + yaml.safe_dump(spec, sort_keys=False))
+
+
 if __name__ == "__main__":
     main()
     write_study_o()
     write_study_q()
+    write_study_r()
