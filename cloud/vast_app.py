@@ -48,6 +48,7 @@ TORCH = "2.14.1"  # the version the Modal runs used, recorded in their manifests
 MAX_MACHINES = 6  # rented machines at once
 RUN_HOURS = 40  # a try still going after this long is stopped
 POLL_S = 120
+STALE_S = 15 * 60  # a try's marker older than this means its manager has stopped
 
 # Machines: one RTX 4090, CUDA 13 drivers (for torch 2.14 cu130), a verified
 # host with reliability above 0.98, and memory for the data set.
@@ -200,6 +201,21 @@ def _offer(memory_gb: int, exclude: set) -> dict:
     raise RuntimeError("no machine matches the query")
 
 
+def _rent(config: dict, env: dict, dataset: str, tried: set) -> int:
+    """Rent the cheapest matching machine not tried yet and start the worker on it."""
+    offer = _offer(MEMORY_GB.get(dataset, DEFAULT_MEMORY_GB), tried)
+    tried.add(offer["machine_id"])
+    made = _first_json(_vast(
+        "create", "instance", str(offer["id"]), "--image", "python:3.12-slim", "--disk", "120",
+        "--label", f"rwm {config['name']}"[:60],
+        "--env", " ".join(f"-e {k}={v}" for k, v in env.items()),
+        # the image's own command, not Vast's ssh start-up, which needs packages a slim image lacks
+        "--entrypoint", "bash", "--args", "-c", "echo $WORKER_B64 | base64 -d > /worker.sh && bash /worker.sh"))
+    iid = made["new_contract"]
+    print(f"{config['name']}: machine {iid} ({offer['geolocation']}, US${offer['dph_total']:.3f}/h)", flush=True)
+    return iid
+
+
 @app.function(image=image, volumes={RESULTS: results_volume}, secrets=[vast_secret, bridge_secret],
               timeout=24 * 3600, cpu=0.25, memory=1024, max_containers=MAX_MACHINES)
 def vast_try(config: dict, commit: str, out: str) -> dict | None:
@@ -209,27 +225,48 @@ def vast_try(config: dict, commit: str, out: str) -> dict | None:
     done = _finished(folder, config)
     if done:
         return json.loads((done / "metrics.json").read_text())
+    # A loop restarted after its daily time limit asks again for tries whose
+    # machines are still working: wait for those instead of renting a second machine.
+    marker = Path(RESULTS) / "_vast_running" / out.replace("/", "__") / f"{config['name']}.json"
+    while marker.exists() and time.time() - json.loads(marker.read_text())["at"] < STALE_S:
+        time.sleep(POLL_S)
+        results_volume.reload()
+        done = _finished(folder, config)
+        if done:
+            return json.loads((done / "metrics.json").read_text())
+
+    def mark(iid) -> None:
+        marker.parent.mkdir(parents=True, exist_ok=True)
+        marker.write_text(json.dumps({"at": time.time(), "machine": iid}))
+        results_volume.commit()
+
     dataset = config["dataset"]["name"]
     url = modal.Function.from_name("rwm-vast", "bridge").get_web_url()
     env = {"REPO_URL": REPO_URL, "COMMIT": commit, "TORCH": TORCH, "DATASET": dataset, "OUT": out,
            "RUN_NAME": config["name"], "BRIDGE_URL": url, "BRIDGE_TOKEN": os.environ["BRIDGE_TOKEN"],
            "CONFIG_B64": base64.b64encode(json.dumps(config).encode()).decode(),
            "WORKER_B64": base64.b64encode(WORKER.encode()).decode()}
+    # a manager that stopped without destroying its machine (a restart of the app) leaves the
+    # machine working: carry on with that machine rather than start the run again
+    adopt = None
+    if marker.exists():
+        old = json.loads(marker.read_text()).get("machine")
+        try:
+            if json.loads(_vast("show", "instance", str(old))).get("actual_status") in ("running", "loading"):
+                adopt = old
+        except Exception:
+            pass
     tried: set = set()
     for attempt in range(2):
-        offer = _offer(MEMORY_GB.get(dataset, DEFAULT_MEMORY_GB), tried)
-        tried.add(offer["machine_id"])
-        made = _first_json(_vast(
-            "create", "instance", str(offer["id"]), "--image", "python:3.12-slim", "--disk", "120",
-            "--label", f"rwm {config['name']}"[:60],
-            "--env", " ".join(f"-e {k}={v}" for k, v in env.items()),
-            # the image's own command, not Vast's ssh start-up, which needs packages a slim image lacks
-            "--entrypoint", "bash", "--args", "-c", "echo $WORKER_B64 | base64 -d > /worker.sh && bash /worker.sh"))
-        iid = made["new_contract"]
-        print(f"{config['name']}: machine {iid} ({offer['geolocation']}, US${offer['dph_total']:.3f}/h)", flush=True)
-        started = time.time()
+        if adopt is not None and attempt == 0:
+            iid = adopt
+            print(f"{config['name']}: carrying on with machine {iid}", flush=True)
+            started = time.time()
+        else:
+            iid, started = _rent(config, env, dataset, tried), time.time()
         try:
             while time.time() - started < RUN_HOURS * 3600:
+                mark(iid)
                 time.sleep(POLL_S)
                 results_volume.reload()
                 done = _finished(folder, config)
@@ -244,6 +281,8 @@ def vast_try(config: dict, commit: str, out: str) -> dict | None:
                     break
         finally:
             gone = subprocess.run(["vastai", "destroy", "instance", str(iid), "-y"], capture_output=True, text=True)  # -y: no prompt
+            marker.unlink(missing_ok=True)
+            results_volume.commit()
             print(f"{config['name']}: machine {iid} destroyed ({gone.returncode})", flush=True)
     return None
 
