@@ -155,7 +155,15 @@ def _vast(*args: str) -> str:
         key.parent.mkdir(parents=True, exist_ok=True)
         key.write_text(os.environ["VAST_API_KEY"])
         key.chmod(0o600)
-    return subprocess.run(["vastai", *args, "--raw"], check=True, capture_output=True, text=True).stdout
+    args = list(args)
+    at = args.index("--entrypoint") if "--entrypoint" in args else len(args)  # --args must come last
+    cmd = ["vastai", *args[:at], "--raw", *args[at:]]
+    return subprocess.run(cmd, check=True, capture_output=True, text=True).stdout
+
+
+def _first_json(text: str) -> dict:
+    """The JSON object in the CLI's output, which may have lines before it."""
+    return json.loads(text[text.index("{"):])
 
 
 def _finished(folder: Path, config: dict) -> Path | None:
@@ -197,11 +205,12 @@ def vast_try(config: dict, commit: str, out: str) -> dict | None:
     for attempt in range(2):
         offer = _offer(MEMORY_GB.get(dataset, DEFAULT_MEMORY_GB), tried)
         tried.add(offer["machine_id"])
-        made = json.loads(_vast(
+        made = _first_json(_vast(
             "create", "instance", str(offer["id"]), "--image", "python:3.12-slim", "--disk", "120",
             "--label", f"rwm {config['name']}"[:60],
             "--env", " ".join(f"-e {k}={v}" for k, v in env.items()),
-            "--onstart-cmd", "echo $WORKER_B64 | base64 -d > /worker.sh && bash /worker.sh"))
+            # the image's own command, not Vast's ssh start-up, which needs packages a slim image lacks
+            "--entrypoint", "bash", "--args", "-c", "echo $WORKER_B64 | base64 -d > /worker.sh && bash /worker.sh"))
         iid = made["new_contract"]
         print(f"{config['name']}: machine {iid} ({offer['geolocation']}, US${offer['dph_total']:.3f}/h)", flush=True)
         started = time.time()
