@@ -948,3 +948,11 @@ to 5.7 hours), so the loops are to run on rented RTX 4090 machines (Vast.ai) rat
 than Modal, at an estimated US$200 to 400 against US$1,300 to 2,500 on Modal; the
 launcher is tested on one small run before the loops start. Every run records its
 machine in its manifest, so the GPU each result came from is known.
+
+**3 November 2026, study R, where the Favorita world-model loop runs.** One five-copy
+Favorita world-model run took 14.0 hours on a rented RTX 4090 (Vast.ai, US$0.46 an hour, about
+US$6.50 a run; timing run in `rwm-results/vast_timing`, outside the loop, never used by it).
+Karthik chose Vast for the loop (3 November: "Vast"). Every try of the world-model loop runs on
+an RTX 4090 on Vast, the starting runs included, so the keep bar and every comparison inside
+the loop come from one kind of machine. The LightGBM loop uses no GPU, so its machine does not
+change its scores.
