@@ -220,7 +220,8 @@ def vast_try(config: dict, commit: str, out: str) -> dict | None:
                     print(f"{config['name']}: machine {iid} {state.get('actual_status')}", flush=True)
                     break
         finally:
-            subprocess.run(["vastai", "destroy", "instance", str(iid)], capture_output=True)
+            gone = subprocess.run(["vastai", "destroy", "instance", str(iid), "-y"], capture_output=True, text=True)  # -y: no prompt
+            print(f"{config['name']}: machine {iid} destroyed ({gone.returncode})", flush=True)
     return None
 
 
