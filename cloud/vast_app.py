@@ -68,15 +68,13 @@ WORKER = r"""#!/bin/bash
 # Runs one config on a rented machine; written by cloud/vast_app.py.
 set -uo pipefail
 exec > >(tee -a /work.log) 2>&1
-fail() { echo "FAILED: $1"; curl -fsS -X PUT -H "Authorization: Bearer $BRIDGE_TOKEN" --data-binary @/work.log "$BRIDGE_URL/failed/$OUT/$RUN_NAME" || true; sleep infinity; }
+# on failure: send the log, then end the container, so vast_try sees the machine stop and destroys it
+fail() { echo "FAILED: $1"; curl -fsS --retry 5 --retry-all-errors -X PUT -H "Authorization: Bearer $BRIDGE_TOKEN" --data-binary @/work.log "$BRIDGE_URL/failed/$OUT/$RUN_NAME" || true; exit 1; }
 apt-get update -qq && apt-get install -y -qq git curl p7zip-full >/dev/null || fail "apt"
 nvidia-smi || fail "no GPU"
 mkdir -p /root/repo && cd /root/repo && git init -q && git fetch -q --depth 1 "$REPO_URL" "$COMMIT" && git checkout -q FETCH_HEAD || fail "checkout"
 pip install -q "torch==$TORCH" && pip install -q -e ".[trees,deep]" || fail "install"
-mkdir -p "data/raw/$DATASET"
-for f in $(curl -fsS -H "Authorization: Bearer $BRIDGE_TOKEN" "$BRIDGE_URL/data/$DATASET"); do
-  curl -fsS -H "Authorization: Bearer $BRIDGE_TOKEN" -o "data/raw/$DATASET/$f" "$BRIDGE_URL/data/$DATASET/$f" || fail "data $f"
-done
+python cloud/fetch_data.py "$BRIDGE_URL" "$DATASET" "data/raw/$DATASET" || fail "data"  # in parts: one long request is cut off
 mkdir -p /out && python - <<'EOF' || fail "run"
 import base64, json, os
 from pathlib import Path
@@ -85,7 +83,7 @@ run(json.loads(base64.b64decode(os.environ["CONFIG_B64"])), strict=True, out_roo
 EOF
 rm -rf /out/_partial
 tar czf /run.tgz -C /out . || fail "tar"
-curl -fsS -X PUT -H "Authorization: Bearer $BRIDGE_TOKEN" --data-binary @/run.tgz "$BRIDGE_URL/results/$OUT" || fail "upload"
+curl -fsS --retry 5 --retry-all-errors -X PUT -H "Authorization: Bearer $BRIDGE_TOKEN" --data-binary @/run.tgz "$BRIDGE_URL/results/$OUT" || fail "upload"
 echo "DONE"
 sleep infinity
 """
@@ -100,7 +98,7 @@ def bridge():
     import tarfile
 
     from fastapi import FastAPI, HTTPException, Request
-    from fastapi.responses import FileResponse, PlainTextResponse
+    from fastapi.responses import FileResponse, PlainTextResponse, Response
 
     web = FastAPI()
     token = os.environ["BRIDGE_TOKEN"]
@@ -125,6 +123,22 @@ def bridge():
     def data(dataset: str, name: str, request: Request):
         check(request)
         return FileResponse(Path(DATA, "raw") / safe(dataset, name))
+
+    @web.get("/size/{dataset}/{name}")
+    def size(dataset: str, name: str, request: Request):
+        check(request)
+        return PlainTextResponse(str((Path(DATA, "raw") / safe(dataset, name)).stat().st_size))
+
+    @web.get("/part/{dataset}/{name}")
+    def part(dataset: str, name: str, start: int, length: int, request: Request):
+        """One part of a file (cloud/fetch_data.py): a whole large file in one
+        request outlasts Modal's limit on a web request."""
+        check(request)
+        if start < 0 or not 0 < length <= 256 << 20:
+            raise HTTPException(status_code=400)
+        with open(Path(DATA, "raw") / safe(dataset, name), "rb") as f:
+            f.seek(start)
+            return Response(f.read(length), media_type="application/octet-stream")
 
     @web.put("/results/{out:path}")
     async def results(out: str, request: Request):
