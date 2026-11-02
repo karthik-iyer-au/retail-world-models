@@ -54,10 +54,7 @@ while true; do
     if [ "$(cat "$HOME_DIR/installed" 2>/dev/null)" != "$COMMIT" ]; then
       "$PY" -m pip install -q -e ".[trees,deep]" && echo "$COMMIT" > "$HOME_DIR/installed"
     fi
-    mkdir -p "data/raw/$DATASET"
-    for f in $(curl -fsS -H "$AUTH" "$BRIDGE_URL/data/$DATASET"); do
-      [ -s "data/raw/$DATASET/$f" ] || curl -fsS -H "$AUTH" -o "data/raw/$DATASET/$f" "$BRIDGE_URL/data/$DATASET/$f"
-    done
+    BRIDGE_TOKEN="${AUTH#Authorization: Bearer }" "$PY" cloud/fetch_data.py "$BRIDGE_URL" "$DATASET" "data/raw/$DATASET"
     rm -rf "$HOME_DIR/out" && mkdir -p "$HOME_DIR/out"
     nice -n 10 "$PY" - "$JOB" "$HOME_DIR/out" <<'EOF'
 import json, sys
