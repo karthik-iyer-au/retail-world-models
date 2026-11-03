@@ -2,6 +2,7 @@
 
   python cloud/start_local.py --config configs/experiments/<x>.yaml --out <folder>
   python cloud/start_local.py status
+  python cloud/start_local.py --loop configs/research/<spec>.yaml   # a research loop, every try on the NUC
 
 The commit is the local HEAD, which must be clean and on GitHub, as for Modal.
 """
@@ -32,6 +33,12 @@ def main(argv: list[str]) -> None:
     import modal_app  # only for the commit check; deploys nothing
 
     commit = modal_app._local_commit()
+    if "--loop" in argv:
+        spec = argv[argv.index("--loop") + 1]
+        call = modal.Function.from_name("rwm-local", "local_loop").spawn(spec, commit, 0)
+        name = yaml.safe_load((modal_app.LOCAL_REPO / spec).read_text())["name"]
+        print(f"research loop on the NUC started at commit {commit[:8]} ({call.object_id}); log at rwm-results research/{name}/log.jsonl")
+        return
     config = yaml.safe_load((modal_app.LOCAL_REPO / argv[argv.index("--config") + 1]).read_text())
     out = argv[argv.index("--out") + 1]
     queue.put({"config": config, "commit": commit, "out": out})
