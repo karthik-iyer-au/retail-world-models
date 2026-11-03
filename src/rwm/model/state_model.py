@@ -136,6 +136,17 @@ in `levers` set to zero.
   that share of training examples so the model learns to do without it.
 - `likelihood`: `tweedie` (the default, on sales relative to the item's own
   level) or `negative_binomial` (on units, as a count with a learned spread).
+  Two more for periods with no sales (study T, docs/PAPER1_REVISION_PLAN.md,
+  entry of 4 November 2026): `zinb`, a negative binomial with a second part
+  that can make a period zero on its own (a gate read from the item's state
+  for that period), and `hurdle_nb`, where the gate decides zero or not and a
+  negative binomial on the count above one gives how many. In both the
+  network's forecast stays the expected sales, so forecasting is unchanged:
+  the count part's mean is that forecast divided by the chance of a sale.
+- `spread_by_item`: with a negative binomial likelihood, the spread is read
+  from the item's state for each period (its history, labels and plan)
+  around one shared value, rather than one value for every item, so slow,
+  lumpy items can have a wider spread than steady fast sellers.
 - `rollout`: the world-model form. A transition step takes the state and one
   period's plan and gives the state one period later. It is applied period
   by period across the horizon, and each period's sales are read from the
@@ -209,7 +220,7 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
                lift_readout: bool = False, latent: bool = False, readout_dropout: float = 0.0,
                rollout: bool = False, spread: bool = False, plan_split: bool = False,
                feedback: bool = False, teacher_rate: float = 0.5, roll_norm: bool = False,
-               stock: bool = False):
+               stock: bool = False, aux: int = 0):
     import torch
     from torch import nn
 
@@ -240,15 +251,18 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
                     if neighbours == "both":  # start as similarity alone
                         nn.init.zeros_(self.query.weight)
                         nn.init.zeros_(self.query.bias)
-            readout = lambda: nn.Sequential(
+            readout = lambda n_out=1: nn.Sequential(
                 nn.Linear(d_model * (2 if neighbours else 1) + 16 * len(cat_sizes) + 16 + n_fut, 2 * d_model),
                 nn.GELU(),
                 nn.Dropout(readout_dropout),
                 nn.Linear(2 * d_model, d_model),
                 nn.GELU(),
                 nn.Dropout(readout_dropout),
-                nn.Linear(d_model, 1),
+                nn.Linear(d_model, n_out),
             )
+            # per period: [spread offset, zero gate], read like the forecast (study T)
+            self.aux = readout(aux) if aux else None
+            self.last_aux = None
             self.rollout = rollout
             # for the negative binomial: how much more spread out sales are than a Poisson count
             self.spread = nn.Parameter(torch.zeros(())) if spread else None
@@ -407,6 +421,8 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
             world = effect = None
             if self.feedback:
                 out, base, on = self.roll_feedback(state, hist, fut, fut_off, rest, teacher)
+                if self.aux is not None:
+                    self.last_aux = self.aux(torch.cat([on] + rest + [fut], dim=2)).float()
                 if not full:
                     return out
                 return {"log_mu": out, "base": base, "state": state, "weights": w, "rolled": on, "world": None, "effect": None}
@@ -423,6 +439,8 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
                 out = (base + run(self.lift, fut, on) - run(self.lift, fut_off, off)).clamp(-10, 10)
             if self.stock:
                 out = self.carry_stock(out, base, hist, labels)
+            if self.aux is not None:
+                self.last_aux = self.aux(torch.cat([on] + rest + [fut], dim=2)).float()
             if not full:
                 return out
             return {"log_mu": out, "base": base, "state": state, "weights": w, "rolled": on if self.rollout else None,
@@ -474,6 +492,7 @@ class StateModel(Forecaster):
         weight_decay: float = 1e-4,
         rollout: bool = False,
         likelihood: str = "tweedie",
+        spread_by_item: bool = False,
         scale_cap: float | None = None,
         scale_window: int | None = None,
         scale_unpromoted: bool = False,
@@ -529,9 +548,11 @@ class StateModel(Forecaster):
         if validation_periods and validation_periods < horizon:
             raise ValueError("validation_periods must be at least the horizon")
         self.validation_periods, self.total_weight = validation_periods, total_weight
-        if likelihood not in ("tweedie", "negative_binomial"):
-            raise ValueError("likelihood must be tweedie or negative_binomial")
-        self.likelihood = likelihood
+        if likelihood not in ("tweedie", "negative_binomial", "zinb", "hurdle_nb"):
+            raise ValueError("likelihood must be tweedie, negative_binomial, zinb or hurdle_nb")
+        if spread_by_item and likelihood == "tweedie":
+            raise ValueError("spread_by_item needs a negative binomial likelihood")
+        self.likelihood, self.spread_by_item = likelihood, spread_by_item
         self.scale_cap, self.scale_window = scale_cap, scale_window
         self.scale_unpromoted = scale_unpromoted
         self.level_views = list(level_views or [])
@@ -593,7 +614,8 @@ class StateModel(Forecaster):
                              lift_readout=lift_readout, latent=latent_weight > 0 or pretrain_steps > 0,
                              readout_dropout=readout_dropout, rollout=rollout, plan_split=plan_split,
                              feedback=feedback, teacher_rate=teacher_rate, roll_norm=roll_norm,
-                             spread=likelihood == "negative_binomial", stock=stock)
+                             spread=likelihood != "tweedie", stock=stock,
+                             aux=2 if spread_by_item or likelihood in ("zinb", "hurdle_nb") else 0)
         self.steps, self.batch, self.lr = steps, batch, lr
         self.power, self.seed, self.device = tweedie_power, seed, device
         self.mixed_precision = mixed_precision  # faster on a GPU; has no effect on a CPU
@@ -808,6 +830,38 @@ class StateModel(Forecaster):
             out["plan"] = fut
         return out, scale, on_sale, ahead
 
+    def _count_loss(self, log_mu, scale, y):
+        """Negative log likelihood of the units `y` under the count likelihoods.
+        log_mu (relative to scale) is the expected sales in every case."""
+        import torch
+        F = torch.nn.functional
+        m = (torch.exp(log_mu) * scale).clamp(min=1e-6)
+        aux = self._net.last_aux
+        spread = self._net.spread.float()
+        if self.spread_by_item:
+            spread = spread + aux[..., 0]
+        r = 1 / F.softplus(spread).clamp(min=1e-4)
+
+        def log_nb(k, mean):
+            return (torch.lgamma(k + r) - torch.lgamma(r) - torch.lgamma(k + 1)
+                    + r * torch.log(r / (r + mean)) + k * torch.log(mean / (r + mean)))
+
+        if self.likelihood == "negative_binomial":
+            return -log_nb(y, m)
+        zero = (y < 0.5)
+        log_gate, log_open = F.logsigmoid(aux[..., 1]), F.logsigmoid(-aux[..., 1])  # log P(gate shut), log P(open)
+        if self.likelihood == "zinb":
+            # a period is zero either by the gate or by the count; the count's mean is
+            # the expected sales divided by the chance the gate is open
+            mean = (m / torch.exp(log_open).clamp(min=1e-3)).clamp(min=1e-6)
+            nb0 = r * torch.log(r / (r + mean))
+            at_zero = torch.logaddexp(log_gate, log_open + nb0)
+            return -torch.where(zero, at_zero, log_open + log_nb(y, mean))
+        # hurdle: the gate decides zero or not; above zero, y - 1 is a negative binomial
+        # whose mean makes the expected sales come out at m
+        above = (m / torch.exp(log_open).clamp(min=1e-3) - 1).clamp(min=1e-6)
+        return -torch.where(zero, log_gate, log_open + log_nb((y - 1).clamp(min=0), above))
+
     def fit(self, train: pd.DataFrame) -> "StateModel":
         import torch
 
@@ -1006,12 +1060,7 @@ class StateModel(Forecaster):
                         # Tweedie loss on sales relative to the item's own level
                         each = -target * torch.exp((1 - p) * log_mu) / (1 - p) + torch.exp((2 - p) * log_mu) / (2 - p)
                     else:
-                        # negative binomial on units: a count with mean m and a learned spread
-                        y = data["units"][rows[:, None], ahead].round()
-                        m = (torch.exp(log_mu) * scale).clamp(min=1e-6)
-                        r = 1 / torch.nn.functional.softplus(self._net.spread).clamp(min=1e-4)
-                        each = -(torch.lgamma(y + r) - torch.lgamma(r) - torch.lgamma(y + 1)
-                                 + r * torch.log(r / (r + m)) + y * torch.log(m / (r + m)))
+                        each = self._count_loss(log_mu, scale, data["units"][rows[:, None], ahead].round())
                     if self.peak_weight:
                         # periods far from the item's usual level (a promotion peak, the dip
                         # after it) count for more than ordinary periods, which are most of

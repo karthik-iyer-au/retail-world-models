@@ -1007,3 +1007,27 @@ after round 2, the number of rounds the tuned LightGBM loop on M5 ran before it 
 pure_lightgbm_m5/log.jsonl: kept num_leaves_quarter, 0.556). Fixed now, while the loop is in round 1 and
 before any round-2 result exists. The Favorita loops run on up to 12 machines each instead of 6, which
 changes when they finish and nothing else.
+
+**4 November 2026, study T, count likelihoods that treat zero sales on their own, written down before it runs.**
+Karthik asked whether the world model could be tried with a loss suited to slow, intermittent items (zero-inflated
+negative binomial, item-dependent dispersion, hurdle models), and agreed to one extra round rather than a rerun
+(4 November: "Yes please"). Until now the world model trains on a Tweedie loss (default) or a negative binomial with
+one spread for every item; neither was on its search menu. Added to `rwm.model.state_model` (tests in
+tests/test_state_model.py): `spread_by_item` (the negative binomial's spread read from each item's state for each
+period, around one shared value), `likelihood: zinb` (a gate that can make a period zero on its own, plus a negative
+binomial count) and `likelihood: hurdle_nb` (the gate decides zero or not; above zero, sales minus one follow a
+negative binomial; a shifted count is used rather than a zero-truncated one so the mean has a closed form). In every
+case the network's output stays the expected sales, so forecasts and scores are computed exactly as before; a test
+checks that the probabilities sum to one and that their mean equals the forecast. The Croston-style split into sale
+size and gap between sales is not tried: it changes what the model forecasts, not how it is trained.
+
+How it runs: for each world-model loop once it ends (study S on all six Dominick's categories, Favorita, Frat, M5),
+`scripts/make_loss_round.py` writes a spec whose starting settings are that loop's final settings (its kept changes
+applied in the order kept) and whose menu has four changes: negative binomial; negative binomial with item spread;
+zero-inflated negative binomial with item spread; hurdle with item spread. It runs as the loop does (starting
+settings on seeds 1 to 3 to measure the keep bar again, each change on seed 1, seeds 2 and 3 for changes that beat
+the start on seed 1, the best kept only if its three-seed mean beats the start by the bar, the held-out window
+never deciding), limited to one round, every run on a rented RTX 4090 (Vast), the starting settings included, so
+the comparison inside the round is on one kind of machine. LightGBM's searches already tried its own objectives
+(Poisson, Tweedie powers), so this gives the world model the same kind of choice. Results are reported with each
+data set's final comparison, by grain, including slow movers.
