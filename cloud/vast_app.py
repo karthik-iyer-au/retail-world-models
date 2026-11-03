@@ -304,12 +304,20 @@ def vast_loop(spec: str, commit: str, max_rounds: int) -> dict:
     def evaluate(configs):
         calls = [vast_try.spawn(c, commit, out) for c in configs]
         got = []
-        for call in calls:
-            try:
-                got.append(call.get())
-            except Exception as e:
-                print(f"a try failed: {e}", flush=True)
-                got.append(None)
+        for c, call in zip(configs, calls):
+            # a try can fail on a passing Modal error (3 November: "failed to resolve volume") after its
+            # run was saved; asking again reads the saved run back, or waits for or reruns it
+            for attempt in range(3):
+                try:
+                    got.append(call.get())
+                    break
+                except Exception as e:
+                    print(f"a try failed ({c['name']}, attempt {attempt + 1}): {e}", flush=True)
+                    if attempt == 2:
+                        got.append(None)
+                    else:
+                        time.sleep(60)
+                        call = vast_try.spawn(c, commit, out)
         return got
 
     class SavedLog(loop.Log):
