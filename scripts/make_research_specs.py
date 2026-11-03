@@ -216,8 +216,31 @@ def write_study_r():
         (OUT / f"avg5_{model}_{key}.yaml").write_text(header + yaml.safe_dump(spec, sort_keys=False))
 
 
+def write_study_s():
+    """Study S (plan entry of 3 November 2026): study O again on Dominick's prices cleaned by
+    the rule of rwm.data.dominicks (clean_prices 5), for both models and all six categories.
+    Everything else is study O's: the same base settings, windows, seeds, menu and keep rule."""
+    for c in CATS:
+        key = f"dominicks_{c}"
+        for model in ("world_model", "lightgbm"):
+            cfg = yaml.safe_load((EXP / f"avg5_{key}_rolling_{model}.yaml").read_text())
+            name = f"clean_avg5_{key}_rolling_{model}"
+            cfg["name"] = name
+            cfg["dataset"]["params"]["clean_prices"] = 5
+            (EXP / f"{name}.yaml").write_text(
+                f"# Study S (plan entry of 3 November 2026): avg5_{key}_rolling_{model} on cleaned prices; written by scripts/make_research_specs.py.\n"
+                + yaml.safe_dump(cfg, sort_keys=False))
+            spec = yaml.safe_load((OUT / f"avg5_{model}_{key}.yaml").read_text())
+            spec["name"] = f"clean_avg5_{model}_{key}"
+            spec["base"] = f"configs/experiments/{name}.yaml"
+            header = HEADER_O.replace("Study O (docs/PAPER1_REVISION_PLAN.md, entry of 29 October 2026)",
+                                      "Study S (docs/PAPER1_REVISION_PLAN.md, entry of 3 November 2026), study O on cleaned prices")
+            (OUT / f"clean_avg5_{model}_{key}.yaml").write_text(header + yaml.safe_dump(spec, sort_keys=False))
+
+
 if __name__ == "__main__":
     main()
     write_study_o()
     write_study_q()
     write_study_r()
+    write_study_s()

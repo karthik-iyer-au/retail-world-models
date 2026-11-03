@@ -24,6 +24,12 @@ What the data records, following the Kilts data manual:
 - cost: price x (1 - PROFIT/100). PROFIT is gross margin based on the
   chain's average acquisition cost, which lags replacement cost.
 - Weeks flagged as suspect by the Kilts Center (OK = 0) are dropped.
+- clean_prices (off unless asked for): a recorded price more than that many
+  times above, or below 1/that of, the median price of the same item in the
+  same week across the stores that recorded one (at least three) is treated
+  as not recorded, so the week takes the store's last good price and cost.
+  The files hold prices such as 84.72 dollars for an 8 oz cream cheese that
+  sells at 1.29 (week 323, OK = 1); docs/PAPER1_REVISION_PLAN.md, study S.
 
 Not recorded: display, feature advertising, shelf space.
 """
@@ -58,8 +64,18 @@ def _price_tiers(path: Path) -> pd.Series:
     return pd.Series(tier, index=demo["store"].astype(int))
 
 
+def _clean_prices(d: pd.DataFrame, factor: float) -> pd.DataFrame:
+    """Price and cost set to missing where the price is far from the same item's
+    same-week median across stores (see clean_prices in the module notes)."""
+    g = d.groupby(["upc", "week"])[PRICE]
+    median, stores = g.transform("median"), g.transform("count")
+    bad = (stores >= 3) & ((d[PRICE] > factor * median) | (d[PRICE] < median / factor))
+    d.loc[bad, [PRICE, "cost"]] = np.nan
+    return d
+
+
 @register_dataset("dominicks")
-def load_dominicks(categories: list[str], root: str | None = None) -> Dataset:
+def load_dominicks(categories: list[str], root: str | None = None, clean_prices: float | None = None) -> Dataset:
     root_path = Path(root) if root else DATA_RAW / "dominicks"
     files, parts = [], []
     for code in categories:
@@ -88,6 +104,8 @@ def load_dominicks(categories: list[str], root: str | None = None) -> Dataset:
         )
     d = pd.concat(parts, ignore_index=True)
     del parts
+    if clean_prices:
+        d = _clean_prices(d, float(clean_prices))
 
     # Fixed-width text keys so that text order equals numeric order.
     stores = np.sort(d["store"].unique())
