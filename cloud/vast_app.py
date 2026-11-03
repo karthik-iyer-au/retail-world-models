@@ -45,9 +45,10 @@ DATA = "/vol/data"
 RESULTS = "/vol/results"
 CHECKOUT = "/root/repo"
 TORCH = "2.14.1"  # the version the Modal runs used, recorded in their manifests
-# The same code is deployed twice: as rwm-vast for the world model (RTX 4090s) and as
-# rwm-vast-cpu for LightGBM (`RWM_VAST_APP=rwm-vast-cpu modal deploy cloud/vast_app.py`),
-# so each has its own limit on machines and a deploy of one never stops the other's work.
+# The app name comes from RWM_VAST_APP at deploy time (`RWM_VAST_APP=<name> modal deploy
+# cloud/vast_app.py`), so a new version can be deployed beside one whose machines are mid-run.
+# Since 4 November each loop watches all its machines from its own container (_manage), so an
+# app needs one container per loop plus its bridge, whatever the number of machines.
 APP_NAME = os.environ.get("RWM_VAST_APP", "rwm-vast")
 MAX_MACHINES = 6 if APP_NAME == "rwm-vast" else 12  # rented machines at once
 RUN_HOURS = 40  # a try still going after this long is stopped
@@ -375,8 +376,120 @@ def vast_try(config: dict, commit: str, out: str) -> dict | None:
     return None
 
 
-@app.function(image=image, volumes={RESULTS: results_volume}, timeout=24 * 3600, cpu=0.5, memory=2048)
-def vast_loop(spec: str, commit: str, max_rounds: int) -> dict:
+def _manage(configs: list[dict], commit: str, out: str, limit: int) -> list[dict | None]:
+    """Run each config on a rented machine, at most `limit` machines at once, watched from
+    this one container (4 November: one Modal container per machine reached the
+    workspace's limit of 100 containers). A run already saved is read back; a run whose
+    marker another manager is refreshing is waited for; a stale marker whose machine is
+    still working is carried on with. A run that fails is retried on another host, up to
+    three hosts, and a host where a run failed is never rented again. Machines are not
+    destroyed if this container is stopped: their markers go stale and the next manager
+    carries on with them."""
+    folder = Path(RESULTS) / out
+    url = modal.Function.from_name(APP_NAME, "bridge").get_web_url()
+    st = {}
+    for c in configs:
+        st[c["name"]] = {"config": c, "state": "pending", "attempts": 0, "tried": set(), "result": None}
+
+    def marker(name):
+        return Path(RESULTS) / "_vast_running" / out.replace("/", "__") / f"{name}.json"
+
+    def failed_log(name):
+        return Path(RESULTS) / "_vast_failed" / f"{out.replace('/', '__')}__{name}.log"
+
+    def finish(name, iid, result=None, bad=False, again=False):
+        r = st[name]
+        if iid is not None:
+            subprocess.run(["vastai", "destroy", "instance", str(iid), "-y"], capture_output=True, text=True)
+        marker(name).unlink(missing_ok=True)
+        if bad and r.get("machine") is not None:
+            _mark_bad(r["machine"])
+        if result is not None:
+            r.update(state="done", result=result)
+        elif again and r["attempts"] < 3:
+            r.update(state="pending")
+        else:
+            r.update(state="gone")
+        results_volume.commit()
+
+    while any(r["state"] not in ("done", "gone") for r in st.values()):
+        results_volume.reload()
+        for name, r in st.items():
+            if r["state"] in ("done", "gone"):
+                continue
+            done = _finished(folder, r["config"])
+            if done:
+                if r["state"] == "running":
+                    print(f"{name}: done on machine {r['iid']}", flush=True)
+                finish(name, r.get("iid") if r["state"] == "running" else None,
+                       result=json.loads((done / "metrics.json").read_text()))
+                continue
+            if r["state"] == "running":
+                iid = r["iid"]
+                if failed_log(name).exists():
+                    print(f"{name}: failed on machine {iid}", flush=True)
+                    failed_log(name).rename(failed_log(name).with_suffix(f".{int(time.time())}.log"))
+                    finish(name, iid, bad=True, again=True)
+                    continue
+                try:
+                    info = json.loads(_vast("show", "instance", str(iid)))
+                except Exception:
+                    info = {"actual_status": "gone"}
+                if info.get("actual_status") in ("exited", "offline", "gone") or info.get("intended_status") == "stopped" \
+                        or time.time() - r["started"] > RUN_HOURS * 3600:
+                    print(f"{name}: machine {iid} {info.get('actual_status')}", flush=True)
+                    finish(name, iid, again=True)
+                    continue
+                marker(name).parent.mkdir(parents=True, exist_ok=True)
+                marker(name).write_text(json.dumps({"at": time.time(), "machine": iid}))
+            elif r["state"] in ("pending", "waiting") and marker(name).exists():
+                m = json.loads(marker(name).read_text())
+                if time.time() - m["at"] < STALE_S:
+                    r["state"] = "waiting"  # another manager has it
+                    continue
+                try:
+                    alive = json.loads(_vast("show", "instance", str(m["machine"]))).get("actual_status") in ("running", "loading")
+                except Exception:
+                    alive = False
+                if alive:
+                    print(f"{name}: carrying on with machine {m['machine']}", flush=True)
+                    r.update(state="running", iid=m["machine"], machine=None, started=time.time())
+                else:
+                    marker(name).unlink(missing_ok=True)
+                    r["state"] = "pending"
+            elif r["state"] == "waiting":
+                r["state"] = "pending"
+        running = sum(1 for r in st.values() if r["state"] == "running")
+        for name, r in st.items():
+            if running >= limit:
+                break
+            if r["state"] != "pending":
+                continue
+            c = r["config"]
+            env = {"REPO_URL": REPO_URL, "COMMIT": commit, "TORCH": TORCH, "DATASET": c["dataset"]["name"], "OUT": out,
+                   "RUN_NAME": name, "BRIDGE_URL": url, "BRIDGE_TOKEN": os.environ["BRIDGE_TOKEN"],
+                   "CONFIG_B64": base64.b64encode(json.dumps(c).encode()).decode(),
+                   "WORKER_B64": base64.b64encode(WORKER.encode()).decode()}
+            if failed_log(name).exists():
+                failed_log(name).rename(failed_log(name).with_suffix(f".{int(time.time())}.log"))
+            try:
+                iid, machine = _rent(c, env, c["dataset"]["name"], r["tried"])
+            except Exception as e:
+                print(f"{name}: could not rent a machine: {e}", flush=True)
+                break
+            r["tried"].add(machine)
+            r.update(state="running", iid=iid, machine=machine, started=time.time(), attempts=r["attempts"] + 1)
+            marker(name).parent.mkdir(parents=True, exist_ok=True)
+            marker(name).write_text(json.dumps({"at": time.time(), "machine": iid}))
+            running += 1
+        results_volume.commit()
+        time.sleep(POLL_S)
+    return [st[c["name"]]["result"] for c in configs]
+
+
+@app.function(image=image, volumes={RESULTS: results_volume}, secrets=[vast_secret, bridge_secret],
+              timeout=24 * 3600, cpu=0.5, memory=2048)
+def vast_loop(spec: str, commit: str, max_rounds: int, limit: int = 6) -> dict:
     """The research loop (src/rwm/research/loop.py) with every try on a rented machine."""
     subprocess.run(["git", "init", "-q", CHECKOUT], check=True)
     subprocess.run(["git", "-C", CHECKOUT, "fetch", "-q", "--depth", "1", REPO_URL, commit], check=True)
@@ -390,23 +503,7 @@ def vast_loop(spec: str, commit: str, max_rounds: int) -> dict:
     out = f"research/{s['name']}"
 
     def evaluate(configs):
-        calls = [vast_try.spawn(c, commit, out) for c in configs]
-        got = []
-        for c, call in zip(configs, calls):
-            # a try can fail on a passing Modal error (3 November: "failed to resolve volume") after its
-            # run was saved; asking again reads the saved run back, or waits for or reruns it
-            for attempt in range(3):
-                try:
-                    got.append(call.get())
-                    break
-                except Exception as e:
-                    print(f"a try failed ({c['name']}, attempt {attempt + 1}): {e}", flush=True)
-                    if attempt == 2:
-                        got.append(None)
-                    else:
-                        time.sleep(60)
-                        call = vast_try.spawn(c, commit, out)
-        return got
+        return _manage(configs, commit, out, limit)
 
     class SavedLog(loop.Log):
         def write(self, row):
