@@ -992,3 +992,11 @@ revision; the raw-price runs of study O stay in the record and are reported besi
 rows the rule changed, so a reader can see what the cleaning did to each model. The paper's other Dominick's
 results (the rolling-window comparison of every model) are rerun on the cleaned data as well, as a separate
 job once the loops have chosen their settings.
+
+**3 November 2026, study S, where it runs.** Karthik chose Vast for both models (3 November: "If cheaper on vast
+let's do vast for light gbm"; "Just do vast"). Every try of each study S world-model loop runs on a rented
+RTX 4090 (app `rwm-vast-dominicks`, up to 12 machines), and every try of each LightGBM loop on a rented machine
+with at least 16 processor cores (app `rwm-vast-cpu`, up to 12 machines). Each loop stays on its kind of
+machine to the end. The raw-price runs of study O came from Modal's L4, so a raw-against-clean comparison for
+the world model also carries the difference between machines (0.01 to 0.02 on the cheese check of 2 November);
+it is reported with that caveat. The Favorita LightGBM loop of study R runs on `rwm-vast-cpu` as well.
