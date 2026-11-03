@@ -170,3 +170,36 @@ def test_switching_keeps_group_totals_to_the_learned_share():
     assert np.allclose(zero["f"], zero["b"], rtol=1e-6)
     with pytest.raises(ValueError):
         StateModel(horizon=4, switching=["store_id"])
+
+
+@pytest.mark.parametrize("extra", [dict(likelihood="negative_binomial", spread_by_item=True),
+                                   dict(likelihood="zinb"), dict(likelihood="hurdle_nb"),
+                                   dict(likelihood="zinb", spread_by_item=True),
+                                   dict(likelihood="hurdle_nb", rollout=True, lift_readout=True)])
+def test_zero_aware_likelihoods_also_beat_the_simple_benchmarks(split, extra):
+    """Study T (plan entry of 4 November 2026): item-level spread, zero-inflated and
+    hurdle negative binomials train, forecast expected sales, and beat the benchmarks."""
+    train, test = split
+    future, y = test.drop(columns=[UNITS]), test[UNITS].to_numpy()
+    rmse = lambda f: float(np.sqrt(((f - y) ** 2).mean()))
+    model = build_model("state_model", **SETTINGS, **extra).fit(train)
+    f = model.predict(future)
+    assert np.isfinite(f).all() and (f >= 0).all()
+    ours = rmse(f)
+    assert ours < rmse(build_model("seasonal_naive").fit(train).predict(future))
+    assert ours < rmse(build_model("recent_average").fit(train).predict(future))
+
+
+def test_count_loss_cases():
+    """The zero-inflated and hurdle losses are proper: probabilities over counts sum to one."""
+    from types import SimpleNamespace
+    from rwm.model.state_model import StateModel
+    for lik in ("zinb", "hurdle_nb"):
+        m = StateModel.__new__(StateModel)
+        m.likelihood, m.spread_by_item = lik, False
+        m._net = SimpleNamespace(spread=torch.tensor(0.3), last_aux=torch.tensor([[[0.0, -0.5]]]).expand(1, 400, 2))
+        y = torch.arange(400, dtype=torch.float32)[None, :]
+        nll = m._count_loss(torch.full((1, 400), np.log(3.0)), torch.ones(1, 1), y)
+        p = torch.exp(-nll)
+        assert abs(float(p.sum()) - 1) < 1e-3
+        assert abs(float((p * y).sum()) - 3.0) < 1e-2  # the expected sales come out as the forecast
