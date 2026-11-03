@@ -89,15 +89,29 @@ git checkout -q FETCH_HEAD || fail "checkout"
 PIP="pip install -q --retries 10 --timeout 60"
 for t in 1 2 3; do $PIP "torch==$TORCH" && $PIP -e ".[trees,deep]" && break; [ $t = 3 ] && fail "install"; sleep 30; done
 python cloud/fetch_data.py "$BRIDGE_URL" "$DATASET" "data/raw/$DATASET" || fail "data"  # in parts: one long request is cut off
-mkdir -p /out && python - <<'EOF' || fail "run"
+# training saves partway (about every 5% of steps) under /out/_partial; copy them to the results
+# volume every five minutes and start from the last copy, so a lost machine costs minutes, not the run
+mkdir -p /out
+AUTHH="Authorization: Bearer $BRIDGE_TOKEN"
+if curl -fsS -H "$AUTHH" -o /partial.tgz "$BRIDGE_URL/partial/$OUT/$RUN_NAME" 2>/dev/null; then
+  tar xzf /partial.tgz -C /out && echo "resuming from the saved partway state"
+fi
+( while sleep 300; do
+    [ -d /out/_partial ] && tar czf /partial.new --exclude='*.tmp' -C /out _partial && mv /partial.new /partial.up \
+      && curl -fsS --retry 3 -X PUT -H "$AUTHH" --data-binary @/partial.up "$BRIDGE_URL/partial/$OUT/$RUN_NAME" >/dev/null
+  done ) &
+SAVER=$!
+python - <<'EOF' || { kill $SAVER; fail "run"; }
 import base64, json, os
 from pathlib import Path
 from rwm.experiments.run import run
 run(json.loads(base64.b64decode(os.environ["CONFIG_B64"])), strict=True, out_root=Path("/out"))
 EOF
+kill $SAVER 2>/dev/null
 rm -rf /out/_partial
 tar czf /run.tgz -C /out . || fail "tar"
 curl -fsS --retry 5 --retry-all-errors -X PUT -H "Authorization: Bearer $BRIDGE_TOKEN" --data-binary @/run.tgz "$BRIDGE_URL/results/$OUT" || fail "upload"
+curl -fsS -X DELETE -H "$AUTHH" "$BRIDGE_URL/partial/$OUT/$RUN_NAME" >/dev/null || true
 echo "DONE"
 sleep infinity
 """
@@ -164,6 +178,37 @@ def bridge():
             t.extractall(dest, filter="data")
         results_volume.commit()
         return {"saved": len(body)}
+
+    def partial_file(out: str) -> Path:
+        return Path(RESULTS) / "_vast_partial" / safe(out.replace("/", "__") + ".tgz")
+
+    @web.put("/partial/{out:path}")
+    async def partial_put(out: str, request: Request):
+        """A run's partway training state (cloud/vast_app.py worker), replaced each time."""
+        check(request)
+        f = partial_file(out)
+        f.parent.mkdir(parents=True, exist_ok=True)
+        tmp = f.with_suffix(".part")
+        tmp.write_bytes(await request.body())
+        tmp.replace(f)
+        results_volume.commit()
+        return {"saved": True}
+
+    @web.get("/partial/{out:path}")
+    def partial_get(out: str, request: Request):
+        check(request)
+        results_volume.reload()
+        f = partial_file(out)
+        if not f.exists():
+            raise HTTPException(status_code=404)
+        return FileResponse(f)
+
+    @web.delete("/partial/{out:path}")
+    def partial_delete(out: str, request: Request):
+        check(request)
+        partial_file(out).unlink(missing_ok=True)
+        results_volume.commit()
+        return {"deleted": True}
 
     @web.put("/failed/{out:path}")
     async def failed(out: str, request: Request):
@@ -276,7 +321,7 @@ def vast_try(config: dict, commit: str, out: str) -> dict | None:
         results_volume.commit()
 
     dataset = config["dataset"]["name"]
-    url = modal.Function.from_name("rwm-vast", "bridge").get_web_url()
+    url = modal.Function.from_name(APP_NAME, "bridge").get_web_url()  # this app's bridge, at this app's code
     env = {"REPO_URL": REPO_URL, "COMMIT": commit, "TORCH": TORCH, "DATASET": dataset, "OUT": out,
            "RUN_NAME": config["name"], "BRIDGE_URL": url, "BRIDGE_TOKEN": os.environ["BRIDGE_TOKEN"],
            "CONFIG_B64": base64.b64encode(json.dumps(config).encode()).decode(),
