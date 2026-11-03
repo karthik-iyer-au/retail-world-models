@@ -27,19 +27,25 @@ only secret the NUC holds, in ~/rwm/bridge_token, written there by Karthik.
 """
 import json
 import os
+import subprocess
+import sys
 import time
 from pathlib import Path
 
 import modal
 
 RESULTS = "/vol/results"
+REPO_URL = "https://github.com/karthik-iyer-au/retail-world-models"
+CHECKOUT = "/root/repo"
+POLL_S = 120
 QUEUE = "rwm-local-jobs"
 STATE = "rwm-local-state"
 
 app = modal.App("rwm-local")
 results_volume = modal.Volume.from_name("rwm-results")
 bridge_secret = modal.Secret.from_name("rwm-bridge")
-image = modal.Image.debian_slim(python_version="3.12").pip_install("fastapi[standard]").env({"PYTHONUNBUFFERED": "1"})
+image = (modal.Image.debian_slim(python_version="3.12").apt_install("git")
+         .pip_install("fastapi[standard]", "pyyaml").env({"PYTHONUNBUFFERED": "1"}))
 
 
 def job_id(job: dict) -> str:
@@ -96,3 +102,65 @@ def jobs():
         return {"recorded": True}
 
     return web
+
+
+@app.function(image=image, volumes={RESULTS: results_volume}, timeout=24 * 3600, cpu=0.5, memory=2048)
+def local_loop(spec: str, commit: str, max_rounds: int) -> dict:
+    """The research loop (src/rwm/research/loop.py) with every try run on the NUC.
+
+    Each try is put on the queue once (a loop restarted after its daily limit
+    finds its tries already queued or running and waits for them) and read back
+    from the results volume when the NUC has saved it. A try the NUC reports as
+    failed is queued once more; a second failure counts as a failed try."""
+    subprocess.run(["git", "init", "-q", CHECKOUT], check=True)
+    subprocess.run(["git", "-C", CHECKOUT, "fetch", "-q", "--depth", "1", REPO_URL, commit], check=True)
+    subprocess.run(["git", "-C", CHECKOUT, "checkout", "-q", "FETCH_HEAD"], check=True)
+    subprocess.run([sys.executable, "-m", "pip", "install", "-q", "-e", CHECKOUT], check=True)
+    sys.path.insert(0, f"{CHECKOUT}/src")
+    os.chdir(CHECKOUT)
+    from rwm.research import loop
+
+    s = loop.load_spec(spec)
+    out = f"research/{s['name']}"
+    queue = modal.Queue.from_name(QUEUE, create_if_missing=True)
+    state = modal.Dict.from_name(STATE, create_if_missing=True)
+
+    def evaluate(configs):
+        jobs = [{"config": c, "commit": commit, "out": out} for c in configs]
+        tries = {job_id(j): 0 for j in jobs}
+        results_volume.reload()
+        for j in jobs:
+            st = state.get(job_id(j), {}).get("status")
+            if not _finished(Path(RESULTS) / out, j["config"]) and st not in ("queued", "running"):
+                queue.put(j)
+                state[job_id(j)] = {"status": "queued", "at": time.time()}
+        got = {}
+        while len(got) < len(jobs):
+            time.sleep(POLL_S)
+            results_volume.reload()
+            for j in jobs:
+                k = job_id(j)
+                if k in got:
+                    continue
+                done = _finished(Path(RESULTS) / out, j["config"])
+                if done:
+                    got[k] = json.loads((done / "metrics.json").read_text())
+                elif state.get(k, {}).get("status") == "failed":
+                    tries[k] += 1
+                    if tries[k] >= 2:
+                        print(f"{k} failed twice on the NUC", flush=True)
+                        got[k] = None
+                    else:
+                        queue.put(j)
+                        state[k] = {"status": "queued", "at": time.time()}
+        return [got[job_id(j)] for j in jobs]
+
+    class SavedLog(loop.Log):
+        def write(self, row):
+            results_volume.reload()
+            super().write(row)
+            print(row, flush=True)
+            results_volume.commit()
+
+    best = loop.search(s, evaluate, SavedLog(Path(RESULTS) / out / "log.jsonl"), max_rounds=max_rounds or None)
+    return {k: best[k] for k in ("kept", "score", "held_out")}
