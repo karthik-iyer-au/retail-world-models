@@ -81,7 +81,9 @@ exec > >(tee -a /work.log) 2>&1
 fail() { echo "FAILED: $1"; curl -fsS --retry 5 --retry-all-errors -X PUT -H "Authorization: Bearer $BRIDGE_TOKEN" --data-binary @/work.log "$BRIDGE_URL/failed/$OUT/$RUN_NAME" || true; exit 1; }
 apt-get update -qq && apt-get install -y -qq git curl p7zip-full >/dev/null || fail "apt"
 nvidia-smi || fail "no GPU"
-mkdir -p /root/repo && cd /root/repo && git init -q && git fetch -q --depth 1 "$REPO_URL" "$COMMIT" && git checkout -q FETCH_HEAD || fail "checkout"
+mkdir -p /root/repo && cd /root/repo && git init -q
+for t in 1 2 3 4 5; do git fetch -q --depth 1 "$REPO_URL" "$COMMIT" && break; sleep 30; done  # a host's network can be slow to come up
+git checkout -q FETCH_HEAD || fail "checkout"
 pip install -q "torch==$TORCH" && pip install -q -e ".[trees,deep]" || fail "install"
 python cloud/fetch_data.py "$BRIDGE_URL" "$DATASET" "data/raw/$DATASET" || fail "data"  # in parts: one long request is cut off
 mkdir -p /out && python - <<'EOF' || fail "run"
@@ -218,9 +220,22 @@ def _offer(memory_gb: int, exclude: set, gpu: bool = True) -> dict:
     raise RuntimeError("no machine matches the query")
 
 
-def _rent(config: dict, env: dict, dataset: str, tried: set) -> int:
+BAD = Path(RESULTS) / "_vast_bad_machines.json"  # hosts where a run failed; never rented again
+
+
+def _bad() -> set:
+    return set(json.loads(BAD.read_text())) if BAD.exists() else set()
+
+
+def _mark_bad(machine_id) -> None:
+    results_volume.reload()
+    BAD.write_text(json.dumps(sorted(_bad() | {machine_id})))
+    results_volume.commit()
+
+
+def _rent(config: dict, env: dict, dataset: str, tried: set) -> tuple[int, int]:
     """Rent the cheapest matching machine not tried yet and start the worker on it."""
-    offer = _offer(MEMORY_GB.get(dataset, DEFAULT_MEMORY_GB), tried, _uses_gpu(config["model"]))
+    offer = _offer(MEMORY_GB.get(dataset, DEFAULT_MEMORY_GB), tried | _bad(), _uses_gpu(config["model"]))
     tried.add(offer["machine_id"])
     made = _first_json(_vast(
         "create", "instance", str(offer["id"]), "--image", "python:3.12-slim", "--disk", "120",
@@ -230,7 +245,7 @@ def _rent(config: dict, env: dict, dataset: str, tried: set) -> int:
         "--entrypoint", "bash", "--args", "-c", "echo $WORKER_B64 | base64 -d > /worker.sh && bash /worker.sh"))
     iid = made["new_contract"]
     print(f"{config['name']}: machine {iid} ({offer['geolocation']}, US${offer['dph_total']:.3f}/h)", flush=True)
-    return iid
+    return iid, offer["machine_id"]
 
 
 @app.function(image=image, volumes={RESULTS: results_volume}, secrets=[vast_secret, bridge_secret],
@@ -274,13 +289,19 @@ def vast_try(config: dict, commit: str, out: str) -> dict | None:
         except Exception:
             pass
     tried: set = set()
-    for attempt in range(2):
+    failed_log = Path(RESULTS) / "_vast_failed" / f"{out.replace('/', '__')}__{config['name']}.log"
+    for attempt in range(3):
+        # a failure log from an earlier machine would end this attempt at once (3 November): keep it under another name
+        if failed_log.exists():
+            failed_log.rename(failed_log.with_suffix(f".{int(time.time())}.log"))
+            results_volume.commit()
+        machine = None
         if adopt is not None and attempt == 0:
             iid = adopt
             print(f"{config['name']}: carrying on with machine {iid}", flush=True)
-            started = time.time()
         else:
-            iid, started = _rent(config, env, dataset, tried), time.time()
+            iid, machine = _rent(config, env, dataset, tried)
+        started = time.time()
         try:
             while time.time() - started < RUN_HOURS * 3600:
                 mark(iid)
@@ -289,8 +310,10 @@ def vast_try(config: dict, commit: str, out: str) -> dict | None:
                 done = _finished(folder, config)
                 if done:
                     return json.loads((done / "metrics.json").read_text())
-                if (Path(RESULTS) / "_vast_failed" / f"{out.replace('/', '__')}__{config['name']}.log").exists():
+                if failed_log.exists():
                     print(f"{config['name']}: failed on machine {iid}", flush=True)
+                    if machine is not None:
+                        _mark_bad(machine)
                     break
                 state = json.loads(_vast("show", "instance", str(iid)))
                 if state.get("actual_status") in ("exited", "offline") or state.get("intended_status") == "stopped":
