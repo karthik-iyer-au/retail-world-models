@@ -45,25 +45,33 @@ DATA = "/vol/data"
 RESULTS = "/vol/results"
 CHECKOUT = "/root/repo"
 TORCH = "2.14.1"  # the version the Modal runs used, recorded in their manifests
-MAX_MACHINES = 6  # rented machines at once
+# The same code is deployed twice: as rwm-vast for the world model (RTX 4090s) and as
+# rwm-vast-cpu for LightGBM (`RWM_VAST_APP=rwm-vast-cpu modal deploy cloud/vast_app.py`),
+# so each has its own limit on machines and a deploy of one never stops the other's work.
+APP_NAME = os.environ.get("RWM_VAST_APP", "rwm-vast")
+MAX_MACHINES = 6 if APP_NAME == "rwm-vast" else 12  # rented machines at once
 RUN_HOURS = 40  # a try still going after this long is stopped
 POLL_S = 120
 STALE_S = 15 * 60  # a try's marker older than this means its manager has stopped
 
 # Machines: one RTX 4090, CUDA 13 drivers (for torch 2.14 cu130), a verified
 # host with reliability above 0.98, and memory for the data set.
-QUERY = ("gpu_name=RTX_4090 num_gpus=1 cuda_vers>=13.0 reliability>0.98 verified=true rentable=true "
+QUERY_GPU = ("gpu_name=RTX_4090 num_gpus=1 cuda_vers>=13.0 reliability>0.98 verified=true rentable=true "
          "disk_space>=120 inet_down>=300 cpu_cores_effective>=8")
+# LightGBM uses no GPU, so its scores do not depend on the machine: the cheapest verified host
+# with at least 16 processor cores (the 16 threads its configs ask for) will do.
+QUERY_CPU = "num_gpus>=1 cpu_cores_effective>=16 reliability>0.98 verified=true rentable=true disk_space>=120 inet_down>=200"
+CPU_MODELS = {"lightgbm_direct", "seasonal_naive", "recent_average"}  # as rwm.experiments.plan
 MEMORY_GB = {"favorita": 96, "m5": 64}
 DEFAULT_MEMORY_GB = 48
 
-app = modal.App("rwm-vast")
+app = modal.App(APP_NAME)
 data_volume = modal.Volume.from_name("rwm-data")
 results_volume = modal.Volume.from_name("rwm-results")
 bridge_secret = modal.Secret.from_name("rwm-bridge")
 vast_secret = modal.Secret.from_name("vast")
 image = (modal.Image.debian_slim(python_version="3.12").apt_install("git")
-         .pip_install("fastapi[standard]", "vastai", "pyyaml").env({"PYTHONUNBUFFERED": "1"}))
+         .pip_install("fastapi[standard]", "vastai", "pyyaml").env({"PYTHONUNBUFFERED": "1", "RWM_VAST_APP": APP_NAME}))
 
 WORKER = r"""#!/bin/bash
 # Runs one config on a rented machine; written by cloud/vast_app.py.
@@ -193,8 +201,17 @@ def _finished(folder: Path, config: dict) -> Path | None:
     return None
 
 
-def _offer(memory_gb: int, exclude: set) -> dict:
-    offers = json.loads(_vast("search", "offers", f"{QUERY} cpu_ram>={memory_gb}", "-o", "dph_total"))
+def _uses_gpu(model: dict) -> bool:
+    """False when the model, and the model a five-copy average wraps, run on the processor only."""
+    names = {model.get("name")}
+    inner = model.get("params", {}).get("model")
+    names.add(inner.get("name") if isinstance(inner, dict) else inner)
+    return bool(names - {"seed_average", None} - CPU_MODELS)
+
+
+def _offer(memory_gb: int, exclude: set, gpu: bool = True) -> dict:
+    query = QUERY_GPU if gpu else QUERY_CPU
+    offers = json.loads(_vast("search", "offers", f"{query} cpu_ram>={memory_gb}", "-o", "dph_total"))
     for o in offers:
         if o["machine_id"] not in exclude:
             return o
@@ -203,7 +220,7 @@ def _offer(memory_gb: int, exclude: set) -> dict:
 
 def _rent(config: dict, env: dict, dataset: str, tried: set) -> int:
     """Rent the cheapest matching machine not tried yet and start the worker on it."""
-    offer = _offer(MEMORY_GB.get(dataset, DEFAULT_MEMORY_GB), tried)
+    offer = _offer(MEMORY_GB.get(dataset, DEFAULT_MEMORY_GB), tried, _uses_gpu(config["model"]))
     tried.add(offer["machine_id"])
     made = _first_json(_vast(
         "create", "instance", str(offer["id"]), "--image", "python:3.12-slim", "--disk", "120",

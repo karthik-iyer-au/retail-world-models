@@ -2,6 +2,7 @@
 
   python cloud/start_vast.py configs/research/<spec>.yaml                 # a research loop
   python cloud/start_vast.py --config configs/experiments/<x>.yaml --out vast_test   # one run
+  python cloud/start_vast.py --app rwm-vast-cpu configs/research/<spec>.yaml   # LightGBM, on processor machines
 
 The commit is the local HEAD, which must be clean and on GitHub, as for Modal.
 Deploy the app first (`modal deploy cloud/vast_app.py`); deploying it does not
@@ -23,15 +24,17 @@ def main(argv: list[str]) -> None:
     import modal_app  # only for the commit check; deploys nothing
 
     commit = modal_app._local_commit()
+    app = argv[argv.index("--app") + 1] if "--app" in argv else "rwm-vast"
+    argv = [a for i, a in enumerate(argv) if a != "--app" and (i == 0 or argv[i - 1] != "--app")]
     if "--config" in argv:
         cfg_file = argv[argv.index("--config") + 1]
         out = argv[argv.index("--out") + 1]
         config = yaml.safe_load((modal_app.LOCAL_REPO / cfg_file).read_text())
-        call = modal.Function.from_name("rwm-vast", "vast_try").spawn(config, commit, out)
+        call = modal.Function.from_name(app, "vast_try").spawn(config, commit, out)
         print(f"{config['name']} started at commit {commit[:8]} ({call.object_id}); results in rwm-results/{out}")
         return
     spec = [a for a in argv if not a.startswith("--")][0]
-    call = modal.Function.from_name("rwm-vast", "vast_loop").spawn(spec, commit, 0)
+    call = modal.Function.from_name(app, "vast_loop").spawn(spec, commit, 0)
     name = yaml.safe_load((modal_app.LOCAL_REPO / spec).read_text())["name"]
     print(f"research loop on Vast started at commit {commit[:8]} ({call.object_id}); log at rwm-results research/{name}/log.jsonl")
 
