@@ -1000,3 +1000,10 @@ with at least 16 processor cores (app `rwm-vast-cpu`, up to 12 machines). Each l
 machine to the end. The raw-price runs of study O came from Modal's L4, so a raw-against-clean comparison for
 the world model also carries the difference between machines (0.01 to 0.02 on the cheese check of 2 November);
 it is reported with that caveat. The Favorita LightGBM loop of study R runs on `rwm-vast-cpu` as well.
+
+**4 November 2026, the M5 world-model loop is limited to two rounds.** To have results across all data sets
+in mid-November (Karthik agreed, 4 November), the M5 world-model loop (`configs/research/pure_m5.yaml`) stops
+after round 2, the number of rounds the tuned LightGBM loop on M5 ran before it ended (results/research/
+pure_lightgbm_m5/log.jsonl: kept num_leaves_quarter, 0.556). Fixed now, while the loop is in round 1 and
+before any round-2 result exists. The Favorita loops run on up to 12 machines each instead of 6, which
+changes when they finish and nothing else.
