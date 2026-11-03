@@ -56,11 +56,12 @@ STALE_S = 15 * 60  # a try's marker older than this means its manager has stoppe
 
 # Machines: one RTX 4090, CUDA 13 drivers (for torch 2.14 cu130), a verified
 # host with reliability above 0.98, and memory for the data set.
-QUERY_GPU = ("gpu_name=RTX_4090 num_gpus=1 cuda_vers>=13.0 reliability>0.98 verified=true rentable=true "
+QUERY_GPU = ("gpu_name=RTX_4090 num_gpus=1 cuda_vers>=13.0 reliability>0.99 verified=true rentable=true "
          "disk_space>=120 inet_down>=300 cpu_cores_effective>=8")
 # LightGBM uses no GPU, so its scores do not depend on the machine: the cheapest verified host
-# with at least 16 processor cores (the 16 threads its configs ask for) will do.
-QUERY_CPU = "num_gpus>=1 cpu_cores_effective>=16 reliability>0.98 verified=true rentable=true disk_space>=120 inet_down>=200"
+# with at least 16 processor cores (the 16 threads its configs ask for) will do. Reliability above
+# 0.99 since 3 November: on cheaper hosts LightGBM segfaulted or read memory out of bounds.
+QUERY_CPU = "num_gpus>=1 cpu_cores_effective>=16 reliability>0.99 verified=true rentable=true disk_space>=120 inet_down>=200"
 CPU_MODELS = {"lightgbm_direct", "seasonal_naive", "recent_average"}  # as rwm.experiments.plan
 MEMORY_GB = {"favorita": 96, "m5": 64}
 DEFAULT_MEMORY_GB = 48
@@ -84,7 +85,9 @@ nvidia-smi || fail "no GPU"
 mkdir -p /root/repo && cd /root/repo && git init -q
 for t in 1 2 3 4 5; do git fetch -q --depth 1 "$REPO_URL" "$COMMIT" && break; sleep 30; done  # a host's network can be slow to come up
 git checkout -q FETCH_HEAD || fail "checkout"
-pip install -q "torch==$TORCH" && pip install -q -e ".[trees,deep]" || fail "install"
+# hosts' links to the package index drop now and then (3 November: read timeouts, broken connections): retry
+PIP="pip install -q --retries 10 --timeout 60"
+for t in 1 2 3; do $PIP "torch==$TORCH" && $PIP -e ".[trees,deep]" && break; [ $t = 3 ] && fail "install"; sleep 30; done
 python cloud/fetch_data.py "$BRIDGE_URL" "$DATASET" "data/raw/$DATASET" || fail "data"  # in parts: one long request is cut off
 mkdir -p /out && python - <<'EOF' || fail "run"
 import base64, json, os
