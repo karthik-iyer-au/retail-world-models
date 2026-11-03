@@ -4,6 +4,7 @@
   python cloud/start_vast.py --config configs/experiments/<x>.yaml --out vast_test   # one run
   python cloud/start_vast.py --app rwm-vast-cpu configs/research/<spec>.yaml   # LightGBM, on processor machines
   python cloud/start_vast.py --app <app> --machines 6 configs/research/<spec>.yaml   # at most 6 machines for this loop
+  python cloud/start_vast.py --app <app> --rounds 1 configs/research/lossT_<name>.yaml  # one round only (study T)
 
 The commit is the local HEAD, which must be clean and on GitHub, as for Modal.
 Deploy the app first (`modal deploy cloud/vast_app.py`); deploying it does not
@@ -27,7 +28,9 @@ def main(argv: list[str]) -> None:
     commit = modal_app._local_commit()
     app = argv[argv.index("--app") + 1] if "--app" in argv else "rwm-vast"
     limit = int(argv[argv.index("--machines") + 1]) if "--machines" in argv else 6
-    argv = [a for i, a in enumerate(argv) if a not in ("--app", "--machines") and (i == 0 or argv[i - 1] not in ("--app", "--machines"))]
+    rounds = int(argv[argv.index("--rounds") + 1]) if "--rounds" in argv else 0  # 0: no limit
+    opts = ("--app", "--machines", "--rounds")
+    argv = [a for i, a in enumerate(argv) if a not in opts and (i == 0 or argv[i - 1] not in opts)]
     if "--config" in argv:
         cfg_file = argv[argv.index("--config") + 1]
         out = argv[argv.index("--out") + 1]
@@ -36,7 +39,7 @@ def main(argv: list[str]) -> None:
         print(f"{config['name']} started at commit {commit[:8]} ({call.object_id}); results in rwm-results/{out}")
         return
     spec = [a for a in argv if not a.startswith("--")][0]
-    call = modal.Function.from_name(app, "vast_loop").spawn(spec, commit, 0, limit)
+    call = modal.Function.from_name(app, "vast_loop").spawn(spec, commit, rounds, limit)
     name = yaml.safe_load((modal_app.LOCAL_REPO / spec).read_text())["name"]
     print(f"research loop on Vast started at commit {commit[:8]} ({call.object_id}); log at rwm-results research/{name}/log.jsonl")
 
