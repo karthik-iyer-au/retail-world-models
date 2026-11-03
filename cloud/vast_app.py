@@ -437,8 +437,9 @@ def _manage(configs: list[dict], commit: str, out: str, limit: int) -> list[dict
                     info = {"actual_status": "gone"}
                 if info.get("actual_status") in ("exited", "offline", "gone") or info.get("intended_status") == "stopped" \
                         or time.time() - r["started"] > RUN_HOURS * 3600:
-                    print(f"{name}: machine {iid} {info.get('actual_status')}", flush=True)
-                    finish(name, iid, again=True)
+                    print(f"{name}: machine {iid} {info.get('actual_status')} (intended {info.get('intended_status')})", flush=True)
+                    # a host that stops a machine before it has started (seen 4 November) is not rented again
+                    finish(name, iid, again=True, bad=info.get("actual_status") in ("loading", "created"))
                     continue
                 marker(name).parent.mkdir(parents=True, exist_ok=True)
                 marker(name).write_text(json.dumps({"at": time.time(), "machine": iid}))
