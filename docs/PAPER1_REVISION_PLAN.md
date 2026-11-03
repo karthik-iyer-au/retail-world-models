@@ -969,3 +969,26 @@ smaller scale (seed 1: 2.6 times the total). Prices above five times the item's 
 items, 39 weeks), snacks 73, soft drinks 76, bottled juice and analgesics none. LightGBM's trees do not
 extrapolate, so the same rows barely move it. Nothing is changed by this entry; a fix (treating such prices as
 missing, for both models alike) would be pre-registered separately and would need the Dominick's runs again.
+
+**3 November 2026, study S, study O again on cleaned Dominick's prices, written down before it runs.**
+Karthik agreed to rerun after the finding above (3 November: "Yes sure no chance but to rerun I guess").
+The rule, fixed now and applied the same way for both models: in each category file, a recorded price more
+than five times above, or below one fifth of, the median price of the same item in the same week across the
+stores that recorded one (at least three stores) is treated as not recorded. That week takes the store's last
+good price and cost, as any week without a recorded price already does; units, promotion code and every other
+field stay as they are (`rwm.data.dominicks`, `clean_prices: 5`, tests in tests/test_dominicks_clean_prices.py).
+Rows it changes: cheese 54 (24 above, 30 below), snacks 18, soft drinks 495 (20 above, 475 below), bottled juice
+7, analgesics 4; frozen entrees counted on its first run. A same-week comparison across stores is used rather
+than the item's own history, because a few items change pack under the same UPC (soft drinks UPC 1200000131
+sells at 4.29 and later at 0.79) and a history rule would flag thousands of genuine prices; that pack change is
+left as it is. The weeks it fixes lose their promotion price as well (the bad cream cheese week was a bonus
+buy, now at the regular 1.29 with promo still 1).
+
+What runs: study O from the start for all six categories and both models, the starting runs and the loops,
+with every setting, window, seed, menu and the keep rule unchanged (`configs/research/clean_avg5_*`, written by
+`scripts/make_research_specs.py`). All six categories, not only the three with the most bad rows, so the paper
+has one definition of the Dominick's data. Results: the cleaned runs are the Dominick's results of the
+revision; the raw-price runs of study O stay in the record and are reported beside them, with the number of
+rows the rule changed, so a reader can see what the cleaning did to each model. The paper's other Dominick's
+results (the rolling-window comparison of every model) are rerun on the cleaned data as well, as a separate
+job once the loops have chosen their settings.
