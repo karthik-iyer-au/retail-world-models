@@ -956,3 +956,16 @@ Karthik chose Vast for the loop (3 November: "Vast"). Every try of the world-mod
 an RTX 4090 on Vast, the starting runs included, so the keep bar and every comparison inside
 the loop come from one kind of machine. The LightGBM loop uses no GPU, so its machine does not
 change its scores.
+
+**3 November 2026, finding: bad prices in the Dominick's files make the world model's forecasts run away.**
+The cheese world-model loop kept lr_half with a held-out score of 11.0 (seed 1: 27.7; tuned LightGBM 0.84).
+`scripts/eda_cheese_heldout.py`: in the held-out window the category total forecast is 29 times the actual
+in the week of 23 November 1995 and 16 times the week after. 99% of the excess is one item, Kraft Philadelphia
+cream cheese 8 oz (UPC 2100061223), in six stores, forecast at about a million units a week against 220 to 330.
+The raw file (wche.csv, week 323) gives that item a price of 32.42 to 84.72 dollars against 1.29 the week
+before, with PROFIT about 99 and OK = 1, so the loader keeps it. The week after, the world model's history
+window holds a price 25 to 65 times normal and its forecasts run away; the starting settings do the same at a
+smaller scale (seed 1: 2.6 times the total). Prices above five times the item's median: cheese 60 rows (14
+items, 39 weeks), snacks 73, soft drinks 76, bottled juice and analgesics none. LightGBM's trees do not
+extrapolate, so the same rows barely move it. Nothing is changed by this entry; a fix (treating such prices as
+missing, for both models alike) would be pre-registered separately and would need the Dominick's runs again.
