@@ -170,8 +170,20 @@ def search(spec: dict, evaluate: Evaluate, log: Log, max_rounds: int | None = No
             break
         # rung 2: full steps, every seed, for the changes promoted from rung 1
         results = []
+        # every promoted change's remaining seeds are asked for at once, so they can run
+        # side by side; each try's result is the same as when asked for one by one
+        configs = [config_for(spec, p, s, f"r{round_no}_{c['name']}_s{s}") for _, c, p in up for s in seeds]
+        answers = iter(evaluate(configs))
+        batch = {}
+        for _, c, _ in up:
+            got_seeds = [next(answers) for _ in seeds]
+            if any(g is None for g in got_seeds):
+                batch[c["name"]] = None
+            else:
+                each = [scores(g) for g in got_seeds]
+                batch[c["name"]] = (float(np.mean([e[0] for e in each])), float(np.mean([e[1] for e in each])), [e[0] for e in each])
         for s_cheap, c, p in up:
-            got = full(p, f"r{round_no}_{c['name']}")
+            got = batch[c["name"]]
             row = {"kind": "try", "round": round_no, "change": c["name"], "params_changed": c["change"]}
             if got is None:
                 log.write({**row, "failed": True})
