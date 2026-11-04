@@ -376,6 +376,24 @@ def vast_try(config: dict, commit: str, out: str) -> dict | None:
     return None
 
 
+def _destroy(iid) -> None:
+    """Destroy a machine and check it is gone; a destroy call can fail on a passing API
+    error, which left finished machines running with no one watching them (4 November)."""
+    for attempt in range(5):
+        subprocess.run(["vastai", "destroy", "instance", str(iid), "-y"], capture_output=True, text=True)
+        time.sleep(5)
+        shown = subprocess.run(["vastai", "show", "instance", str(iid), "--raw"], capture_output=True, text=True)
+        if shown.returncode != 0 or "{" not in shown.stdout:
+            return
+        try:
+            if json.loads(shown.stdout[shown.stdout.index("{"):]).get("actual_status") in (None, "destroyed"):
+                return
+        except Exception:
+            return
+        time.sleep(20 * (attempt + 1))
+    print(f"machine {iid} could not be destroyed", flush=True)
+
+
 def _manage(configs: list[dict], commit: str, out: str, limit: int) -> list[dict | None]:
     """Run each config on a rented machine, at most `limit` machines at once, watched from
     this one container (4 November: one Modal container per machine reached the
@@ -400,7 +418,7 @@ def _manage(configs: list[dict], commit: str, out: str, limit: int) -> list[dict
     def finish(name, iid, result=None, bad=False, again=False):
         r = st[name]
         if iid is not None:
-            subprocess.run(["vastai", "destroy", "instance", str(iid), "-y"], capture_output=True, text=True)
+            _destroy(iid)
         marker(name).unlink(missing_ok=True)
         if bad and r.get("machine") is not None:
             _mark_bad(r["machine"])
@@ -459,7 +477,7 @@ def _manage(configs: list[dict], commit: str, out: str, limit: int) -> list[dict
                     # the machine may still exist (a passing error from the Vast API reads as
                     # "not alive"): destroy it before renting another, so no run has two
                     # machines and none is left with no one watching it (4 November)
-                    subprocess.run(["vastai", "destroy", "instance", str(m["machine"]), "-y"], capture_output=True, text=True)
+                    _destroy(m["machine"])
                     marker(name).unlink(missing_ok=True)
                     r["state"] = "pending"
             elif r["state"] == "waiting":
