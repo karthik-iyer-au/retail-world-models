@@ -1,0 +1,7 @@
+{"kind": "start", "score": 0.5469647793984079, "held_out": 0.6081922759223088, "seed_scores": [0.5423910590512833, 0.5391940257816306, 0.55930925336231], "keep_bar": 0.020115227580679407, "config_sha256": "c89f98c94197ff6ddd00a11090a99904577e3128698e74b4724de32e1ad7ff0c"}
+{"kind": "rung", "round": 1, "change": "negative_binomial", "params_changed": {"params": {"likelihood": "negative_binomial"}}, "score": 0.5835725711861902}
+{"kind": "rung", "round": 1, "change": "negative_binomial_item_spread", "params_changed": {"params": {"likelihood": "negative_binomial", "spread_by_item": true}}, "score": 0.5997295383589348}
+{"kind": "rung", "round": 1, "change": "zinb_item_spread", "params_changed": {"params": {"likelihood": "zinb", "spread_by_item": true}}, "score": 0.5849046839966092}
+{"kind": "rung", "round": 1, "change": "hurdle_nb_item_spread", "params_changed": {"params": {"likelihood": "hurdle_nb", "spread_by_item": true}}, "score": 0.589663817293869}
+{"kind": "stop", "round": 1, "reason": "no change beat the best on the first seed"}
+{"kind": "end", "kept": [], "score": 0.5469647793984079, "held_out": 0.6081922759223088}
