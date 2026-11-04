@@ -456,6 +456,10 @@ def _manage(configs: list[dict], commit: str, out: str, limit: int) -> list[dict
                     print(f"{name}: carrying on with machine {m['machine']}", flush=True)
                     r.update(state="running", iid=m["machine"], machine=None, started=time.time())
                 else:
+                    # the machine may still exist (a passing error from the Vast API reads as
+                    # "not alive"): destroy it before renting another, so no run has two
+                    # machines and none is left with no one watching it (4 November)
+                    subprocess.run(["vastai", "destroy", "instance", str(m["machine"]), "-y"], capture_output=True, text=True)
                     marker(name).unlink(missing_ok=True)
                     r["state"] = "pending"
             elif r["state"] == "waiting":
