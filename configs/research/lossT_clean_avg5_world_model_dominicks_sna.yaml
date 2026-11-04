@@ -1,0 +1,41 @@
+# Study T (docs/PAPER1_REVISION_PLAN.md, entry of 4 November 2026): one round of count likelihoods on top of
+# the final settings of clean_avg5_world_model_dominicks_sna; written by scripts/make_loss_round.py. Run with one round.
+name: lossT_clean_avg5_world_model_dominicks_sna
+base: configs/experiments/lossT_clean_avg5_world_model_dominicks_sna.yaml
+evaluation:
+  horizon: 8
+  n_origins: 4
+  holdout_periods: 72
+  step: 8
+  scale_lag: 1
+  weight_window: 13
+  after_promo:
+    levers:
+    - promo
+    periods: 2
+seeds:
+- 1
+- 2
+- 3
+rung_fraction: 1.0
+promote: beats_best
+menu:
+- name: negative_binomial
+  change:
+    params:
+      likelihood: negative_binomial
+- name: negative_binomial_item_spread
+  change:
+    params:
+      likelihood: negative_binomial
+      spread_by_item: true
+- name: zinb_item_spread
+  change:
+    params:
+      likelihood: zinb
+      spread_by_item: true
+- name: hurdle_nb_item_spread
+  change:
+    params:
+      likelihood: hurdle_nb
+      spread_by_item: true

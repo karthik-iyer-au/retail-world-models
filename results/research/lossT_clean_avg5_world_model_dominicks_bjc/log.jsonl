@@ -1,0 +1,14 @@
+{"kind": "start", "score": 0.5872050824334176, "held_out": 0.6370157354801833, "seed_scores": [0.5696814919462592, 0.5939758319902118, 0.597957923363782], "keep_bar": 0.028276431417522785, "config_sha256": "b954182278e30032551d83900462e12a079eedcc4acb02156a0ff0fb1a49070c"}
+{"kind": "rung", "round": 1, "change": "negative_binomial", "params_changed": {"params": {"likelihood": "negative_binomial"}}, "score": 0.5922498657679538}
+{"kind": "rung", "round": 1, "change": "negative_binomial_item_spread", "params_changed": {"params": {"likelihood": "negative_binomial", "spread_by_item": true}}, "score": 0.6013923567673581}
+{"kind": "rung", "round": 1, "change": "zinb_item_spread", "params_changed": {"params": {"likelihood": "zinb", "spread_by_item": true}}, "score": 0.6135334316231532}
+{"kind": "rung", "round": 1, "change": "hurdle_nb_item_spread", "params_changed": {"params": {"likelihood": "hurdle_nb", "spread_by_item": true}}, "score": 0.6038062828461155}
+{"kind": "stop", "round": 1, "reason": "no change beat the best on the first seed"}
+{"kind": "end", "kept": [], "score": 0.5872050824334176, "held_out": 0.6370157354801833}
+{"kind": "start", "score": 0.5872050824334176, "held_out": 0.6370157354801833, "seed_scores": [0.5696814919462592, 0.5939758319902118, 0.597957923363782], "keep_bar": 0.028276431417522785, "config_sha256": "b954182278e30032551d83900462e12a079eedcc4acb02156a0ff0fb1a49070c"}
+{"kind": "rung", "round": 1, "change": "negative_binomial", "params_changed": {"params": {"likelihood": "negative_binomial"}}, "score": 0.5922498657679538}
+{"kind": "rung", "round": 1, "change": "negative_binomial_item_spread", "params_changed": {"params": {"likelihood": "negative_binomial", "spread_by_item": true}}, "score": 0.6013923567673581}
+{"kind": "rung", "round": 1, "change": "zinb_item_spread", "params_changed": {"params": {"likelihood": "zinb", "spread_by_item": true}}, "score": 0.6135334316231532}
+{"kind": "rung", "round": 1, "change": "hurdle_nb_item_spread", "params_changed": {"params": {"likelihood": "hurdle_nb", "spread_by_item": true}}, "score": 0.6038062828461155}
+{"kind": "stop", "round": 1, "reason": "no change beat the best on the first seed"}
+{"kind": "end", "kept": [], "score": 0.5872050824334176, "held_out": 0.6370157354801833}
