@@ -10,7 +10,7 @@ any new promise, decision or finished item. The research record behind it is doc
 | 3 Nov | Study S: Dominick's on cleaned prices, both models, six categories | Claude | Done (all six pairs reported 5 Nov; logs to 88f6597) |
 | 1 Nov | Study R: Favorita loops, both models, on Vast | Claude | Running; world model limited to two rounds (Karthik 5 Nov: "2 rounds is good"), plan entry dcb9d99 |
 | 28 Oct | Study M: M5 world-model loop on Modal, two rounds | Claude | Running, round 2 |
-| 4 Nov | Study T: loss round after each world-model loop | Claude | Frat, five Dominick's categories done (snacks kept item-spread NB); frozen entrees running; M5 and Favorita when their loops end |
+| 4 Nov | Study T: loss round after each world-model loop | Claude | Frat and all six Dominick's categories done (only snacks kept a change: item-spread NB); M5 and Favorita when their loops end |
 | 5 Nov | 3-hourly checks of Vast and Modal loops | Claude | Scheduled tasks running |
 
 ## To do once the searches end (Karthik 5 Nov: "ledger it and pick up everything at the end")
