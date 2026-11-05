@@ -1038,3 +1038,14 @@ is good") so that every data set finishes around 10 November. The Favorita world
 while it is still in round 1 and before any round-1 rung result exists. The Favorita LightGBM loop keeps no limit:
 it is cheap to run, it is already in round 2, and a limit would only take tuning away from the benchmark. The loop is
 restarted with the limit; runs already saved are read back, so nothing is rerun.
+
+**5 November 2026, the ensemble is rebuilt from the tuned models, written down before any final run.** Karthik
+agreed (5 November: "Yes we should"). The paper's ensemble stays as fixed on 13 October in its form: the
+equal-weight mean of the world model, LightGBM and TimesFM with the plan, with no weights fitted. In the final runs
+its world model and LightGBM members are each data set's tuned forms (the settings its loops kept, as five-copy
+averages, with the study T loss where one was kept); TimesFM with the plan is unchanged, as it has no settings to
+tune. The ensemble of the untuned members is reported beside it, with the paired test between the two.
+
+The paper reports, besides accuracy: the transition ablation (the lift model in every window), the plan occlusion
+and permutation tests and the history occlusion (study B), the persistence and timing tests, and calibration
+(interval coverage and the pinball score, before and after the pooling fix). The research loop has its own section.
