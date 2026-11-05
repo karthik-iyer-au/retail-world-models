@@ -1031,3 +1031,10 @@ never deciding), limited to one round, every run on a rented RTX 4090 (Vast), th
 the comparison inside the round is on one kind of machine. LightGBM's searches already tried its own objectives
 (Poisson, Tweedie powers), so this gives the world model the same kind of choice. Results are reported with each
 data set's final comparison, by grain, including slow movers.
+
+**5 November 2026, the Favorita world-model loop is limited to two rounds.** Karthik agreed (5 November: "2 rounds
+is good") so that every data set finishes around 10 November. The Favorita world-model loop
+(`configs/research/avg5_world_model_favorita.yaml`) stops after round 2, as the M5 world-model loop does. Fixed now,
+while it is still in round 1 and before any round-1 rung result exists. The Favorita LightGBM loop keeps no limit:
+it is cheap to run, it is already in round 2, and a limit would only take tuning away from the benchmark. The loop is
+restarted with the limit; runs already saved are read back, so nothing is rerun.
