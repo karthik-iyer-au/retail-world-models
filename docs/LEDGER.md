@@ -30,4 +30,4 @@ any new promise, decision or finished item. The research record behind it is doc
 
 | Date | Item | Owner | Status |
 |---|---|---|---|
-| 4 Nov | Saturday reminder about the NUC's 96 GB RAM | Claude | Redundant: the RAM arrived 5 Nov |
+| 4 Nov | Saturday reminder about the NUC's 96 GB RAM | Claude | Closed: memory fitted and the NUC is in use by ww (Karthik 7 Nov); the stale reminder fired once on 7 Nov and will not repeat |
