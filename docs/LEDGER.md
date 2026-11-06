@@ -17,7 +17,7 @@ any new promise, decision or finished item. The research record behind it is doc
 
 | Date | Item | Owner | Status |
 |---|---|---|---|
-| 5 Nov | Final runs: tuned settings of both models on the paper's reported rolling and held-out windows, paired tests at every grain | Claude | Open; cost first; NUC 5090 is the place to run them |
+| 5 Nov | Final runs: tuned settings of both models on the paper's reported rolling and held-out windows, paired tests at every grain | Claude | Open; cost first; on Vast by default, the NUC only when ww is not using it (Karthik 6 Nov: "U will compete with ww for NUc") |
 | 5 Nov | Ensemble rebuilt from the tuned world model and tuned LightGBM, TimesFM with the plan unchanged; untuned ensemble reported beside it (Karthik: "Yes we should"; plan entry 0ab4b46) | Claude | Open, part of the final runs |
 | 5 Nov | Rerun the paper's Dominick's comparison of all models on cleaned prices | Claude | Open; cost first |
 | 5 Nov | Paper writes up ablations, occlusion and perturbation, mechanism tests, calibration (Karthik 5 Nov) | Claude | Open; results in results/paper1_revision/tables (ablation_*, perturbation, mechanism, intervals_fixed) |
