@@ -8,7 +8,7 @@ any new promise, decision or finished item. The research record behind it is doc
 | Date | Item | Owner | Status |
 |---|---|---|---|
 | 3 Nov | Study S: Dominick's on cleaned prices, both models, six categories | Claude | Done (all six pairs reported 5 Nov; logs to 88f6597) |
-| 1 Nov | Study R: Favorita loops, both models, on Vast | Claude | Running; world model limited to two rounds (Karthik 5 Nov: "2 rounds is good"), plan entry dcb9d99 |
+| 1 Nov | Study R: Favorita loops, both models, on Vast | Claude | Running; world model limited to two rounds (Karthik 5 Nov: "2 rounds is good"), plan entry dcb9d99; world model round 1 kept latent_overshooting (JEPA check over seven steps), 0.547 -> 0.484, held-out 0.600 -> 0.560 (reported 7 Nov); LightGBM kept min_data_in_leaf_4x, objective_poisson, learning_rate_half (0.580 / 0.573) |
 | 28 Oct | Study M: M5 world-model loop on Modal, two rounds | Claude | Running, round 2 |
 | 4 Nov | Study T: loss round after each world-model loop | Claude | Frat and all six Dominick's categories done (only snacks kept a change: item-spread NB); M5 and Favorita when their loops end |
 | 5 Nov | 3-hourly checks of Vast and Modal loops | Claude | Scheduled tasks running |
