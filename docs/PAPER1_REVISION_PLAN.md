@@ -1049,3 +1049,17 @@ tune. The ensemble of the untuned members is reported beside it, with the paired
 The paper reports, besides accuracy: the transition ablation (the lift model in every window), the plan occlusion
 and permutation tests and the history occlusion (study B), the persistence and timing tests, and calibration
 (interval coverage and the pinball score, before and after the pooling fix). The research loop has its own section.
+
+**8 November 2026, the M5 world-model loop ends after round 2's first two promoted changes.** Karthik decided
+(8 November: "old code is bad. but if u think worl model has a better chance with mor rounds only then we do it").
+The M5 loop (`configs/research/pure_m5.yaml`) ran on Modal at commit 88346c1, which evaluates promoted changes one at
+a time; Modal restarted the loop and its runs repeatedly, and runs at that commit without partial saves restart from
+the beginning, so each remaining change took about 10 hours. Round 2 had finished two promoted changes, both short of
+the keep bar (0.013 on a best of 0.552, so a three-seed mean below about 0.539 was needed): the JEPA check over seven
+steps, 0.545 (seeds 0.543, 0.546, 0.546), and volume weight 0.25, 0.549. The five left had seed-1 scores of 0.550 to
+0.552, so each would have needed seeds 2 and 3 near 0.535 to be kept; that chance is small and does not justify
+three more days. The loop is cancelled; round 1's kept settings (feedback: 0.570 to 0.552, held-out 0.550 to 0.545)
+are M5's final world-model settings. The saved log is copied to `results/research/pure_m5/log.jsonl` with one `end`
+row added by hand that carries round 1's result (kept: feedback), so that study T can be written from it; the paper
+states that M5's round 2 was cut short and why, and reports the two finished round-2 changes and the seed-1 scores of
+the rest. M5's study T round then runs on Vast like the others.
