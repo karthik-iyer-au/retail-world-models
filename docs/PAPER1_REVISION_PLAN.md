@@ -1063,3 +1063,12 @@ are M5's final world-model settings. The saved log is copied to `results/researc
 row added by hand that carries round 1's result (kept: feedback), so that study T can be written from it; the paper
 states that M5's round 2 was cut short and why, and reports the two finished round-2 changes and the seed-1 scores of
 the rest. M5's study T round then runs on Vast like the others.
+
+**8 November 2026, Favorita's study T round starts now on round 1's settings, alongside round 2.** Karthik agreed
+(8 November: "yes"). Favorita's world-model round 2 carries the seven-step JEPA check kept in round 1, so its runs take
+25 to 30 hours and the loop would end about 10 November with study T after it. To save that time, study T for
+Favorita runs now on round 1's final settings (kept: latent_overshooting; 0.484 search windows, 0.560 held-out), as
+`lossT_r1_avg5_world_model_favorita`, written by `scripts/make_loss_round.py` from a copy of the log with one `end`
+row added by hand that carries round 1's result. Rule fixed now: if round 2 keeps nothing, this is Favorita's study T
+round; if round 2 keeps a change, study T is run again on the final settings and that run is the one reported, with
+this one reported beside it as a run on round 1's settings.
