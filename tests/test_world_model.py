@@ -61,7 +61,8 @@ def test_without_rollout_a_plan_cannot_reach_a_later_period(split):
     np.testing.assert_allclose(still.predict(on)[~first], still.predict(off)[~first], rtol=1e-5)
 
 
-@pytest.mark.parametrize("more", [dict(latent_weight=0.5), dict(pretrain_steps=40, finetune="low_lr")])
+@pytest.mark.parametrize("more", [dict(latent_weight=0.5), dict(pretrain_steps=40, finetune="low_lr"),
+                                  dict(pretrain_steps=40, finetune="low_lr", encoder_lr_scale=0.1, latent_weight=0.5)])
 def test_latent_check_on_the_rolled_states_trains_and_repeats(split, more):
     train, test = split
     quick = {**SETTINGS, "steps": 80, **more}

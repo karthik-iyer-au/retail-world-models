@@ -1072,3 +1072,21 @@ Favorita runs now on round 1's final settings (kept: latent_overshooting; 0.484 
 row added by hand that carries round 1's result. Rule fixed now: if round 2 keeps nothing, this is Favorita's study T
 round; if round 2 keeps a change, study T is run again on the final settings and that run is the one reported, with
 this one reported beside it as a run on round 1's settings.
+
+**9 November 2026, study U part (a): JEPA pretraining with hybrid fine-tuning, written down before any run.**
+Karthik agreed the terms on 6 November ("perfect") and the start on 9 November ("Stick with ur recommendations").
+One round per data set on top of its final settings (the world-model loop's kept changes plus study T's), on Vast,
+with the same windows, seeds, keep rule and promotion rule as every other round, and the keep bar measured again on
+these settings. The held-out window never decides. Two recipes, fixed now from the early Frat JEPA study
+(`frat_dev_state_model_lift_jepa_pretrain_low_lr_joint` and its longer variant), with the pretraining length set from
+each data set's training steps:
+- `jepa_hybrid`: latent-only pretraining for as many steps as training, then the forecast loss with the latent loss
+  kept on at 0.5 and the encoder at a tenth of the learning rate;
+- `jepa_hybrid_long`: the same with three times the pretraining.
+Pretraining uses only each data set's own training history, so the comparison with LightGBM stays on the same data;
+pooled pretraining (part b) is a separate study with its matching pooled LightGBM. Every JEPA try is counted in the
+paper: the seven Frat recipes, the four JEPA changes in every loop menu, and these two per data set. Order: the six
+Dominick's categories and Frat now (their searches and study T rounds have ended), M5 when its study T round ends,
+Favorita when its loop and study T end. Written by `scripts/make_hybrid_round.py`; run with `--rounds 1`. Cost: the
+study T rounds took 0.4 to 1.0 hours per run on Vast, and these runs take two to four times as long, so about 70
+machine-hours for the seven data sets started now.
