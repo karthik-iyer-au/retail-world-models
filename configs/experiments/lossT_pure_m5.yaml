@@ -1,0 +1,40 @@
+# Study T (plan entry of 4 November 2026): configs/experiments/rev_m5_rolling_world_model.yaml with the kept changes of pure_m5 (feedback); written by scripts/make_loss_round.py.
+name: lossT_pure_m5
+seed: 0
+dataset:
+  name: m5
+model:
+  name: state_model
+  params:
+    horizon: 28
+    history: 112
+    train_periods: 730
+    categorical:
+    - item_id
+    - dept_id
+    - cat_id
+    - store_id
+    - state_id
+    extra:
+    - event
+    - snap
+    d_model: 128
+    layers: 3
+    heads: 4
+    steps: 30000
+    batch: 1024
+    lr: 0.001
+    seed: 0
+    mixed_precision: true
+    regular_price: true
+    lift_readout: true
+    rollout: true
+    roll_norm: true
+    feedback: true
+evaluation:
+  horizon: 28
+  n_origins: 4
+  scale_lag: 1
+  weight_window: 28
+  holdout_periods: 84
+  step: 28
