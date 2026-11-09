@@ -415,11 +415,14 @@ def _sha8(config: dict) -> str:
     return hashlib.sha256(json.dumps(config, sort_keys=True, separators=(",", ":"), default=str).encode()).hexdigest()[:8]
 
 
-def _splittable(config: dict) -> bool:
-    """A five-copy average of a model on the graphics card, over more than one window or copy."""
+def _members(config: dict) -> int:
     m = config["model"]
-    return m.get("name") == "seed_average" and _uses_gpu(m) and \
-        config["evaluation"].get("n_origins", 1) * m.get("params", {}).get("members", 5) > 1
+    return m.get("params", {}).get("members", 5) if m.get("name") == "seed_average" else 1
+
+
+def _splittable(config: dict) -> bool:
+    """A model on the graphics card (alone or as a five-copy average) over more than one window or copy."""
+    return _uses_gpu(config["model"]) and config["evaluation"].get("n_origins", 1) * _members(config) > 1
 
 
 def _manage(configs: list[dict], commit: str, out: str, limit: int, split: bool = False) -> list[dict | None]:
@@ -459,7 +462,7 @@ def _manage(configs: list[dict], commit: str, out: str, limit: int, split: bool 
                  "env": {}, "deps": [], "done": (lambda c=c: _finished(folder, c))}
         if split and _splittable(c) and not _finished(folder, c):
             n_o = c["evaluation"].get("n_origins", 1)
-            n_m = c["model"].get("params", {}).get("members", 5)
+            n_m = _members(c)
             began = any(piece_done(c, o, m) for o in range(n_o) for m in range(n_m)) or \
                 any(marker(f"{name}__o{o}m{m}").exists() for o in range(n_o) for m in range(n_m))
             if began or not marker(name).exists():  # an unsplit machine already working is left to finish

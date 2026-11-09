@@ -15,24 +15,29 @@ STATE = dict(
 )
 
 
-def _config(more: dict) -> dict:
+def _config(more: dict, average: bool = True) -> dict:
+    model = {"name": "seed_average", "params": {"model": "state_model", "members": 2, "seed": 0,
+                                                "params": {**STATE, **more}}} if average else \
+        {"name": "state_model", "params": {**STATE, **more}}
     return {
         "name": "split",
         "seed": 0,
         "dataset": {"name": "synthetic", "params": {"n_stores": 2, "n_items": 3, "n_periods": 260, "seed": 4}},
-        "model": {"name": "seed_average", "params": {"model": "state_model", "members": 2, "seed": 0,
-                                                     "params": {**STATE, **more}}},
+        "model": model,
         "evaluation": {"horizon": 7, "n_origins": 2},
     }
 
 
-@pytest.mark.parametrize("more", [{}, dict(pretrain_steps=20, finetune="low_lr", encoder_lr_scale=0.1, latent_weight=0.5),
-                                  dict(latent_weight=0.1, latent_checks=3, weight_average=0.9)])
-def test_split_run_matches_one_run(tmp_path, monkeypatch, more):
-    config = _config(more)
+@pytest.mark.parametrize("more,average", [({}, True),
+                                          (dict(pretrain_steps=20, finetune="low_lr", encoder_lr_scale=0.1, latent_weight=0.5), True),
+                                          (dict(latent_weight=0.1, latent_checks=3, weight_average=0.9), True),
+                                          (dict(pretrain_steps=20, finetune="low_lr", encoder_lr_scale=0.1, latent_weight=0.5), False)])
+def test_split_run_matches_one_run(tmp_path, monkeypatch, more, average):
+    config = _config(more, average)
+    members = 2 if average else 1
     whole = run(config, out_root=tmp_path / "a", partial=tmp_path / "a" / "_partial")
     for origin in range(2):
-        for member in range(2):
+        for member in range(members):
             monkeypatch.setenv("RWM_PIECE", f"{origin},{member}")
             piece = run(config, out_root=tmp_path / "b", partial=tmp_path / "b" / "_partial")
             assert json.loads((piece / "metrics.json").read_text())["piece"] == {
