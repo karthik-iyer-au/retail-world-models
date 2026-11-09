@@ -1,0 +1,48 @@
+# Study U part (a) (plan entry of 9 November 2026): configs/experiments/lossT_r1_avg5_world_model_favorita.yaml with study T's kept changes (none); written by scripts/make_hybrid_round.py.
+name: hybridU_r1_avg5_world_model_favorita
+seed: 0
+dataset:
+  name: favorita
+model:
+  name: seed_average
+  params:
+    model: state_model
+    members: 5
+    seed: 0
+    params:
+      horizon: 28
+      history: 112
+      train_periods: 730
+      categorical:
+      - item_id
+      - class
+      - family
+      - store_id
+      - city
+      extra:
+      - promo
+      - event
+      - payday
+      d_model: 128
+      layers: 3
+      heads: 4
+      steps: 30000
+      batch: 1024
+      lr: 0.001
+      mixed_precision: true
+      regular_price: true
+      lift_readout: true
+      rollout: true
+      roll_norm: true
+      levers:
+      - promo
+      weight_average: 0.999
+      latent_weight: 0.1
+      latent_checks: 7
+evaluation:
+  horizon: 28
+  n_origins: 4
+  scale_lag: 1
+  weight_window: 28
+  holdout_periods: 0
+  step: 28

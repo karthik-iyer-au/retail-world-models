@@ -1090,3 +1090,12 @@ Dominick's categories and Frat now (their searches and study T rounds have ended
 Favorita when its loop and study T end. Written by `scripts/make_hybrid_round.py`; run with `--rounds 1`. Cost: the
 study T rounds took 0.4 to 1.0 hours per run on Vast, and these runs take two to four times as long, so about 70
 machine-hours for the seven data sets started now.
+
+**9 November 2026, Favorita's study U round starts now on round 1's settings, both recipes kept.** Karthik decided
+(9 November: "start the hybrid but dont drop the long recipe, research accuracy is more critical"). Favorita's runs
+carry the seven-step JEPA check kept in round 1 and take 25 to 30 hours; waiting for round 2 and study T would push
+study U to about 16 November. It runs now as `hybridU_r1_avg5_world_model_favorita` on round 1's final settings
+(latent_overshooting kept; 30,000 training steps, so pretraining of 30,000 and 90,000 steps), with the same menu as
+every data set (the hybrid recipes set the latent weight to 0.5, replacing round 1's 0.1, and keep its seven-step
+check). Rule fixed now: if Favorita's round 2 and study T keep nothing, this is Favorita's study U; if either keeps a
+change, study U is run again on the final settings and that run is reported, with this one beside it.
