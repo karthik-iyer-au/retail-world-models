@@ -10,6 +10,7 @@ evaluation:
   weight_window: 13
 seeds:
 - 1
+- 2
 rung_fraction: 1.0
 promote: beats_best
 menu: []
