@@ -1,0 +1,15 @@
+# Check that a split run gives the same forecasts as one run (9 November 2026).
+name: splitcheck_frat_split
+base: configs/experiments/splitcheck_frat_split.yaml
+evaluation:
+  horizon: 8
+  n_origins: 4
+  holdout_periods: 56
+  step: 8
+  scale_lag: 1
+  weight_window: 13
+seeds:
+- 1
+rung_fraction: 1.0
+promote: beats_best
+menu: []

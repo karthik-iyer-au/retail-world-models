@@ -34,7 +34,12 @@ class SeedAverage(Forecaster):
         ]
 
     def fit(self, train: pd.DataFrame) -> "SeedAverage":
+        from rwm.experiments.run import piece_of
+
+        piece = piece_of()  # a split run's piece fits one member only (rwm.experiments.run.piece_of)
         for i, m in enumerate(self.models):
+            if piece is not None and i != piece[1]:
+                continue
             with resume.scope(None, f"member{i}"):  # each member saves its own training
                 m.fit(train)
         return self

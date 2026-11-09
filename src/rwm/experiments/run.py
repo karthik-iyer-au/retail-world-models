@@ -48,8 +48,26 @@ def _data_files(ds, strict: bool) -> list[dict]:
     return data_manifest.describe(ds.files, DATA_RAW / ds.name)
 
 
-def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
+def piece_of(env=None) -> tuple[int, int] | None:
+    """The one window and member a split run fits on this machine, from RWM_PIECE ("origin,member"), or None.
+
+    A run of a five-copy average over several windows is many fits. Split (9 November 2026), each
+    (window, member) is fitted on its own machine and saved through the partway saves; a last run on
+    one machine then finds every fit finished, loads them and scores as one run would. The setting is
+    taken from the environment, not the config, so the config, its hash and the save folder are the
+    same for every piece and for the last run."""
+    import os
+
+    v = (env if env is not None else os.environ).get("RWM_PIECE")
+    if not v:
+        return None
+    o, m = (int(x) for x in v.split(","))
+    return o, m
+
+
+def run(config: dict, strict: bool = False, out_root: Path = RESULTS, partial: Path | None = None) -> Path:
     started = time.time()
+    piece = piece_of()
     set_seed(config["seed"])
     ds = load_dataset(config["dataset"]["name"], **config["dataset"].get("params", {}))
     manifest = build_manifest(config, _data_files(ds, strict))
@@ -130,13 +148,16 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
     # started again. Kept per config and per version of the code folder (not
     # the whole commit, so a results-only commit does not lose them); removed once the run is saved.
     # Runs from uncommitted code save nothing partway, since their code cannot be matched later.
-    partial = None
-    if manifest["git"]["commit"] and not manifest["git"]["dirty"]:
+    if partial is None and manifest["git"]["commit"] and not manifest["git"]["dirty"]:
         code = _git("rev-parse", "HEAD:src")
         partial = out_root / "_partial" / f"{config['name']}_{manifest['config_sha256'][:8]}_{code[:8]}"
+    if piece is not None and partial is None:
+        raise RuntimeError("a split run's piece needs partway saves: committed code, or a save folder")
     for sp in reversed(splits):
         test = panel[panel[DATE].isin(sp.test_dates)].reset_index(drop=True)
         panel = train = panel[panel[DATE] <= sp.train_end]
+        if piece is not None and sp.origin != piece[0]:
+            continue
         model = build_model(config["model"]["name"], **config["model"].get("params", {}))
         fit_started = time.time()
         with resume.scope(partial, f"origin{sp.origin}"):
@@ -146,6 +167,17 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS) -> Path:
             else:
                 model.fit(train if held is None else train[~train[ITEM].astype(str).isin(held)])
         fit_seconds = time.time() - fit_started
+        if piece is not None:
+            # this machine's one fit is done and saved under `partial`; record it and stop
+            stamp = manifest["created_utc"].replace(":", "").replace("-", "")[:15]
+            piece_dir = out_root / f"{stamp}_{config['name']}_{manifest['config_sha256'][:8]}_piece_o{piece[0]}_m{piece[1]}"
+            piece_dir.mkdir(parents=True, exist_ok=False)
+            manifest["finished_utc"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+            manifest["wall_seconds"] = round(time.time() - started, 1)
+            manifest["piece"] = {"origin": piece[0], "member": piece[1], "fit_seconds": round(fit_seconds, 1)}
+            (piece_dir / "manifest.json").write_text(json.dumps(manifest, indent=2, default=str) + "\n")
+            (piece_dir / "metrics.json").write_text(json.dumps({"piece": manifest["piece"]}) + "\n")
+            return piece_dir
         # wall-clock seconds per window, kept in the manifest (not the scores) so scores stay
         # identical between repeats; a fit that went on from a partway save counts only the time after the restart
         # Unusual plans: lever mixes that made up a small share of training rows.

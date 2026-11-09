@@ -5,6 +5,8 @@
   python cloud/start_vast.py --app rwm-vast-cpu configs/research/<spec>.yaml   # LightGBM, on processor machines
   python cloud/start_vast.py --app <app> --machines 6 configs/research/<spec>.yaml   # at most 6 machines for this loop
   python cloud/start_vast.py --app <app> --rounds 1 configs/research/lossT_<name>.yaml  # one round only (study T)
+  python cloud/start_vast.py --app <app> --machines 40 --split configs/research/<spec>.yaml  # each run split into one
+      # piece per (window, copy) on its own machine, then a last run that scores (vast_app._manage)
 
 The commit is the local HEAD, which must be clean and on GitHub, as for Modal.
 Deploy the app first (`modal deploy cloud/vast_app.py`); deploying it does not
@@ -29,8 +31,9 @@ def main(argv: list[str]) -> None:
     app = argv[argv.index("--app") + 1] if "--app" in argv else "rwm-vast"
     limit = int(argv[argv.index("--machines") + 1]) if "--machines" in argv else 6
     rounds = int(argv[argv.index("--rounds") + 1]) if "--rounds" in argv else 0  # 0: no limit
+    split = "--split" in argv
     opts = ("--app", "--machines", "--rounds")
-    argv = [a for i, a in enumerate(argv) if a not in opts and (i == 0 or argv[i - 1] not in opts)]
+    argv = [a for i, a in enumerate(argv) if a != "--split" and a not in opts and (i == 0 or argv[i - 1] not in opts)]
     if "--config" in argv:
         cfg_file = argv[argv.index("--config") + 1]
         out = argv[argv.index("--out") + 1]
@@ -39,7 +42,7 @@ def main(argv: list[str]) -> None:
         print(f"{config['name']} started at commit {commit[:8]} ({call.object_id}); results in rwm-results/{out}")
         return
     spec = [a for a in argv if not a.startswith("--")][0]
-    call = modal.Function.from_name(app, "vast_loop").spawn(spec, commit, rounds, limit)
+    call = modal.Function.from_name(app, "vast_loop").spawn(spec, commit, rounds, limit, split)
     name = yaml.safe_load((modal_app.LOCAL_REPO / spec).read_text())["name"]
     print(f"research loop on Vast started at commit {commit[:8]} ({call.object_id}); log at rwm-results research/{name}/log.jsonl")
 

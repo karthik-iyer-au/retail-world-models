@@ -96,7 +96,14 @@ mkdir -p /out
 AUTHH="Authorization: Bearer $BRIDGE_TOKEN"
 if curl -fsS -H "$AUTHH" -o /partial.tgz "$BRIDGE_URL/partial/$OUT/$RUN_NAME" 2>/dev/null; then
   tar xzf /partial.tgz -C /out && echo "resuming from the saved partway state"
+elif [ -n "${BASE_NAME:-}" ] && curl -fsS -H "$AUTHH" -o /partial.tgz "$BRIDGE_URL/partial/$OUT/$BASE_NAME" 2>/dev/null; then
+  # a piece of a split run starts from what the run saved before it was split
+  tar xzf /partial.tgz -C /out && echo "resuming from the unsplit run's partway state"
 fi
+# the last run of a split run: every piece's finished fit, merged into one save folder
+for P in ${PIECES:-}; do
+  curl -fsS --retry 5 --retry-all-errors -H "$AUTHH" -o /piece.tgz "$BRIDGE_URL/partial/$OUT/$P" && tar xzf /piece.tgz -C /out || fail "piece $P"
+done
 ( while sleep 300; do
     [ -d /out/_partial ] && tar czf /partial.new --exclude='*.tmp' -C /out _partial && mv /partial.new /partial.up \
       && curl -fsS --retry 3 -X PUT -H "$AUTHH" --data-binary @/partial.up "$BRIDGE_URL/partial/$OUT/$RUN_NAME" >/dev/null
@@ -109,10 +116,18 @@ from rwm.experiments.run import run
 run(json.loads(base64.b64decode(os.environ["CONFIG_B64"])), strict=True, out_root=Path("/out"))
 EOF
 kill $SAVER 2>/dev/null
+if [ -n "${RWM_PIECE:-}" ]; then
+  # a piece's finished fit is what the last run needs: save it, and keep it on the bridge
+  tar czf /partial.up --exclude='*.tmp' -C /out _partial || fail "piece tar"
+  curl -fsS --retry 5 --retry-all-errors -X PUT -H "$AUTHH" --data-binary @/partial.up "$BRIDGE_URL/partial/$OUT/$RUN_NAME" >/dev/null || fail "piece save"
+fi
 rm -rf /out/_partial
 tar czf /run.tgz -C /out . || fail "tar"
 curl -fsS --retry 5 --retry-all-errors -X PUT -H "Authorization: Bearer $BRIDGE_TOKEN" --data-binary @/run.tgz "$BRIDGE_URL/results/$OUT" || fail "upload"
-curl -fsS -X DELETE -H "$AUTHH" "$BRIDGE_URL/partial/$OUT/$RUN_NAME" >/dev/null || true
+if [ -z "${RWM_PIECE:-}" ]; then
+  curl -fsS -X DELETE -H "$AUTHH" "$BRIDGE_URL/partial/$OUT/$RUN_NAME" >/dev/null || true
+  for P in ${PIECES:-}; do curl -fsS -X DELETE -H "$AUTHH" "$BRIDGE_URL/partial/$OUT/$P" >/dev/null || true; done
+fi
 echo "DONE"
 sleep infinity
 """
@@ -282,18 +297,18 @@ def _mark_bad(machine_id) -> None:
     results_volume.commit()
 
 
-def _rent(config: dict, env: dict, dataset: str, tried: set) -> tuple[int, int]:
+def _rent(config: dict, env: dict, dataset: str, tried: set, label: str | None = None) -> tuple[int, int]:
     """Rent the cheapest matching machine not tried yet and start the worker on it."""
     offer = _offer(MEMORY_GB.get(dataset, DEFAULT_MEMORY_GB), tried | _bad(), _uses_gpu(config["model"]))
     tried.add(offer["machine_id"])
     made = _first_json(_vast(
         "create", "instance", str(offer["id"]), "--image", "python:3.12-slim", "--disk", "120",
-        "--label", f"rwm {config['name']}"[:60],
+        "--label", f"rwm {label or config['name']}"[:60],
         "--env", " ".join(f"-e {k}={v}" for k, v in env.items()),
         # the image's own command, not Vast's ssh start-up, which needs packages a slim image lacks
         "--entrypoint", "bash", "--args", "-c", "echo $WORKER_B64 | base64 -d > /worker.sh && bash /worker.sh"))
     iid = made["new_contract"]
-    print(f"{config['name']}: machine {iid} ({offer['geolocation']}, US${offer['dph_total']:.3f}/h)", flush=True)
+    print(f"{label or config['name']}: machine {iid} ({offer['geolocation']}, US${offer['dph_total']:.3f}/h)", flush=True)
     return iid, offer["machine_id"]
 
 
@@ -394,7 +409,20 @@ def _destroy(iid) -> None:
     print(f"machine {iid} could not be destroyed", flush=True)
 
 
-def _manage(configs: list[dict], commit: str, out: str, limit: int) -> list[dict | None]:
+def _sha8(config: dict) -> str:
+    import hashlib
+
+    return hashlib.sha256(json.dumps(config, sort_keys=True, separators=(",", ":"), default=str).encode()).hexdigest()[:8]
+
+
+def _splittable(config: dict) -> bool:
+    """A five-copy average of a model on the graphics card, over more than one window or copy."""
+    m = config["model"]
+    return m.get("name") == "seed_average" and _uses_gpu(m) and \
+        config["evaluation"].get("n_origins", 1) * m.get("params", {}).get("members", 5) > 1
+
+
+def _manage(configs: list[dict], commit: str, out: str, limit: int, split: bool = False) -> list[dict | None]:
     """Run each config on a rented machine, at most `limit` machines at once, watched from
     this one container (4 November: one Modal container per machine reached the
     workspace's limit of 100 containers). A run already saved is read back; a run whose
@@ -402,18 +430,49 @@ def _manage(configs: list[dict], commit: str, out: str, limit: int) -> list[dict
     still working is carried on with. A run that fails is retried on another host, up to
     three hosts, and a host where a run failed is never rented again. Machines are not
     destroyed if this container is stopped: their markers go stale and the next manager
-    carries on with them."""
+    carries on with them.
+
+    With `split` (9 November 2026) a five-copy average over several windows is run as one
+    piece per (window, copy), each on its own machine, then one last run that loads every
+    piece's finished fit and scores (rwm.experiments.run.piece_of); the last run's result
+    is the run's result, identical to running it in one go (tests/test_split_run.py)."""
     folder = Path(RESULTS) / out
     url = modal.Function.from_name(APP_NAME, "bridge").get_web_url()
     st = {}
-    for c in configs:
-        st[c["name"]] = {"config": c, "state": "pending", "attempts": 0, "tried": set(), "result": None}
 
     def marker(name):
         return Path(RESULTS) / "_vast_running" / out.replace("/", "__") / f"{name}.json"
 
     def failed_log(name):
         return Path(RESULTS) / "_vast_failed" / f"{out.replace('/', '__')}__{name}.log"
+
+    def piece_done(c, o, m):
+        for f in sorted(folder.glob(f"*_{c['name']}_{_sha8(c)}_piece_o{o}_m{m}")):
+            if (f / "metrics.json").exists():
+                return f
+        return None
+
+    results_volume.reload()
+    for c in configs:
+        name = c["name"]
+        whole = {"config": c, "state": "pending", "attempts": 0, "tried": set(), "result": None,
+                 "env": {}, "deps": [], "done": (lambda c=c: _finished(folder, c))}
+        if split and _splittable(c) and not _finished(folder, c):
+            n_o = c["evaluation"].get("n_origins", 1)
+            n_m = c["model"].get("params", {}).get("members", 5)
+            began = any(piece_done(c, o, m) for o in range(n_o) for m in range(n_m)) or \
+                any(marker(f"{name}__o{o}m{m}").exists() for o in range(n_o) for m in range(n_m))
+            if began or not marker(name).exists():  # an unsplit machine already working is left to finish
+                keys = []
+                for o in range(n_o):
+                    for m in range(n_m):
+                        k = f"{name}__o{o}m{m}"
+                        keys.append(k)
+                        st[k] = {"config": c, "state": "pending", "attempts": 0, "tried": set(), "result": None,
+                                 "env": {"RWM_PIECE": f"{o},{m}", "BASE_NAME": name}, "deps": [],
+                                 "done": (lambda c=c, o=o, m=m: piece_done(c, o, m))}
+                whole.update(env={"PIECES": " ".join(keys)}, deps=keys)
+        st[name] = whole
 
     def finish(name, iid, result=None, bad=False, again=False):
         r = st[name]
@@ -435,7 +494,11 @@ def _manage(configs: list[dict], commit: str, out: str, limit: int) -> list[dict
         for name, r in st.items():
             if r["state"] in ("done", "gone"):
                 continue
-            done = _finished(folder, r["config"])
+            if any(st[d]["state"] == "gone" for d in r["deps"]):
+                print(f"{name}: a piece failed three times", flush=True)
+                r["state"] = "gone"
+                continue
+            done = r["done"]()
             if done:
                 if r["state"] == "running":
                     print(f"{name}: done on machine {r['iid']}", flush=True)
@@ -486,17 +549,17 @@ def _manage(configs: list[dict], commit: str, out: str, limit: int) -> list[dict
         for name, r in st.items():
             if running >= limit:
                 break
-            if r["state"] != "pending":
+            if r["state"] != "pending" or any(st[d]["state"] != "done" for d in r["deps"]):
                 continue
             c = r["config"]
             env = {"REPO_URL": REPO_URL, "COMMIT": commit, "TORCH": TORCH, "DATASET": c["dataset"]["name"], "OUT": out,
                    "RUN_NAME": name, "BRIDGE_URL": url, "BRIDGE_TOKEN": os.environ["BRIDGE_TOKEN"],
                    "CONFIG_B64": base64.b64encode(json.dumps(c).encode()).decode(),
-                   "WORKER_B64": base64.b64encode(WORKER.encode()).decode()}
+                   "WORKER_B64": base64.b64encode(WORKER.encode()).decode(), **r["env"]}
             if failed_log(name).exists():
                 failed_log(name).rename(failed_log(name).with_suffix(f".{int(time.time())}.log"))
             try:
-                iid, machine = _rent(c, env, c["dataset"]["name"], r["tried"])
+                iid, machine = _rent(c, env, c["dataset"]["name"], r["tried"], label=name)
             except Exception as e:
                 print(f"{name}: could not rent a machine: {e}", flush=True)
                 break
@@ -512,7 +575,7 @@ def _manage(configs: list[dict], commit: str, out: str, limit: int) -> list[dict
 
 @app.function(image=image, volumes={RESULTS: results_volume}, secrets=[vast_secret, bridge_secret],
               timeout=24 * 3600, cpu=0.5, memory=2048)
-def vast_loop(spec: str, commit: str, max_rounds: int, limit: int = 6) -> dict:
+def vast_loop(spec: str, commit: str, max_rounds: int, limit: int = 6, split: bool = False) -> dict:
     """The research loop (src/rwm/research/loop.py) with every try on a rented machine."""
     subprocess.run(["git", "init", "-q", CHECKOUT], check=True)
     subprocess.run(["git", "-C", CHECKOUT, "fetch", "-q", "--depth", "1", REPO_URL, commit], check=True)
@@ -526,7 +589,7 @@ def vast_loop(spec: str, commit: str, max_rounds: int, limit: int = 6) -> dict:
     out = f"research/{s['name']}"
 
     def evaluate(configs):
-        return _manage(configs, commit, out, limit)
+        return _manage(configs, commit, out, limit, split)
 
     class SavedLog(loop.Log):
         def write(self, row):
