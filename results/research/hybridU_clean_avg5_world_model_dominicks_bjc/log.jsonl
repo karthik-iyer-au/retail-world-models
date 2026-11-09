@@ -1,0 +1,6 @@
+{"kind": "start", "score": 0.5872050824334176, "held_out": 0.6370157354801833, "seed_scores": [0.5696814919462592, 0.5939758319902118, 0.597957923363782], "keep_bar": 0.028276431417522785, "config_sha256": "b954182278e30032551d83900462e12a079eedcc4acb02156a0ff0fb1a49070c"}
+{"kind": "start", "score": 0.5872050824334176, "held_out": 0.6370157354801833, "seed_scores": [0.5696814919462592, 0.5939758319902118, 0.597957923363782], "keep_bar": 0.028276431417522785, "config_sha256": "b954182278e30032551d83900462e12a079eedcc4acb02156a0ff0fb1a49070c"}
+{"kind": "rung", "round": 1, "change": "jepa_hybrid", "params_changed": {"params": {"finetune": "low_lr", "encoder_lr_scale": 0.1, "latent_weight": 0.5, "pretrain_steps": 6000}}, "score": 0.6347749955435228}
+{"kind": "rung", "round": 1, "change": "jepa_hybrid_long", "params_changed": {"params": {"finetune": "low_lr", "encoder_lr_scale": 0.1, "latent_weight": 0.5, "pretrain_steps": 18000}}, "score": 0.6147170493329349}
+{"kind": "stop", "round": 1, "reason": "no change beat the best on the first seed"}
+{"kind": "end", "kept": [], "score": 0.5872050824334176, "held_out": 0.6370157354801833}
