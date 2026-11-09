@@ -1099,3 +1099,13 @@ study U to about 16 November. It runs now as `hybridU_r1_avg5_world_model_favori
 every data set (the hybrid recipes set the latent weight to 0.5, replacing round 1's 0.1, and keep its seven-step
 check). Rule fixed now: if Favorita's round 2 and study T keep nothing, this is Favorita's study U; if either keeps a
 change, study U is run again on the final settings and that run is reported, with this one beside it.
+
+**9 November 2026, runs split across machines (Karthik: "Yes to splitting and incurring the additional cost").** A
+five-copy average over several windows is now run as one piece per (window, copy), each on its own Vast machine,
+then one last run that loads every piece's finished fit and scores (`rwm.experiments.run.piece_of`,
+`cloud/vast_app.py` `_manage(split=True)`, `cloud/start_vast.py --split`). This changes where the work runs, not
+what is computed: `tests/test_split_run.py` shows identical forecasts and scores to the last digit for the plain
+world model, the hybrid JEPA recipe and the seven-step JEPA check with weight averaging, and a short Frat check on
+Vast (`splitcheck_frat_split` against `splitcheck_frat_whole`, two seeds, pieces on 16 different machines) gave
+identical forecasts and WRMSSE (0.76675 and 0.75871 both ways). Favorita's three loops and M5's study U round are
+restarted split; runs already saved are read back, runs in progress start again as pieces.
