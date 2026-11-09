@@ -1,0 +1,31 @@
+# Study U part (a) (docs/PAPER1_REVISION_PLAN.md, entry of 9 November 2026): JEPA pretraining and
+# hybrid fine-tuning on top of the final settings of pure_m5; written by scripts/make_hybrid_round.py.
+# Run with one round.
+name: hybridU_pure_m5
+base: configs/experiments/hybridU_pure_m5.yaml
+evaluation:
+  horizon: 28
+  n_origins: 4
+  holdout_periods: 196
+  step: 28
+  scale_lag: 1
+  weight_window: 28
+seeds:
+- 1
+- 2
+- 3
+rung_fraction: 1.0
+promote: beats_best
+menu:
+- name: jepa_hybrid
+  change:
+    finetune: low_lr
+    encoder_lr_scale: 0.1
+    latent_weight: 0.5
+    pretrain_steps: 30000
+- name: jepa_hybrid_long
+  change:
+    finetune: low_lr
+    encoder_lr_scale: 0.1
+    latent_weight: 0.5
+    pretrain_steps: 90000

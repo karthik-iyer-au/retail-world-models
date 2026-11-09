@@ -1,0 +1,9 @@
+{"kind": "start", "score": 0.5467816353310605, "held_out": 0.5565652139204927, "seed_scores": [0.5517644491502119, 0.5431803919819673, 0.5454000648610022], "keep_bar": 0.008584057168244619, "config_sha256": "05d822d98b362dad455c64b42135a4d9426d367a82275df6aa65fe4f1c84bcce"}
+{"kind": "rung", "round": 1, "change": "negative_binomial", "params_changed": {"likelihood": "negative_binomial"}, "score": 0.55311030659657}
+{"kind": "rung", "round": 1, "change": "negative_binomial_item_spread", "params_changed": {"likelihood": "negative_binomial", "spread_by_item": true}, "score": 0.5583110078140535}
+{"kind": "rung", "round": 1, "change": "zinb_item_spread", "params_changed": {"likelihood": "zinb", "spread_by_item": true}, "score": 0.5500177311792156}
+{"kind": "rung", "round": 1, "change": "hurdle_nb_item_spread", "params_changed": {"likelihood": "hurdle_nb", "spread_by_item": true}, "score": 0.5285893231634871}
+{"kind": "try", "round": 1, "change": "hurdle_nb_item_spread", "params_changed": {"likelihood": "hurdle_nb", "spread_by_item": true}, "score": 0.5326946458623381, "held_out": 0.5338988172985325, "seed_scores": [0.5285893231634871, 0.5320234952174322, 0.5374711192060947], "gain": 0.014086989468722444, "keep_bar": 0.008584057168244619}
+{"kind": "try", "round": 1, "change": "zinb_item_spread", "params_changed": {"likelihood": "zinb", "spread_by_item": true}, "score": 0.552203071350021, "held_out": 0.543990502905217, "seed_scores": [0.5500177311792156, 0.5547918669368478, 0.5517996159339996], "gain": -0.0054214360189605015, "keep_bar": 0.008584057168244619}
+{"kind": "kept", "round": 1, "change": "hurdle_nb_item_spread", "score": 0.5326946458623381, "held_out": 0.5338988172985325}
+{"kind": "end", "kept": ["hurdle_nb_item_spread"], "score": 0.5326946458623381, "held_out": 0.5338988172985325}
