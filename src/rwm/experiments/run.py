@@ -386,6 +386,7 @@ def _takes_seed(name: str) -> bool:
     import rwm.model  # noqa: F401
     import rwm.prior_work  # noqa: F401
     import rwm.seed_average  # noqa: F401
+    import rwm.pooled  # noqa: F401
     from rwm.forecaster import _MODELS
 
     model = _MODELS.get(name)

@@ -41,6 +41,9 @@ in `levers` set to zero.
   the horizon, the model predicts the state the encoder will give once those
   periods are history. The target comes from a slowly updated copy of the
   encoder. The forecast loss stays on throughout.
+- `pretrain_on`: other data sets (as `rwm.data.pool` sources) whose series are
+  read alongside this data set's during pretraining only; their labels are unknown
+  to the model, and the forecast is trained on this data set alone.
 - `pretrain_steps`: train the encoder on the latent loss alone first, then
   train for the forecast. `finetune` says what happens to the encoder in
   that second stretch: `full` (trained as usual), `low_lr` (trained at
@@ -482,6 +485,7 @@ class StateModel(Forecaster):
         year_ago_window: int = 1,
         regular_column: str | None = None,
         pretrain_steps: int = 0,
+        pretrain_on: list[dict] | None = None,
         finetune: str = "full",
         encoder_lr_scale: float = 0.1,
         latent_ema: float = 0.99,
@@ -600,6 +604,9 @@ class StateModel(Forecaster):
         if finetune not in ("full", "low_lr", "frozen"):
             raise ValueError("finetune must be full, low_lr or frozen")
         self.pretrain_steps, self.finetune = pretrain_steps, finetune
+        self.pretrain_on = list(pretrain_on or [])  # other data sets read during pretraining (rwm.data.pool)
+        if self.pretrain_on and not pretrain_steps:
+            raise ValueError("pretrain_on needs pretrain_steps")
         self.encoder_lr_scale, self.latent_ema = encoder_lr_scale, latent_ema
         # periods back to look for "this time last year", e.g. 51, 52, 53
         self._year_offsets = (
@@ -875,6 +882,20 @@ class StateModel(Forecaster):
         self._names = pd.Index(train[SERIES].unique().astype(str)).sort_values()
         self._has_price = PRICE in train
         data = self._tensors(train, dates, with_units=True)
+        sources = []  # other data sets read during pretraining: their tensors, series count and last start
+        for spec in self.pretrain_on:
+            from rwm.data.pool import load_source
+
+            cols = [UNITS] + ([PRICE] if self._has_price else []) + list(self.extra) + ([self.regular_column] if self.regular_column else [])
+            frame = load_source(spec, cols, until=dates[-1])
+            s_dates = np.sort(frame[DATE].unique())[-(self.train_periods + L) :]
+            frame = frame[frame[DATE] >= s_dates[0]]
+            s_names = pd.Index(frame[SERIES].unique().astype(str)).sort_values()
+            s_last = len(s_dates) - H
+            if s_last >= L:
+                sources.append({"data": self._tensors(frame, s_dates, with_units=True, names=s_names),
+                                "n": len(s_names), "last": s_last})
+            del frame
 
         first = train.drop_duplicates(SERIES)
         first = first.set_index(first[SERIES].astype(str)).loc[self._names]
@@ -981,8 +1002,20 @@ class StateModel(Forecaster):
                 }, label)
 
             self._net.train()
+            # pretraining with other data sets: each step draws its series from one data set, chosen
+            # in proportion to its number of series (this data set is one of them)
+            pool = sources if (sources and not forecast) else []
+            pool_p = torch.tensor([float(n)] + [float(s_["n"]) for s_ in pool]) if pool else None
             for step in range(first, steps):
-                if self._members is None:
+                d, src = data, None
+                if pool:
+                    k = int(torch.multinomial(pool_p, 1, generator=gen))
+                    src = pool[k - 1] if k > 0 else None
+                if src is not None:  # a series of another data set, its labels unknown to the model
+                    d, picked = src["data"], None
+                    rows = torch.randint(0, src["n"], (self.batch,), generator=gen).to(self._dev)
+                    start = torch.randint(L, src["last"] + 1, (self.batch,), generator=gen).to(self._dev)
+                elif self._members is None:
                     picked = None
                     rows = torch.randint(0, n, (self.batch,), generator=gen).to(self._dev)
                     if self.total_weight > 0:  # a few shared dates, so totals within the batch mean something
@@ -998,21 +1031,24 @@ class StateModel(Forecaster):
                     rows = picked.reshape(-1).clamp(min=0)
                 with torch.autocast("cuda", dtype=torch.float16, enabled=amp):
                     cats = None
-                    if self.unknown_label_rate > 0 and ITEM in self.categorical:
+                    if src is not None:
+                        cats = torch.zeros((len(rows), self._cats.shape[1]), dtype=torch.long, device=self._dev)
+                        row_window, self._row_window = self._row_window, None
+                    elif self.unknown_label_rate > 0 and ITEM in self.categorical:
                         # now and then hide which item it is, so the model learns to
                         # forecast from the other labels alone (needed for new items)
                         cats = self._cats[rows].clone()
                         hide = torch.rand(len(rows), generator=gen).to(self._dev) < self.unknown_label_rate
                         cats[hide, self.categorical.index(ITEM)] = 0
                     out, scale, on_sale, ahead = self._forward(
-                        data, {**data, "start": start}, rows, start, picked, full=True, cats=cats, teach=True
+                        d, {**d, "start": start}, rows, start, picked, full=True, cats=cats, teach=True
                     )
                     latent = 0.0
                     if with_latent:
                         # the state once the horizon has become history, from the slow copy
                         later = start + H
                         with torch.no_grad():
-                            hist_later = self._window(data, {**data, "start": start}, rows, later)[0]
+                            hist_later = self._window(d, {**d, "start": start}, rows, later)[0]
                             want = slow.state(hist_later)
                         far = lambda a, b: (1 - torch.nn.functional.cosine_similarity(a.float(), b.float(), dim=1)).mean()
                         if self._net.rollout:
@@ -1029,13 +1065,15 @@ class StateModel(Forecaster):
                                 ks = torch.randint(1, H, (self.latent_checks,), generator=gen).tolist()
                             for k in ks:
                                 with torch.no_grad():
-                                    seen = slow.state(self._window(data, {**data, "start": start}, rows, start + k)[0])
+                                    seen = slow.state(self._window(d, {**d, "start": start}, rows, start + k)[0])
                                 latent = latent + rho ** (k - 1) * far(out["rolled"][:, k - 1], seen)
                                 weight = weight + rho ** (k - 1)
                             latent = latent / weight
                         else:
                             guess = self._net.next(torch.cat([out["state"], out["plan"].flatten(1)], dim=1))
                             latent = far(guess, want)
+                if src is not None:
+                    self._row_window = row_window
                 loss = latent_weight * latent
                 if self.plan_split and self.split_weight > 0:
                     # keep what the plan adds apart from what would have happened anyway

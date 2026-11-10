@@ -57,7 +57,7 @@ def model_names(model: dict) -> set[str]:
 
 
 # Models that only hold others; the machine is decided by what they hold.
-WRAPPERS = {"seed_average", "combination"}
+WRAPPERS = {"seed_average", "combination", "pooled"}
 
 
 def machine(config: dict) -> str:

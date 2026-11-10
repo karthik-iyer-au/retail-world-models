@@ -286,7 +286,7 @@ def _uses_gpu(model: dict) -> bool:
     names = {model.get("name")}
     inner = model.get("params", {}).get("model")
     names.add(inner.get("name") if isinstance(inner, dict) else inner)
-    return bool(names - {"seed_average", None} - CPU_MODELS)
+    return bool(names - {"seed_average", "pooled", None} - CPU_MODELS)
 
 
 def _offer(memory_gb: int, exclude: set, gpu: bool = True) -> dict:

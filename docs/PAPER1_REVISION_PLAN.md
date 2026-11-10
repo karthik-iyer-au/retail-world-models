@@ -1162,3 +1162,34 @@ with and without the plan, so it is part of the paper's Dominick's comparison an
 way (`configs/experiments/cleanrev_dominicks_<c>_rolling_timestral_{mean,plan}.yaml`), with study F's two added
 ensembles (Timestral's plan form in place of TimesFM's, and all four together) rebuilt beside the paper's ensemble.
 12 runs; cost about US$3.
+
+**11 November 2026, study U part (b), pooled pretraining with a matching pooled LightGBM, written down before it
+runs.** Karthik asked for it in this revision (10 November: "Okay we need this too right so we have fair comparison
+that can be parallel too?"). Part (a) pretrained each world model on its own data set and kept a gain on one data set
+of nine. Part (b) asks whether sales from other data sets help: the world model is pretrained on its own data set's
+history together with other data sets of the same period length, then fitted to its own data set as in part (a);
+LightGBM is fitted on the same pooled data, so both models see exactly the same extra sales.
+
+Pools, fixed now: for each Dominick's category the other five categories and Frat; for Frat the six Dominick's
+categories; for M5, Favorita; for Favorita, M5. A source from the target's own retailer (another Dominick's
+category, which shares its stores and weeks) is cut at the target's training end in every window, so no sales from
+the target's test weeks are seen (`rwm.data.pool.load_source`, `same_retailer`). Source labels are prefixed so they
+never match the target's; the world model treats them as unknown labels, and a column the target uses and the source
+lacks is zero.
+
+World model (`StateModel(pretrain_on=...)`): each data set's final settings (`final_<data>_world_model`), with the
+long hybrid recipe of part (a) (latent-only pretraining for three times the training steps, then the forecast loss
+with the latent loss kept on at 0.5 and the encoder at a tenth of the learning rate); during pretraining each batch
+is drawn from one data set chosen in proportion to its number of series, the target included. The long recipe is
+fixed now because pretraining on more data needs more steps, and it was the recipe part (a) kept on snacks.
+LightGBM (`rwm.pooled`): each data set's final settings fitted on the target and the sources together, with the
+data set as a label; where the final settings fit one model per store, the pooled fit is one model for all stores
+with the store as a label (as in the transfer test), since per-store models would share nothing across data sets.
+Sources' dates are moved by whole weeks so that their last period falls on the target's last training period.
+
+Run on the paper's rolling windows of every data set (the final runs' windows), five-copy averages where the final
+runs use them, seed 0, split across machines. Reported beside the final runs: pooled against own-data for each
+model, and pooled world model against pooled LightGBM, with the paired tests of the final runs. No search: one
+setting each, fixed here. Code: `src/rwm/data/pool.py`, `src/rwm/pooled.py`, `StateModel.pretrain_on`; tests in
+`tests/test_pooled_pretraining.py`. Cost: pretraining three times the training steps on two to seven times the
+series makes these runs three to four times as long as the final runs; about 120 GPU-hours, US$50 to 60.
