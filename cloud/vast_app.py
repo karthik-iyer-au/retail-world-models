@@ -88,7 +88,7 @@ for t in 1 2 3 4 5; do git fetch -q --depth 1 "$REPO_URL" "$COMMIT" && break; sl
 git checkout -q FETCH_HEAD || fail "checkout"
 # hosts' links to the package index drop now and then (3 November: read timeouts, broken connections): retry
 PIP="pip install -q --retries 10 --timeout 60"
-for t in 1 2 3; do $PIP "torch==$TORCH" && $PIP -e ".[trees,deep]" && break; [ $t = 3 ] && fail "install"; sleep 30; done
+for t in 1 2 3; do $PIP "torch==$TORCH" && $PIP -e ".[trees,deep${EXTRAS:+,$EXTRAS}]" && break; [ $t = 3 ] && fail "install"; sleep 30; done
 python cloud/fetch_data.py "$BRIDGE_URL" "$DATASET" "data/raw/$DATASET" || fail "data"  # in parts: one long request is cut off
 # training saves partway (about every 5% of steps) under /out/_partial; copy them to the results
 # volume every five minutes and start from the last copy, so a lost machine costs minutes, not the run
@@ -307,9 +307,20 @@ def _mark_bad(machine_id) -> None:
     results_volume.commit()
 
 
+EXTRA_PACKAGES = {"timesfm": "foundation", "chronos": "foundation", "chronos2": "foundation", "timestral": "foundation",
+                  "tft": "benchmarks"}  # the optional packages a model needs on the machine (pyproject.toml)
+
+
+def _extras(model: dict) -> str:
+    inner = model.get("params", {}).get("model")
+    names = {model.get("name"), inner.get("name") if isinstance(inner, dict) else inner}
+    return ",".join(sorted({EXTRA_PACKAGES[n] for n in names if n in EXTRA_PACKAGES}))
+
+
 def _rent(config: dict, env: dict, dataset: str, tried: set, label: str | None = None) -> tuple[int, int]:
     """Rent the cheapest matching machine not tried yet and start the worker on it."""
     offer = _offer(MEMORY_GB.get(dataset, DEFAULT_MEMORY_GB), tried | _bad(), _uses_gpu(config["model"]))
+    env = {**env, **({"EXTRAS": _extras(config["model"])} if _extras(config["model"]) else {})}
     tried.add(offer["machine_id"])
     made = _first_json(_vast(
         "create", "instance", str(offer["id"]), "--image", "python:3.12-slim", "--disk", "120",
