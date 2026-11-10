@@ -1,0 +1,31 @@
+# Dominick's comparison of all models rerun on cleaned prices (plan entry of 10 November 2026, Timestral added the same day): rev_dominicks_sna_rolling_timestral_plan.yaml with clean_prices 5.
+name: cleanrev_dominicks_sna_rolling_timestral_plan
+seed: 0
+dataset:
+  name: dominicks
+  params:
+    categories:
+    - sna
+    clean_prices: 5
+model:
+  name: timestral
+  params:
+    context: 512
+    batch_size: 256
+    repo: mistralai/Timestral-28M
+    plan:
+    - promo
+    price_plan: true
+evaluation:
+  horizon: 8
+  n_origins: 6
+  holdout_periods: 24
+  scale_lag: 1
+  weight_window: 13
+  conditions:
+  - promo
+  after_promo:
+    levers:
+    - promo
+    periods: 2
+  step: 8

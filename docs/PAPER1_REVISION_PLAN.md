@@ -1155,3 +1155,10 @@ paper's `rev_` configs with the one line added), and the equal-weight ensemble i
 members. Scored and tested as the paper's comparison; reported as the paper's Dominick's results on cleaned
 prices, with the recorded-price results in the supplement, so a reader sees what the fix changes. 48 runs, not split
 (single fits); cost about 30 GPU-hours, US$15 to 20.
+
+**10 November 2026, later: Timestral added to the cleaned-price comparison, before any of it is scored.** Karthik
+asked (10 November: "also minestral rifht?"). Study F ran Timestral zero-shot on every data set's rolling windows,
+with and without the plan, so it is part of the paper's Dominick's comparison and is rerun on cleaned prices the same
+way (`configs/experiments/cleanrev_dominicks_<c>_rolling_timestral_{mean,plan}.yaml`), with study F's two added
+ensembles (Timestral's plan form in place of TimesFM's, and all four together) rebuilt beside the paper's ensemble.
+12 runs; cost about US$3.
