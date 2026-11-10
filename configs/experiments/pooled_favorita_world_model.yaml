@@ -1,0 +1,56 @@
+# Study U part (b), pooled (plan entry of 11 November 2026); written by scripts/make_pooled_configs.py.
+name: pooled_favorita_world_model
+seed: 0
+dataset:
+  name: favorita
+model:
+  name: seed_average
+  params:
+    model: state_model
+    members: 5
+    seed: 0
+    params:
+      horizon: 28
+      history: 112
+      train_periods: 730
+      categorical:
+      - item_id
+      - class
+      - family
+      - store_id
+      - city
+      extra:
+      - promo
+      - event
+      - payday
+      d_model: 128
+      layers: 3
+      heads: 4
+      steps: 30000
+      batch: 1024
+      lr: 0.001
+      mixed_precision: true
+      regular_price: true
+      lift_readout: true
+      rollout: true
+      roll_norm: true
+      levers:
+      - promo
+      weight_average: 0.999
+      latent_weight: 0.5
+      latent_checks: 7
+      likelihood: hurdle_nb
+      spread_by_item: true
+      pretrain_steps: 90000
+      finetune: low_lr
+      encoder_lr_scale: 0.1
+      pretrain_on:
+      - name: m5
+        tag: m5
+evaluation:
+  horizon: 28
+  n_origins: 4
+  scale_lag: 1
+  weight_window: 28
+  holdout_periods: 0
+  step: 28

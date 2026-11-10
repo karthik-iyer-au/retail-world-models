@@ -1193,3 +1193,10 @@ model, and pooled world model against pooled LightGBM, with the paired tests of 
 setting each, fixed here. Code: `src/rwm/data/pool.py`, `src/rwm/pooled.py`, `StateModel.pretrain_on`; tests in
 `tests/test_pooled_pretraining.py`. Cost: pretraining three times the training steps on two to seven times the
 series makes these runs three to four times as long as the final runs; about 120 GPU-hours, US$50 to 60.
+
+**11 November 2026, Favorita's final runs start before its study U rerun ends.** Favorita's study T kept the hurdle
+likelihood with an item spread (0.483 to 0.468 on the search windows, 0.560 to 0.550 held out), so study U runs again
+on top of it (`hybridU_avg5_world_model_favorita`, rule of 9 November). So that Favorita does not wait a day, its
+final run, its transfer runs and its pooled runs start now on the settings as they stand (round 1's latent check and
+the hurdle likelihood). If the study U rerun keeps a change, those runs are made again on the new settings and the
+new ones are reported; if it keeps nothing, these are Favorita's final runs.

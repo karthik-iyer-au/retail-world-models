@@ -1,0 +1,50 @@
+# Final run (plan entry of 10 November 2026): the tuned settings of favorita's world model, from lossT_r1_avg5_world_model_favorita (kept: avg5_world_model_favorita:latent_overshooting, lossT_r1_avg5_world_model_favorita:hurdle_nb_item_spread), on the paper's rolling windows; started before Favorita's study U rerun ends (plan entry of 11 November 2026); written by scripts/make_final_configs.py logic.
+name: final_favorita_world_model
+seed: 0
+dataset:
+  name: favorita
+model:
+  name: seed_average
+  params:
+    model: state_model
+    members: 5
+    seed: 0
+    params:
+      horizon: 28
+      history: 112
+      train_periods: 730
+      categorical:
+      - item_id
+      - class
+      - family
+      - store_id
+      - city
+      extra:
+      - promo
+      - event
+      - payday
+      d_model: 128
+      layers: 3
+      heads: 4
+      steps: 30000
+      batch: 1024
+      lr: 0.001
+      mixed_precision: true
+      regular_price: true
+      lift_readout: true
+      rollout: true
+      roll_norm: true
+      levers:
+      - promo
+      weight_average: 0.999
+      latent_weight: 0.1
+      latent_checks: 7
+      likelihood: hurdle_nb
+      spread_by_item: true
+evaluation:
+  horizon: 28
+  n_origins: 4
+  scale_lag: 1
+  weight_window: 28
+  holdout_periods: 0
+  step: 28

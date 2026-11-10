@@ -1,0 +1,41 @@
+# Transfer rerun (plan entry of 10 November 2026) from final_favorita_lightgbm; written by scripts/make_final_transfer_configs.py.
+name: ftransfer_favorita_item_lightgbm_trained_on_all
+seed: 0
+dataset:
+  name: favorita
+model:
+  name: seed_average
+  params:
+    model: lightgbm_direct
+    members: 5
+    seed: 0
+    params:
+      horizon: 28
+      train_periods: 730
+      group_by: store_id
+      categorical:
+      - item_id
+      - class
+      - family
+      extra:
+      - promo
+      - event
+      - payday
+      rounds: 800
+      threads: 16
+      params:
+        min_data_in_leaf: 800
+        objective: poisson
+        learning_rate: 0.025
+evaluation:
+  horizon: 28
+  n_origins: 4
+  scale_lag: 1
+  weight_window: 28
+  holdout_periods: 0
+  step: 28
+  transfer:
+    by: item_id
+    share: 0.2
+    seed: 0
+    trained_on_all: true
