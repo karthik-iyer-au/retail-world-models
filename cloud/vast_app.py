@@ -294,11 +294,14 @@ def _uses_gpu(model: dict) -> bool:
 
 
 def _offer(memory_gb: int, exclude: set, gpu: bool = True) -> dict:
-    query = QUERY_GPU if gpu else QUERY_CPU
-    offers = json.loads(_vast("search", "offers", f"{query} cpu_ram>={memory_gb}", "-o", "dph_total"))
-    for o in offers:
-        if o["machine_id"] not in exclude:
-            return o
+    # an RTX 4090 when one is free, else an RTX 5090 (11 November 2026: the 96 GB machines Favorita needs ran
+    # short); the GPU each run used is in its manifest
+    queries = [QUERY_GPU, QUERY_GPU.replace("gpu_name=RTX_4090", "gpu_name=RTX_5090")] if gpu else [QUERY_CPU]
+    for query in queries:
+        offers = json.loads(_vast("search", "offers", f"{query} cpu_ram>={memory_gb}", "-o", "dph_total"))
+        for o in offers:
+            if o["machine_id"] not in exclude:
+                return o
     raise RuntimeError("no machine matches the query")
 
 
