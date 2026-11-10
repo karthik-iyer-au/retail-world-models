@@ -1144,3 +1144,14 @@ every model setting taken unchanged from M5's final configs (the other daily sou
 lists that name the data set's own columns (`configs/experiments/fnewretailer_favorita_*.yaml`); scored and tested
 against each other as the final runs are, and reported beside Favorita's tuned final runs, so the paper shows the
 same retailer with settings carried over and with settings searched on it. Cost: about 45 GPU-hours, US$25 to 35.
+
+**10 November 2026, the paper's Dominick's comparison of all models on cleaned prices, written down before it
+runs.** The paper's Dominick's results used the prices as recorded; study S found recorded prices more than five
+times off the same item's same-week median in other stores and fixed them (`clean_prices: 5`, entry of 3 November).
+Every model of the paper's Dominick's comparison (seasonal naive, LightGBM, the world model, the lift model, TFT,
+Chronos-Bolt, TimesFM with and without the plan) is run again on the six categories' rolling windows with
+`clean_prices: 5` and nothing else changed (`configs/experiments/cleanrev_dominicks_<c>_rolling_<model>.yaml`, the
+paper's `rev_` configs with the one line added), and the equal-weight ensemble is rebuilt from the same three
+members. Scored and tested as the paper's comparison; reported as the paper's Dominick's results on cleaned
+prices, with the recorded-price results in the supplement, so a reader sees what the fix changes. 48 runs, not split
+(single fits); cost about 30 GPU-hours, US$15 to 20.

@@ -1,0 +1,26 @@
+# Dominick's comparison of all models rerun on cleaned prices (plan entry of 10 November 2026): rev_dominicks_fre_rolling_chronos.yaml with clean_prices 5; written by hand from the rev configs.
+name: cleanrev_dominicks_fre_rolling_chronos
+seed: 0
+dataset:
+  name: dominicks
+  params:
+    categories:
+    - fre
+    clean_prices: 5
+model:
+  name: chronos
+  params:
+    context: 512
+evaluation:
+  horizon: 8
+  n_origins: 6
+  holdout_periods: 24
+  scale_lag: 1
+  weight_window: 13
+  conditions:
+  - promo
+  after_promo:
+    levers:
+    - promo
+    periods: 2
+  step: 8
