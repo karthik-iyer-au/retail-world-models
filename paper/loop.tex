@@ -1,0 +1,122 @@
+% The research loop: how both models' settings were searched (revision, November 2026).
+% Numbers come from paper/generated/tab_loop.tex and the figures, all built from results/research/*/log.jsonl
+% by paper/figs/make_loop_figures.py.
+\section{Searching the settings of both models}
+\label{sec:loop}
+
+Both models were tuned with the same procedure on every data set. On the windows the searches
+scored, tuning improved LightGBM on all nine data sets and the world model on six, and the gains
+were mostly small next to the differences between data sets. The held-out window agreed with the
+search windows only weakly, so the paper judges the models on later windows the searches never
+saw. Table~\ref{tab:loop} gives every search from its starting settings to its final settings, and
+Figure~\ref{fig:looppath} shows every run in the order it was made.
+
+\subsection{The procedure}
+
+The procedure is a fixed loop, written down before it ran, that changes one setting at a time. It
+starts from the settings the first version of this paper used. Each change on a menu fixed in
+advance is run once, on one seed, on top of the best settings so far. Every change that beats the
+best settings on that seed is run on two more seeds. The best of those is kept if its mean over
+three seeds beats the best settings' mean by at least the keep bar, which is the spread of the
+three seeds of the starting settings. The loop then starts a new round from the new best and stops
+when a round keeps nothing. A change cannot be kept because one seed was lucky, and the bar is set
+by the model's own noise on that data set before any change is tried.
+
+The windows the loop scores lie before every window this paper reports. The latest of them is held
+out: it is scored for every three-seed run and never used to decide. The menus differ between the
+models, because the models have different settings, but each covers what a practitioner would try
+first: for the world model the loss weights, the roll-forward, training length, learning rate and
+batch, weight averaging and the latent checks of Section~\ref{sec:models}; for LightGBM the
+number of leaves, the learning rate and number of rounds, the minimum data in a leaf, the
+objective, feature sampling and the lag windows.
+
+After its loop each world model had two more rounds of one change each. The first tried four count
+likelihoods that treat weeks with no sales on their own: the negative binomial, the same with a
+spread for each item, the zero-inflated negative binomial and the hurdle negative binomial. The
+second tried JEPA pretraining of the encoder with the forecast head fitted afterwards at a lower
+rate, at two lengths of pretraining. Both used the keep rule above. LightGBM has no counterpart
+to either, so it had none. Pretraining used only each data set's own history, so the two models
+still saw the same data.
+
+Each model on each data set was searched as a five-copy average, the mean forecast of five fits
+with different seeds, except on M5, where both models were single fits. Section~\ref{sec:loopnoise} shows why the
+average matters.
+
+\input{generated/tab_loop}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_loop_path.pdf}
+\caption{Every run of every search, in the order it was made. Faint dots are first-seed screens,
+open circles are three-seed confirmations, and the step line is the best settings so far. The band
+under the line is the keep bar: a change had to land below it to be kept. The world model's line
+runs on into its likelihood and JEPA rounds after its own loop ends.}
+\label{fig:looppath}
+\end{figure*}
+
+\subsection{What the searches kept}
+
+The searches made 1,020 runs, 463 of the world model and 557 of LightGBM, and kept 22 changes, 9 for the world model and 13 for LightGBM.
+LightGBM kept at least one change on every data set and the world model kept nothing on three of
+the six Dominick's categories. No single change helped the world model everywhere
+(Figure~\ref{fig:loopheat}). Weighting the loss toward high-volume series made the first seed worse on most data sets. The seven-step latent
+check, kept on Favorita, was among the changes that moved Favorita most and did little elsewhere.
+
+On the search windows the world model improved on six of the nine data sets and LightGBM on all
+nine (Figure~\ref{fig:loopslopes}). The largest gain of either model was LightGBM on Favorita,
+from 0.922 to 0.580. The world model's largest was also Favorita, from 0.547 to 0.483.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figs/fig_loop_heat.pdf}
+\caption{Each change tried alone on the world model in the first round, against that data set's
+starting settings on the first seed. Blue is better. A blank cell is a change that was not on that
+data set's menu.}
+\label{fig:loopheat}
+\end{figure}
+
+\subsection{Did the held-out window agree?}
+
+Only partly. Across every three-seed run, the change on the search windows and the change on the
+held-out window are correlated at 0.29 for the world model and 0.05 for LightGBM
+(Figure~\ref{fig:loopheldout}). A change that helps on the search windows is a weak guide to the
+next window. The world model's final settings were worse than its starting settings on the
+held-out window on two data sets, Frat (0.591 to 0.608) and snacks (0.568 to 0.608), and
+LightGBM's on five, most on soft drinks (0.435 to 0.507). This is why the paper reports the final settings on windows that the
+searches never saw, in Section~\ref{sec:results}, and not the search scores.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figs/fig_loop_heldout.pdf}
+\caption{Each three-seed run's change on the search windows against its change on the held-out
+window, both against the starting settings of its search.}
+\label{fig:loopheldout}
+\end{figure}
+
+\subsection{Seed noise, one copy against five}
+\label{sec:loopnoise}
+
+A single world-model fit is noisy enough to hide most of the changes the loop tries. On the six
+Dominick's categories the three seeds of the starting settings differ from their mean by a
+standard deviation of 6.3\% for a single fit and 1.8\% for a five-copy average
+(Figure~\ref{fig:loopnoise}). The
+single-fit search on cheese had a bar of 0.040 and kept nothing; with the average the bars on the
+Dominick's categories were between 0.004 and 0.034. LightGBM's seeds differ much less, and its
+bars were between 0.002 and 0.010.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figs/fig_loop_noise.pdf}
+\caption{The starting settings' three seed scores on each Dominick's category, as a share of their
+mean, for a single world-model fit and for the five-copy average. Ticks are the scores.}
+\label{fig:loopnoise}
+\end{figure}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_loop_slopes.pdf}
+\caption{Each model's starting and final settings on each data set. Open circles are the starting
+settings and filled circles the final settings, on the search windows (top) and the held-out
+window (bottom).}
+\label{fig:loopslopes}
+\end{figure*}

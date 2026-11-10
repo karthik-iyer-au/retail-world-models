@@ -1,0 +1,39 @@
+\begin{table*}[t]
+\centering\footnotesize
+\caption{Every search, from starting to final settings. Scores are WRMSSE (lower is better), the mean of three seeds on the search windows and one score on the held-out window, which never decided anything. The keep bar is the seed spread of the starting settings; a change was kept only when its three-seed mean beat the best so far by at least the bar. Tries counts every run, first-seed screens and three-seed confirmations.}
+\label{tab:loop}
+\begin{tabular}{llrrrrrrp{5.2cm}}
+\toprule
+Data & Model & Tries & Keep bar & \multicolumn{2}{c}{Starting} & \multicolumn{2}{c}{Final} & Kept, in order \\
+& & & & Search & Held-out & Search & Held-out & \\
+\midrule
+M5 & World model & 59 & 0.013 & 0.570 & 0.550 & 0.533 & 0.534 & feedback, hurdle nb item spread \\
+ & LightGBM & 51 & 0.003 & 0.603 & 0.553 & 0.556 & 0.522 & num leaves quarter \\
+\addlinespace[2pt]
+Favorita & World model & 51 & 0.028 & 0.547 & 0.600 & 0.483 & 0.560 & latent overshooting \\
+ & LightGBM & 99 & 0.009 & 0.922 & 0.576 & 0.580 & 0.573 & min data in leaf 4x, objective poisson, learning rate half \\
+\addlinespace[2pt]
+Frat & World model & 53 & 0.028 & 0.588 & 0.591 & 0.547 & 0.608 & batch half \\
+ & LightGBM & 52 & 0.003 & 0.501 & 0.546 & 0.489 & 0.546 & learning rate double \\
+\addlinespace[2pt]
+Analgesics & World model & 35 & 0.004 & 0.509 & 0.619 & 0.509 & 0.619 & nothing \\
+ & LightGBM & 52 & 0.010 & 0.548 & 0.757 & 0.528 & 0.764 & num leaves quarter \\
+\addlinespace[2pt]
+Bottled juice & World model & 30 & 0.028 & 0.587 & 0.637 & 0.587 & 0.637 & nothing \\
+ & LightGBM & 67 & 0.008 & 0.708 & 0.582 & 0.674 & 0.593 & objective poisson, feature fraction 0.8 \\
+\addlinespace[2pt]
+Cheese & World model & 33 & 0.034 & 0.392 & 0.714 & 0.392 & 0.714 & nothing \\
+ & LightGBM & 49 & 0.002 & 0.352 & 0.833 & 0.346 & 0.839 & longer windows \\
+\addlinespace[2pt]
+Frozen entrees & World model & 95 & 0.007 & 0.246 & 0.251 & 0.216 & 0.241 & total weight 0.1, batch half \\
+ & LightGBM & 53 & 0.010 & 0.222 & 0.183 & 0.181 & 0.195 & num leaves 4x \\
+\addlinespace[2pt]
+Soft drinks & World model & 65 & 0.020 & 0.594 & 0.579 & 0.572 & 0.522 & lr double \\
+ & LightGBM & 80 & 0.004 & 0.554 & 0.435 & 0.532 & 0.507 & num leaves quarter, max bin 255 \\
+\addlinespace[2pt]
+Snacks & World model & 42 & 0.018 & 0.439 & 0.568 & 0.400 & 0.608 & negative binomial item spread, jepa hybrid long \\
+ & LightGBM & 54 & 0.006 & 0.358 & 0.425 & 0.351 & 0.424 & rounds double \\
+\addlinespace[2pt]
+\bottomrule
+\end{tabular}
+\end{table*}

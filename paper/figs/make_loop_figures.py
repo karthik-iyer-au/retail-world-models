@@ -255,6 +255,38 @@ def main():
     fig_noise()
     fig_heldout()
     fig_slopes()
+    write_table()
+
+
+def write_table():
+    """paper/generated/tab_loop.tex: each search, from starting to final settings."""
+    lines = [r"\begin{table*}[t]", r"\centering\footnotesize",
+             r"\caption{Every search, from starting to final settings. Scores are WRMSSE (lower is better), the mean of three seeds on the "
+             r"search windows and one score on the held-out window, which never decided anything. The keep bar is the seed spread of "
+             r"the starting settings; a change was kept only when its three-seed mean beat the best so far by at least the bar. "
+             r"Tries counts every run, first-seed screens and three-seed confirmations.}",
+             r"\label{tab:loop}",
+             r"\begin{tabular}{llrrrrrrp{5.2cm}}", r"\toprule",
+             r"Data & Model & Tries & Keep bar & \multicolumn{2}{c}{Starting} & \multicolumn{2}{c}{Final} & Kept, in order \\",
+             r"& & & & Search & Held-out & Search & Held-out & \\", r"\midrule"]
+    for d in DATA:
+        for model, chains in (("World model", WM), ("LightGBM", LGB)):
+            names = [n for n in chains[d] if rows(n)]
+            if not names:
+                continue
+            st = first_start(names[0])
+            end = next((r for r in reversed(rows(names[-1])) if r["kind"] == "end"), None)
+            tries = sum(1 for n in names for r in rows(n) if r["kind"] in ("rung", "try"))
+            kept = [r["change"] for n in names for r in rows(n) if r["kind"] == "kept"]
+            fin = (f"{end['score']:.3f} & {end['held_out']:.3f}" if end else r"\multicolumn{2}{c}{running}")
+            lines.append(f"{TITLE[d] if model == 'World model' else ''} & {model} & {tries} & {st['keep_bar']:.3f} & "
+                         f"{st['score']:.3f} & {st['held_out']:.3f} & {fin} & "
+                         + (", ".join(k.replace('_', ' ') for k in kept) or "nothing") + r" \\")
+        lines.append(r"\addlinespace[2pt]")
+    lines += [r"\bottomrule", r"\end{tabular}", r"\end{table*}"]
+    out = ROOT / "paper" / "generated" / "tab_loop.tex"
+    out.write_text("\n".join(lines) + "\n")
+    print(f"  wrote {out}")
 
 
 if __name__ == "__main__":
