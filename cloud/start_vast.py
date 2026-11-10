@@ -2,6 +2,7 @@
 
   python cloud/start_vast.py configs/research/<spec>.yaml                 # a research loop
   python cloud/start_vast.py --config configs/experiments/<x>.yaml --out vast_test   # one run
+  python cloud/start_vast.py --app <app> --machines 40 --split --out final --configs a.yaml b.yaml   # several runs
   python cloud/start_vast.py --app rwm-vast-cpu configs/research/<spec>.yaml   # LightGBM, on processor machines
   python cloud/start_vast.py --app <app> --machines 6 configs/research/<spec>.yaml   # at most 6 machines for this loop
   python cloud/start_vast.py --app <app> --rounds 1 configs/research/lossT_<name>.yaml  # one round only (study T)
@@ -34,6 +35,13 @@ def main(argv: list[str]) -> None:
     split = "--split" in argv
     opts = ("--app", "--machines", "--rounds")
     argv = [a for i, a in enumerate(argv) if a != "--split" and a not in opts and (i == 0 or argv[i - 1] not in opts)]
+    if "--configs" in argv:  # several runs at once: --configs a.yaml b.yaml ... --out <folder>
+        files = [a for a in argv[argv.index("--configs") + 1:] if a.endswith(".yaml")]
+        out = argv[argv.index("--out") + 1]
+        configs = [yaml.safe_load((modal_app.LOCAL_REPO / f).read_text()) for f in files]
+        call = modal.Function.from_name(app, "vast_batch").spawn(configs, commit, out, limit, split)
+        print(f"{len(configs)} runs started at commit {commit[:8]} ({call.object_id}); results in rwm-results/{out}")
+        return
     if "--config" in argv:
         cfg_file = argv[argv.index("--config") + 1]
         out = argv[argv.index("--out") + 1]

@@ -588,6 +588,14 @@ def _manage(configs: list[dict], commit: str, out: str, limit: int, split: bool 
 
 @app.function(image=image, volumes={RESULTS: results_volume}, secrets=[vast_secret, bridge_secret],
               timeout=24 * 3600, cpu=0.5, memory=2048)
+def vast_batch(configs: list[dict], commit: str, out: str, limit: int = 20, split: bool = False) -> list:
+    """Several runs at once (the final runs, entry of 10 November 2026), each on rented machines, split by
+    (window, copy) when asked; results in rwm-results/<out>. Runs already finished there are read back."""
+    return _manage(configs, commit, out, limit, split)
+
+
+@app.function(image=image, volumes={RESULTS: results_volume}, secrets=[vast_secret, bridge_secret],
+              timeout=24 * 3600, cpu=0.5, memory=2048)
 def vast_loop(spec: str, commit: str, max_rounds: int, limit: int = 6, split: bool = False) -> dict:
     """The research loop (src/rwm/research/loop.py) with every try on a rented machine."""
     subprocess.run(["git", "init", "-q", CHECKOUT], check=True)
