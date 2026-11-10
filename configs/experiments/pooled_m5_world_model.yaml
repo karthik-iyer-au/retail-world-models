@@ -1,0 +1,49 @@
+# Study U part (b), pooled (plan entry of 11 November 2026); written by scripts/make_pooled_configs.py.
+name: pooled_m5_world_model
+seed: 0
+dataset:
+  name: m5
+model:
+  name: state_model
+  params:
+    horizon: 28
+    history: 112
+    train_periods: 730
+    categorical:
+    - item_id
+    - dept_id
+    - cat_id
+    - store_id
+    - state_id
+    extra:
+    - event
+    - snap
+    d_model: 128
+    layers: 3
+    heads: 4
+    steps: 30000
+    batch: 1024
+    lr: 0.001
+    seed: 0
+    mixed_precision: true
+    regular_price: true
+    lift_readout: true
+    rollout: true
+    roll_norm: true
+    feedback: true
+    likelihood: hurdle_nb
+    spread_by_item: true
+    pretrain_steps: 90000
+    finetune: low_lr
+    encoder_lr_scale: 0.1
+    latent_weight: 0.5
+    pretrain_on:
+    - name: favorita
+      tag: favorita
+evaluation:
+  horizon: 28
+  n_origins: 4
+  scale_lag: 1
+  weight_window: 28
+  holdout_periods: 84
+  step: 28

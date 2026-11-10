@@ -1,0 +1,35 @@
+# Study U part (b), pooled (plan entry of 11 November 2026); written by scripts/make_pooled_configs.py.
+name: pooled_m5_lightgbm
+seed: 0
+dataset:
+  name: m5
+model:
+  name: pooled
+  params:
+    model: lightgbm_direct
+    params:
+      horizon: 28
+      train_periods: 730
+      group_by: store_id
+      categorical:
+      - item_id
+      - dept_id
+      - cat_id
+      extra:
+      - event
+      - snap
+      rounds: 800
+      seed: 0
+      threads: 16
+      params:
+        num_leaves: 63
+    pool_with:
+    - name: favorita
+      tag: favorita
+evaluation:
+  horizon: 28
+  n_origins: 4
+  scale_lag: 1
+  weight_window: 28
+  holdout_periods: 84
+  step: 28

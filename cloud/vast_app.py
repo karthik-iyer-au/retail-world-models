@@ -94,6 +94,10 @@ command -v gcc >/dev/null || fail "compiler"
 export CC=$(command -v gcc)
 for t in 1 2 3; do $PIP "torch==$TORCH" && $PIP -e ".[trees,deep${EXTRAS:+,$EXTRAS}]" && break; [ $t = 3 ] && fail "install"; sleep 30; done
 python cloud/fetch_data.py "$BRIDGE_URL" "$DATASET" "data/raw/$DATASET" || fail "data"  # in parts: one long request is cut off
+SOURCE_LIST=${SOURCES:-}
+for D in ${SOURCE_LIST//:/ }; do  # other data sets a pooled run reads (rwm.data.pool)
+  python cloud/fetch_data.py "$BRIDGE_URL" "$D" "data/raw/$D" || fail "data $D"
+done
 # training saves partway (about every 5% of steps) under /out/_partial; copy them to the results
 # volume every five minutes and start from the last copy, so a lost machine costs minutes, not the run
 mkdir -p /out
@@ -328,6 +332,25 @@ EXTRA_PACKAGES = {"timesfm": "foundation", "chronos": "foundation", "chronos2": 
                   "tft": "benchmarks"}  # the optional packages a model needs on the machine (pyproject.toml)
 
 
+def _source_sets(config: dict) -> set:
+    """Names of the other data sets a pooled run reads (pretrain_on, pool_with), anywhere in its model."""
+    found = set()
+
+    def walk(x):
+        if isinstance(x, dict):
+            for k, v in x.items():
+                if k in ("pretrain_on", "pool_with") and isinstance(v, list):
+                    found.update(s["name"] for s in v if isinstance(s, dict) and "name" in s)
+                else:
+                    walk(v)
+        elif isinstance(x, list):
+            for v in x:
+                walk(v)
+
+    walk(config.get("model", {}))
+    return found
+
+
 def _extras(model: dict) -> str:
     inner = model.get("params", {}).get("model")
     names = {model.get("name"), inner.get("name") if isinstance(inner, dict) else inner}
@@ -336,7 +359,11 @@ def _extras(model: dict) -> str:
 
 def _rent(config: dict, env: dict, dataset: str, tried: set, label: str | None = None) -> tuple[int, int]:
     """Rent the cheapest matching machine not tried yet and start the worker on it."""
-    offer = _offer(MEMORY_GB.get(dataset, DEFAULT_MEMORY_GB), tried | _bad(), _uses_gpu(config["model"]))
+    pooled = sorted(_source_sets(config) - {dataset})
+    if pooled:  # a pooled run also reads other data sets: fetch them and size the machine for the largest
+        env = {**env, "SOURCES": ":".join(pooled)}
+    memory = max(MEMORY_GB.get(d, DEFAULT_MEMORY_GB) for d in [dataset] + pooled)
+    offer = _offer(memory, tried | _bad(), _uses_gpu(config["model"]))
     env = {**env, **({"EXTRAS": _extras(config["model"])} if _extras(config["model"]) else {})}
     tried.add(offer["machine_id"])
     made = _first_json(_vast(

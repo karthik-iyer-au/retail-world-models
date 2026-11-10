@@ -29,8 +29,10 @@ TARGET = "target"
 
 @register_model("pooled")
 class Pooled(Forecaster):
-    def __init__(self, model: str, pool_with: list[dict], params: dict | None = None):
+    def __init__(self, model: str, pool_with: list[dict], params: dict | None = None, seed: int | None = None):
         p = dict(params or {})
+        if seed is not None:  # a five-copy average gives each copy its own seed (rwm.seed_average)
+            p["seed"] = seed
         if p.get("group_by") == STORE:
             p["group_by"] = None
             p["categorical"] = list(p.get("categorical", [])) + [STORE]
