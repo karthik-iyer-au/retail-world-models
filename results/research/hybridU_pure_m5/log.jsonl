@@ -1,0 +1,13 @@
+{"kind": "start", "score": 0.5326946458623381, "held_out": 0.5338988172985325, "seed_scores": [0.5285893231634871, 0.5320234952174322, 0.5374711192060947], "keep_bar": 0.008881796042607637, "config_sha256": "53e65945515fd299ff1c3493339e53a32baa576ae500101640400bbb14ce6068"}
+{"kind": "start", "score": 0.5326946458623381, "held_out": 0.5338988172985325, "seed_scores": [0.5285893231634871, 0.5320234952174322, 0.5374711192060947], "keep_bar": 0.008881796042607637, "config_sha256": "53e65945515fd299ff1c3493339e53a32baa576ae500101640400bbb14ce6068"}
+{"kind": "start", "score": 0.5326946458623381, "held_out": 0.5338988172985325, "seed_scores": [0.5285893231634871, 0.5320234952174322, 0.5374711192060947], "keep_bar": 0.008881796042607637, "config_sha256": "53e65945515fd299ff1c3493339e53a32baa576ae500101640400bbb14ce6068"}
+{"kind": "rung", "round": 1, "change": "jepa_hybrid", "params_changed": {"finetune": "low_lr", "encoder_lr_scale": 0.1, "latent_weight": 0.5, "pretrain_steps": 30000}, "score": 0.5368365496799937}
+{"kind": "rung", "round": 1, "change": "jepa_hybrid_long", "params_changed": {"finetune": "low_lr", "encoder_lr_scale": 0.1, "latent_weight": 0.5, "pretrain_steps": 90000}, "failed": true}
+{"kind": "stop", "round": 1, "reason": "no change beat the best on the first seed"}
+{"kind": "end", "kept": [], "score": 0.5326946458623381, "held_out": 0.5338988172985325}
+{"kind": "start", "score": 0.5326946458623381, "held_out": 0.5338988172985325, "seed_scores": [0.5285893231634871, 0.5320234952174322, 0.5374711192060947], "keep_bar": 0.008881796042607637, "config_sha256": "53e65945515fd299ff1c3493339e53a32baa576ae500101640400bbb14ce6068"}
+{"kind": "start", "score": 0.5326946458623381, "held_out": 0.5338988172985325, "seed_scores": [0.5285893231634871, 0.5320234952174322, 0.5374711192060947], "keep_bar": 0.008881796042607637, "config_sha256": "53e65945515fd299ff1c3493339e53a32baa576ae500101640400bbb14ce6068"}
+{"kind": "rung", "round": 1, "change": "jepa_hybrid", "params_changed": {"finetune": "low_lr", "encoder_lr_scale": 0.1, "latent_weight": 0.5, "pretrain_steps": 30000}, "score": 0.5368365496799937}
+{"kind": "rung", "round": 1, "change": "jepa_hybrid_long", "params_changed": {"finetune": "low_lr", "encoder_lr_scale": 0.1, "latent_weight": 0.5, "pretrain_steps": 90000}, "score": 0.5439999390658773}
+{"kind": "stop", "round": 1, "reason": "no change beat the best on the first seed"}
+{"kind": "end", "kept": [], "score": 0.5326946458623381, "held_out": 0.5338988172985325}
