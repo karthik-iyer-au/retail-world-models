@@ -1,0 +1,10 @@
+{"kind": "start", "score": 0.4834887425605183, "held_out": 0.5597920534140831, "seed_scores": [0.48632437351854857, 0.48464650806410114, 0.47949534609890526], "keep_bar": 0.006829027419643308, "config_sha256": "1d348c86ecb89ad821cc802fadec8a37fc02f9d2c31ca5b396c5dcbf264ea268"}
+{"kind": "rung", "round": 1, "change": "jepa_hybrid", "params_changed": {"params": {"finetune": "low_lr", "encoder_lr_scale": 0.1, "latent_weight": 0.5, "pretrain_steps": 30000}}, "score": 0.5272006397374711}
+{"kind": "rung", "round": 1, "change": "jepa_hybrid_long", "params_changed": {"params": {"finetune": "low_lr", "encoder_lr_scale": 0.1, "latent_weight": 0.5, "pretrain_steps": 90000}}, "failed": true}
+{"kind": "stop", "round": 1, "reason": "no change beat the best on the first seed"}
+{"kind": "end", "kept": [], "score": 0.4834887425605183, "held_out": 0.5597920534140831}
+{"kind": "start", "score": 0.4834887425605183, "held_out": 0.5597920534140831, "seed_scores": [0.48632437351854857, 0.48464650806410114, 0.47949534609890526], "keep_bar": 0.006829027419643308, "config_sha256": "1d348c86ecb89ad821cc802fadec8a37fc02f9d2c31ca5b396c5dcbf264ea268"}
+{"kind": "rung", "round": 1, "change": "jepa_hybrid", "params_changed": {"params": {"finetune": "low_lr", "encoder_lr_scale": 0.1, "latent_weight": 0.5, "pretrain_steps": 30000}}, "score": 0.5272006397374711}
+{"kind": "rung", "round": 1, "change": "jepa_hybrid_long", "params_changed": {"params": {"finetune": "low_lr", "encoder_lr_scale": 0.1, "latent_weight": 0.5, "pretrain_steps": 90000}}, "score": 0.5232043844142978}
+{"kind": "stop", "round": 1, "reason": "no change beat the best on the first seed"}
+{"kind": "end", "kept": [], "score": 0.4834887425605183, "held_out": 0.5597920534140831}
