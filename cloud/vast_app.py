@@ -303,6 +303,19 @@ def _bad() -> set:
     return set(json.loads(BAD.read_text())) if BAD.exists() else set()
 
 
+CODE_FAULTS = ("ModuleNotFoundError", "ImportError", "Failed to find C compiler")  # the image's fault, not the host's
+
+
+def _host_fault(log: Path) -> bool:
+    """Whether a failure should keep its host out of later rentals: not when the run failed for want of a
+    package or compiler on the image (10 November 2026: such failures had excluded 32 of 33 offers)."""
+    try:
+        text = log.read_text(errors="replace")[-20000:]
+    except OSError:
+        return True
+    return not any(f in text for f in CODE_FAULTS)
+
+
 def _mark_bad(machine_id) -> None:
     results_volume.reload()
     BAD.write_text(json.dumps(sorted(_bad() | {machine_id})))
@@ -399,7 +412,7 @@ def vast_try(config: dict, commit: str, out: str) -> dict | None:
                     return json.loads((done / "metrics.json").read_text())
                 if failed_log.exists():
                     print(f"{config['name']}: failed on machine {iid}", flush=True)
-                    if machine is not None:
+                    if machine is not None and _host_fault(failed_log):
                         _mark_bad(machine)
                     break
                 state = json.loads(_vast("show", "instance", str(iid)))
@@ -535,8 +548,9 @@ def _manage(configs: list[dict], commit: str, out: str, limit: int, split: bool 
                 iid = r["iid"]
                 if failed_log(name).exists():
                     print(f"{name}: failed on machine {iid}", flush=True)
+                    host = _host_fault(failed_log(name))
                     failed_log(name).rename(failed_log(name).with_suffix(f".{int(time.time())}.log"))
-                    finish(name, iid, bad=True, again=True)
+                    finish(name, iid, bad=host, again=True)
                     continue
                 try:
                     info = json.loads(_vast("show", "instance", str(iid)))
