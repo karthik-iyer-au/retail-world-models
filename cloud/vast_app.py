@@ -522,7 +522,7 @@ def _manage(configs: list[dict], commit: str, out: str, limit: int, split: bool 
             _mark_bad(r["machine"])
         if result is not None:
             r.update(state="done", result=result)
-        elif again and r["attempts"] < 3:
+        elif again and r["attempts"] < 6:  # long pieces lose hosts more often; each retry resumes from its saves
             r.update(state="pending")
         else:
             r.update(state="gone")
