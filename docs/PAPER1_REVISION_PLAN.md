@@ -1109,3 +1109,20 @@ world model, the hybrid JEPA recipe and the seven-step JEPA check with weight av
 Vast (`splitcheck_frat_split` against `splitcheck_frat_whole`, two seeds, pieces on 16 different machines) gave
 identical forecasts and WRMSSE (0.76675 and 0.75871 both ways). Favorita's three loops and M5's study U round are
 restarted split; runs already saved are read back, runs in progress start again as pieces.
+
+**10 November 2026, the final runs, written down before they run.** Each data set's tuned world model and tuned
+LightGBM are run on the paper's reported rolling windows (the windows of each data set's rolling config: six of
+eight weeks for each Dominick's category, four of eight weeks for Frat, four of 28 days for M5 and Favorita), which
+lie after every search window. Settings: the last finished stage of each model's searches with every kept change
+(`scripts/make_final_configs.py`, which writes `configs/experiments/final_<data>_{world_model,lightgbm}.yaml` and
+prints the chain): for the world model the main loop, study T and study U; for LightGBM its loop. Nothing else
+changes from the rolling configs: same data, windows, five-copy averages where the searches used them (M5's two
+models are single fits on both sides, as in their searches), seed 0. Scored at every level of each data set's
+hierarchy. The test, as in the paper: the paired difference of WRMSSE by window between the tuned world model and
+the tuned LightGBM, with the bootstrap over windows, and the item bootstrap within each window from the saved
+forecasts; the untuned five-copy runs of studies O and S on the same windows are reported beside them, so the
+effect of tuning each model is shown too. The ensemble is rebuilt from the tuned world model, the tuned LightGBM and
+TimesFM with the plan (unchanged), equal weights as before, and the untuned ensemble is reported beside it (entry
+of 5 November). Favorita's world model runs when its study T and study U rounds end. Runs split by window and copy
+across Vast machines. Cost: about 15 GPU-hours for the world models and a few CPU-hours for LightGBM, US$10 to 15
+at the week's Vast prices.
