@@ -48,8 +48,12 @@ class SeedAverage(Forecaster):
         return np.mean([m.predict(future) for m in self.models], axis=0)
 
     def refresh(self, history: pd.DataFrame) -> "SeedAverage":
-        for m in self.models:
-            m.refresh(history)
+        from rwm.experiments.run import piece_of
+
+        piece = piece_of()  # a split run's piece holds one fitted member only
+        for i, m in enumerate(self.models):
+            if piece is None or i == piece[1]:
+                m.refresh(history)
         return self
 
     def breakdown(self, future: pd.DataFrame) -> pd.DataFrame:

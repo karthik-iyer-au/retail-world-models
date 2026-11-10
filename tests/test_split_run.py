@@ -47,3 +47,18 @@ def test_split_run_matches_one_run(tmp_path, monkeypatch, more, average):
     pd.testing.assert_frame_equal(pd.read_csv(whole / "forecasts.csv"), pd.read_csv(last / "forecasts.csv"), check_exact=True)
     a, b = (json.loads((d / "metrics.json").read_text()) for d in (whole, last))
     assert a["wrmsse"] == b["wrmsse"] and a["splits"] == b["splits"]
+
+
+def test_split_run_with_stores_kept_out_matches_one_run(tmp_path, monkeypatch):
+    """The transfer test reads the kept-out series back after fitting (refresh); a piece holds one
+    fitted copy and must read back with that copy only (10 November 2026)."""
+    config = _config({}, True)
+    config["evaluation"]["transfer"] = {"by": "store_id", "share": 0.5, "seed": 0, "trained_on_all": False}
+    whole = run(config, out_root=tmp_path / "a", partial=tmp_path / "a" / "_partial")
+    for origin in range(2):
+        for member in range(2):
+            monkeypatch.setenv("RWM_PIECE", f"{origin},{member}")
+            run(config, out_root=tmp_path / "b", partial=tmp_path / "b" / "_partial")
+    monkeypatch.delenv("RWM_PIECE")
+    last = run(config, out_root=tmp_path / "b", partial=tmp_path / "b" / "_partial")
+    pd.testing.assert_frame_equal(pd.read_csv(whole / "forecasts.csv"), pd.read_csv(last / "forecasts.csv"), check_exact=True)
