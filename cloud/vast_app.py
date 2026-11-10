@@ -101,8 +101,14 @@ elif [ -n "${BASE_NAME:-}" ] && curl -fsS -H "$AUTHH" -o /partial.tgz "$BRIDGE_U
   tar xzf /partial.tgz -C /out && echo "resuming from the unsplit run's partway state"
 fi
 # the last run of a split run: every piece's finished fit, merged into one save folder
-for P in ${PIECES:-}; do
-  curl -fsS --retry 5 --retry-all-errors -H "$AUTHH" -o /piece.tgz "$BRIDGE_URL/partial/$OUT/$P" && tar xzf /piece.tgz -C /out || fail "piece $P"
+PIECE_LIST=${PIECES:-}
+for P in ${PIECE_LIST//:/ }; do  # the list is joined with ":" (a space would end the value in Vast's env string)
+  curl -fsS --retry 5 --retry-all-errors -H "$AUTHH" -o /piece.tgz "$BRIDGE_URL/partial/$OUT/$P" || fail "piece $P"
+  # only that piece's own fit (key ...__o<window>m<copy>), so no stale copy overwrites another's
+  rm -rf /piece && mkdir /piece && tar xzf /piece.tgz -C /piece || fail "piece $P"
+  K=${P##*__o}; PO=${K%m*}; PM=${K#*m}
+  find /piece -type f ! \( -name "origin${PO}_member${PM}_*" -o \( -name "origin${PO}_*" ! -name "*_member*" \) \) -delete
+  [ -d /piece/_partial ] && cp -r /piece/_partial /out/ || fail "piece $P"
 done
 ( while sleep 300; do
     [ -d /out/_partial ] && tar czf /partial.new --exclude='*.tmp' -C /out _partial && mv /partial.new /partial.up \
@@ -118,6 +124,10 @@ EOF
 kill $SAVER 2>/dev/null
 if [ -n "${RWM_PIECE:-}" ]; then
   # a piece's finished fit is what the last run needs: save it, and keep it on the bridge
+  # only this piece's own saves: copies of other fits it started from (a split run's earlier
+  # saves) would overwrite those pieces' finished fits when the last run merges them (10 November)
+  O=${RWM_PIECE%,*}; M=${RWM_PIECE#*,}
+  find /out/_partial -type f ! \( -name "origin${O}_member${M}_*" -o \( -name "origin${O}_*" ! -name "*_member*" \) \) -delete
   tar czf /partial.up --exclude='*.tmp' -C /out _partial || fail "piece tar"
   curl -fsS --retry 5 --retry-all-errors -X PUT -H "$AUTHH" --data-binary @/partial.up "$BRIDGE_URL/partial/$OUT/$RUN_NAME" >/dev/null || fail "piece save"
 fi
@@ -126,7 +136,7 @@ tar czf /run.tgz -C /out . || fail "tar"
 curl -fsS --retry 5 --retry-all-errors -X PUT -H "Authorization: Bearer $BRIDGE_TOKEN" --data-binary @/run.tgz "$BRIDGE_URL/results/$OUT" || fail "upload"
 if [ -z "${RWM_PIECE:-}" ]; then
   curl -fsS -X DELETE -H "$AUTHH" "$BRIDGE_URL/partial/$OUT/$RUN_NAME" >/dev/null || true
-  for P in ${PIECES:-}; do curl -fsS -X DELETE -H "$AUTHH" "$BRIDGE_URL/partial/$OUT/$P" >/dev/null || true; done
+  for P in ${PIECE_LIST//:/ }; do curl -fsS -X DELETE -H "$AUTHH" "$BRIDGE_URL/partial/$OUT/$P" >/dev/null || true; done
 fi
 echo "DONE"
 sleep infinity
@@ -474,7 +484,7 @@ def _manage(configs: list[dict], commit: str, out: str, limit: int, split: bool 
                         st[k] = {"config": c, "state": "pending", "attempts": 0, "tried": set(), "result": None,
                                  "env": {"RWM_PIECE": f"{o},{m}", "BASE_NAME": name}, "deps": [],
                                  "done": (lambda c=c, o=o, m=m: piece_done(c, o, m))}
-                whole.update(env={"PIECES": " ".join(keys)}, deps=keys)
+                whole.update(env={"PIECES": ":".join(keys)}, deps=keys)  # no spaces: Vast splits its env string on them (10 November)
         st[name] = whole
 
     def finish(name, iid, result=None, bad=False, again=False):
