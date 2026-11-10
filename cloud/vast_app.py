@@ -89,7 +89,9 @@ git checkout -q FETCH_HEAD || fail "checkout"
 # hosts' links to the package index drop now and then (3 November: read timeouts, broken connections): retry
 PIP="pip install -q --retries 10 --timeout 60"
 # pretrained forecasters compile kernels at run time (Timestral through triton): they need a C compiler
-if [ -n "${EXTRAS:-}" ]; then for t in 1 2 3; do apt-get update -qq && apt-get install -y -qq gcc >/dev/null && break; sleep 30; done; fi
+for t in 1 2 3; do command -v gcc >/dev/null && break; DEBIAN_FRONTEND=noninteractive apt-get update -qq >/dev/null 2>&1 && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq gcc libc6-dev >/dev/null 2>&1; sleep 5; done
+command -v gcc >/dev/null || fail "compiler"
+export CC=$(command -v gcc)
 for t in 1 2 3; do $PIP "torch==$TORCH" && $PIP -e ".[trees,deep${EXTRAS:+,$EXTRAS}]" && break; [ $t = 3 ] && fail "install"; sleep 30; done
 python cloud/fetch_data.py "$BRIDGE_URL" "$DATASET" "data/raw/$DATASET" || fail "data"  # in parts: one long request is cut off
 # training saves partway (about every 5% of steps) under /out/_partial; copy them to the results
