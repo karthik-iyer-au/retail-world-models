@@ -1126,3 +1126,21 @@ TimesFM with the plan (unchanged), equal weights as before, and the untuned ense
 of 5 November). Favorita's world model runs when its study T and study U rounds end. Runs split by window and copy
 across Vast machines. Cost: about 15 GPU-hours for the world models and a few CPU-hours for LightGBM, US$10 to 15
 at the week's Vast prices.
+
+**10 November 2026, the transfer test and the new-retailer test rerun on the final settings, written down before
+they run.** Karthik decided both (10 November: "yes i decde to run"). (1) Transfer, as studies I and L, from each
+data set's final configs (`scripts/make_final_transfer_configs.py`, `configs/experiments/ftransfer_*.yaml`): a fifth
+of stores, or of items (seed 0, the same fifth in every window), kept out of training in every rolling window and
+read back from their own history without weight changes, against a comparison run trained on everything and scored
+on the same fifth; the tuned world model and the tuned LightGBM, where LightGBM fits one model per store it becomes
+one model with the store as an input for the stores test, as in study I; on Dominick's cheese and snacks and on M5
+now, and on Favorita once its world model's final settings are fixed. One run per form (seed 0): the Dominick's
+models are five-copy averages, M5's are single fits on both sides, as in their searches. Measure and rule unchanged
+from study I: the cost of not training on a series, kept-out score minus comparison score on the same fifth; the
+world model's cost against LightGBM's, mean over windows with the paired bootstrap interval over windows, for stores
+and items and each data set separately; forecast over actual on the kept-out fifth; reported whatever it shows. (2)
+New retailer with settings carried over, as study D: Favorita's rolling windows, both models as five-copy averages,
+every model setting taken unchanged from M5's final configs (the other daily source, as in study D) except the
+lists that name the data set's own columns (`configs/experiments/fnewretailer_favorita_*.yaml`); scored and tested
+against each other as the final runs are, and reported beside Favorita's tuned final runs, so the paper shows the
+same retailer with settings carried over and with settings searched on it. Cost: about 45 GPU-hours, US$25 to 35.
