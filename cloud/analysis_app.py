@@ -17,6 +17,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from modal_app import CHECKOUT, DATA, RESULTS, _checkout, data_volume, image, results_volume  # noqa: E402
 
 app = modal.App("rwm-analysis")
+# the container needs modal_app.py beside this file, for the import above
+image = image.add_local_file(Path(__file__).resolve().parent / "modal_app.py", "/root/modal_app.py")
 
 
 @app.function(image=image, volumes={DATA: data_volume, RESULTS: results_volume}, cpu=8, memory=96 * 1024, timeout=8 * 3600)
