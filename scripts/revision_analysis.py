@@ -25,7 +25,9 @@ MODELS = ["world_model", "lift", "lightgbm", "seasonal_naive", "timesfm_mean", "
 ENSEMBLE = ["world_model", "lightgbm", "timesfm_plan"]
 # study F (plan, 17 October): Timestral's plan form in place of TimesFM's, and all four together
 VARIANTS = {"ensemble_timestral": ["world_model", "lightgbm", "timestral_plan"],
-            "ensemble_4": ["world_model", "lightgbm", "timesfm_plan", "timestral_plan"]}
+            "ensemble_4": ["world_model", "lightgbm", "timesfm_plan", "timestral_plan"],
+            # the two tuned models alone, beside the paper's three-model ensemble (Karthik 11 November 2026: "an ensemble of the 2")
+            "ensemble_2": ["world_model", "lightgbm"]}
 PAIRS_WITH = ["world_model", "lightgbm", "ensemble"]
 CATLEVEL = {"m5": "store_idxcat_id", "favorita": "store_idxfamily", "default": "cat_idxstore_id"}
 DAILY = ("m5", "favorita")
