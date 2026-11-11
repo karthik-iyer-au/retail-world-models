@@ -1248,3 +1248,8 @@ hand at 16:30 UTC and the run marked failed, so the manager rented another machi
 save at step 27,000; nothing is retrained and the settings are unchanged. The manager did not notice the destroyed
 machine by itself: Vast returns no status for an instance that no longer exists, and the loop only stops on an
 "exited" or "offline" status. Fix after the running work ends (treat a missing instance as gone).
+
+Correction, 17:25 UTC: the save read as "step 27,000" was a stale one from the batch's first start (code tree
+c7eefdec), which the restart of 11 November 09:21 local (tree 308ffc46) does not use. The run's own save, under
+308ffc46, stands at step 15,000 of 30,000 on the new machine. Whether the first machine had hung is not known; it was
+working on this run, not stuck at 27,000. The finish is hours away, not minutes.
