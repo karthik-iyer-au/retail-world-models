@@ -16,10 +16,10 @@ LightGBM tuned by the same search. Results are read by grain, by the nature of
 the line, on seen and unseen data, and across retailers. On lines and stores the
 models were trained on, the tuned world model and LightGBM are close, each ahead
 on different data sets and grains, and their average is the most accurate
-choice across grains: it is in the 90\% model confidence set at 46 of 54
+choice across grains: it is in the 90\% model confidence set at 51 of 60
 data-set-and-grain pairs, for the fast lines that carry most sales and for the
 slow tail. On lines with short history the world model is ahead of LightGBM on
-seven of eight data sets. On items or stores kept out of training it loses at
+eight of nine data sets. On items or stores kept out of training it loses at
 most 0.04 in scaled error and forecasts within 11\% of actual sales, while
 LightGBM loses up to 0.31 and forecasts as little as two thirds of actual
 sales. Training on other retailers' data improved neither model by more than
@@ -28,8 +28,7 @@ tuned world model and tuned trees serves every grain studied, and the world
 model carries the forecast where history is short or absent. The study covers
 forecasts of 8 weeks and 28 days and the price and promotion levers; longer
 plans need a retailer's own data.
-% Numbers from results/analysis_tuned (eight data sets) and the transfer runs; Favorita's seen-data
-% scores are added when its tuned world model finishes (plan entry of 11 November 2026).
+% Numbers from results/analysis_tuned (nine data sets) and the transfer runs.
 
 \vspace{4pt}
 \textbf{Keywords:} retail forecasting; forecast grain; hierarchical evaluation;
