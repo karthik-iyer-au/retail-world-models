@@ -22,8 +22,10 @@ this as coherence across the levels of the product and store hierarchy
 usually by forecasting each level and reconciling the forecasts. This paper
 takes the other route retailers use: one forecast made at the finest grain,
 item by store by period, and summed to every coarser grain, so that the grains
-add up by construction. The question is which approach gives the best balance
-across grains when it is used this way.
+add up by construction. The question this paper answers is whether one
+forecast, built once at the finest grain, can serve the decisions a retailer
+makes from it, across every kind of line, and which kind of model, or
+combination of models, does that best.
 
 We test four kinds of model. Gradient-boosted trees are the proven method:
 LightGBM was behind the leading entries of the M5 competition
@@ -140,6 +142,55 @@ Sections~\ref{sec:discussion} to \ref{sec:conclusion} discuss what the results
 mean for a retailer, their limits, and conclude. The development study is in
 Supplement~\ref{sec:supplementdev}, and the final windows and dropped changes of
 the first version in Supplement~\ref{sec:supplementfinal}.
+
+% =====================================================================
+\section{Framework}
+\label{sec:framework}
+
+The question is answered in four parts, in the order a retailer meets them.
+Each part fixes what is measured before any model is compared, and the results
+are reported in the same order (Section~\ref{sec:results}).
+
+\paragraph{Grain.} Does the forecast hold up at every grain a decision is made
+at, and do the grains add up? Every model forecasts each item in each store for
+each period, and the forecasts are summed to item, store, category, category by
+store and the chain total. Each grain is scored period by period, which is how
+store orders and the category week are judged, and over the whole forecast
+window as one block, which is how a promotion is judged. Because every grain is
+a sum of the same item-by-store forecast, the plans built from them add up, and
+any value lost between grains shows as a difference in accuracy between them.
+
+\paragraph{Nature of the line.} Does the forecast hold up on every kind of
+line? Grocery sales are concentrated: a short head of fast lines carries most of
+the units, and a long tail of slow lines sells a few units a week or none. Lines
+also differ in how much history they have. The fast lines are defined as the
+items that together make 80\% of unit sales over the year before the forecast,
+the slow lines as the rest, and lines with short history as those whose first
+sale falls less than 26 weeks before the forecast. Each part is scored on its
+own series at every grain, so that the total of the fast lines, the slow lines
+of each store, and so on, are each judged as a planner would judge them. The
+share of items that makes 80\% of sales is reported for each data set.
+
+\paragraph{Seen and unseen data.} Does the forecast hold up on items and stores
+the model was not trained on? Ranges change and stores open, so part of every
+forecast is for lines or stores with little or no history in the model. A fifth
+of the items, or of the stores, is kept out of training; once trained, each
+model reads the kept-out series' recent sales and forecasts them. The cost of
+not having trained on them is the accuracy lost on that fifth against a model
+trained on everything.
+
+\paragraph{Transferability.} Do the settings carry to another retailer, and does
+training on other retailers' data help? Settings tuned on M5 are carried
+unchanged to Favorita and compared with settings tuned on Favorita itself. Each
+model is also trained on its data set together with the other data sets, and
+compared with the same model trained on its own data alone.
+
+\paragraph{The broad view.} The four parts are then brought together: which
+model, or combination, gives the best balance across grains, lines and seen and
+unseen data, and where each kind of model fits in the planning cycle. Findings
+are reported for each grain and each kind of line, since that is what a
+retailer needs to choose a model for a decision; the broad view simplifies them
+and does not replace them.
 
 % =====================================================================
 \section{Related work}
