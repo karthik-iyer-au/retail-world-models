@@ -29,11 +29,16 @@ def main(argv: list[str]) -> None:
     import modal_app  # only for the commit check; deploys nothing
 
     commit = modal_app._local_commit()
+    if "--commit" in argv:  # an earlier commit, so a split run restarts on the code its saves were made with
+        import subprocess
+
+        commit = subprocess.run(["git", "-C", str(modal_app.LOCAL_REPO), "rev-parse", argv[argv.index("--commit") + 1]],
+                                capture_output=True, text=True, check=True).stdout.strip()
     app = argv[argv.index("--app") + 1] if "--app" in argv else "rwm-vast"
     limit = int(argv[argv.index("--machines") + 1]) if "--machines" in argv else 6
     rounds = int(argv[argv.index("--rounds") + 1]) if "--rounds" in argv else 0  # 0: no limit
     split = "--split" in argv
-    opts = ("--app", "--machines", "--rounds")
+    opts = ("--app", "--machines", "--rounds", "--commit")
     argv = [a for i, a in enumerate(argv) if a != "--split" and a not in opts and (i == 0 or argv[i - 1] not in opts)]
     if "--configs" in argv:  # several runs at once: --configs a.yaml b.yaml ... --out <folder>
         files = [a for a in argv[argv.index("--configs") + 1:] if a.endswith(".yaml")]
