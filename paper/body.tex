@@ -125,7 +125,7 @@ retailer meets them:
 and the results are reported in the same order (Section~\ref{sec:results}).
 The broad view then brings the four answers together.
 
-\paragraph{RQ1, grain.} Does the forecast hold up at every grain a decision is made
+\paragraph{RQ1, grain} Does the forecast hold up at every grain a decision is made
 at, and do the grains add up? Every model forecasts each item in each store for
 each period, and the forecasts are summed to item, store, category, category by
 store and the chain total. Each grain is scored period by period, which is how
@@ -134,7 +134,7 @@ window as one block, which is how a promotion is judged. Because every grain is
 a sum of the same item-by-store forecast, the plans built from them add up, and
 any value lost between grains shows as a difference in accuracy between them.
 
-\paragraph{RQ2, nature of the line.} Does the forecast hold up on every kind of
+\paragraph{RQ2, nature of the line} Does the forecast hold up on every kind of
 line? Grocery sales are concentrated: a short head of fast lines carries most of
 the units, and a long tail of slow lines sells a few units a week or none. Lines
 also differ in how much history they have. The fast lines are defined as the
@@ -145,7 +145,7 @@ own series at every grain, so that the total of the fast lines, the slow lines
 of each store, and so on, are each judged as a planner would judge them. The
 share of items that makes 80\% of sales is reported for each data set.
 
-\paragraph{RQ3, seen and unseen data.} Does the forecast hold up on items and stores
+\paragraph{RQ3, seen and unseen data} Does the forecast hold up on items and stores
 the model was not trained on? Ranges change and stores open, so part of every
 forecast is for lines or stores with little or no history in the model. A fifth
 of the items, or of the stores, is kept out of training; once trained, each
@@ -153,13 +153,13 @@ model reads the kept-out series' recent sales and forecasts them. The cost of
 not having trained on them is the accuracy lost on that fifth against a model
 trained on everything.
 
-\paragraph{RQ4, transferability.} Do the settings carry to another retailer, and does
+\paragraph{RQ4, transferability} Do the settings carry to another retailer, and does
 training on other retailers' data help? Settings tuned on M5 are carried
 unchanged to Favorita and compared with settings tuned on Favorita itself. Each
 model is also trained on its data set together with the other data sets, and
 compared with the same model trained on its own data alone.
 
-\paragraph{The broad view.} The four parts are then brought together: which
+\paragraph{The broad view} The four parts are then brought together: which
 model, or combination, gives the best balance across grains, lines and seen and
 unseen data, and where each kind of model fits in the planning cycle. Findings
 are reported for each grain and each kind of line, since that is what a
