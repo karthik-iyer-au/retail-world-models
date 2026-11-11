@@ -98,6 +98,50 @@ def block_scores(fr: Frame, origin: int, fc: np.ndarray) -> dict:
     return {lv["level"]: lv["wrmsse"] for lv in sc["by_level"]}
 
 
+def line_segments(fr: Frame, origin: int, head_share: float = 0.8) -> tuple[dict, dict]:
+    """Bottom series grouped by the nature of their line (plan entry of 11 November 2026).
+
+    fast: the items (lines) that together make `head_share` of unit sales over the year before
+    the forecast, with every store's series of those items; slow: the rest of the items;
+    short_history: series whose first sale falls less than 26 weeks (182 days) before the
+    forecast. Returns the masks over series and facts about the split."""
+    t0, _, _ = fr.cut(origin)
+    daily = np.median(np.diff(fr.dates[-10:]).astype("timedelta64[D]").astype(int)) < 7
+    year, short = (364, 182) if daily else (52, 26)
+    item = fr.codes([ITEM]) if ITEM in fr.attrs else np.arange(len(fr.attrs))
+    per_item = np.bincount(item, weights=fr.units[:, max(0, t0 - year):t0].sum(axis=1), minlength=item.max() + 1)
+    order = np.argsort(-per_item)
+    share = np.cumsum(per_item[order]) / max(per_item.sum(), 1e-9)
+    head = order[: int(np.searchsorted(share, head_share)) + 1]
+    fast = np.isin(item, head)
+    sold = fr.units[:, :t0] > 0
+    first = np.where(sold.any(axis=1), sold.argmax(axis=1), t0)
+    masks = {"fast": fast, "slow": ~fast, "short_history": (t0 - first) < short}
+    facts = {"items": int(item.max() + 1), "fast_items": int(len(head)),
+             "fast_item_share": len(head) / (item.max() + 1),
+             "short_history_series": int(masks["short_history"].sum()), "series": len(fr.attrs)}
+    return masks, facts
+
+
+def subset_scores(fr: Frame, origin: int, fc: np.ndarray, mask: np.ndarray, block: bool = False) -> dict:
+    """WRMSSE by level over the series in `mask` only: each level's totals are of those series
+    (the total of the fast lines, the fast lines of each store, and so on). With `block`, on the
+    whole window's sum as in block_scores."""
+    if not mask.any():
+        return {}
+    t0, t1, rev = fr.cut(origin)
+    attrs = fr.attrs[mask].reset_index(drop=True)
+    u, f, r = fr.units[mask], fc[mask], rev[mask]
+    if block:
+        h = t1 - t0
+        n = t0 // h
+        past = u[:, t0 - n * h:t0].reshape(len(attrs), n, h).sum(axis=2)
+        sc = wrmsse(past, u[:, t0:t1].sum(axis=1, keepdims=True), f.sum(axis=1, keepdims=True), r, attrs, fr.levels, 1)
+    else:
+        sc = wrmsse(u[:, :t0], u[:, t0:t1], f, r, attrs, fr.levels, fr.lag)
+    return {lv["level"]: lv["wrmsse"] for lv in sc["by_level"]}
+
+
 class _Mixer:
     """Products of resample counts (k x items) with item-by-node sums
     (items x nodes x periods), on the GPU when there is one."""

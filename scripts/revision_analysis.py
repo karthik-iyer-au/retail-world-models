@@ -156,8 +156,16 @@ def main(argv=None):
                     for m, f in mats.items():
                         for lv, v in C.block_scores(fr, o, f).items():
                             acc["blocks"].append({**base, "model": m, "level": lv, "wrmsse": v})
+                if "segments" in acc:  # by the nature of the line (Karthik, 11 November 2026)
+                    masks, facts = C.line_segments(fr, o)
+                    for seg, mask in masks.items():
+                        for view in ("period", "block"):
+                            for m, f in mats.items():
+                                for lv, v in C.subset_scores(fr, o, f, mask, block=view == "block").items():
+                                    acc["segments"].append({**base, "segment": seg, "view": view, "model": m,
+                                                            "level": lv, "wrmsse": v, "series": int(mask.sum()), **facts})
                 if "paired" in acc:
-                    bs =C.Bootstrap(fr, o, n=a.boot, seed=o)
+                    bs = C.Bootstrap(fr, o, n=a.boot, seed=o)
                     boot = bs.scores(mats)
                     pairs = {tuple(sorted((x, y))) for x in PAIRS_WITH for y in mats if x != y and x in mats}
                     df = C.paired(boot, point, bs.level_names, sorted(pairs))

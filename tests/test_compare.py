@@ -182,3 +182,15 @@ def test_block_score_counts_only_the_block_total(fr):
     assert all(v < 1e-9 for v in C.block_scores(fr, 2, reshaped).values())
     assert all(v > 0 for v in C.level_scores(fr, 2, reshaped).values())
     assert all(v > 0.1 for v in C.block_scores(fr, 2, actual * 1.5).values())
+
+
+def test_line_segments_split_items_and_score_each_part(fr):
+    masks, facts = C.line_segments(fr, 2)
+    assert (masks["fast"] ^ masks["slow"]).all() and masks["fast"].any()
+    item = fr.attrs["item_id"].to_numpy()
+    for i in np.unique(item):  # every store of an item falls in the same part
+        assert len(set(masks["fast"][item == i])) == 1
+    perfect = fr.units[:, -8:]
+    assert all(v < 1e-9 for v in C.subset_scores(fr, 2, perfect, masks["fast"]).values())
+    whole = C.subset_scores(fr, 2, perfect * 1.3, np.ones(len(item), bool))
+    assert whole == pytest.approx(C.level_scores(fr, 2, perfect * 1.3))

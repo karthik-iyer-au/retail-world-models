@@ -1226,3 +1226,17 @@ reason for leaving out Frat and the other categories; the rerun on the final set
 but not Frat, which was a miss, not a decision. Karthik asked (11 November: "why did u not do it for frat?
 intentional or a miss?"). Frat is run now with the same rules (`configs/experiments/ftransfer_frat_*.yaml`), so the
 test covers all four data sets. Cost about US$10.
+
+**11 November 2026, results by the nature of the line, written down before it runs.** Karthik (11 November): the
+paper should be read by grain, then by the nature of the line (a short head of fast lines carrying most sales, a long
+tail of slow lines, lines with little history, new lines), then by seen against unseen data and transferability,
+and only then a broad view. He agreed the definitions ("Yes on what ur costs and assertion"). On the saved
+forecasts of the tuned world model, the tuned LightGBM, TimesFM with the plan and the two averages, for each
+window: fast lines are the items that together make 80% of unit sales over the year before the forecast (52 weeks
+or 364 days), with all their stores' series; slow lines are the other items; short-history series are those whose
+first sale is less than 26 weeks (182 days) before the forecast. Each part is scored at every level on its own
+series (the total of the fast lines, the fast lines of each store, and so on), period by period and as the whole
+window's block (`rwm.evaluation.compare.line_segments`, `subset_scores`; part `segments` of
+`scripts/revision_analysis.py`). The share of items that make 80% of sales is reported for each data set, so the
+head-and-tail shape is measured rather than assumed. New lines and stores come from the transfer test. No new
+training; one analysis run on Modal.
