@@ -29,8 +29,7 @@ CHAINS = {
     "m5": (["pure_m5", "lossT_pure_m5", "hybridU_pure_m5"], ["pure_lightgbm_m5"]),
     "frat": (["avg5_world_model_frat", "lossT_avg5_world_model_frat", "hybridU_avg5_world_model_frat"],
              ["avg5_lightgbm_frat"]),
-    "favorita": (["avg5_world_model_favorita", "lossT_r1_avg5_world_model_favorita",
-                  "hybridU_avg5_world_model_favorita"], ["avg5_lightgbm_favorita"]),
+    "favorita": (["avg5_world_model_favorita", "lossT_r1_avg5_world_model_favorita"], ["avg5_lightgbm_favorita"]),  # study U rerun stopped early (plan entry of 11 November 2026)
     **{f"dominicks_{c}": ([f"clean_avg5_world_model_dominicks_{c}", f"lossT_clean_avg5_world_model_dominicks_{c}",
                            f"hybridU_clean_avg5_world_model_dominicks_{c}"],
                           [f"clean_avg5_lightgbm_dominicks_{c}"])

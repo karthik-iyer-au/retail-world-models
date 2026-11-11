@@ -36,7 +36,7 @@ TITLE = {"m5": "M5", "favorita": "Favorita", "frat": "Frat", "dominicks_ana": "A
 WM = {"m5": ["pure_m5", "lossT_pure_m5", "hybridU_pure_m5"],
       "frat": ["avg5_world_model_frat", "lossT_avg5_world_model_frat", "hybridU_avg5_world_model_frat"],
       "favorita": ["avg5_world_model_favorita", "lossT_r1_avg5_world_model_favorita",
-                   "hybridU_avg5_world_model_favorita"],
+                   "hybridU_r1_avg5_world_model_favorita"],  # the rerun on the final loss was stopped early (11 November 2026)
       **{f"dominicks_{c}": [f"clean_avg5_world_model_dominicks_{c}", f"lossT_clean_avg5_world_model_dominicks_{c}",
                             f"hybridU_clean_avg5_world_model_dominicks_{c}"]
          for c in ("ana", "bjc", "che", "fre", "sdr", "sna")}}

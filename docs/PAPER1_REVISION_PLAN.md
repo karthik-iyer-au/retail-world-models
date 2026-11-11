@@ -1200,3 +1200,12 @@ on top of it (`hybridU_avg5_world_model_favorita`, rule of 9 November). So that 
 final run, its transfer runs and its pooled runs start now on the settings as they stand (round 1's latent check and
 the hurdle likelihood). If the study U rerun keeps a change, those runs are made again on the new settings and the
 new ones are reported; if it keeps nothing, these are Favorita's final runs.
+
+**11 November 2026, Favorita's study U rerun stopped early.** Karthik decided (11 November: "stop it and report as
+8/9 led fails led to early stopping"). The rerun on top of the hurdle likelihood (`hybridU_avg5_world_model_favorita`)
+had nearly finished its starting runs and had no first-seed result for either recipe. It was stopped because JEPA
+pretraining with hybrid fine-tuning had kept nothing on eight of nine data sets, Favorita on round 1's settings
+included (0.527 and 0.523 against 0.483); snacks was the one exception, on the search windows only. The paper reports
+Favorita's study U on round 1's settings and states that the rerun on the final likelihood was stopped early, and why.
+Favorita's final settings are therefore round 1's latent check with the hurdle likelihood, which are the settings its
+final, transfer and pooled runs already use (entry earlier today), so nothing is rerun.
