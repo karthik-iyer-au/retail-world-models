@@ -1220,3 +1220,9 @@ seven pooled LightGBM runs that read a weekly source of another retailer (the si
 rerun as `pooled_<data>_lightgbm_v2`, settings unchanged; the faulty runs are not reported. M5's and Favorita's pooled
 LightGBM read only daily data and are not affected. The world model's pooled pretraining reads each source on its own
 dates and is not affected.
+
+**11 November 2026, the transfer test on Frat as well.** Study I (27 October) chose M5, cheese and snacks and gave no
+reason for leaving out Frat and the other categories; the rerun on the final settings (10 November) added Favorita
+but not Frat, which was a miss, not a decision. Karthik asked (11 November: "why did u not do it for frat?
+intentional or a miss?"). Frat is run now with the same rules (`configs/experiments/ftransfer_frat_*.yaml`), so the
+test covers all four data sets. Cost about US$10.
