@@ -1,40 +1,37 @@
 \small
 \textbf{Abstract.}
-A retailer makes different decisions at different grains of the product, store
-and time hierarchy: store orders for one item in one store by day or week,
-supplier funding for an item across stores by week, category performance by
-store and week or across weeks, and the financial plan for the chain. Which
-forecasting model to use depends on the grain being solved for. This paper
-compares models at each of these grains on four public data sets (M5, six
-Dominick's categories, Breakfast at the Frat, and Corporaci\'on Favorita, the
-last kept out of all development), over rolling forecast origins with paired
-tests and model confidence sets. It addresses two of the four Ps of retail,
-price and promotion, through the plan inputs these data record; it does not
-forecast product, assortment or place, and does not solve them jointly. The
-models are a world model that carries each item's state forward under the
-price and promotion plan, the same network without that carried state,
-LightGBM, the Temporal Fusion Transformer, TimesFM, Chronos-Bolt, Timestral,
-seasonal naive, and an equal-weight average of the world model, LightGBM and
-TimesFM given the plan. On these data the answer changed with the grain. For
-an item by store and for an item across stores, the average had the lowest
-error on \rgrain{ixs}{ens}{best} and \rgrain{item}{ens}{best} of nine data
-sets, and the 90\% confidence set held a median of \rgrain{ixs}{set}{median} and
-\rgrain{item}{set}{median} models. For a category by store, a category and the
-chain total, the lowest-error model differed between data sets and a median of
-\rgrain{catstore}{set}{median} of nine models were not separated by the four to
-six windows available. For category-by-store planning cost, the average or
-LightGBM was lowest on \rcount{ccclearother} of eight data sets, ahead of the
-world model by an interval over category-by-store nodes within windows (the
-world model was lower in at most two windows), and the world model was lowest
-only on M5; it was behind LightGBM item by store on \rcount{lgbbeatsworldixs}
-of eight. Every trained model used
-the plan, and on the weekly promotion-driven data pretrained models were less
-accurate without it. These are
-results for these data sets, with the plan inputs and constraints they carry; a
-forecast solved across all four Ps, or a retailer's own data, may give
-different results. Every model, test and change that lost is reported, with each change scored against the configuration it changed.
+A retailer makes decisions from the same demand at different grains and on
+different cycles: store orders by item and day, promotions by item and week in
+blocks of weeks, category reviews week by week, and supplier ranges and terms
+over a year. It wants one forecast that serves all of them without losing value
+between plans. This paper asks whether one forecast, built at the finest grain
+and summed to every coarser grain, can serve these decisions across every kind
+of line, and which kind of model does that best. It compares gradient-boosted
+trees (LightGBM), pretrained foundation models (TimesFM, Chronos-Bolt,
+Timestral), an attention-based model (the Temporal Fusion Transformer) and a
+world model that carries each item's state forward under the price and
+promotion plan, on four public data sets (M5, six Dominick's categories,
+Breakfast at the Frat and Corporaci\'on Favorita), with the world model and
+LightGBM tuned by the same search. Results are read by grain, by the nature of
+the line, on seen and unseen data, and across retailers. On lines and stores the
+models were trained on, the tuned world model and LightGBM are close, each ahead
+on different data sets and grains, and their average is the most accurate
+choice across grains: it is in the 90\% model confidence set at 46 of 54
+data-set-and-grain pairs, for the fast lines that carry most sales and for the
+slow tail. On lines with short history the world model is ahead of LightGBM on
+seven of eight data sets. On items or stores kept out of training it loses at
+most 0.04 in scaled error and forecasts within 11\% of actual sales, while
+LightGBM loses up to 0.31 and forecasts as little as two thirds of actual
+sales. Training on other retailers' data improved neither model by more than
+0.01 on any data set. Taken broadly, one forecast built from the average of a
+tuned world model and tuned trees serves every grain studied, and the world
+model carries the forecast where history is short or absent. The study covers
+forecasts of 8 weeks and 28 days and the price and promotion levers; longer
+plans need a retailer's own data.
+% Numbers from results/analysis_tuned (eight data sets) and the transfer runs; Favorita's seen-data
+% scores are added when its tuned world model finishes (plan entry of 11 November 2026).
 
 \vspace{4pt}
-\textbf{Keywords:} retail forecasting; hierarchical evaluation; forecast
-combination; promotions; world models; foundation models; rolling-origin
-evaluation.
+\textbf{Keywords:} retail forecasting; forecast grain; hierarchical evaluation;
+forecast combination; promotions; new products; world models; foundation
+models.

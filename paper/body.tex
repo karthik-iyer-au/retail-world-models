@@ -51,60 +51,9 @@ of scope. Every analysis was written down before it ran, except checks of
 unexpected results and corrections, which are marked where they appear
 (Figure~\ref{fig:study}).
 
-% The list of findings below is from the first revision and is rewritten once the
-% tuned models' results on all four data sets are in (plan entry of 11 November 2026).
-On these data sets, with the plan inputs and constraints they carry, we
-observed the following.
-\begin{enumerate}\setlength{\itemsep}{2pt}
-\item \textbf{The model with the lowest error depended on the grain}
-  (\S\ref{sec:res-grain}). For an item by store and an item across stores, the
-  equal-weight average had the lowest error on \rgrain{ixs}{ens}{best} and
-  \rgrain{item}{ens}{best} of nine data sets, and the 90\% confidence set kept
-  few models with it (median \rgrain{ixs}{set}{median} and
-  \rgrain{item}{set}{median} of nine). For a category by store, a category and
-  the chain total, the lowest-error model differed from data set to data set
-  and the confidence set kept a median of \rgrain{catstore}{set}{median}: with
-  four to six windows, these data did not separate the models at these grains.
-\item \textbf{The decision costs followed the same pattern.} For category-by-store
-  plans the average had the lowest cost on \rcount{ccdollarsens} of eight data
-  sets and LightGBM on \rcount{ccdollarslgb}, each ahead of the world model by an
-  interval over category-by-store nodes that excludes zero (the world model was
-  lower in at most two of the four to six windows); under the other horizon and
-  weighting rules the lowest was the same kind of model with one exception. The
-  world model was lowest only on M5, not separated by period and lower in all
-  four windows over the whole window. A first version of
-  this cost, which put the world model first on most data sets, was wrong
-  (\S\ref{sec:res-decisions}). For store orders at critical ratios of 0.5 and
-  0.8, the average or LightGBM had the lowest cost on every data set.
-\item \textbf{LightGBM was the strongest single model at the fine grains, and
-  averaging added to it.} LightGBM was more accurate than the world model item by
-  store on \rcount{lgbbeatsworldixs} of eight data sets by the paired test. The
-  average was more accurate than LightGBM item by store on
-  \rcount{ensbeatslgbixs} and never less accurate. Weights fitted on earlier
-  windows beat equal weights in \rcount{fittedwins} of \rcount{fittedn}
-  comparisons (\S\ref{sec:res-ensemble}, \S\ref{sec:res-adds}).
-\item \textbf{The world model added to the average on some data sets, and its
-  carried state on almost none.} Without it the average was less accurate item
-  by store on \rcount{withoutworldmodelixsens} data sets; on
-  \rcount{addsnotliftixslist} we did not detect a difference when the same network
-  without the carried state took its place, also on Frat when it was rerun with
-  the world model's regularisation (\S\ref{sec:res-adds}, \S\ref{sec:res-world}).
-\item \textbf{Every trained model used the plan, and pretrained models needed
-  it.} Removing the plan inputs made every trained model less accurate; TimesFM
-  with the plan was the most accurate model not trained on the data, and
-  Timestral, released two days after this revision began, was behind it on
-  every data set item by store and put extreme upper quantiles on a few weekly
-  series (\S\ref{sec:res-plan}, \S\ref{sec:res-pretrained}).
-\item \textbf{After a promotion the world model forecast more, not the dip that
-  follows stocking up}, and the changes we tried for the dip were not kept
-  (\S\ref{sec:res-plan}, \S\ref{sec:dropped}).
-\item \textbf{Every model, test and change that lost is reported}, including a
-  seed that never reached single-fit runs and run-to-run noise as large as the
-  differences being tested (\S\ref{sec:dropped}). Every change to a model
-  setting with saved runs is scored against the configuration it changed,
-  including changes that were kept after winning half their comparisons or
-  fewer (\S\ref{sec:dev-record}).
-\end{enumerate}
+Section~\ref{sec:framework} sets out the framework, and the results follow it
+part by part: grain, the nature of the line, seen and unseen data, and
+transferability, with the broad view last.
 
 \begin{figure*}[t]
 \centering
