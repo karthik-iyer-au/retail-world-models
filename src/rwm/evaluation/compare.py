@@ -84,6 +84,20 @@ def level_scores(fr: Frame, origin: int, fc: np.ndarray, weights: np.ndarray | N
     return {lv["level"]: lv["wrmsse"] for lv in sc["by_level"]}
 
 
+def block_scores(fr: Frame, origin: int, fc: np.ndarray) -> dict:
+    """WRMSSE by level on the whole forecast block: each series' forecast and sales summed over
+    the window (8 weeks or 28 days), the view of a promotion block rather than of each week or day.
+    The scale is the change between successive whole blocks of the history, counted back from the
+    window's start, so a score of 1 is as good as calling the next block the same as the last."""
+    t0, t1, rev = fr.cut(origin)
+    h = t1 - t0
+    n = t0 // h
+    past = fr.units[:, t0 - n * h:t0].reshape(len(fr.attrs), n, h).sum(axis=2)
+    sc = wrmsse(past, fr.units[:, t0:t1].sum(axis=1, keepdims=True), fc.sum(axis=1, keepdims=True), rev,
+                fr.attrs, fr.levels, 1)
+    return {lv["level"]: lv["wrmsse"] for lv in sc["by_level"]}
+
+
 class _Mixer:
     """Products of resample counts (k x items) with item-by-node sums
     (items x nodes x periods), on the GPU when there is one."""

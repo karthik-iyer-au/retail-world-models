@@ -150,8 +150,12 @@ def main(argv=None):
                     for m, s in point.items():
                         for lv, v in s.items():
                             acc["scores"].append({**base, "model": m, "level": lv, "wrmsse": v})
+                if "blocks" in acc:  # the whole window summed: the promotion-block view (Karthik, 11 November 2026)
+                    for m, f in mats.items():
+                        for lv, v in C.block_scores(fr, o, f).items():
+                            acc["blocks"].append({**base, "model": m, "level": lv, "wrmsse": v})
                 if "paired" in acc:
-                    bs = C.Bootstrap(fr, o, n=a.boot, seed=o)
+                    bs =C.Bootstrap(fr, o, n=a.boot, seed=o)
                     boot = bs.scores(mats)
                     pairs = {tuple(sorted((x, y))) for x in PAIRS_WITH for y in mats if x != y and x in mats}
                     df = C.paired(boot, point, bs.level_names, sorted(pairs))

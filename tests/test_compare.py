@@ -172,3 +172,13 @@ def test_mint_shrink_with_a_zero_variance_node():
     b = mint_shrink_bottom(S, y, R)
     assert np.all(np.abs(b) < 100)
     assert np.allclose(b.sum(axis=0), [20.5, 20.0], atol=2.0)  # close to the base forecasts
+
+
+def test_block_score_counts_only_the_block_total(fr):
+    """A forecast with the right total over the window but the wrong week-to-week shape is perfect on
+    the block measure and not on the weekly one; a forecast off in total is worse on both."""
+    actual = fr.units[:, -8:]
+    reshaped = np.repeat(actual.mean(axis=1, keepdims=True), 8, axis=1)
+    assert all(v < 1e-9 for v in C.block_scores(fr, 2, reshaped).values())
+    assert all(v > 0 for v in C.level_scores(fr, 2, reshaped).values())
+    assert all(v > 0.1 for v in C.block_scores(fr, 2, actual * 1.5).values())
