@@ -1240,3 +1240,11 @@ window's block (`rwm.evaluation.compare.line_segments`, `subset_scores`; part `s
 `scripts/revision_analysis.py`). The share of items that make 80% of sales is reported for each data set, so the
 head-and-tail shape is measured rather than assumed. New lines and stores come from the transfer test. No new
 training; one analysis run on Modal.
+
+**11 November 2026, the last piece of Favorita's final world model hung.** Piece (window 0, copy 0) on machine
+60133664 made no training save past step 27,000 of 30,000 for over two and a half hours (saves come every 1,500 steps,
+about 40 minutes apart on the other pieces), with the GPU reported fully busy at 41 C. The machine was destroyed by
+hand at 16:30 UTC and the run marked failed, so the manager rented another machine (60233087), which goes on from the
+save at step 27,000; nothing is retrained and the settings are unchanged. The manager did not notice the destroyed
+machine by itself: Vast returns no status for an instance that no longer exists, and the loop only stops on an
+"exited" or "offline" status. Fix after the running work ends (treat a missing instance as gone).
