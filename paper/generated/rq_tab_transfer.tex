@@ -1,0 +1,26 @@
+\begin{table*}[t]
+\centering\footnotesize\setlength{\tabcolsep}{3pt}
+\caption{RQ3, seen and unseen data. A fifth of the items, or of the stores, is kept out of training; the cost is the
+WRMSSE on that fifth minus the WRMSSE on the same fifth of the same model trained on everything, mean over windows.
+The interval is a 90\% bootstrap interval over windows for the world model's cost minus LightGBM's; ``clearly lower''
+names the model whose cost is lower when the interval excludes zero. Forecast over actual is on the kept-out series.}
+\label{tab:rq-transfer}
+\resizebox{\textwidth}{!}{\begin{tabular}{ll cc c l cc}
+\toprule
+ & & \multicolumn{2}{c}{Cost of not training on them} & & & \multicolumn{2}{c}{Forecast over actual}\\
+\cmidrule(lr){3-4}\cmidrule(lr){7-8}
+Data set & Kept out & WM & LGB & WM $-$ LGB, 90\% & Clearly lower & WM & LGB\\
+\midrule
+Cheese & Items & 0.011 & 0.058 & [-0.064, -0.030] & World model & 0.99 & 0.93 \\
+Cheese & Stores & 0.001 & 0.047 & [-0.060, -0.032] & World model & 1.05 & 0.94 \\
+Snacks & Items & 0.012 & 0.162 & [-0.195, -0.109] & World model & 0.89 & 0.68 \\
+Snacks & Stores & 0.001 & 0.103 & [-0.136, -0.068] & World model & 1.00 & 0.72 \\
+Frat & Items & 0.008 & 0.313 & [-0.398, -0.248] & World model & 0.95 & 0.66 \\
+Frat & Stores & 0.007 & 0.206 & [-0.210, -0.187] & World model & 0.99 & 0.77 \\
+M5 & Items & 0.040 & 0.083 & [-0.057, -0.029] & World model & 1.04 & 0.84 \\
+M5 & Stores & 0.022 & 0.020 & [-0.001, +0.006] & Neither & 0.99 & 0.93 \\
+Favorita & Items & 0.010 & 0.171 & [-0.172, -0.145] & World model & 1.01 & 0.77 \\
+Favorita & Stores & 0.020 & 0.017 & [-0.005, +0.015] & Neither & 0.97 & 0.98 \\
+\bottomrule
+\end{tabular}}
+\end{table*}

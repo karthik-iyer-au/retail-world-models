@@ -1,0 +1,114 @@
+% Results by research question (Framework section). Tables from scripts/make_rq_tables.py; paired counts from
+% results/analysis_tuned/paired.csv (item bootstrap within each window, 90% intervals).
+\input{generated/rq_values}
+
+The results follow the four research questions. Every number comes from the
+tuned world model and the tuned LightGBM, each set by the same search on each
+data set (Section~\ref{sec:loop}), scored on the paper's windows. The average is
+the equal-weight mean of the two forecasts.
+
+\subsection{RQ1: grain}
+\label{sec:rq-grain}
+
+\textbf{No one model is the most accurate at every grain, and the average of the
+two is the most accurate at almost every grain.} At store grain and above, the
+average has the lowest error on eight of nine data sets; at the item levels, on
+all nine (Table~\ref{tab:rq-grain}). In the paired tests, which compare two
+forecasts level by level and window by window and count a difference only when
+it holds after resampling items, the average is clearly more accurate than the
+world model in 128 of 312 comparisons and clearly less accurate in 27; against
+LightGBM the counts are 124 and 21. At the item levels the average is clearly
+less accurate than either model in at most 8 of 100 comparisons. Across all
+data sets and levels, the average is in the 90\% model confidence set in
+\rqMcsAverage{} of \rqMcsCells{} cases, against \rqMcsLightgbm{} for
+LightGBM and \rqMcsWorldModel{} for the world model.
+
+The two models on their own are close. The world model is clearly more accurate
+than LightGBM in 64 comparisons and clearly less accurate in 75, and the
+balance is the same at store grain (40 against 45) and at item grain (24
+against 30). Which one leads depends on the data set. LightGBM leads at every
+grain on frozen entrees and on snacks; the world model leads at both store and
+item grain on Favorita, the data set kept out of all development, and at store
+grain on analgesics, cheese and Frat.
+
+Over the whole forecast window summed as one block, the view a promotion is
+judged on, the picture changes for some data sets. LightGBM forecasts each day
+of M5 well but drifts in total over the four weeks: its block error is 0.953
+against 0.598 for the world model and 0.589 for the average. The same drift
+shows on Favorita (0.565 against 0.482) and soft drinks (0.632 against 0.576).
+On analgesics, bottled juice and snacks the reverse holds: LightGBM's block
+total is closer than the world model's. The average is lowest on the block in
+five of nine data sets.
+
+\input{generated/rq_tab_grain}
+
+\subsection{RQ2: nature of the line}
+\label{sec:rq-lines}
+
+\textbf{Sales are concentrated, and the average holds up on both the fast lines
+and the slow tail; where history is short, the world model is ahead of
+LightGBM.} On the six Dominick's categories, 11 to 21\% of the items make 80\% of
+unit sales over the year before the forecast; on M5, Frat and Favorita the head
+is flatter, at 37 to 42\% (Table~\ref{tab:rq-lines}). On the fast lines the
+average has the lowest error on eight of nine data sets, and on the slow lines
+also on eight; on snacks LightGBM is lowest on the fast lines, and on cheese the
+world model is lowest on the slow lines.
+
+On series whose first sale falls less than 26 weeks before the forecast, the
+world model's error is lower than LightGBM's on eight of nine data sets, Frat
+being the exception: for example 0.539 against 0.667 on Favorita and 0.866
+against 1.024 on M5. These series are 11 to 21\% of the series on the Dominick's
+categories, where items enter and leave the range over the years, and under 2\%
+on M5, Frat and Favorita.
+
+\input{generated/rq_tab_lines}
+
+\subsection{RQ3: seen and unseen data}
+\label{sec:rq-unseen}
+
+\textbf{On items it was not trained on, the world model loses almost no accuracy
+and LightGBM loses a great deal; on stores it was not trained on, the world model
+loses less on three of five data sets and the same on two.} With a fifth of the
+items kept out of training, the world model's error on them rises by 0.008 to
+0.040, and LightGBM's by 0.058 to 0.313; the difference is clear on all five data
+sets tested (Table~\ref{tab:rq-transfer}). LightGBM under-forecasts the kept-out
+items, at 66 to 93\% of actual sales; the world model forecasts 89 to 104\%. With a
+fifth of the stores kept out, the world model loses less on cheese, snacks and
+Frat, and the two lose the same on M5 and Favorita.
+
+\input{generated/rq_tab_transfer}
+
+\subsection{RQ4: transferability}
+\label{sec:rq-transfer}
+
+\textbf{The settings carry to another retailer, and training on other retailers'
+data does not help either model.} M5's tuned settings carried unchanged to
+Favorita give 0.447 overall for the world model, against 0.428 with Favorita's own
+settings, and 0.450 for LightGBM, against 0.448 (Table~\ref{tab:rq-retailer});
+at item by store the difference is 0.002 for the world model and 0.001 for
+LightGBM. Training each model on its data set together with other data sets
+lowers the error by no more than 0.007 overall on any data set: by 0.004 for the
+world model on analgesics and by 0.007 for LightGBM on frozen entrees. Elsewhere
+it leaves the error unchanged or raises it, by as much as 0.141 for the world model on soft drinks and
+0.235 for LightGBM on analgesics.
+
+\input{generated/rq_tab_retailer}
+
+\subsection{The broad view}
+\label{sec:rq-broad}
+
+Brought together, the four answers give one recommendation and one reason for
+it. One forecast made at item by store and summed to every grain, as the
+equal-weight average of a tuned world model and tuned gradient-boosted trees,
+is the most accurate choice at the grains and on the kinds of line studied
+here: it is lowest at store grain and above on eight of nine data sets, at the
+item levels on all nine, and on the fast lines and the slow tail on most. The
+two models on their own are close on items and stores they were trained on, and
+each leads on different data sets. They part company on items and stores with
+little or no history, where the world model holds its accuracy and LightGBM
+under-forecasts. That is what the world model brings to the average, and where
+it fits in the planning cycle: new lines, range changes and new stores, where a
+retailer has the least history and the most to lose from a forecast that is too
+low. These findings are for the price and promotion levers, the forecast windows
+and the data sets studied; Section~\ref{sec:limits} sets out what they do not
+cover.
