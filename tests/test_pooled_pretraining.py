@@ -65,3 +65,16 @@ def test_pooled_lightgbm_fits_on_both_and_forecasts_the_target():
     pooled = build_model("pooled", model="lightgbm_direct", params=lgb, pool_with=[SOURCE]).fit(past).predict(future)
     assert pooled.shape == alone.shape and np.isfinite(pooled).all()
     assert not np.allclose(alone, pooled)
+
+
+def test_pooled_sources_land_on_the_target_dates():
+    """A weekly source whose weeks start on another weekday is moved onto the target's weeks."""
+    from rwm.pooled import Pooled
+
+    train = _target()
+    weekly = train.assign(**{DATE: train[DATE]})
+    m = Pooled.__new__(Pooled)
+    m.pool_with, m._columns = [SOURCE], [UNITS, PRICE, "promo"]
+    src = m._sources(weekly)[0]
+    assert set(src[DATE].unique()) <= set(weekly[DATE].unique()) or src[DATE].max() == weekly[DATE].max()
+    assert src[DATE].max() == weekly[DATE].max()

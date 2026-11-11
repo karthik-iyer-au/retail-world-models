@@ -45,11 +45,19 @@ class Pooled(Forecaster):
         from rwm.data.pool import load_source
 
         end = pd.Timestamp(train[DATE].max())
+        step = int(np.median(np.diff(np.sort(train[DATE].unique())).astype("timedelta64[D]").astype(int)))  # days between periods
         out = []
         for spec in self.pool_with:
             frame = load_source(spec, self._columns, until=end)
-            shift = end - pd.Timestamp(frame[DATE].max())
-            frame[DATE] = frame[DATE] + pd.Timedelta(days=7 * int(round(shift.days / 7)))
+            # the source's dates must fall on the target's own grid of dates: weekly data sets start their
+            # weeks on different weekdays (Dominick's on Thursday), so a weekly source is moved by the exact
+            # gap, which puts its last week on the target's last week; daily data move by whole weeks, which
+            # keeps each day on its own weekday (11 November 2026: a shift by whole weeks alone left Frat's
+            # weeks between Dominick's, so the pooled LightGBM read lags on a mixed date axis)
+            shift = (end - pd.Timestamp(frame[DATE].max())).days
+            if step < 7:
+                shift = 7 * int(round(shift / 7))
+            frame[DATE] = frame[DATE] + pd.Timedelta(days=shift)
             frame["source"] = spec.get("tag") or spec["name"]
             out.append(frame)
         return out

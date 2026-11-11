@@ -1209,3 +1209,14 @@ included (0.527 and 0.523 against 0.483); snacks was the one exception, on the s
 Favorita's study U on round 1's settings and states that the rerun on the final likelihood was stopped early, and why.
 Favorita's final settings are therefore round 1's latent check with the hurdle likelihood, which are the settings its
 final, transfer and pooled runs already use (entry earlier today), so nothing is rerun.
+
+**11 November 2026, a fault in the pooled LightGBM, found in its first results, and the rerun.** The pooled LightGBM
+moved each source's dates by whole weeks so its last week fell near the target's. Weekly data sets start their weeks
+on different weekdays (Dominick's on Thursday, Frat on another day), so Frat's weeks landed between Dominick's weeks
+and the pooled LightGBM built its lagged inputs on a mixed date axis. Its first results were far worse than LightGBM
+alone (analgesics 0.935 against 0.701 overall), which is how it was found. Fixed in `rwm.pooled` (weekly sources move
+by the exact gap onto the target's weeks; daily sources still move by whole weeks so each day keeps its weekday). The
+seven pooled LightGBM runs that read a weekly source of another retailer (the six Dominick's categories and Frat) are
+rerun as `pooled_<data>_lightgbm_v2`, settings unchanged; the faulty runs are not reported. M5's and Favorita's pooled
+LightGBM read only daily data and are not affected. The world model's pooled pretraining reads each source on its own
+dates and is not affected.
