@@ -1,44 +1,56 @@
 \section{Introduction}
 \label{sec:intro}
 
-A retailer uses sales forecasts for several decisions, and each decision is made
-at its own grain of the product, store and time hierarchy. Store orders and
-inventory are set for one item in one store, by day or week. Supplier funding
-and deal terms are agreed for an item across all stores, by week. Category
-performance is reviewed by category and store, week by week or over a run of
-weeks, and category sales and margin plans are set for the category across the
-chain. The financial plan is a chain total. A forecast can be accurate item by
-store and still miss the category total by several percent, because small
-errors in the same direction add up while large errors in opposite directions
-cancel. Knowing which grain is being solved for therefore bears on which model
-to use.
+Retail decisions run at different grains and on different clocks. Supplier
+range, space and cost reviews look at an item's volume across the chain over 26
+or 52 weeks, and the terms agreed in them commit allowances for the year ahead.
+Promotions are planned item by week in blocks of six to twelve weeks, and the
+promotional and retail allowances that fund them follow the same blocks.
+Merchants judge their category week by week. Store inventory is ordered item by
+store, day by day \cite{fildes2022}. Each of these decisions reads the same
+demand at a different grain and over a different span of time.
 
-This paper asks that question directly: at which grain do which models
-forecast best, when the price and promotion plan for the weeks ahead is known?
-Of the four Ps of retail (product, price, promotion and place), it addresses
-price and promotion, through the plan inputs that public data record: shelf
-price, temporary price cuts, promotion flags, displays and circulars, event and
-payment days. It does not forecast product (assortment, new items, ranging) or
-place (space, distribution), and it does not solve the four together. A
-forecast that did, or a retailer's own data with stock, space and range
-recorded, could give different results from those reported here.
+Since there is no single grain, there is no reason to expect one model to be
+the most accurate at every grain and every horizon. Retailers do not want a
+separate model at each grain either. Separate models disagree, and value leaks
+at each hand-off from a coarse long-range plan to a finer short-range one: the
+annual plan agreed with a supplier is broken into promotion blocks, weeks and
+store orders, and where the finer forecasts do not add back to the plan the gap
+is paid for in stock, markdowns or lost sales. The forecasting literature treats
+this as coherence across the levels of the product and store hierarchy
+\cite{hyndman2011,mint} and across levels of time \cite{athanasopoulos2017},
+usually by forecasting each level and reconciling the forecasts. This paper
+takes the other route retailers use: one forecast made at the finest grain,
+item by store by period, and summed to every coarser grain, so that the grains
+add up by construction. The question is which approach gives the best balance
+across grains when it is used this way.
 
-We compare models chosen to span what retailers use or are offered: LightGBM,
-the tree model behind the leading M5 entries; the Temporal Fusion Transformer;
-three pretrained models used without training on our data (TimesFM, Chronos-Bolt
-and Timestral); a world model of our own, which turns each item's recent history
-into a state and carries it forward one period at a time under the plan
-(Figure~\ref{fig:overview}); the same network without the carried state; and an
-equal-weight average of the world model, LightGBM and TimesFM given the plan.
-An earlier version of this work scored one final window per data set and found
-that the most accurate model changed with the level scored, the month and the
-data set. This version tests that on rolling forecast origins taken before any
-window used for development, on four public data sets, one of them kept out of
-all development, with paired tests, model confidence sets, interval forecasts,
-decision costs and reconciliation, every analysis written down before it ran
-except checks of unexpected results and two corrections, which are marked where
-they appear (Figure~\ref{fig:study}).
+We test four kinds of model. Gradient-boosted trees are the proven method:
+LightGBM was behind the leading entries of the M5 competition
+\cite{m5accuracy}. Pretrained foundation models (TimesFM, Chronos-Bolt and
+Timestral) forecast without training on the retailer's data. The Temporal
+Fusion Transformer is an attention-based model trained on it. World models, the
+newest of the four, learn a state for each item and carry it forward one period
+at a time under the price and promotion plan; ours is shown in
+Figure~\ref{fig:overview}. The world model and LightGBM were each tuned by the
+same search on every data set, and the average of forecasts is tested
+alongside them. The data are four public data sets: M5, six categories of
+Dominick's, Breakfast at the Frat, and Corporaci\'on Favorita.
 
+The study covers the short end of the planning cycle. Forecasts run 8 weeks
+ahead on the weekly data and 28 days ahead on the daily data, and are scored at
+every grain from item by store to the chain total, period by period and summed
+over the whole window as a promotion block. Forecasts of 26 or 52 weeks are not
+tested: judging them needs a retailer's own plans and range decisions to score
+against, which no public data set carries, and is left for work with an
+industry partner. Of the four Ps of retail, the study covers price and
+promotion, through the plan inputs these data record; product and place are out
+of scope. Every analysis was written down before it ran, except checks of
+unexpected results and corrections, which are marked where they appear
+(Figure~\ref{fig:study}).
+
+% The list of findings below is from the first revision and is rewritten once the
+% tuned models' results on all four data sets are in (plan entry of 11 November 2026).
 On these data sets, with the plan inputs and constraints they carry, we
 observed the following.
 \begin{enumerate}\setlength{\itemsep}{2pt}
