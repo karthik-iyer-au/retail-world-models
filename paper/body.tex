@@ -96,11 +96,36 @@ the first version in Supplement~\ref{sec:supplementfinal}.
 \section{Framework}
 \label{sec:framework}
 
-The question is answered in four parts, in the order a retailer meets them.
-Each part fixes what is measured before any model is compared, and the results
-are reported in the same order (Section~\ref{sec:results}).
+The overall question of this paper is:
 
-\paragraph{Grain.} Does the forecast hold up at every grain a decision is made
+\begin{quote}
+Can one forecast, built once at the finest grain of item by store by period and
+summed to every coarser grain, serve the decisions a retailer makes from it
+across every kind of line, and which kind of model, or combination of models,
+does that best?
+\end{quote}
+
+\noindent It is answered through four research questions, in the order a
+retailer meets them:
+
+\begin{description}\setlength{\itemsep}{2pt}
+\item[RQ1, grain.] At which grains of product, store and time does each model
+  forecast best, period by period and over a whole promotion block, when every
+  grain is summed from the same item-by-store forecast?
+\item[RQ2, nature of the line.] How does each model do on the fast lines that
+  carry most of the sales, on the long tail of slow lines, and on lines with
+  short history?
+\item[RQ3, seen and unseen data.] How much accuracy does each model lose on
+  items and stores it was not trained on?
+\item[RQ4, transferability.] Do a model's settings carry to another retailer,
+  and does training on other retailers' data make it more accurate?
+\end{description}
+
+\noindent Each question fixes what is measured before any model is compared,
+and the results are reported in the same order (Section~\ref{sec:results}).
+The broad view then brings the four answers together.
+
+\paragraph{RQ1, grain.} Does the forecast hold up at every grain a decision is made
 at, and do the grains add up? Every model forecasts each item in each store for
 each period, and the forecasts are summed to item, store, category, category by
 store and the chain total. Each grain is scored period by period, which is how
@@ -109,7 +134,7 @@ window as one block, which is how a promotion is judged. Because every grain is
 a sum of the same item-by-store forecast, the plans built from them add up, and
 any value lost between grains shows as a difference in accuracy between them.
 
-\paragraph{Nature of the line.} Does the forecast hold up on every kind of
+\paragraph{RQ2, nature of the line.} Does the forecast hold up on every kind of
 line? Grocery sales are concentrated: a short head of fast lines carries most of
 the units, and a long tail of slow lines sells a few units a week or none. Lines
 also differ in how much history they have. The fast lines are defined as the
@@ -120,7 +145,7 @@ own series at every grain, so that the total of the fast lines, the slow lines
 of each store, and so on, are each judged as a planner would judge them. The
 share of items that makes 80\% of sales is reported for each data set.
 
-\paragraph{Seen and unseen data.} Does the forecast hold up on items and stores
+\paragraph{RQ3, seen and unseen data.} Does the forecast hold up on items and stores
 the model was not trained on? Ranges change and stores open, so part of every
 forecast is for lines or stores with little or no history in the model. A fifth
 of the items, or of the stores, is kept out of training; once trained, each
@@ -128,7 +153,7 @@ model reads the kept-out series' recent sales and forecasts them. The cost of
 not having trained on them is the accuracy lost on that fifth against a model
 trained on everything.
 
-\paragraph{Transferability.} Do the settings carry to another retailer, and does
+\paragraph{RQ4, transferability.} Do the settings carry to another retailer, and does
 training on other retailers' data help? Settings tuned on M5 are carried
 unchanged to Favorita and compared with settings tuned on Favorita itself. Each
 model is also trained on its data set together with the other data sets, and
