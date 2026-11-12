@@ -110,47 +110,48 @@ Data set & 80\% of units & WM & LGB & Avg & WM & LGB & Avg & WM & LGB & Avg\\
 
 
 def transfer() -> tuple[str, list]:
-    rows = []
-    for f in glob.glob(str(ROOT / "results" / "ftransfer" / "*" / "metrics.json")):
-        m = re.search(r"ftransfer_(?P<data>m5|favorita|frat|dominicks_[a-z]+)_(?P<kind>store|item)_"
-                      r"(?P<model>world_model|lightgbm)(?:_pooled)?_(?P<form>kept_out|trained_on_all)_[0-9a-f]{8}/", f)
-        if not m:
-            continue
-        for s in json.load(open(f))["splits"]:
-            rows.append({**m.groupdict(), "window": s["test_start"], "kept_out": s["kept_out"],
-                         "fa": s.get("kept_out_forecast_to_actual")})
-    r = pd.DataFrame(rows)
-    k = ["data", "kind", "model", "window"]
-    o = r[r.form == "kept_out"].set_index(k)
-    ref = r[r.form == "trained_on_all"].set_index(k)["kept_out"]
-    o = o.assign(comp=ref.reindex(o.index)).dropna(subset=["comp"])
-    o["cost"] = o.kept_out - o.comp
-    c = o.reset_index()
+    """Kept-out series scored for each model and the average (part keptout of scripts/revision_analysis.py, which
+    reproduces the transfer runs' own kept-out scores); the cost is against the trained-on-all runs."""
+    d = pd.read_csv(A / "keptout.csv")
+    M = ["world_model", "lightgbm", "ensemble_2"]
     rng = np.random.default_rng(0)
     out, lines_ = [], []
-    for (d, kd), g in sorted(c.groupby(["data", "kind"]), key=lambda t: (list(KEYS).index(t[0][0]), t[0][1])):
-        w = g.pivot(index="window", columns="model", values="cost")
-        fa = g.groupby("model").fa.mean()
-        x = (w.world_model - w.lightgbm).dropna().to_numpy()
+
+    def clear(x: np.ndarray, a: str, b: str) -> str:
         lo, hi = np.quantile(rng.choice(x, (10000, len(x))).mean(1), [0.05, 0.95])
-        clear = "World model" if hi < 0 else ("LightGBM" if lo > 0 else "Neither")
-        out.append(dict(data=d, kind=kd, wm=w.world_model.mean(), lgb=w.lightgbm.mean(), lo=lo, hi=hi,
-                        fa_wm=fa["world_model"], fa_lgb=fa["lightgbm"], clear=clear))
-        lines_.append(f"{KEYS[d]} & {'Items' if kd == 'item' else 'Stores'} & {w.world_model.mean():.3f} & "
-                      f"{w.lightgbm.mean():.3f} & [{lo:+.3f}, {hi:+.3f}] & {_shade(clear)} & {fa['world_model']:.2f} & "
-                      f"{fa['lightgbm']:.2f} \\\\")
+        return a if hi < 0 else (b if lo > 0 else "Neither")
+
+    for key in KEYS:
+        for kind in ("item", "store"):
+            ko = d[(d.key == key) & (d.set == f"kept_out_{kind}")].pivot_table(index="origin", columns="model",
+                                                                               values="kept_out")
+            if ko.empty or not set(M) <= set(ko.columns):
+                continue
+            al = d[(d.key == key) & (d.set == f"trained_on_all_{kind}")].pivot_table(index="origin", columns="model",
+                                                                                     values="kept_out")
+            cost = (ko[M] - al[M]).mean()
+            fa = d[(d.key == key) & (d.set == f"kept_out_{kind}")].groupby("model").forecast_to_actual.mean()
+            wl = clear((ko.world_model - ko.lightgbm).to_numpy(), "World model", "LightGBM")
+            wa = clear((ko.world_model - ko.ensemble_2).to_numpy(), "World model", "Average")
+            out.append(dict(data=key, kind=kind, score=ko[M].mean(), cost=cost, fa=fa[M], wm_lgb=wl, wm_avg=wa))
+            shade = lambda t: _shade(t) if t != "Average" else f"\\cellcolor{{avgcell}}{t}"  # noqa: E731
+            lines_.append(f"{KEYS[key]} & {'Items' if kind == 'item' else 'Stores'} & "
+                          + " & ".join(_fmt(list(ko[M].mean()))) + " & "
+                          + " & ".join(f"{v:.3f}" for v in cost) + " & "
+                          + " & ".join(f"{v:.2f}" for v in fa[M]) + f" & {shade(wl)} & {shade(wa)} \\\\")
     tab = r"""\begin{table*}[t]
 \centering\footnotesize\setlength{\tabcolsep}{3pt}
-\caption{RQ3, seen and unseen data. A fifth of the items, or of the stores, is kept out of training; the cost is the
-WRMSSE on that fifth minus the WRMSSE on the same fifth of the same model trained on everything, mean over windows.
-The interval is a 90\% bootstrap interval over windows for the world model's cost minus LightGBM's; ``clearly lower''
-names the model whose cost is lower when the interval excludes zero. Forecast over actual is on the kept-out series.}
+\caption{RQ3, seen and unseen data. A fifth of the items, or of the stores, is kept out of training. WRMSSE on that
+fifth for the world model (WM), LightGBM (LGB) and their average (Avg); the cost of not training on them, which is that
+WRMSSE minus the WRMSSE on the same fifth of the same forecast trained on everything; and forecast over actual on the
+fifth. Means over windows. The last two columns name the forecast that is clearly lower on the kept-out fifth when a
+90\% bootstrap interval over windows of the difference excludes zero. """ + KEY + r"""}
 \label{tab:rq-transfer}
-\resizebox{\textwidth}{!}{\begin{tabular}{ll cc c l cc}
+\resizebox{\textwidth}{!}{\begin{tabular}{ll ccc ccc ccc ll}
 \toprule
- & & \multicolumn{2}{c}{Cost of not training on them} & & & \multicolumn{2}{c}{Forecast over actual}\\
-\cmidrule(lr){3-4}\cmidrule(lr){7-8}
-Data set & Kept out & WM & LGB & WM $-$ LGB, 90\% & Clearly lower & WM & LGB\\
+ & & \multicolumn{3}{c}{WRMSSE, kept out} & \multicolumn{3}{c}{Cost of not training on them} & \multicolumn{3}{c}{Forecast over actual} & \multicolumn{2}{c}{Clearly lower}\\
+\cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}\cmidrule(lr){12-13}
+Data set & Kept out & WM & LGB & Avg & WM & LGB & Avg & WM & LGB & Avg & WM or LGB & WM or Avg\\
 \midrule
 """ + "\n".join(lines_) + "\n" + r"""\bottomrule
 \end{tabular}}

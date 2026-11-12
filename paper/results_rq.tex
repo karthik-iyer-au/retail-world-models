@@ -65,15 +65,19 @@ on M5, Frat and Favorita.
 \subsection{RQ3: seen and unseen data}
 \label{sec:rq-unseen}
 
-\textbf{On items it was not trained on, the world model loses almost no accuracy
-and LightGBM loses a great deal; on stores it was not trained on, the world model
-loses less on three of five data sets and the same on two.} With a fifth of the
-items kept out of training, the world model's error on them rises by 0.008 to
-0.040, and LightGBM's by 0.058 to 0.313; the difference is clear on all five data
-sets tested (Table~\ref{tab:rq-transfer}). LightGBM under-forecasts the kept-out
-items, at 66 to 93\% of actual sales; the world model forecasts 89 to 104\%. With a
-fifth of the stores kept out, the world model loses less on cheese, snacks and
-Frat, and the two lose the same on M5 and Favorita.
+\textbf{On items the models were not trained on, use the world model alone; on
+stores they were not trained on, the average serves.} With a fifth of the items
+kept out of training, the world model's error on them rises by 0.008 to 0.040,
+against 0.058 to 0.313 for LightGBM (Table~\ref{tab:rq-transfer}). LightGBM
+under-forecasts these items, at 66 to 93\% of actual sales, and that pulls the
+average down to 78 to 96\%; the world model forecasts 89 to 104\%. On the kept-out
+items the world model alone is clearly more accurate than the average on all five
+data sets tested.
+
+With a fifth of the stores kept out, the world model is clearly more accurate
+than LightGBM on four of five data sets and level on M5. Against the average it
+is clearly more accurate only on Frat; the average is clearly more accurate on
+cheese, and the two are level on snacks, M5 and Favorita.
 
 \input{generated/rq_tab_transfer}
 
@@ -96,18 +100,33 @@ it leaves the error unchanged or raises it, by as much as 0.141 for the world mo
 \subsection{The broad view}
 \label{sec:rq-broad}
 
-Brought together, the four answers give one recommendation and one reason for
-it. One forecast made at item by store and summed to every grain, as the
-equal-weight average of a tuned world model and tuned gradient-boosted trees,
-is the most accurate choice at the grains and on the kinds of line studied
-here: it is lowest at store grain and above on eight of nine data sets, at the
-item levels on all nine, and on the fast lines and the slow tail on most. The
-two models on their own are close on items and stores they were trained on, and
-each leads on different data sets. They part company on items and stores with
-little or no history, where the world model holds its accuracy and LightGBM
-under-forecasts. That is what the world model brings to the average, and where
-it fits in the planning cycle: new lines, range changes and new stores, where a
-retailer has the least history and the most to lose from a forecast that is too
-low. These findings are for the price and promotion levers, the forecast windows
-and the data sets studied; Section~\ref{sec:limits} sets out what they do not
-cover.
+Brought together, the four answers give one rule. \textbf{Forecast every item in
+every store as the equal-weight average of a tuned world model and tuned
+gradient-boosted trees, and sum it to every grain; for an item the models have
+not been trained on, use the world model alone until they are retrained with
+it.} On the data sets studied, the average is the most accurate choice at store
+grain and above on eight of nine data sets, at the item levels on all nine, and
+on the fast lines and the slow tail on eight of nine. The two models on their own
+are close on items they were trained on; they part company on items they were
+not, where LightGBM under-forecasts and the world model does not. The trigger
+for the exception is one a merchant always knows: whether the item is new to the
+range. Settings carry from one retailer's data to another's, and training on
+other retailers' data does not help.
+
+Two parts of this rule were reached differently, and the difference matters to
+a reader who would use it. The average for series with history was the
+recommendation of the first revision and holds on the tuned models. The
+exception was tested as part of a wider rule written down before it ran, which
+also gave the world model every series with less than 26 weeks of history; that
+half added nothing on the data with history (it was level with the average on
+eight data sets and worse on snacks), and only the new-item half held. The rule
+as stated is therefore drawn from these results.
+
+The rule is a finding on these nine data sets, not a ranking of methods for any
+retailer. A retailer, or a researcher, adopting the framework should rerun the
+full set of comparisons on its own data, including the models and combinations
+that lost here: the pretrained models, the Temporal Fusion Transformer, the
+three-model ensemble, pooling across retailers and the forecast by history. Their
+order may change on data with other levers, other lines and other history; the
+code to do so is released with the paper. Section~\ref{sec:limits} sets out what
+the study does not cover, including forecasts longer than 8 weeks or 28 days.

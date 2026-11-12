@@ -735,14 +735,38 @@ plans against.
 \label{sec:limitations}
 
 \paragraph{Scope: two of the four Ps, on public data}
-The paper addresses price and promotion. It does not forecast product
-(assortment, new items, ranging) or place (space, distribution), and it does not
-solve the four Ps together; a unified forecast across them does not exist in
+The paper addresses price and promotion. It forecasts items newly added to a
+range but does not decide product (which items to range) or place (space,
+distribution), and it does not solve the four Ps together; a unified forecast across them does not exist in
 this work, and one could change which model works best at each grain. The data
 are four public data sets with their own plan inputs and constraints. A single
 retailer's data, with its own levers, stock and space records, could give a
 different ordering of models, and the grain comparison should be repeated on
 it before a choice is made.
+
+\paragraph{Adapting the findings}
+The rule of Section~\ref{sec:rq-broad} and the ordering of models behind it hold
+on the nine data sets studied. They are not a ranking of methods for retail in
+general. A retailer or researcher adopting the framework should rerun every
+comparison on its own data, including the models and combinations that lost
+here, since data with other levers, lines and lengths of history can change the
+order. The code and settings for every comparison are released for that purpose.
+
+\paragraph{Forecast horizon}
+Every forecast in the study runs 8 weeks ahead on the weekly data and 28 days
+ahead on the daily data. Whether the models' accuracy, and the order between
+them, holds over the 26- and 52-week horizons of range, space and supplier
+reviews was not tested: a longer forecast may degrade, and may degrade
+differently for each model. Testing it needs a retailer's own plans and range
+decisions to score against and is left for separate work.
+
+\paragraph{New items}
+The kept-out items of the transfer test were not trained on, but each model read
+their recent sales before forecasting them. An item with no sales at all, on its
+first day in range, was not tested; the new-item part of the rule covers items
+the models have not been trained on, not items with no history. That part of
+the rule was drawn from the results, after a wider rule written down in advance
+held only in part (Section~\ref{sec:rq-broad}).
 
 \paragraph{Windows and seeds}
 Trained models are one fit each in the rolling windows, and runs of one
