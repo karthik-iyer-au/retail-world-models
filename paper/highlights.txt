@@ -1,0 +1,5 @@
+One item-by-store forecast, summed upward, is scored at every retail grain
+Averaging a tuned world model and tuned trees is most accurate at almost every grain
+On items not yet trained on, the world model holds accuracy; trees under-forecast
+Results are read by grain, by fast, slow and new lines, and across retailers
+Both models get the same settings search, scored on windows the search never saw
