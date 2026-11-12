@@ -20,7 +20,9 @@ def test_nodes_rebuild_the_reported_cost(fr):  # noqa: F811
         t0, t1, _ = fr.cut(sp.origin)
         fc = fr.units[:, t0:t1] * np.exp(rng.normal(0, 0.4, (len(fr.names), t1 - t0)))
         d = CC.node_rows(fr, sp.origin, fc, cols, daily=False)
-        cost = (d["dollars"] * d["abs_period"] / d["actual_window"]).sum() / d["dollars"].sum()
+        # the corrected cost (study G): error in dollars over sales in dollars, at each node's average price
+        price = d["dollars"] / d["units_before"].where(d["units_before"] > 0)
+        cost = (price * d["abs_period"]).sum() / (price * d["actual_window"]).sum()
         assert np.isclose(cost, C.category_planning_loss(fr, sp.origin, fc, cols))
         assert np.allclose(d["abs_week"], d["abs_period"])  # weekly data
         assert (d["abs_half"] <= d["abs_period"] + 1e-9).all()

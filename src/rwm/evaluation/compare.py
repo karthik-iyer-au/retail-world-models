@@ -457,14 +457,18 @@ def replenishment_cost(fr: Frame, origin: int, fc: np.ndarray, qerr_bottom: np.n
 def category_planning_loss(fr: Frame, origin: int, fc: np.ndarray, cols) -> float:
     """Absolute error of category-by-store totals, weighted by each node's dollar
     sales in the window before, as a share of those dollar sales."""
+    # the error in dollars over sales in dollars, each node's units valued at its average price over the weight
+    # window (study G, plan entry of 17 October 2026): dividing each node's error by its own sales, as first run, let
+    # a node that sold nothing in a window enter at about 1e9 times its error
     t0, t1, rev = fr.cut(origin)
     codes = fr.codes(cols)
     g = int(codes.max()) + 1
-    a = _sum_by_group(fr.units[:, t0:t1], codes, g)
-    f = _sum_by_group(fc, codes, g)
+    a = _sum_by_group(np.nan_to_num(fr.units[:, t0:t1]), codes, g)
+    f = _sum_by_group(np.nan_to_num(fc), codes, g)
     w = _sum_by_group(rev[:, None], codes, g)[:, 0]
-    err = np.abs(a - f).sum(axis=1) / np.maximum(a.sum(axis=1), 1e-9)
-    return float((err * w).sum() / w.sum())
+    u = _sum_by_group(np.nan_to_num(fr.units[:, t0 - fr.window:t0]).sum(axis=1, keepdims=True), codes, g)[:, 0]
+    price = np.where(u > 0, w / np.maximum(u, 1e-9), 0.0)
+    return float((price * np.abs(a - f).sum(axis=1)).sum() / max((price * a.sum(axis=1)).sum(), 1e-9))
 
 
 def load_run(run_dir: Path) -> tuple[dict, pd.DataFrame]:

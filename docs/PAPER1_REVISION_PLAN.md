@@ -1291,3 +1291,9 @@ not rerun; comparisons with it are dropped. No new training on Vast.
 Note, 12 November: the tuned world model is an average of five copies; the timing and persistence tests use the
 average's forecasts, and the probe of the carried state reads the state of the first copy, since the five states are
 not averaged anywhere.
+
+**13 November 2026, the category-plan cost rerun on the tuned models uses the corrected cost.** The tuned rerun of the
+decision costs still called the cost as first run (each node's error over its own sales), which study G found broken
+on Dominick's (17 October). `rwm.evaluation.compare.category_planning_loss` now computes the corrected cost the plan
+defines, the error in dollars over sales in dollars at each node's average price, and the decision costs are rerun
+for all nine data sets (analysis_tuned/decisions_fixed_<key>). The replenishment costs are unchanged by this.
