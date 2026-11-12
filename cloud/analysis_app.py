@@ -25,7 +25,7 @@ image = image.add_local_file(Path(__file__).resolve().parent / "modal_app.py", "
 def analyse(commit: str, keys: list[str], parts: list[str], boot: int) -> str:
     _checkout(commit)
     if "reconcile" in parts:  # the ETS base forecasts of the reconciliation part
-        subprocess.run([sys.executable, "-m", "pip", "install", "-q", "statsforecast"], check=True)
+        subprocess.run([sys.executable, "-m", "pip", "install", "-q", "statsforecast==2.1.1", "hierarchicalforecast==1.5.3"], check=True)
     runs = Path("/tmp/runs")
     runs.mkdir(exist_ok=True)
     for src in ("final", "cleanrev", "ftransfer"):
