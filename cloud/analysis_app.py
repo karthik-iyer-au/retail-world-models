@@ -21,8 +21,8 @@ app = modal.App("rwm-analysis")
 image = image.add_local_file(Path(__file__).resolve().parent / "modal_app.py", "/root/modal_app.py")
 
 
-@app.function(image=image, volumes={DATA: data_volume, RESULTS: results_volume}, cpu=8, memory=96 * 1024, timeout=8 * 3600)
-def analyse(commit: str, keys: list[str], parts: list[str], boot: int) -> str:
+@app.function(image=image, volumes={DATA: data_volume, RESULTS: results_volume}, cpu=8, memory=96 * 1024, timeout=20 * 3600)
+def analyse(commit: str, keys: list[str], parts: list[str], boot: int, out_dir: str = "analysis_tuned") -> str:
     _checkout(commit)
     if "reconcile" in parts:  # the ETS base forecasts of the reconciliation part
         subprocess.run([sys.executable, "-m", "pip", "install", "-q", "statsforecast==2.1.1", "hierarchicalforecast==1.5.3"], check=True)
@@ -32,7 +32,7 @@ def analyse(commit: str, keys: list[str], parts: list[str], boot: int) -> str:
         for d in Path(RESULTS, src).iterdir():
             if (d / "forecasts.csv").exists() and (d / "manifest.json").exists() and "_piece_" not in d.name:
                 (runs / d.name).symlink_to(d)
-    out = Path(RESULTS, "analysis_tuned")
+    out = Path(RESULTS, out_dir)
     cmd = [sys.executable, "scripts/revision_analysis.py", "--tuned", "--results", str(runs), "--out", str(out),
            "--parts", *parts, "--boot", str(boot)] + (["--keys", *keys] if keys else [])
     done = subprocess.run(cmd, cwd=CHECKOUT, capture_output=True, text=True)
@@ -66,4 +66,4 @@ def main(commit: str, keys: str = "", parts: str = "scores,paired,mcs", boot: in
     if run:  # --run <script> --args "<space-separated args>"
         print(script.remote(commit, run, args.split(), out))
     else:
-        print(analyse.remote(commit, [k for k in keys.split(",") if k], parts.split(","), boot))
+        print(analyse.remote(commit, [k for k in keys.split(",") if k], parts.split(","), boot, out))
