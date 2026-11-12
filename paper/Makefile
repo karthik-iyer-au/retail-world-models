@@ -32,10 +32,12 @@ all: pdf
 figures:
 	cd figs && $(PY) make_figures.py
 	cd figs && $(PY) make_revision_figures.py
+	cd figs && $(PY) make_loop_figures.py
 
 tables:
 	cd figs && $(PY) make_tables.py
 	cd figs && $(PY) make_revision.py
+	cd .. && $(PY) scripts/make_rq_tables.py
 
 # Three passes: the second resolves labels and reflows floats, the third
 # settles references that moved.
