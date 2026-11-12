@@ -33,6 +33,7 @@ CATLEVEL = {"m5": "store_idxcat_id", "favorita": "store_idxfamily", "default": "
 DAILY = ("m5", "favorita")
 
 
+COMPARISON = False  # --comparison: also every comparison model's rolling runs
 TUNED = False  # --tuned: the final runs' tuned world model and LightGBM (entry of 10 November 2026)
 
 
@@ -48,6 +49,11 @@ def label(config_name: str) -> tuple[str, str, str] | None:
         m = re.fullmatch(r"ftransfer_(dominicks_\w{3}|frat|m5|favorita)_(item|store)_(world_model|lightgbm)(?:_pooled)?_(kept_out|trained_on_all)", n)
         if m:
             return m.group(1), f"{m.group(4)}_{m.group(2)}", m.group(3)
+        if COMPARISON:  # every comparison model on the rolling windows, beside the tuned pair (plan entry of 12 November)
+            m = re.fullmatch(r"(?:cleanrev|rev)_(dominicks_\w{3}|frat|m5|favorita)_rolling_(\w+)", n)
+            if m and m.group(2) not in ("world_model", "lightgbm", "lift", "lift_matched") \
+                    and not (m.group(1).startswith("dominicks") and n.startswith("rev_")):
+                return m.group(1), "rolling", m.group(2)
         m = re.fullmatch(r"(?:cleanrev|rev)_(dominicks_\w{3}|frat|m5|favorita)_rolling_(timesfm_plan)", n)
         if m and not (m.group(1).startswith("dominicks") and n.startswith("rev_")):
             return m.group(1), "rolling", m.group(2)
@@ -158,11 +164,12 @@ def main(argv=None):
     p.add_argument("--keys", nargs="*")
     p.add_argument("--boot", type=int, default=1000)
     p.add_argument("--tuned", action="store_true", help="the final runs' tuned models (entry of 10 November 2026)")
+    p.add_argument("--comparison", action="store_true", help="with --tuned, every comparison model as well")
     p.add_argument("--interval-fix", action="store_true",
                    help="pool horizons where a level has few earlier errors, and count whole units (plan, 16 October)")
     a = p.parse_args(argv)
-    global TUNED
-    TUNED = a.tuned
+    global TUNED, COMPARISON
+    TUNED, COMPARISON = a.tuned, a.comparison
     qkw = {"min_per_horizon": 50} if a.interval_fix else {}
     results, out = Path(a.results), Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
