@@ -110,41 +110,34 @@ def fig_overview():
             ha="center", va="top", color=MUTED)
     ax.text(0.3, 1.75, "Plan: price against the\nitem's regular price,\npromotion, display,\nfeature, events",
             fontsize=6.0, ha="left", va="top", color=MUTED)
-    ax.text(5.2, 0.55, "Lift model: the same encoder and inputs with no roll-forward;\n"
-            "every period is read from $s_t$ and that period's plan.", fontsize=6.0, ha="left", va="center",
-            color=INK)
     fig.text(0.0, 0.985, "(a)", fontsize=9.5, weight="bold", va="top")
     fig.text(0.04, 0.985, "The world model carries an item state forward under the plan", fontsize=8,
              weight="bold", va="top")
 
-    # (b) protocol
-    bx = fig.add_axes([0.745, 0.13, 0.25, 0.66])
+    # (b) how the settings were set (revision, November 2026): a search on early windows, one held out, then the
+    # rolling windows scored once with the final settings
+    bx = fig.add_axes([0.765, 0.13, 0.225, 0.66])
     fig.text(0.635, 0.985, "(b)", fontsize=9.5, weight="bold", va="top")
-    fig.text(0.675, 0.985, "Settings fixed before each final window", fontsize=8, weight="bold", va="top")
-    bx.set_ylim(-0.75, 2.75)
+    fig.text(0.675, 0.985, "Settings searched, then scored", fontsize=8, weight="bold", va="top")
+    bx.set_ylim(-0.95, 2.75)
     bx.set_xlim(0, 10)
-    segs = [(1.0, "Mar", "#c9d6e4", INK), (3.25, "Apr", "#c9d6e4", INK), (5.5, "Prac.", "#e5e7eb", INK),
-            (7.75, "Test", ACCENT, "white")]
-    bx.add_patch(plt.Rectangle((0, 1.78), 0.9, 0.44, color="#f3f4f6", lw=0))
-    for x, nm, c, tc in segs:
-        bx.add_patch(plt.Rectangle((x, 1.78), 2.15, 0.44, color=c, lw=0))
-        bx.text(x + 1.07, 2, nm, ha="center", va="center", fontsize=6.2, color=tc)
-    bx.text(3.2, 2.33, "never used to choose", ha="center", va="bottom", fontsize=5.8, color=MUTED)
-    bx.text(6.6, 2.33, "chosen on", ha="center", va="bottom", fontsize=5.8, color=MUTED)
-    for y in (1, 0):
-        bx.add_patch(plt.Rectangle((0, y - 0.22), 2.9, 0.44, color="#f3f4f6", lw=0))
-        bx.text(1.45, y, "training", ha="center", va="center", fontsize=6.0, color=MUTED)
-        for k, x in enumerate((3.0, 5.0)):
-            bx.add_patch(plt.Rectangle((x, y - 0.22), 1.9, 0.44, color="#e5e7eb", lw=0))
-            bx.text(x + 0.95, y, f"dev {k + 1}", ha="center", va="center", fontsize=6.0)
-        bx.add_patch(plt.Rectangle((7.2, y - 0.22), 2.8, 0.44, color=ACCENT, lw=0))
-        bx.text(8.6, y, "final 8 wk", ha="center", va="center", fontsize=6.0, color="white")
-    bx.plot([7.1, 7.1], [-0.4, 1.4], color=INK, lw=0.9)
-    bx.text(7.1, -0.5, "settings fixed,\nrun once", ha="center", va="top", fontsize=5.8, color=INK)
-    bx.set_yticks([2, 1, 0])
-    bx.set_yticklabels(["M5,\ndaily", "Dominick's,\nweekly", "Frat,\nweekly"], fontsize=6.6)
+    rows = [(2, "one change\nat a time"), (1, "kept if 3 seeds\nbeat the bar"), (0, "final\nsettings")]
+    for y, lab in rows:
+        bx.text(-0.2, y, lab, ha="right", va="center", fontsize=6.0, color=INK, linespacing=0.95)
+    for y in (2, 1):
+        for k, x in enumerate((0.0, 1.55, 3.1)):
+            bx.add_patch(plt.Rectangle((x, y - 0.22), 1.45, 0.44, color="#c9d6e4", lw=0))
+            bx.text(x + 0.72, y, f"S{k + 1}", ha="center", va="center", fontsize=5.6, color=INK)
+        bx.add_patch(plt.Rectangle((4.65, y - 0.22), 1.45, 0.44, facecolor="white", edgecolor=MUTED, lw=0.6,
+                                   hatch="////"))
+        bx.text(5.37, y + 0.32, "held out", ha="center", va="bottom", fontsize=5.4, color=MUTED)
+    for k, x in enumerate((6.4, 7.3, 8.2, 9.1)):
+        bx.add_patch(plt.Rectangle((x, -0.22), 0.82, 0.44, color=ACCENT, lw=0))
+    bx.text(8.15, 0.32, "rolling,\nscored", ha="center", va="bottom", fontsize=5.4, color=ACCENT, linespacing=0.95)
+    bx.plot([6.25, 6.25], [-0.55, 2.4], color=INK, lw=0.9)
+    bx.text(6.25, -0.62, "settings fixed", ha="center", va="top", fontsize=5.8, color=INK)
     bx.set_xticks([])
-    bx.tick_params(axis="y", length=0)
+    bx.set_yticks([])
     despine(bx, keep=())
     save(fig, OUT / "fig_overview.pdf")
 

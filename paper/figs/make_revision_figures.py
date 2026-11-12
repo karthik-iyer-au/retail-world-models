@@ -261,7 +261,8 @@ def fig_study():
     ax.grid(False)
     fig.text(0.005, 0.985, "(a)", fontsize=9.5, fontweight="bold", ha="left", va="top", color=INK)
 
-    # (b) the ensemble, drawn in equal-aspect units
+    # (b) the forecast the paper recommends: the average of the two tuned models, the world model alone for items
+    # not yet trained on (plan entry of 12 November 2026), drawn in equal-aspect units
     left, width = 0.675, 0.32
     bx = fig.add_axes([left, 0.0, width, 1.0])
     W = 10.0
@@ -269,12 +270,11 @@ def fig_study():
     bx.set_xlim(0, W)
     bx.set_ylim(0, Hh)
     bx.axis("off")
-    members = [("world", "World model", glyph_world), ("lgb", "LightGBM", glyph_tree),
-               ("tfm_plan", "TimesFM + plan", glyph_series)]
-    top = Hh - 1.6
-    ys = [top, top - 1.75, top - 3.5]
+    members = [("world", "World model, tuned", glyph_world), ("lgb", "LightGBM, tuned", glyph_tree)]
+    top = Hh - 1.7
+    ys = [top, top - 1.9]
     bw, bhh, x0 = 5.5, 1.3, 0.1
-    mx, my = 7.15, ys[1]
+    mx, my = 7.15, (ys[0] + ys[1]) / 2
     fig.text(left - 0.035, 0.985, "(b)", fontsize=9.5, fontweight="bold", ha="left", va="top", color=INK)
     for (m, name, g), y in zip(members, ys):
         bx.add_patch(FancyBboxPatch((x0, y - bhh / 2), bw, bhh, boxstyle="round,pad=0.02,rounding_size=0.3",
@@ -282,12 +282,12 @@ def fig_study():
         if m == "world":
             g(bx, x0 + 0.4, y, COLOR[m], s=0.13)
         else:
-            g(bx, x0 + 0.33, y + (0.02 if m == "lgb" else 0.0), COLOR[m])
+            g(bx, x0 + 0.33, y + 0.02, COLOR[m])
         bx.text(x0 + 1.6, y, name, ha="left", va="center", fontsize=7.0, color=INK)
         end = (mx - 0.8, my + (y - my) * 0.22)
         bx.add_patch(FancyArrowPatch((x0 + bw, y), end, arrowstyle="-|>", mutation_scale=6, color=MUTED, lw=0.7,
                                      shrinkA=1, shrinkB=1))
-        bx.text(x0 + bw + 0.12, y + 0.12, "1/3", ha="left", va="bottom", fontsize=SMALL, color=MUTED)
+        bx.text(x0 + bw + 0.12, y + 0.12, "1/2", ha="left", va="bottom", fontsize=SMALL, color=MUTED)
     bx.add_patch(FancyBboxPatch((mx - 0.75, my - 0.5), 1.5, 1.0, boxstyle="round,pad=0.02,rounding_size=0.45",
                                 facecolor=FILL, edgecolor=ACCENT, lw=0.8))
     bx.text(mx, my, "mean", ha="center", va="center", fontsize=6.8, color=ACCENT)
@@ -295,28 +295,18 @@ def fig_study():
                                  color=ACCENT, lw=0.8, shrinkA=0, shrinkB=0))
     bx.scatter([mx + 1.95], [my], marker=MARKER["ensemble"], s=90, color=COLOR["ensemble"], edgecolor="white",
                lw=0.5, zorder=4)
-    bx.text(mx + 1.95, my - 0.6, "Ensemble", ha="center", va="top", fontsize=7.0, color=ACCENT)
-    # the study A variants, from the ablation table
-    ab = pd.concat([read("ablation_paired.csv"), read("favorita_ablation_paired.csv")])
-    var = set(ab.a)
-    drop = sorted(v for v in var if v.startswith("without_"))
-    fit = sorted(v for v in var if v.startswith("fitted_"))
-    lines = []
-    if drop:
-        lines.append(f"drop one member ({len(drop)} variants)")
-    if "lift_for_world_model" in var:
-        lines.append("lift model in place of the world model")
-    if fit:
-        lines.append(f"weights fitted ({len(fit)} variants)")
-    vb_top = ys[2] - bhh / 2 - 0.55
+    bx.text(mx + 1.95, my - 0.6, "Average", ha="center", va="top", fontsize=7.0, color=ACCENT)
+    lines = ["every item and store: the average", "an item not yet trained on:", "    the world model alone",
+             "summed to every grain"]
+    vb_top = ys[1] - bhh / 2 - 0.55
     vb_h = 0.95 + 0.82 * len(lines)
     bx.add_patch(FancyBboxPatch((x0, vb_top - vb_h), W - 0.25, vb_h, boxstyle="round,pad=0.02,rounding_size=0.3",
                                 facecolor=FILL, edgecolor="none"))
-    bx.text(x0 + 0.35, vb_top - 0.3, "Variants tested", ha="left", va="top", fontsize=7.0, color=INK,
+    bx.text(x0 + 0.35, vb_top - 0.3, "The forecast used", ha="left", va="top", fontsize=7.0, color=INK,
             fontweight="bold")
     for j, t in enumerate(lines):
-        bx.text(x0 + 0.35, vb_top - 1.05 - j * 0.82, "–  " + t, ha="left", va="top", fontsize=SMALL + 0.3,
-                color=INK)
+        bx.text(x0 + 0.35, vb_top - 1.05 - j * 0.82, ("–  " if not t.startswith("    ") else "   ") + t.strip(),
+                ha="left", va="top", fontsize=SMALL + 0.3, color=INK)
     save(fig, OUT / "fig_study.pdf")
     return lay
 

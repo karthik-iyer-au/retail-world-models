@@ -58,13 +58,15 @@ transferability, with the broad view last.
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figs/fig_study.pdf}
-\caption{\textbf{The main results come from rolling windows taken before any
-window used to choose a setting, and the average tested is fixed in advance.} \textbf{(a)} Windows by data source, in periods before the end of the
-data: rolling windows (scored for this revision), development windows (used to
-choose settings) and final windows (scored once in the first version). Favorita
-has rolling windows only; nothing was chosen on it. \textbf{(b)} The ensemble:
-the equal-weight mean of the world model, LightGBM and TimesFM with the plan,
-and the variants of study A that test what each member adds.}
+\caption{\textbf{Every result is scored on rolling windows that no choice of
+setting saw, and the forecast recommended is the average of the two tuned
+models.} \textbf{(a)} Windows by data set, in windows before the end of the data:
+the rolling windows scored in this paper; and the development and final windows
+of the first version, which are not scored here. The searches that tuned each
+model scored windows earlier than the rolling windows. \textbf{(b)} The forecast
+that the results support: the equal-weight average of the tuned world model and
+the tuned LightGBM for every item and store, the world model alone for an item
+the models have not yet been trained on, summed to every grain.}
 \label{fig:study}
 \end{figure*}
 
@@ -75,10 +77,11 @@ and the variants of study A that test what each member adds.}
 plan.} \textbf{(a)} An encoder turns the recent history of one item in one store into
 a state $s_t$. A transition step takes the state and one period's plan and
 gives the state one period later; each period's sales are read from the state
-as it stands after the plan so far. The lift model shares the encoder and
-inputs and reads every period from $s_t$. \textbf{(b)} On M5, settings were
-chosen on the practice window (25 April to 22 May 2016); on Dominick's and Frat,
-on two development windows before the final 8 weeks.}
+as it stands after the plan so far. \textbf{(b)} Each model's settings were
+searched one change at a time on early windows (S1 to S3), a change kept only if
+its mean over three seeds beat the best so far by the keep bar, with the latest
+search window held out of every decision; the final settings were then scored
+once on the later rolling windows (Section~\ref{sec:loop}).}
 \label{fig:overview}
 \end{figure*}
 
@@ -582,29 +585,24 @@ of probability nearest it. \emph{Seasonal naive}: sales one season earlier.
 \label{sec:setup}
 
 \paragraph{Windows}
-On Dominick's and Frat the last 8 weeks of each data set were the final window
-of the first version, touched once, and settings were chosen on the two 8-week
-windows before it. On M5 settings were chosen on the practice window (25 April
-to 22 May 2016), and the final windows were the official test month and, after
-it, the two months before the practice window. For this revision each data set
-gained rolling windows taken before the development windows, so none was used
-for any choice: six 8-week windows on each Dominick's category, four on Frat,
-and four 28-day windows on M5 (November 2015 to February 2016), each forecast
-from everything earlier (Figure~\ref{fig:study}a). Favorita has four 28-day
-rolling windows, the last ending on its last day, and no other.
+Every result of Section~\ref{sec:results} is scored on rolling windows that no
+choice of setting ever saw: six 8-week windows on each Dominick's category, four
+on Frat, and four 28-day windows on M5 (November 2015 to February 2016) and on
+Favorita (the last ending on its last day), each forecast from everything
+earlier. The searches of Section~\ref{sec:loop} scored windows before these,
+and held the latest of their own windows out of every decision. The windows used
+to develop the first version of the models lie after the rolling windows and are
+not scored in this paper (Figure~\ref{fig:study}a).
 
 \paragraph{Rules fixed in advance}
-The revision plan, including every window, model, test and pass rule below,
-was written down on 13 October 2026 before any revision run, and every change
-to it is a dated amendment; all but the interval fix below were made before the
-results they affect were read. Every
-model runs in every rolling window with the settings of its final configuration,
-unchanged. Trained models are one fit in the rolling windows: seed~1 where the
-configuration names a seed (M5, Frat, LightGBM everywhere), and seed~0 for the
-world model, lift model and TFT on Dominick's, whose configurations name none
-and which, before a fix on 16 October, did not pass the run's seed to the model
-(\S\ref{sec:dropped}). The final windows keep their three-seed results. No new result changes a setting of
-a model already reported, and every model, window and test is reported.
+The revision plan, with every window, model, test and pass rule, was written down
+before the revision's first run, and every change to it is a dated entry,
+made before the results it governs were read unless the entry says otherwise.
+Each data set's world model and LightGBM run in every rolling window with the
+final settings of their searches (Table~\ref{tab:final-settings}), unchanged
+from window to window; each forecast is the average of five fits with different
+seeds (one on M5's world model). No result on the rolling windows changed a
+setting, and every model, window and test is reported.
 
 \paragraph{Comparing two models}
 For models $A$ and $B$, window $k$ and a level, let $d_k = \mathrm{WRMSSE}_k(A) -
@@ -626,8 +624,9 @@ windows are dependent: each is forecast from all data before it, so they share
 most of their training history, and an error tied to a season or a stretch of
 trading can recur in neighbouring windows. A bootstrap that resamples whole
 windows treats them as exchangeable and so understates that dependence; we
-report the number of windows in which one model beats another next to the
-interval where it matters (\S\ref{sec:res-world}).
+therefore also count, over levels and windows, the comparisons in which one model
+is clearly more accurate than the other by the item bootstrap
+(Section~\ref{sec:rq-grain}).
 
 \paragraph{Intervals}
 Each model's interval forecasts come from its own errors in the earlier rolling
@@ -641,7 +640,7 @@ $e_{\cdot,h}$. Where a level has fewer than 50
 earlier errors for each horizon, all horizons are pooled into one set of
 quantiles, and interval ends are rounded outwards to whole units except on
 Favorita; this fix was added on 16 October after the first intervals covered
-far less than planned at the totals, and both versions are reported. The first
+far less than planned at the totals, and is used throughout. The first
 rolling window has no earlier window and is not scored. We report the scaled
 pinball loss averaged over the quantiles, weighted as in the M5 uncertainty
 competition~\cite{m5uncertainty}, and coverage at 50\%, 80\% and 95\%. Models
@@ -657,9 +656,7 @@ forecast $\hat y_{n,t}$ and average price $\bar\pi_n$ before the window,
 \begin{equation}
 C = \frac{\sum_n \bar\pi_n \sum_{t} |y_{n,t} - \hat y_{n,t}|}{\sum_n \bar\pi_n \sum_t y_{n,t}},
 \end{equation}
-the absolute error in dollars over sales in dollars; study G checks
-it against the first half of the window, the error of the whole window's total,
-units in place of dollars and equal node weights. \emph{Promotion decisions}: in the generated
+the absolute error in dollars over sales in dollars. \emph{Promotion decisions}: in the generated
 store worlds of the companion paper~\cite{paper2}, where each promotion's true
 lift is known, promote when the predicted lift times margin exceeds a fixed
 cost; regret is the value lost against deciding with the true lift. The first
@@ -681,8 +678,7 @@ weights), $W$ the diagonal of in-sample error variances, or $W = \lambda
 \mathrm{diag}(\hat\Sigma) + (1-\lambda)\hat\Sigma$ with the Sch\"afer--Strimmer
 intensity $\lambda$ (MinT-shrink, where the hierarchy has at most 6,000 nodes:
 Frat); nodes with no
-in-sample error are given the smallest variance of the others, a fix made after
-the first run failed (\S\ref{sec:res-recon}). Each model's own
+in-sample error are given the smallest variance of the others. Each model's own
 item-by-store forecasts are also combined with ETS above them by weighted least
 squares.
 
@@ -696,22 +692,14 @@ chance); the Spearman correlation across promoted periods between forecast and
 actual units over the series' unpromoted level; and bias, forecast over actual.
 These were written down before they ran and have no pass rule.
 
-\paragraph{Studies added after the rolling results}
-The rolling windows put the ensemble first, so studies were added, each
-written down before it ran and reported as added after the main results:
-\emph{A}, what each member adds to the ensemble and whether fitted weights beat
-equal ones; \emph{B}, input perturbation on the saved models; \emph{C} and
-\emph{E}, changes aimed at the forecast after a promotion; \emph{D}, Favorita;
-\emph{F}, Timestral, with the ranking check alongside; and \emph{G}, asked for by
-a reader of the first revision: paired uncertainty and sensitivity for the
-category-plan cost, the Frat lift model rerun with the world model's
-regularisation, and a diagnosis of the MinT failure. Study G found an error in
-the category-plan cost and a numerical failure in MinT-shrink; both are
-corrected and the first results kept for the record. Three tests on the
-saved world models complete the set: shuffling the timing of the plan within
-each series, adding one promotion and price cut and following its effect
-through later periods, and a ridge read-out from the rolled state to sales after
-the window.
+\paragraph{Analyses added after the first results}
+Four analyses were added after the first scores of the tuned models were read,
+each written down before it ran: the scores by line type (Section~\ref{sec:rq-lines});
+the whole window scored as one block; the average and the forecast by history on
+the transfer test's kept-out series (Section~\ref{sec:rq-unseen}); and the
+supporting analyses of Section~\ref{sec:support} rerun on the tuned models. The
+transfer test and the pooled training of RQ4 were written down before any
+tuned model was scored.
 
 \input{loop}
 \input{results}
