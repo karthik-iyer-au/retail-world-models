@@ -468,9 +468,9 @@ price, no lever) times a lift,
 with $b$ and $g$ small networks that also take the item's labels and the
 horizon step, and the log forecast bounded to $[-10, 10]$. The lift is exactly
 zero when nothing is planned, and the baseline does not move when the plan
-changes; both are checked by tests in the repository. Training minimises a
-Tweedie loss on sales relative to $\ell_i$, with batches of item, store and
-date drawn at random.
+changes; both are checked by tests in the repository. Training minimises the
+loss of Section~\ref{sec:losses} on sales relative to $\ell_i$, with batches of
+item, store and date drawn at random.
 
 \paragraph{Brand switching (Dominick's)}
 In a store and week where several items are promoted, much of each item's lift
@@ -490,8 +490,7 @@ last 8 training weeks, $\alpha$ is the least-squares slope
 $\sum_g \Lambda_g G_g / \sum_g \Lambda_g^2$, kept between 0 and 1.
 $\alpha$ is a forecast-implied split
 of lift, not an identified estimate of where promoted sales come from, because
-promotions are not assigned at random. On Dominick's three fits with different
-seeds are averaged in each run.
+promotions are not assigned at random.
 
 \input{generated/tab_final_settings}
 
