@@ -127,8 +127,10 @@ def main(argv=None):
                 later = later[later > end][: len(np.unique(test[DATE]))]
                 if len(later):
                     y = full[full[DATE].isin(later)].groupby(full[SERIES].astype(str))[UNITS].sum()
-                    idx, before, after = states(model, test)
-                    names = model._names[idx]
+                    # a five-copy average (the tuned world model): the state of the first copy
+                    one = model.models[0] if hasattr(model, "models") else model
+                    idx, before, after = states(one, test)
+                    names = one._names[idx]
                     target = np.log1p(y.reindex(names).fillna(0).to_numpy())
                     rng = np.random.default_rng(origin)
                     half = rng.random(len(names)) < 0.5

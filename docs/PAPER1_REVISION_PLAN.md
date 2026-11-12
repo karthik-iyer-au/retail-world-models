@@ -1288,3 +1288,6 @@ every window, and the last two on M5); the mechanism tests on the world model's 
 (scripts/mechanism_tests.py, pattern final_*_world_model); and the intervals, decision costs and reconciliation
 (parts intervals, decisions, reconcile of scripts/revision_analysis.py --tuned). The lift model was not tuned and is
 not rerun; comparisons with it are dropped. No new training on Vast.
+Note, 12 November: the tuned world model is an average of five copies; the timing and persistence tests use the
+average's forecasts, and the probe of the carried state reads the state of the first copy, since the five states are
+not averaged anywhere.
