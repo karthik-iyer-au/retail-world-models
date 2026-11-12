@@ -228,7 +228,7 @@ def main(argv=None):
                     df = C.paired(boot, point, bs.level_names, sorted(pairs))
                     for r in df.to_dict("records"):
                         acc["paired"].append({**base, **r})
-                if "intervals" in acc or "decisions" in acc:
+                if "intervals" in acc or "decisions" in acc or "probabilistic" in acc:
                     for m, f in mats.items():
                         for cols in fr.levels:
                             lv = "x".join(cols) if cols else "total"
@@ -238,6 +238,12 @@ def main(argv=None):
                                 whole = a.interval_fix and key != "favorita"  # Favorita sells some items by weight
                                 acc["intervals"].append({**base, "model": m, "level": lv, "windows_used": len(prior),
                                                          **C.interval_scores(fr, o, f, q, cols, whole_units=whole)})
+                            if prior and "probabilistic" in acc:  # Karthik, 13 November 2026: CRPS, reliability, Brier
+                                q = C.conformal_quantiles(prior, qs=C.QFINE, **qkw)
+                                acc["probabilistic"].append({**base, "model": m, "level": lv, "windows_used": len(prior),
+                                                             **C.probabilistic_scores(fr, o, f, q, cols,
+                                                                                      zero_event=cols == bottom,
+                                                                                      year=365 if key in DAILY else 52)})
                             if prior and "decisions" in acc and cols == bottom:
                                 q = C.conformal_quantiles(prior)
                                 for ratio in (0.5, 0.8, 0.95):

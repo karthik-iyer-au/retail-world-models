@@ -417,6 +417,65 @@ def interval_scores(fr: Frame, origin: int, fc: np.ndarray, qerr: np.ndarray, co
     return out
 
 
+QFINE = (0.01, 0.025, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8,
+         0.85, 0.9, 0.95, 0.975, 0.99)
+ZERO_BINS = 10
+
+
+def probabilistic_scores(fr: Frame, origin: int, fc: np.ndarray, qerr: np.ndarray, cols, qs=QFINE,
+                         zero_event: bool = False, year: int = 52) -> dict:
+    """The whole forecast distribution of one level, from the point forecast and quantiles of earlier windows'
+    scaled errors (as interval_scores), on a fine grid of quantiles.
+
+    crps: twice the pinball loss averaged over the grid (the quantile approximation of the continuous ranked
+    probability score), scaled by each node's mean absolute change and weighted by revenue, as the scaled
+    pinball loss. le_<q> and lt_<q>: share of node-periods whose actual is at or below, and strictly below, the
+    forecast's q quantile; for whole-unit sales the calibrated value of q lies between the two. With zero_event
+    (the bottom level): the chance of selling nothing is the largest q whose quantile is zero; brier is its
+    Brier score against whether the node-period sold nothing, brier_clim that of the series' share of
+    zero-sale periods over the year before (`year` periods), and zb<i>_n, zb<i>_p, zb<i>_y the count, summed chance and summed
+    outcome of the node-periods whose chance falls in tenth i, for a reliability diagram."""
+    t0, t1, rev = fr.cut(origin)
+    codes = fr.codes(cols)
+    g = int(codes.max()) + 1
+    h = _sum_by_group(fr.units[:, :t0], codes, g)
+    a = _sum_by_group(fr.units[:, t0:t1], codes, g)
+    f = _sum_by_group(fc, codes, g)
+    w = _sum_by_group(rev[:, None], codes, g)[:, 0]
+    w = w / w.sum()
+    s = np.sqrt(series_scale(h, fr.lag))
+    started = np.cumsum(h != 0, axis=1) > 0
+    abs_scale = (np.abs(np.diff(h, axis=1)) * started[:, 1:]).sum(axis=1) / np.maximum(started[:, 1:].sum(axis=1), 1)
+    q = np.clip(f[:, :, None] + qerr[None, :, :] * s[:, None, None], 0.0, None)  # node x horizon x quantile
+    qa = np.asarray(qs)[None, None, :]
+    pin = np.where(a[:, :, None] >= q, qa * (a[:, :, None] - q), (1 - qa) * (q - a[:, :, None]))
+    crps = 2 * pin.mean(axis=(1, 2)) / abs_scale
+    ok = np.isfinite(crps) & (w > 0) & (abs_scale > 0)
+    out = {"crps": float((crps[ok] * w[ok]).sum() / w[ok].sum())}
+    cell = ok[:, None] & np.isfinite(a)
+    for j, qv in enumerate(qs):
+        out[f"le_{qv}"] = float((a <= q[:, :, j])[cell].mean())
+        out[f"lt_{qv}"] = float((a < q[:, :, j])[cell].mean())
+    if zero_event:
+        at_zero = q <= 0
+        p0 = np.where(at_zero.any(axis=2), np.max(np.where(at_zero, qa, 0.0), axis=2), 0.0)
+        y0 = (a == 0).astype(float)
+        year = min(year, h.shape[1])
+        past = h[:, -year:]
+        live = started[:, -year:]
+        clim = (((past == 0) & live).sum(axis=1) / np.maximum(live.sum(axis=1), 1))[:, None] * np.ones_like(a)
+        out["brier"] = float(((p0 - y0) ** 2)[cell].mean())
+        out["brier_clim"] = float(((clim - y0) ** 2)[cell].mean())
+        out["zero_share"] = float(y0[cell].mean())
+        b = np.minimum((p0 * ZERO_BINS).astype(int), ZERO_BINS - 1)
+        for i in range(ZERO_BINS):
+            m = cell & (b == i)
+            out[f"zb{i}_n"] = int(m.sum())
+            out[f"zb{i}_p"] = float(p0[m].sum())
+            out[f"zb{i}_y"] = float(y0[m].sum())
+    return out
+
+
 def native_scores(fr: Frame, origin: int, forecasts: pd.DataFrame) -> dict:
     """Scaled pinball loss of a model's own quantiles at the bottom level, on the
     quantiles it gives."""

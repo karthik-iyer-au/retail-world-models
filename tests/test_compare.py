@@ -194,3 +194,24 @@ def test_line_segments_split_items_and_score_each_part(fr):
     assert all(v < 1e-9 for v in C.subset_scores(fr, 2, perfect, masks["fast"]).values())
     whole = C.subset_scores(fr, 2, perfect * 1.3, np.ones(len(item), bool))
     assert whole == pytest.approx(C.level_scores(fr, 2, perfect * 1.3))
+
+
+def test_probabilistic_scores_reliability_crps_and_brier(fr):
+    """Quantile reliability rises with the quantile; a tighter forecast distribution around the truth has lower
+    CRPS; the zero-sales chance is a probability and its tenths add up to every node-period."""
+    cols = ["item_id", "store_id"]
+    errs = []
+    for o in (0, 1):
+        t0, t1, _ = fr.cut(o)
+        errs.append(C.scaled_errors(fr, o, fr.units[:, t0 - 8:t0], cols))
+    q = C.conformal_quantiles(errs, qs=C.QFINE)
+    t0, t1, _ = fr.cut(2)
+    naive = C.probabilistic_scores(fr, 2, fr.units[:, t0 - 8:t0], q, cols, zero_event=True, year=52)
+    le = [naive[f"le_{x}"] for x in C.QFINE]
+    assert all(b >= a for a, b in zip(le, le[1:]))
+    assert all(naive[f"lt_{x}"] <= naive[f"le_{x}"] for x in C.QFINE)
+    perfect = C.probabilistic_scores(fr, 2, fr.units[:, t0:t1], q * 0.0, cols, zero_event=True, year=52)
+    assert perfect["crps"] < 1e-9 < naive["crps"]
+    assert 0 <= naive["brier"] <= 1 and 0 <= naive["brier_clim"] <= 1
+    n = sum(naive[f"zb{i}_n"] for i in range(C.ZERO_BINS))
+    assert n == fr.units.shape[0] * (t1 - t0)
