@@ -243,7 +243,8 @@ TRIO = [("world_model", "WM"), ("lightgbm", "LGB"), ("ensemble_2", "Avg")]
 
 
 def decisions(v: dict) -> str:
-    d = _cat(A / "decisions.csv", *sorted(A.glob("idr*/decisions.csv")), keys=("key", "origin", "model", "decision"))
+    # the rerun with the corrected category-plan cost (plan entry of 13 November 2026)
+    d = _cat(*sorted(A.glob("decisions_fixed_*/decisions.csv")), keys=("key", "origin", "model", "decision"))
     if d.empty:
         return "% decisions pending\n"
     rows = []
