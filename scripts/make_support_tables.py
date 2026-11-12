@@ -156,10 +156,21 @@ Data set & Three & No WM & No LGB & No TFM & Fitted\\
 
 # ------------------------------------------------------------------ input perturbation
 def perturbation(v: dict) -> str:
+    # perturbation.csv is the first job; perturbation_<key>.csv are the same script run one data set per container
+    # (13 November, to finish in time); a data set in its own file is read from there
+    parts = {f.stem.split("perturbation_")[1]: _read(f) for f in sorted(A.glob("perturbation_*.csv"))}
     d = _read(A / "perturbation.csv")
+    d = pd.concat([d[~d.key.isin([k for k, x in parts.items() if not x.empty])] if not d.empty else d]
+                  + [x for x in parts.values() if not x.empty], ignore_index=True)
     if d.empty:
         return "% perturbation pending\n"
     d = d.assign(dbottom=d.bottom - d.bottom_true)
+    occ = d[d.operation == "occlude"].groupby(["key", "model", "input"]).dbottom.mean()
+    for m, tag in (("world_model", "Wm"), ("lightgbm", "Lgb")):
+        for inp, itag in (("price", "Price"), ("whole_plan", "Plan")):
+            x = occ.xs((m, inp), level=("model", "input")) if (m, inp) in occ.droplevel(0).index else pd.Series(dtype=float)
+            v[f"supPert{itag}Helps{tag}"] = _w(int((x > 0).sum()))
+    v["supPertSets"] = _w(int(d.key.nunique()))
     rows = []
     for k, name in KEYS.items():
         cells = []

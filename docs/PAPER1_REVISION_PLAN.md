@@ -1297,3 +1297,8 @@ decision costs still called the cost as first run (each node's error over its ow
 on Dominick's (17 October). `rwm.evaluation.compare.category_planning_loss` now computes the corrected cost the plan
 defines, the error in dollars over sales in dollars at each node's average price, and the decision costs are rerun
 for all nine data sets (analysis_tuned/decisions_fixed_<key>). The replenishment costs are unchanged by this.
+
+### 13 November: plan-input test split across containers
+The plan-input test (input_perturbation.py, tuned models) ran as one job and finished three Dominick's categories
+in about twelve hours. The remaining data sets were started as the same script, one data set per container
+(perturbation_<key>.csv), with no change to the method; the table reads a data set from its own file where there is one.
