@@ -168,6 +168,7 @@ def main(argv=None):
     out.mkdir(parents=True, exist_ok=True)
     idx = index(results)
     idx.to_csv(out / "runs.csv", index=False)
+    print("runs by set:", idx.groupby("set").size().to_dict(), flush=True)
     keys = a.keys or sorted(idx["key"].unique())
     acc = {part: [] for part in a.parts}
     for key in keys:
@@ -178,7 +179,9 @@ def main(argv=None):
                 continue
             if wset in extra:
                 if "keptout" in acc:
-                    acc["keptout"] += kept_out_scores(results, rows, key, wset)
+                    got = kept_out_scores(results, rows, key, wset)
+                    acc["keptout"] += got
+                    print(key, wset, sorted(rows["model"]), len(got), flush=True)
                 continue
             if "keptout" in acc and len(acc) == 1:
                 continue
