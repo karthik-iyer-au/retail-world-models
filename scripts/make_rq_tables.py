@@ -283,8 +283,9 @@ def text_values(tr: list) -> dict:
         wide = g.pivot_table(index="origin", columns="model", values="wrmsse").dropna(axis=1)
         if len(wide) >= 3 and wide.shape[1] >= 2:
             ks = C.model_confidence_set(wide)
-            kept += [{"model": m, "in": m in ks} for m in wide.columns]
+            kept += [{"key": k, "level": lv, "model": m, "in": m in ks} for m in wide.columns]
     kp = pd.DataFrame(kept)
+    kp.to_csv(A / "mcs_paper.csv", index=False)  # the confidence sets the paper counts (mcs.csv also has by_history)
     for m, n in {"world_model": "WorldModel", "lightgbm": "Lightgbm", "ensemble_2": "Average",
                  "ensemble": "Ensemble", "timesfm_plan": "Timesfm"}.items():
         v[f"rqMcs{n}"] = int(kp[kp.model == m]["in"].sum())
