@@ -1277,3 +1277,14 @@ to 104% for the world model; on stores not trained on, the average is clearly be
 Frat, and neither on snacks, M5 and Favorita. So the short-history half of the rule adds nothing and the not-trained-on
 half holds for items. The recommendation that follows, stated as drawn from these results rather than fixed before
 them: the average for every series, except items the model was not trained on, which take the world model alone.
+
+**12 November 2026, the supporting analyses rerun on the tuned models, written down before they run.** Karthik
+(12 November): "we can't publish stale findings". Every supporting analysis of the first revision is rerun on the
+tuned world model and tuned LightGBM of the final runs, with the same code and settings as before, and the results of
+the earlier settings are removed from the paper: the ensemble ablation and fitted weights (scripts/ensemble_ablation.py
+--tuned, on saved forecasts); which plan inputs each model uses (scripts/input_perturbation.py --tuned, world model
+from the final runs' saved checkpoints, LightGBM refitted with its tuned settings, on the same windows as before:
+every window, and the last two on M5); the mechanism tests on the world model's checkpoints
+(scripts/mechanism_tests.py, pattern final_*_world_model); and the intervals, decision costs and reconciliation
+(parts intervals, decisions, reconcile of scripts/revision_analysis.py --tuned). The lift model was not tuned and is
+not rerun; comparisons with it are dropped. No new training on Vast.

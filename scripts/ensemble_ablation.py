@@ -105,9 +105,14 @@ def main(argv=None):
     p.add_argument("--results")
     p.add_argument("--out", required=True)
     p.add_argument("--keys", nargs="*")
+    p.add_argument("--tuned", action="store_true", help="the final runs' tuned models (plan entry of 12 November 2026)")
     p.add_argument("--boot", type=int, default=1000)
     p.add_argument("--tables")
     a = p.parse_args(argv)
+    if a.tuned:
+        import revision_analysis
+
+        revision_analysis.TUNED = True
     if a.tables:
         return tables(Path(a.tables), Path(a.out))
     results, out = Path(a.results), Path(a.out)

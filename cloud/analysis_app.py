@@ -38,6 +38,30 @@ def analyse(commit: str, keys: list[str], parts: list[str], boot: int) -> str:
     return done.stdout[-4000:] + done.stderr[-4000:]
 
 
+@app.function(image=image, volumes={DATA: data_volume, RESULTS: results_volume}, cpu=16, memory=96 * 1024, gpu="L4",
+              timeout=12 * 3600)
+def script(commit: str, name: str, args: list[str], out: str) -> str:
+    """Any analysis script over the tuned runs (the supporting analyses rerun on the tuned models, plan entry of
+    12 November 2026): `{runs}` in args is the folder of linked runs, `{out}` rwm-results/<out>."""
+    _checkout(commit)
+    runs = Path("/tmp/runs")
+    runs.mkdir(exist_ok=True)
+    for src in ("final", "cleanrev", "ftransfer"):
+        for d in Path(RESULTS, src).iterdir():
+            if (d / "manifest.json").exists() and "_piece_" not in d.name and not (runs / d.name).exists():
+                (runs / d.name).symlink_to(d)
+    target = Path(RESULTS, out)
+    target.mkdir(parents=True, exist_ok=True)
+    cmd = [sys.executable, f"scripts/{name}.py"] + [a.replace("{runs}", str(runs)).replace("{out}", str(target)) for a in args]
+    done = subprocess.run(cmd, cwd=CHECKOUT, capture_output=True, text=True)
+    results_volume.commit()
+    return done.stdout[-4000:] + done.stderr[-4000:]
+
+
 @app.local_entrypoint()
-def main(commit: str, keys: str = "", parts: str = "scores,paired,mcs", boot: int = 1000):
-    print(analyse.remote(commit, [k for k in keys.split(",") if k], parts.split(","), boot))
+def main(commit: str, keys: str = "", parts: str = "scores,paired,mcs", boot: int = 1000, run: str = "", args: str = "",
+         out: str = "analysis_tuned"):
+    if run:  # --run <script> --args "<space-separated args>"
+        print(script.remote(commit, run, args.split(), out))
+    else:
+        print(analyse.remote(commit, [k for k in keys.split(",") if k], parts.split(","), boot))

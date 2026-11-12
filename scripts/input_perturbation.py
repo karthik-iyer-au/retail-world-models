@@ -110,11 +110,16 @@ def main(argv=None):
     p.add_argument("--results", required=True)
     p.add_argument("--out", required=True)
     p.add_argument("--keys", nargs="*")
+    p.add_argument("--tuned", action="store_true", help="the final runs' tuned models (plan entry of 12 November 2026)")
     p.add_argument("--models", nargs="*", default=list(MODELS))
     p.add_argument("--lightgbm-last", type=int, default=2, help="LightGBM on this many latest windows of --lightgbm-keys")
     p.add_argument("--lightgbm-keys", nargs="*", default=["m5"])
     p.add_argument("--threads", type=int)
     a = p.parse_args(argv)
+    if a.tuned:
+        import revision_analysis
+
+        revision_analysis.TUNED = True
     res, out = Path(a.results), Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     rows = pd.read_csv(out).to_dict("records") if out.exists() else []
