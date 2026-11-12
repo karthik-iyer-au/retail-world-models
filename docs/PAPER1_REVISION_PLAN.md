@@ -1266,3 +1266,14 @@ against LightGBM and the average of the two kept-out runs, with the cost of not 
 against the trained-on-all runs as before (part `keptout` of scripts/revision_analysis.py). If the rule is no better
 than the average alone on seen data and the average is no worse than the world model on unseen series, the paper
 recommends the average for every series and says so.
+
+**12 November 2026, result of the forecast by history.** Seen data (nine data sets, results/analysis_tuned): the rule
+is level with the average on eight data sets (overall within 0.004) and worse on snacks (0.970 against 0.884); in the
+model confidence set 50 of 60 times against 49 for the average. On short-history series it beats the average on five
+data sets and loses on four. Kept-out series (results/analysis_tuned/keptout.csv; the reproduction matches the runs'
+own kept-out scores): on items the model was not trained on, the world model alone is clearly more accurate than the
+average on all five data sets (90% window bootstrap), and the average forecasts 78 to 96% of actual sales against 89
+to 104% for the world model; on stores not trained on, the average is clearly better on cheese, the world model on
+Frat, and neither on snacks, M5 and Favorita. So the short-history half of the rule adds nothing and the not-trained-on
+half holds for items. The recommendation that follows, stated as drawn from these results rather than fixed before
+them: the average for every series, except items the model was not trained on, which take the world model alone.
