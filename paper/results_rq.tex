@@ -1,5 +1,5 @@
-% Results by research question (Framework section). Tables from scripts/make_rq_tables.py; paired counts from
-% results/analysis_tuned/paired.csv (item bootstrap within each window, 90% intervals).
+% Results by research question (Framework section). Tables and every number from scripts/make_rq_tables.py;
+% paired counts from results/analysis_tuned/paired.csv (item bootstrap within each window, 95% intervals).
 
 The results follow the four research questions. Every number comes from the
 tuned world model and the tuned LightGBM, each set by the same search on each
@@ -110,11 +110,14 @@ are close on items they were trained on; they part company on items they were
 not, where LightGBM under-forecasts and the world model does not. The trigger
 for the exception is one a merchant always knows: whether the item is new to the
 range. Settings carry from one retailer's data to another's, and training on
-other retailers' data does not help.
+other retailers' data does not help. Where the forecast is used only for store
+orders, adding TimesFM given the plan as a third member makes item-by-store
+forecasts a little more accurate (Section~\ref{sec:sup-ablation}), at the cost of
+a third model to run.
 
 Two parts of this rule were reached differently, and the difference matters to
-a reader who would use it. The average for series with history was the
-recommendation of the first revision and holds on the tuned models. The
+a reader who would use it. Averaging models was the recommendation of the first
+revision, and the average of the two tuned models holds it up here. The
 exception was tested as part of a wider rule written down before it ran, which
 also gave the world model every series with less than 26 weeks of history; that
 half added nothing on the data with history (it was level with the average on
