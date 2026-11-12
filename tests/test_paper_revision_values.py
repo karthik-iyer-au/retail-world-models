@@ -48,9 +48,10 @@ def _lookups(text: str):
 
 def test_every_quoted_revision_value_exists():
     vals = _values()
-    sources = [PAPER / "abstract.tex", PAPER / "body.tex", PAPER / "results.tex"]
+    # the tuned-model revision (12-13 November 2026) quotes numbers through generated macros (next test);
+    # any first-version lookup that remains must still resolve
+    sources = [f for f in sorted(PAPER.glob("*.tex")) if f.name != "supplement_dev.tex"]  # not in the build
     used = {k for f in sources for k in _lookups(f.read_text())}
-    assert len(used) > 100
     missing = sorted(k for k in used if k not in vals)
     assert not missing, missing
 
@@ -61,3 +62,15 @@ def test_counts_follow_the_tables():
     assert vals["rcount@ensinsettotal"] == "nine"
     # equal-weight ensemble: one third each, so the sweep's equal point exists for every data set
     assert vals["rv@mfive@ens@ixs"] == "0.834"
+
+
+def test_every_generated_macro_used_is_defined():
+    """Every \\rq.., \\sup.., \\loop.., \\compute.., \\build.. macro in the manuscript is written by a script."""
+    defined = set()
+    for f in [*(PAPER / "generated").glob("*values.tex"), PAPER / "generated" / "macros.tex"]:
+        defined |= set(re.findall(r"\\newcommand\{\\([A-Za-z]+)\}", f.read_text()))
+    used = set()
+    for f in PAPER.glob("*.tex"):
+        used |= set(re.findall(r"\\((?:rq|sup|loop|compute|build)[A-Z][A-Za-z]*)", f.read_text()))
+    assert len(used) > 100
+    assert not sorted(used - defined), sorted(used - defined)
