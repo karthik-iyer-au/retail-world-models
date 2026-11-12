@@ -27,6 +27,15 @@ forecast, built once at the finest grain, can serve the decisions a retailer
 makes from it, across every kind of line, and which kind of model, or
 combination of models, does that best.
 
+Lines differ as much as grains do. In grocery a short head of fast lines
+carries most of the units, and a long tail of slow lines sells a few units a
+week or none; on the Dominick's categories studied here, \rqFastShareDomLo{}
+to \rqFastShareDomHi{}\% of the items make 80\% of unit sales. Ranges also
+change: items are added and delisted and stores open, so part of every forecast
+is for a line or a store with little or no history. A forecast that serves the
+fast lines well can fail on the tail or on a new item, and a planner deciding
+for one kind of line needs to know which.
+
 We test four kinds of model. Gradient-boosted trees are the proven method:
 LightGBM was behind the leading entries of the M5 competition
 \cite{m5accuracy}. Pretrained foundation models (TimesFM, Chronos-Bolt and
@@ -47,9 +56,8 @@ tested: judging them needs a retailer's own plans and range decisions to score
 against, which no public data set carries, and is left for work with an
 industry partner. Of the four Ps of retail, the study covers price and
 promotion, through the plan inputs these data record; product and place are out
-of scope. Every analysis was written down before it ran, except checks of
-unexpected results and corrections, which are marked where they appear
-(Figure~\ref{fig:study}).
+of scope. Every analysis was written down before it ran; the few added after
+the first results were read are marked where they appear.
 
 Section~\ref{sec:framework} sets out the framework, and the results follow it
 part by part: grain, the nature of the line, seen and unseen data, and
@@ -564,8 +572,8 @@ training cost was beyond the compute available, nor on Favorita, whose model
 list was fixed without it. Chronos-Bolt and TimesFM from history alone were
 not run on Favorita either. \emph{TimesFM}~\cite{timesfm,timesfm25}:
 the 200M-parameter TimesFM~2.5 checkpoint given each series' last 512 periods;
-we use its mean output, because its median forecasts 27\% to 31\% below M5
-totals (\S\ref{sec:dropped-first}). \emph{TimesFM with the plan}: the same model
+we use its mean output, chosen in the first version because its median forecast
+fell 27\% to 31\% below M5 totals. \emph{TimesFM with the plan}: the same model
 through its covariate method, a linear model on the plan inputs fitted over
 groups of 2,048 series, then TimesFM on what that model leaves.
 \emph{Chronos-Bolt}~\cite{chronos}: the base checkpoint, zero-shot, the mean of

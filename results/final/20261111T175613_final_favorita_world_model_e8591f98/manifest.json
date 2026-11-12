@@ -1,0 +1,172 @@
+{
+  "created_utc": "2026-11-11T17:56:13+00:00",
+  "git": {
+    "commit": "b9c2d731f970d693e63b86fe4fdf5f89fa69a140",
+    "dirty": false
+  },
+  "config": {
+    "name": "final_favorita_world_model",
+    "seed": 0,
+    "dataset": {
+      "name": "favorita"
+    },
+    "model": {
+      "name": "seed_average",
+      "params": {
+        "model": "state_model",
+        "members": 5,
+        "seed": 0,
+        "params": {
+          "horizon": 28,
+          "history": 112,
+          "train_periods": 730,
+          "categorical": [
+            "item_id",
+            "class",
+            "family",
+            "store_id",
+            "city"
+          ],
+          "extra": [
+            "promo",
+            "event",
+            "payday"
+          ],
+          "d_model": 128,
+          "layers": 3,
+          "heads": 4,
+          "steps": 30000,
+          "batch": 1024,
+          "lr": 0.001,
+          "mixed_precision": true,
+          "regular_price": true,
+          "lift_readout": true,
+          "rollout": true,
+          "roll_norm": true,
+          "levers": [
+            "promo"
+          ],
+          "weight_average": 0.999,
+          "latent_weight": 0.1,
+          "latent_checks": 7,
+          "likelihood": "hurdle_nb",
+          "spread_by_item": true
+        }
+      }
+    },
+    "evaluation": {
+      "horizon": 28,
+      "n_origins": 4,
+      "scale_lag": 1,
+      "weight_window": 28,
+      "holdout_periods": 0,
+      "step": 28
+    }
+  },
+  "config_sha256": "e8591f986071f8b0fe9611741067602937a775a2b670b96a1991211f10cd3970",
+  "seed": 0,
+  "data_files": [
+    {
+      "file": "holidays_events.csv",
+      "bytes": 22309,
+      "sha256": "81a183d6c4d691b57f84a0fde6bbf734a5b3c36a74b97378bf33a592648e2999"
+    },
+    {
+      "file": "items.csv",
+      "bytes": 101841,
+      "sha256": "1efd8295f52c8531ec5bf6c3de37228a56bad2f2c653e79c4869baaf637edcc6"
+    },
+    {
+      "file": "stores.csv",
+      "bytes": 1387,
+      "sha256": "af503b2bce11d7906d249f81cc0598f10e2addcc9f6c59aa2d95c9f2652c296b"
+    },
+    {
+      "file": "train.csv",
+      "bytes": 4997452288,
+      "sha256": "ccf4236a6b58b0db937b8c5006a0ad8fffef6acd06bed1c10cd5cd4d68d93248"
+    }
+  ],
+  "python": "3.12.16",
+  "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.41",
+  "device": "cuda: NVIDIA GeForce RTX 4090",
+  "hardware": {
+    "cpu": "AMD EPYC 7B13 64-Core Processor",
+    "logical_cores": 128,
+    "memory_gb": 251.7,
+    "torch": "2.14.1+cu130",
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "gpu_memory_gb": 47.5,
+    "gpu_count": 1,
+    "cuda": "13.0",
+    "cudnn": 92400
+  },
+  "packages": [
+    "Jinja2==3.1.6",
+    "MarkupSafe==3.0.4",
+    "PyYAML==6.0.3",
+    "cuda-bindings==13.5.0",
+    "cuda-pathfinder==1.8.6",
+    "cuda-toolkit==13.0.3.0",
+    "et_xmlfile==2.0.0",
+    "filelock==4.2.10",
+    "fsspec==2026.9.0",
+    "lightgbm==4.7.0",
+    "mpmath==1.3.0",
+    "narwhals==2.28.0",
+    "networkx==3.7",
+    "numpy==2.5.4",
+    "nvidia-cublas==13.1.1.3",
+    "nvidia-cuda-cupti==13.0.85",
+    "nvidia-cuda-nvrtc==13.0.88",
+    "nvidia-cuda-runtime==13.0.96",
+    "nvidia-cudnn-cu13==9.24.0.43",
+    "nvidia-cufft==12.0.0.61",
+    "nvidia-cufile==1.15.1.6",
+    "nvidia-curand==10.4.0.35",
+    "nvidia-cusolver==12.0.4.66",
+    "nvidia-cusparse==12.6.3.3",
+    "nvidia-cusparselt-cu13==0.8.1",
+    "nvidia-nccl-cu13==2.30.7",
+    "nvidia-nvjitlink==13.5.37",
+    "nvidia-nvshmem-cu13==3.4.5",
+    "nvidia-nvtx==13.0.85",
+    "openpyxl==3.1.5",
+    "pandas==3.1.1",
+    "pip==25.0.1",
+    "python-dateutil==4.0.0",
+    "rwm==0.1.0",
+    "rwm==0.1.0",
+    "scipy==1.18.1",
+    "setuptools==84.2.1",
+    "sympy==1.14.0",
+    "torch==2.14.1",
+    "triton==3.8.0",
+    "typing_extensions==4.16.0",
+    "tzdata==2026.6"
+  ],
+  "finished_utc": "2026-11-11T18:01:51+00:00",
+  "wall_seconds": 379.9,
+  "timing": [
+    {
+      "origin": 0,
+      "fit_seconds": 19.7,
+      "predict_seconds": 3.1
+    },
+    {
+      "origin": 1,
+      "fit_seconds": 19.9,
+      "predict_seconds": 3.2
+    },
+    {
+      "origin": 2,
+      "fit_seconds": 19.9,
+      "predict_seconds": 3.1
+    },
+    {
+      "origin": 3,
+      "fit_seconds": 220.4,
+      "predict_seconds": 3.2
+    }
+  ]
+}

@@ -1,0 +1,451 @@
+{
+  "model": "seed_average",
+  "dataset": "breakfast_at_the_frat",
+  "levers_available": [
+    "price",
+    "promo",
+    "display",
+    "feature"
+  ],
+  "levels_scored": 6,
+  "wrmsse": 0.5620600492842949,
+  "splits": [
+    {
+      "origin": 0,
+      "train_end": "2010-12-08",
+      "test_start": "2010-12-15",
+      "test_end": "2011-02-02",
+      "wrmsse": 0.5354039697066137,
+      "by_level": [
+        {
+          "level": "total",
+          "series": 1,
+          "wrmsse": 0.2710995441671589,
+          "mean_rmsse": 0.2710995441671589
+        },
+        {
+          "level": "cat_id",
+          "series": 4,
+          "wrmsse": 0.5330800896282619,
+          "mean_rmsse": 0.7367234055891171
+        },
+        {
+          "level": "store_id",
+          "series": 77,
+          "wrmsse": 0.6109496572012667,
+          "mean_rmsse": 0.5721968557485344
+        },
+        {
+          "level": "cat_idxstore_id",
+          "series": 308,
+          "wrmsse": 0.6984702956292319,
+          "mean_rmsse": 0.7733201013491497
+        },
+        {
+          "level": "item_id",
+          "series": 55,
+          "wrmsse": 0.49095802395233357,
+          "mean_rmsse": 0.7931951529603851
+        },
+        {
+          "level": "item_idxstore_id",
+          "series": 3904,
+          "wrmsse": 0.6078662076614301,
+          "mean_rmsse": 0.6579817723805583
+        }
+      ],
+      "forecast_to_actual": 0.9983164150229953,
+      "by_condition": {
+        "promo": {
+          "on": {
+            "periods": 7889,
+            "series": 2696,
+            "wrmsse": 0.8525624146390814
+          },
+          "off": {
+            "periods": 19944,
+            "series": 3628,
+            "wrmsse": 0.47061472228813506
+          }
+        },
+        "display": {
+          "on": {
+            "periods": 3188,
+            "series": 1374,
+            "wrmsse": 0.8492049690576019
+          },
+          "off": {
+            "periods": 24645,
+            "series": 3737,
+            "wrmsse": 0.5283734585465265
+          }
+        },
+        "feature": {
+          "on": {
+            "periods": 1981,
+            "series": 1160,
+            "wrmsse": 0.8969806625496282
+          },
+          "off": {
+            "periods": 25852,
+            "series": 3760,
+            "wrmsse": 0.554392531127319
+          }
+        },
+        "tpr_only": {
+          "on": {
+            "periods": 3608,
+            "series": 1535,
+            "wrmsse": 0.7002118318633785
+          },
+          "off": {
+            "periods": 24225,
+            "series": 3710,
+            "wrmsse": 0.5986855676053445
+          }
+        }
+      },
+      "by_horizon": [
+        0.5123985416017866,
+        0.515756688253947,
+        0.47601768867542676,
+        0.4527523858686714,
+        0.4876100719013159,
+        0.46086957094307834,
+        0.5264094424464738,
+        0.49066011058394227
+      ],
+      "kept_out": 0.773558408452234,
+      "trained_on": 0.569883733448962,
+      "kept_out_forecast_to_actual": 0.8088077306747437
+    },
+    {
+      "origin": 1,
+      "train_end": "2011-02-02",
+      "test_start": "2011-02-09",
+      "test_end": "2011-03-30",
+      "wrmsse": 0.6957910805258201,
+      "by_level": [
+        {
+          "level": "total",
+          "series": 1,
+          "wrmsse": 0.6150899076484561,
+          "mean_rmsse": 0.6150899076484561
+        },
+        {
+          "level": "cat_id",
+          "series": 4,
+          "wrmsse": 0.7447646372526728,
+          "mean_rmsse": 0.8693047239286644
+        },
+        {
+          "level": "store_id",
+          "series": 77,
+          "wrmsse": 0.7374003297229718,
+          "mean_rmsse": 0.6706659878864512
+        },
+        {
+          "level": "cat_idxstore_id",
+          "series": 308,
+          "wrmsse": 0.7905948543975088,
+          "mean_rmsse": 0.7637549771016867
+        },
+        {
+          "level": "item_id",
+          "series": 55,
+          "wrmsse": 0.6209892953952092,
+          "mean_rmsse": 0.8092291362885685
+        },
+        {
+          "level": "item_idxstore_id",
+          "series": 3904,
+          "wrmsse": 0.6659074587381013,
+          "mean_rmsse": 0.6438711461094321
+        }
+      ],
+      "forecast_to_actual": 0.9379813890584977,
+      "by_condition": {
+        "promo": {
+          "on": {
+            "periods": 8375,
+            "series": 2545,
+            "wrmsse": 0.8945738240267624
+          },
+          "off": {
+            "periods": 19662,
+            "series": 3647,
+            "wrmsse": 0.47127282348912847
+          }
+        },
+        "display": {
+          "on": {
+            "periods": 4189,
+            "series": 1521,
+            "wrmsse": 0.9980718198000501
+          },
+          "off": {
+            "periods": 23848,
+            "series": 3730,
+            "wrmsse": 0.5549875149746504
+          }
+        },
+        "feature": {
+          "on": {
+            "periods": 3041,
+            "series": 1705,
+            "wrmsse": 0.9684013289666471
+          },
+          "off": {
+            "periods": 24996,
+            "series": 3766,
+            "wrmsse": 0.5472898976809009
+          }
+        },
+        "tpr_only": {
+          "on": {
+            "periods": 3070,
+            "series": 1303,
+            "wrmsse": 0.6022358346428547
+          },
+          "off": {
+            "periods": 24967,
+            "series": 3732,
+            "wrmsse": 0.6620755888869003
+          }
+        }
+      },
+      "by_horizon": [
+        0.5620126174421807,
+        0.5599606462666421,
+        0.5375790699542626,
+        0.5678681439423021,
+        0.4690630500487848,
+        0.5784653614511355,
+        0.47489907359304223,
+        0.5005691189454715
+      ],
+      "kept_out": 0.8174977194700487,
+      "trained_on": 0.6306914251987399,
+      "kept_out_forecast_to_actual": 0.7895017266273499
+    },
+    {
+      "origin": 2,
+      "train_end": "2011-03-30",
+      "test_start": "2011-04-06",
+      "test_end": "2011-05-25",
+      "wrmsse": 0.4532224223139449,
+      "by_level": [
+        {
+          "level": "total",
+          "series": 1,
+          "wrmsse": 0.26269351384278905,
+          "mean_rmsse": 0.26269351384278905
+        },
+        {
+          "level": "cat_id",
+          "series": 4,
+          "wrmsse": 0.3351774442383152,
+          "mean_rmsse": 0.39261800517953455
+        },
+        {
+          "level": "store_id",
+          "series": 77,
+          "wrmsse": 0.568516618498106,
+          "mean_rmsse": 0.5037393231834825
+        },
+        {
+          "level": "cat_idxstore_id",
+          "series": 308,
+          "wrmsse": 0.5606114782588043,
+          "mean_rmsse": 0.5882795748809362
+        },
+        {
+          "level": "item_id",
+          "series": 55,
+          "wrmsse": 0.43282654266335985,
+          "mean_rmsse": 0.5548994244648813
+        },
+        {
+          "level": "item_idxstore_id",
+          "series": 3904,
+          "wrmsse": 0.5595089363822949,
+          "mean_rmsse": 0.597949743432941
+        }
+      ],
+      "forecast_to_actual": 0.9742814862145449,
+      "by_condition": {
+        "promo": {
+          "on": {
+            "periods": 9259,
+            "series": 2830,
+            "wrmsse": 0.7635997255019389
+          },
+          "off": {
+            "periods": 18889,
+            "series": 3673,
+            "wrmsse": 0.40453786906218936
+          }
+        },
+        "display": {
+          "on": {
+            "periods": 3600,
+            "series": 1543,
+            "wrmsse": 0.8215985019114966
+          },
+          "off": {
+            "periods": 24548,
+            "series": 3722,
+            "wrmsse": 0.48121903843826175
+          }
+        },
+        "feature": {
+          "on": {
+            "periods": 2995,
+            "series": 1681,
+            "wrmsse": 0.8470942265122916
+          },
+          "off": {
+            "periods": 25153,
+            "series": 3746,
+            "wrmsse": 0.46243631136628216
+          }
+        },
+        "tpr_only": {
+          "on": {
+            "periods": 4388,
+            "series": 1761,
+            "wrmsse": 0.5565577974945272
+          },
+          "off": {
+            "periods": 23760,
+            "series": 3725,
+            "wrmsse": 0.5598053891465213
+          }
+        }
+      },
+      "by_horizon": [
+        0.4655868581170075,
+        0.4487408273108593,
+        0.4246104406626849,
+        0.3781706628652978,
+        0.48134457080602444,
+        0.4862137884179648,
+        0.5125753711920092,
+        0.40258130961864247
+      ],
+      "kept_out": 0.7362734231685629,
+      "trained_on": 0.5184566155641044,
+      "kept_out_forecast_to_actual": 0.7754210233688354
+    },
+    {
+      "origin": 3,
+      "train_end": "2011-05-25",
+      "test_start": "2011-06-01",
+      "test_end": "2011-07-20",
+      "wrmsse": 0.5638227245908006,
+      "by_level": [
+        {
+          "level": "total",
+          "series": 1,
+          "wrmsse": 0.5870037359766394,
+          "mean_rmsse": 0.5870037359766394
+        },
+        {
+          "level": "cat_id",
+          "series": 4,
+          "wrmsse": 0.4818623806452301,
+          "mean_rmsse": 0.4445697969261916
+        },
+        {
+          "level": "store_id",
+          "series": 77,
+          "wrmsse": 0.6363900486604334,
+          "mean_rmsse": 0.5421488282642739
+        },
+        {
+          "level": "cat_idxstore_id",
+          "series": 308,
+          "wrmsse": 0.6026706343082944,
+          "mean_rmsse": 0.5541012198384455
+        },
+        {
+          "level": "item_id",
+          "series": 55,
+          "wrmsse": 0.48082125347475696,
+          "mean_rmsse": 0.6128511936239133
+        },
+        {
+          "level": "item_idxstore_id",
+          "series": 3904,
+          "wrmsse": 0.5941882944794491,
+          "mean_rmsse": 0.5616627211472185
+        }
+      ],
+      "forecast_to_actual": 0.8882240636799305,
+      "by_condition": {
+        "promo": {
+          "on": {
+            "periods": 8192,
+            "series": 2376,
+            "wrmsse": 0.9203352423739803
+          },
+          "off": {
+            "periods": 19693,
+            "series": 3524,
+            "wrmsse": 0.42046127345230755
+          }
+        },
+        "display": {
+          "on": {
+            "periods": 3304,
+            "series": 1293,
+            "wrmsse": 1.122242879554739
+          },
+          "off": {
+            "periods": 24581,
+            "series": 3723,
+            "wrmsse": 0.4698752177014523
+          }
+        },
+        "feature": {
+          "on": {
+            "periods": 2296,
+            "series": 1107,
+            "wrmsse": 1.1243271747068144
+          },
+          "off": {
+            "periods": 25589,
+            "series": 3754,
+            "wrmsse": 0.4711548750256302
+          }
+        },
+        "tpr_only": {
+          "on": {
+            "periods": 4049,
+            "series": 1520,
+            "wrmsse": 0.5601115317499774
+          },
+          "off": {
+            "periods": 23836,
+            "series": 3744,
+            "wrmsse": 0.6054566180243652
+          }
+        }
+      },
+      "by_horizon": [
+        0.3859284458950135,
+        0.38735937871494197,
+        0.3693719993453053,
+        0.4811548937666499,
+        0.4927987921460013,
+        0.5278404433176513,
+        0.5199661548850567,
+        0.5674736635376387
+      ],
+      "kept_out": 0.8041975671658752,
+      "trained_on": 0.54270717455226,
+      "kept_out_forecast_to_actual": 0.7197446227073669
+    }
+  ],
+  "checkpoints": []
+}

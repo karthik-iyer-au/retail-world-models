@@ -18,3 +18,18 @@ results/*
 !results/records/
 # Every try of the research loop, published with the paper (src/rwm/research/loop.py).
 !results/research/
+# The tuned-model analyses and the scores of the final, transfer and pooled runs, which the paper is built from
+# (paper/Makefile; plan entry of 12 November 2026). Forecasts and checkpoints stay on the results volume.
+!results/analysis_tuned/
+!results/final/
+results/final/*/*
+!results/final/*/metrics.json
+!results/final/*/manifest.json
+!results/ftransfer/
+results/ftransfer/*/*
+!results/ftransfer/*/metrics.json
+!results/ftransfer/*/manifest.json
+!results/pooled/
+results/pooled/*/*
+!results/pooled/*/metrics.json
+!results/pooled/*/manifest.json

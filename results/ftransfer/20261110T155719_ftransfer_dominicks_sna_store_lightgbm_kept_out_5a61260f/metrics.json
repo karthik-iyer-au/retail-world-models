@@ -1,0 +1,554 @@
+{
+  "model": "seed_average",
+  "dataset": "dominicks",
+  "levers_available": [
+    "price",
+    "promo",
+    "cost"
+  ],
+  "levels_scored": 6,
+  "wrmsse": 0.9287613849647974,
+  "splits": [
+    {
+      "origin": 0,
+      "train_end": "1995-11-30",
+      "test_start": "1995-12-07",
+      "test_end": "1996-01-25",
+      "wrmsse": 0.7098504732460382,
+      "by_level": [
+        {
+          "level": "total",
+          "series": 1,
+          "wrmsse": 0.6544210811875417,
+          "mean_rmsse": 0.6544210811875417
+        },
+        {
+          "level": "cat_id",
+          "series": 1,
+          "wrmsse": 0.6544210811875417,
+          "mean_rmsse": 0.6544210811875417
+        },
+        {
+          "level": "store_id",
+          "series": 93,
+          "wrmsse": 0.7940487162251352,
+          "mean_rmsse": 0.7124522546622901
+        },
+        {
+          "level": "cat_idxstore_id",
+          "series": 93,
+          "wrmsse": 0.7940487162251352,
+          "mean_rmsse": 0.7124522546622901
+        },
+        {
+          "level": "item_id",
+          "series": 418,
+          "wrmsse": 0.631891845685248,
+          "mean_rmsse": 0.2731853808746503
+        },
+        {
+          "level": "item_idxstore_id",
+          "series": 30159,
+          "wrmsse": 0.7302713989656271,
+          "mean_rmsse": 0.2692519491792916
+        }
+      ],
+      "forecast_to_actual": 0.9420940192746476,
+      "by_condition": {
+        "promo": {
+          "on": {
+            "periods": 18610,
+            "series": 5954,
+            "wrmsse": 1.0029953021810938
+          },
+          "off": {
+            "periods": 87234,
+            "series": 10864,
+            "wrmsse": 0.5728525982851185
+          }
+        }
+      },
+      "by_horizon": [
+        0.5002816499048452,
+        0.6000095567965014,
+        0.7120838077325101,
+        0.5855148261548031,
+        0.5285127522965809,
+        0.5684964136274705,
+        0.48757119401591775,
+        0.5881065189237072
+      ],
+      "peaks": {
+        "promoted": {
+          "forecast_to_actual": 0.8873480558395386,
+          "share_of_units": 0.44838395714759827,
+          "rmsse": 1.0029953021810938
+        },
+        "after_promo": {
+          "forecast_to_actual": 0.939318835735321,
+          "share_of_units": 0.13316422700881958,
+          "rmsse": 0.5164000352962499
+        },
+        "ordinary": {
+          "forecast_to_actual": 1.0016391277313232,
+          "share_of_units": 0.41845181584358215,
+          "rmsse": 0.5456463749642496
+        }
+      },
+      "kept_out": 0.8515689441786469,
+      "trained_on": 0.6995723598724948,
+      "kept_out_forecast_to_actual": 0.6187730431556702
+    },
+    {
+      "origin": 1,
+      "train_end": "1996-01-25",
+      "test_start": "1996-02-01",
+      "test_end": "1996-03-21",
+      "wrmsse": 0.43558267855268334,
+      "by_level": [
+        {
+          "level": "total",
+          "series": 1,
+          "wrmsse": 0.41320869749240496,
+          "mean_rmsse": 0.41320869749240496
+        },
+        {
+          "level": "cat_id",
+          "series": 1,
+          "wrmsse": 0.41320869749240496,
+          "mean_rmsse": 0.41320869749240496
+        },
+        {
+          "level": "store_id",
+          "series": 93,
+          "wrmsse": 0.4590425158657724,
+          "mean_rmsse": 0.40448010707124005
+        },
+        {
+          "level": "cat_idxstore_id",
+          "series": 93,
+          "wrmsse": 0.4590425158657724,
+          "mean_rmsse": 0.40448010707124005
+        },
+        {
+          "level": "item_id",
+          "series": 418,
+          "wrmsse": 0.37076459916765314,
+          "mean_rmsse": 0.22092280756927066
+        },
+        {
+          "level": "item_idxstore_id",
+          "series": 30159,
+          "wrmsse": 0.4982290454320921,
+          "mean_rmsse": 0.21761529310999358
+        }
+      ],
+      "forecast_to_actual": 0.8719086311824947,
+      "by_condition": {
+        "promo": {
+          "on": {
+            "periods": 8240,
+            "series": 5582,
+            "wrmsse": 0.7055695717027768
+          },
+          "off": {
+            "periods": 98175,
+            "series": 10317,
+            "wrmsse": 0.43664918130101765
+          }
+        }
+      },
+      "by_horizon": [
+        0.35417474642300406,
+        0.3438688494000105,
+        0.4277056372464891,
+        0.4615376203182759,
+        0.4147938992072291,
+        0.4142819308347976,
+        0.3776383371818798,
+        0.3813548919870886
+      ],
+      "peaks": {
+        "promoted": {
+          "forecast_to_actual": 0.8523741364479065,
+          "share_of_units": 0.20863699913024902,
+          "rmsse": 0.7055695717027768
+        },
+        "after_promo": {
+          "forecast_to_actual": 0.9100607633590698,
+          "share_of_units": 0.1683311015367508,
+          "rmsse": 0.36732546127889704
+        },
+        "ordinary": {
+          "forecast_to_actual": 0.868142306804657,
+          "share_of_units": 0.6230319142341614,
+          "rmsse": 0.42469467154310114
+        }
+      },
+      "kept_out": 0.6244710450295577,
+      "trained_on": 0.46479421147214905,
+      "kept_out_forecast_to_actual": 0.5949302911758423
+    },
+    {
+      "origin": 2,
+      "train_end": "1996-03-21",
+      "test_start": "1996-03-28",
+      "test_end": "1996-05-16",
+      "wrmsse": 0.5766722455940784,
+      "by_level": [
+        {
+          "level": "total",
+          "series": 1,
+          "wrmsse": 0.5822969614355789,
+          "mean_rmsse": 0.5822969614355789
+        },
+        {
+          "level": "cat_id",
+          "series": 1,
+          "wrmsse": 0.5822969614355789,
+          "mean_rmsse": 0.5822969614355789
+        },
+        {
+          "level": "store_id",
+          "series": 93,
+          "wrmsse": 0.6145977691711231,
+          "mean_rmsse": 0.5516183118653142
+        },
+        {
+          "level": "cat_idxstore_id",
+          "series": 93,
+          "wrmsse": 0.6145977691711231,
+          "mean_rmsse": 0.5516183118653142
+        },
+        {
+          "level": "item_id",
+          "series": 418,
+          "wrmsse": 0.47915662912596935,
+          "mean_rmsse": 0.2542849640904668
+        },
+        {
+          "level": "item_idxstore_id",
+          "series": 30159,
+          "wrmsse": 0.5870873832250976,
+          "mean_rmsse": 0.24047359338803434
+        }
+      ],
+      "forecast_to_actual": 0.8376262558981038,
+      "by_condition": {
+        "promo": {
+          "on": {
+            "periods": 10643,
+            "series": 5197,
+            "wrmsse": 0.9105175287127892
+          },
+          "off": {
+            "periods": 101736,
+            "series": 10039,
+            "wrmsse": 0.4526279505345726
+          }
+        }
+      },
+      "by_horizon": [
+        0.45628004886979834,
+        0.4419993390175242,
+        0.5586800260283673,
+        0.38423784696366403,
+        0.4693349336882142,
+        0.4224998003576757,
+        0.41788781724966895,
+        0.5145097287893594
+      ],
+      "peaks": {
+        "promoted": {
+          "forecast_to_actual": 0.7566970586776733,
+          "share_of_units": 0.32632961869239807,
+          "rmsse": 0.9105175287127892
+        },
+        "after_promo": {
+          "forecast_to_actual": 0.8576440215110779,
+          "share_of_units": 0.1590449959039688,
+          "rmsse": 0.3833932553811529
+        },
+        "ordinary": {
+          "forecast_to_actual": 0.8827579617500305,
+          "share_of_units": 0.5146253705024719,
+          "rmsse": 0.4402857340904617
+        }
+      },
+      "kept_out": 0.794504805014935,
+      "trained_on": 0.5323596703226049,
+      "kept_out_forecast_to_actual": 0.5642150044441223
+    },
+    {
+      "origin": 3,
+      "train_end": "1996-05-16",
+      "test_start": "1996-05-23",
+      "test_end": "1996-07-11",
+      "wrmsse": 0.4420571367042401,
+      "by_level": [
+        {
+          "level": "total",
+          "series": 1,
+          "wrmsse": 0.318021058046784,
+          "mean_rmsse": 0.318021058046784
+        },
+        {
+          "level": "cat_id",
+          "series": 1,
+          "wrmsse": 0.318021058046784,
+          "mean_rmsse": 0.318021058046784
+        },
+        {
+          "level": "store_id",
+          "series": 93,
+          "wrmsse": 0.4546119746506202,
+          "mean_rmsse": 0.40561280462222354
+        },
+        {
+          "level": "cat_idxstore_id",
+          "series": 93,
+          "wrmsse": 0.4546119746506202,
+          "mean_rmsse": 0.40561280462222354
+        },
+        {
+          "level": "item_id",
+          "series": 418,
+          "wrmsse": 0.4856518825241462,
+          "mean_rmsse": 0.3383197406469674
+        },
+        {
+          "level": "item_idxstore_id",
+          "series": 30159,
+          "wrmsse": 0.6214248723064859,
+          "mean_rmsse": 0.25521111627913684
+        }
+      ],
+      "forecast_to_actual": 0.967449214327155,
+      "by_condition": {
+        "promo": {
+          "on": {
+            "periods": 14308,
+            "series": 5835,
+            "wrmsse": 0.9689673357862207
+          },
+          "off": {
+            "periods": 113442,
+            "series": 10495,
+            "wrmsse": 0.45639966530506704
+          }
+        }
+      },
+      "by_horizon": [
+        0.5261643177787185,
+        0.42176488803040846,
+        0.45522388642465117,
+        0.6306036363354711,
+        0.4708017890929358,
+        0.49878612487689883,
+        0.43431603294182963,
+        0.4196169779773945
+      ],
+      "peaks": {
+        "promoted": {
+          "forecast_to_actual": 0.9110161662101746,
+          "share_of_units": 0.37989872694015503,
+          "rmsse": 0.9689673357862207
+        },
+        "after_promo": {
+          "forecast_to_actual": 0.9561112523078918,
+          "share_of_units": 0.2000013142824173,
+          "rmsse": 0.40249175000506954
+        },
+        "ordinary": {
+          "forecast_to_actual": 1.0238796472549438,
+          "share_of_units": 0.4200999438762665,
+          "rmsse": 0.4476674158527817
+        }
+      },
+      "kept_out": 0.6916613997436754,
+      "trained_on": 0.6037205328129065,
+      "kept_out_forecast_to_actual": 1.012753963470459
+    },
+    {
+      "origin": 4,
+      "train_end": "1996-07-11",
+      "test_start": "1996-07-18",
+      "test_end": "1996-09-05",
+      "wrmsse": 2.8109052469366875,
+      "by_level": [
+        {
+          "level": "total",
+          "series": 1,
+          "wrmsse": 4.522970438302706,
+          "mean_rmsse": 4.522970438302706
+        },
+        {
+          "level": "cat_id",
+          "series": 1,
+          "wrmsse": 4.522970438302706,
+          "mean_rmsse": 4.522970438302706
+        },
+        {
+          "level": "store_id",
+          "series": 93,
+          "wrmsse": 3.4231316049235034,
+          "mean_rmsse": 3.389951129046665
+        },
+        {
+          "level": "cat_idxstore_id",
+          "series": 93,
+          "wrmsse": 3.4231316049235034,
+          "mean_rmsse": 3.389951129046665
+        },
+        {
+          "level": "item_id",
+          "series": 418,
+          "wrmsse": 0.4316401811372409,
+          "mean_rmsse": 0.3808628437362155
+        },
+        {
+          "level": "item_idxstore_id",
+          "series": 30159,
+          "wrmsse": 0.541587214030464,
+          "mean_rmsse": 0.2757136461878261
+        }
+      ],
+      "forecast_to_actual": 0.5845674218795882,
+      "by_condition": {
+        "promo": {
+          "on": {
+            "periods": 16550,
+            "series": 6582,
+            "wrmsse": 0.7651715328998854
+          },
+          "off": {
+            "periods": 116673,
+            "series": 10956,
+            "wrmsse": 0.46509564250206775
+          }
+        }
+      },
+      "by_horizon": [
+        0.47680056936159443,
+        0.427318014355454,
+        0.49995137119510336,
+        0.3870268225263852,
+        0.5068082106903553,
+        0.44277407282135883,
+        0.41041254477741906,
+        0.3903692617634031
+      ],
+      "peaks": {
+        "promoted": {
+          "forecast_to_actual": 0.39504000544548035,
+          "share_of_units": 0.5019839406013489,
+          "rmsse": 0.7651715328998854
+        },
+        "after_promo": {
+          "forecast_to_actual": 1.0080548524856567,
+          "share_of_units": 0.1230214461684227,
+          "rmsse": 0.4193655611864573
+        },
+        "ordinary": {
+          "forecast_to_actual": 0.6993468403816223,
+          "share_of_units": 0.3749946057796478,
+          "rmsse": 0.45820990500917325
+        }
+      },
+      "kept_out": 0.6368762981450384,
+      "trained_on": 0.5436063287532714,
+      "kept_out_forecast_to_actual": 0.6599230766296387
+    },
+    {
+      "origin": 5,
+      "train_end": "1996-09-05",
+      "test_start": "1996-09-12",
+      "test_end": "1996-11-14",
+      "wrmsse": 0.5975005287550565,
+      "by_level": [
+        {
+          "level": "total",
+          "series": 1,
+          "wrmsse": 0.5883664981995455,
+          "mean_rmsse": 0.5883664981995455
+        },
+        {
+          "level": "cat_id",
+          "series": 1,
+          "wrmsse": 0.5883664981995455,
+          "mean_rmsse": 0.5883664981995455
+        },
+        {
+          "level": "store_id",
+          "series": 93,
+          "wrmsse": 0.7037055445361146,
+          "mean_rmsse": 0.6972515942441891
+        },
+        {
+          "level": "cat_idxstore_id",
+          "series": 93,
+          "wrmsse": 0.7037055445361146,
+          "mean_rmsse": 0.6972515942441891
+        },
+        {
+          "level": "item_id",
+          "series": 418,
+          "wrmsse": 0.4629390694283234,
+          "mean_rmsse": 0.3081974344572944
+        },
+        {
+          "level": "item_idxstore_id",
+          "series": 30159,
+          "wrmsse": 0.5379200176306956,
+          "mean_rmsse": 0.2847342131711401
+        }
+      ],
+      "forecast_to_actual": 0.8787275410353514,
+      "by_condition": {
+        "promo": {
+          "on": {
+            "periods": 13005,
+            "series": 5144,
+            "wrmsse": 0.7842873183781138
+          },
+          "off": {
+            "periods": 116293,
+            "series": 13922,
+            "wrmsse": 0.4305214683448946
+          }
+        }
+      },
+      "by_horizon": [
+        0.4202220516222286,
+        0.3725660944484082,
+        0.4958312409618361,
+        0.4336641448508482,
+        0.3793495296383063,
+        0.41642359545629515,
+        0.3887308430148797,
+        0.5041133691069422
+      ],
+      "peaks": {
+        "promoted": {
+          "forecast_to_actual": 0.9633644223213196,
+          "share_of_units": 0.2513877749443054,
+          "rmsse": 0.7842873183781138
+        },
+        "after_promo": {
+          "forecast_to_actual": 0.7786883115768433,
+          "share_of_units": 0.14703010022640228,
+          "rmsse": 0.33363325208891226
+        },
+        "ordinary": {
+          "forecast_to_actual": 0.8678097724914551,
+          "share_of_units": 0.6015821099281311,
+          "rmsse": 0.4234078617095849
+        }
+      },
+      "kept_out": 0.617308725652042,
+      "trained_on": 0.5217093141373201,
+      "kept_out_forecast_to_actual": 0.8943697810173035
+    }
+  ],
+  "checkpoints": []
+}
