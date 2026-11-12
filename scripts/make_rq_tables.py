@@ -23,9 +23,21 @@ KEYS = {"dominicks_ana": "Analgesics", "dominicks_bjc": "Bottled juice", "domini
 TRIO = ["world_model", "lightgbm", "ensemble_2"]
 
 
+CELL = ["wmcell", "lgbcell", "avgcell"]  # world model, LightGBM, average (paper/main.tex)
+KEY = (r"Shading marks the lowest of the three: \colorbox{wmcell}{world model}, \colorbox{lgbcell}{LightGBM}, "
+       r"\colorbox{avgcell}{average}.")
+
+
 def _fmt(vals: list[float]) -> list[str]:
+    """Values in the order world model, LightGBM, average; the lowest is bold and shaded in its model's tint."""
     best = np.nanmin(vals)
-    return [("\\textbf{%.3f}" if abs(v - best) < 5e-4 else "%.3f") % v for v in vals]
+    return [(f"\\cellcolor{{{CELL[j]}}}\\textbf{{{v:.3f}}}" if abs(v - best) < 5e-4 else f"{v:.3f}")
+            for j, v in enumerate(vals)]
+
+
+def _shade(clear: str) -> str:
+    cell = {"World model": "wmcell", "LightGBM": "lgbcell"}.get(clear)
+    return f"\\cellcolor{{{cell}}}{clear}" if cell else clear
 
 
 def _groups(p: pd.DataFrame) -> tuple[list, list]:
@@ -49,11 +61,11 @@ def grain() -> tuple[str, dict]:
 \centering\footnotesize\setlength{\tabcolsep}{3pt}
 \caption{RQ1, grain. WRMSSE of the tuned world model (WM), the tuned LightGBM (LGB) and their equal-weight average
 (Avg), averaged over the levels at store grain and above, over the item levels, and over every level for the whole
-forecast window summed as one block; mean over the paper's windows. Lowest of the three in bold.}
+forecast window summed as one block; mean over the paper's windows. """ + KEY + r"""}
 \label{tab:rq-grain}
 \resizebox{\textwidth}{!}{\begin{tabular}{l ccc ccc ccc}
 \toprule
- & \multicolumn{3}{c}{Store and above, by period} & \multicolumn{3}{c}{Item levels, by period} & \multicolumn{3}{c}{Whole block, all levels}\\
+ & \multicolumn{3}{c}{Store and above} & \multicolumn{3}{c}{Item levels} & \multicolumn{3}{c}{Whole block}\\
 \cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}
 Data set & WM & LGB & Avg & WM & LGB & Avg & WM & LGB & Avg\\
 \midrule
@@ -82,7 +94,7 @@ def lines() -> tuple[str, dict]:
 \caption{RQ2, nature of the line. Share of items that make 80\% of unit sales over the year before the forecast, and
 WRMSSE averaged over every level, by period, on the fast lines (those items), the slow lines (the other items) and the
 series with short history (first sale less than 26 weeks or 182 days before the forecast). WM, LGB and Avg as in
-Table~\ref{tab:rq-grain}; lowest in bold.}
+Table~\ref{tab:rq-grain}. """ + KEY + r"""}
 \label{tab:rq-lines}
 \resizebox{\textwidth}{!}{\begin{tabular}{l c ccc ccc ccc}
 \toprule
@@ -125,7 +137,7 @@ def transfer() -> tuple[str, list]:
         out.append(dict(data=d, kind=kd, wm=w.world_model.mean(), lgb=w.lightgbm.mean(), lo=lo, hi=hi,
                         fa_wm=fa["world_model"], fa_lgb=fa["lightgbm"], clear=clear))
         lines_.append(f"{KEYS[d]} & {'Items' if kd == 'item' else 'Stores'} & {w.world_model.mean():.3f} & "
-                      f"{w.lightgbm.mean():.3f} & [{lo:+.3f}, {hi:+.3f}] & {clear} & {fa['world_model']:.2f} & "
+                      f"{w.lightgbm.mean():.3f} & [{lo:+.3f}, {hi:+.3f}] & {_shade(clear)} & {fa['world_model']:.2f} & "
                       f"{fa['lightgbm']:.2f} \\\\")
     tab = r"""\begin{table*}[t]
 \centering\footnotesize\setlength{\tabcolsep}{3pt}

@@ -2,23 +2,23 @@
 \centering\footnotesize\setlength{\tabcolsep}{3pt}
 \caption{RQ1, grain. WRMSSE of the tuned world model (WM), the tuned LightGBM (LGB) and their equal-weight average
 (Avg), averaged over the levels at store grain and above, over the item levels, and over every level for the whole
-forecast window summed as one block; mean over the paper's windows. Lowest of the three in bold.}
+forecast window summed as one block; mean over the paper's windows. Shading marks the lowest of the three: \colorbox{wmcell}{world model}, \colorbox{lgbcell}{LightGBM}, \colorbox{avgcell}{average}.}
 \label{tab:rq-grain}
 \resizebox{\textwidth}{!}{\begin{tabular}{l ccc ccc ccc}
 \toprule
- & \multicolumn{3}{c}{Store and above, by period} & \multicolumn{3}{c}{Item levels, by period} & \multicolumn{3}{c}{Whole block, all levels}\\
+ & \multicolumn{3}{c}{Store and above} & \multicolumn{3}{c}{Item levels} & \multicolumn{3}{c}{Whole block}\\
 \cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}
 Data set & WM & LGB & Avg & WM & LGB & Avg & WM & LGB & Avg\\
 \midrule
-Analgesics & 0.688 & 0.698 & \textbf{0.678} & 0.710 & 0.705 & \textbf{0.695} & 0.523 & \textbf{0.458} & 0.472 \\
-Bottled juice & 0.569 & 0.566 & \textbf{0.539} & 0.581 & 0.596 & \textbf{0.563} & 0.545 & \textbf{0.404} & 0.445 \\
-Cheese & 0.381 & 0.471 & \textbf{0.377} & 0.623 & 0.594 & \textbf{0.578} & 0.445 & 0.425 & \textbf{0.387} \\
-Frozen entrees & 0.339 & 0.327 & \textbf{0.320} & 0.375 & 0.350 & \textbf{0.344} & 0.353 & 0.330 & \textbf{0.318} \\
-Soft drinks & 0.822 & 0.805 & \textbf{0.754} & 0.589 & 0.555 & \textbf{0.547} & 0.576 & 0.632 & \textbf{0.470} \\
-Snacks & 1.241 & \textbf{1.040} & 1.071 & 0.545 & 0.516 & \textbf{0.508} & 0.893 & \textbf{0.633} & 0.688 \\
-Frat & 0.471 & 0.479 & \textbf{0.449} & 0.528 & 0.524 & \textbf{0.508} & \textbf{0.345} & 0.406 & 0.364 \\
-M5 & 0.660 & 0.634 & \textbf{0.591} & 0.859 & 0.886 & \textbf{0.856} & 0.598 & 0.953 & \textbf{0.589} \\
-Favorita & 0.314 & 0.325 & \textbf{0.278} & 0.655 & 0.696 & \textbf{0.653} & 0.482 & 0.565 & \textbf{0.412} \\
+Analgesics & 0.688 & 0.698 & \cellcolor{avgcell}\textbf{0.678} & 0.710 & 0.705 & \cellcolor{avgcell}\textbf{0.695} & 0.523 & \cellcolor{lgbcell}\textbf{0.458} & 0.472 \\
+Bottled juice & 0.569 & 0.566 & \cellcolor{avgcell}\textbf{0.539} & 0.581 & 0.596 & \cellcolor{avgcell}\textbf{0.563} & 0.545 & \cellcolor{lgbcell}\textbf{0.404} & 0.445 \\
+Cheese & 0.381 & 0.471 & \cellcolor{avgcell}\textbf{0.377} & 0.623 & 0.594 & \cellcolor{avgcell}\textbf{0.578} & 0.445 & 0.425 & \cellcolor{avgcell}\textbf{0.387} \\
+Frozen entrees & 0.339 & 0.327 & \cellcolor{avgcell}\textbf{0.320} & 0.375 & 0.350 & \cellcolor{avgcell}\textbf{0.344} & 0.353 & 0.330 & \cellcolor{avgcell}\textbf{0.318} \\
+Soft drinks & 0.822 & 0.805 & \cellcolor{avgcell}\textbf{0.754} & 0.589 & 0.555 & \cellcolor{avgcell}\textbf{0.547} & 0.576 & 0.632 & \cellcolor{avgcell}\textbf{0.470} \\
+Snacks & 1.241 & \cellcolor{lgbcell}\textbf{1.040} & 1.071 & 0.545 & 0.516 & \cellcolor{avgcell}\textbf{0.508} & 0.893 & \cellcolor{lgbcell}\textbf{0.633} & 0.688 \\
+Frat & 0.471 & 0.479 & \cellcolor{avgcell}\textbf{0.449} & 0.528 & 0.524 & \cellcolor{avgcell}\textbf{0.508} & \cellcolor{wmcell}\textbf{0.345} & 0.406 & 0.364 \\
+M5 & 0.660 & 0.634 & \cellcolor{avgcell}\textbf{0.591} & 0.859 & 0.886 & \cellcolor{avgcell}\textbf{0.856} & 0.598 & 0.953 & \cellcolor{avgcell}\textbf{0.589} \\
+Favorita & 0.314 & 0.325 & \cellcolor{avgcell}\textbf{0.278} & 0.655 & 0.696 & \cellcolor{avgcell}\textbf{0.653} & 0.482 & 0.565 & \cellcolor{avgcell}\textbf{0.412} \\
 \bottomrule
 \end{tabular}}
 \end{table*}

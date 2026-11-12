@@ -10,35 +10,34 @@ the equal-weight mean of the two forecasts.
 \subsection{RQ1: grain}
 \label{sec:rq-grain}
 
-\textbf{No one model is the most accurate at every grain, and the average of the
-two is the most accurate at almost every grain.} At store grain and above, the
-average has the lowest error on eight of nine data sets; at the item levels, on
-all nine (Table~\ref{tab:rq-grain}). In the paired tests, which compare two
-forecasts level by level and window by window and count a difference only when
-it holds after resampling items, the average is clearly more accurate than the
-world model in 128 of 312 comparisons and clearly less accurate in 27; against
-LightGBM the counts are 124 and 21. At the item levels the average is clearly
-less accurate than either model in at most 8 of 100 comparisons. Across all
-data sets and levels, the average is in the 90\% model confidence set in
-\rqMcsAverage{} of \rqMcsCells{} cases, against \rqMcsLightgbm{} for
-LightGBM and \rqMcsWorldModel{} for the world model.
+\textbf{Use the average at every grain.} Across the nine data sets and the
+three views of Table~\ref{tab:rq-grain} (store grain and above by period, item
+grain by period, and the whole window as one block), the average has the lowest
+error in 22 of 27 cases and is never the least accurate of the three. The world
+model is the least accurate in 16 cases and LightGBM in 11.
 
-The two models on their own are close. The world model is clearly more accurate
-than LightGBM in 64 comparisons and clearly less accurate in 75, and the
-balance is the same at store grain (40 against 45) and at item grain (24
-against 30). Which one leads depends on the data set. LightGBM leads at every
-grain on frozen entrees and on snacks; the world model leads at both store and
-item grain on Favorita, the data set kept out of all development, and at store
-grain on analgesics, cheese and Frat.
+The paired tests give the same answer. They compare two forecasts level by level
+and window by window, and count a difference only when it holds after
+resampling items. Against the world model, the average is clearly more accurate
+in 128 of 312 comparisons and clearly less accurate in 27; against LightGBM, 124
+and 21. At item grain it is clearly less accurate than either model in at most 8
+of 100 comparisons. Across data sets and levels it is in the 90\% model
+confidence set in \rqMcsAverage{} of \rqMcsCells{} cases, against
+\rqMcsLightgbm{} for LightGBM and \rqMcsWorldModel{} for the world model.
 
-Over the whole forecast window summed as one block, the view a promotion is
-judged on, the picture changes for some data sets. LightGBM forecasts each day
-of M5 well but drifts in total over the four weeks: its block error is 0.953
-against 0.598 for the world model and 0.589 for the average. The same drift
-shows on Favorita (0.565 against 0.482) and soft drinks (0.632 against 0.576).
-On analgesics, bottled juice and snacks the reverse holds: LightGBM's block
-total is closer than the world model's. The average is lowest on the block in
-five of nine data sets.
+\textbf{Grain does not decide between the two models on their own.} The world
+model is clearly more accurate than LightGBM in 40 comparisons at store grain
+and above and clearly less accurate in 45; at item grain the counts are 24 and
+30. Neither is ahead at either grain across the data sets, so a retailer that
+picks one model for a grain is picking by data set, not by grain. The average
+removes that choice.
+
+\textbf{On the whole promotion block, the average is again the safe choice.} It
+is lowest on five of nine data sets and second on the other four. LightGBM is
+lowest on analgesics, bottled juice and snacks, but drifts in total where the
+world model does not: its block error on M5 is 0.953, against 0.598 for the world
+model and 0.589 for the average, and the same pattern shows on Favorita and soft
+drinks.
 
 \input{generated/rq_tab_grain}
 

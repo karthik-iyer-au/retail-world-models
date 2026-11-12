@@ -45,6 +45,7 @@
 \newlength{\rotmaxh}\setlength{\rotmaxh}{\dimexpr\paperwidth-3in\relax}
 \usepackage[font=small,labelfont=bf,skip=6pt]{caption}
 \usepackage{xcolor}
+\usepackage{colortbl}
 \usepackage[verbose=silent]{microtype}
 \usepackage{titlesec}
 \usepackage{fancyhdr}
@@ -54,6 +55,10 @@
 \definecolor{linkblue}{RGB}{20,60,110}
 \definecolor{urlblue}{RGB}{0,84,166}
 \definecolor{headtint}{RGB}{24,42,64}
+% lowest-error cells in the results tables, light tints of the figures' model colours
+\definecolor{wmcell}{RGB}{207,224,240}
+\definecolor{lgbcell}{RGB}{250,222,196}
+\definecolor{avgcell}{RGB}{214,234,214}
 
 \usepackage[colorlinks=true,
             linkcolor=linkblue,
