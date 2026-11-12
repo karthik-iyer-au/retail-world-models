@@ -51,3 +51,9 @@ pdf: figures tables
 
 clean:
 	rm -f main.aux main.log main.out main.toc main.pdf
+
+# Journal version: main text and online supplement, cross-referenced (two passes each).
+.PHONY: journal
+journal: tables figures
+	for i in 1 2; do $(XELATEX) -interaction=nonstopmode main_ijpe.tex >/dev/null; $(XELATEX) -interaction=nonstopmode supplement_ijpe.tex >/dev/null; done
+	$(XELATEX) -interaction=nonstopmode main_ijpe.tex >/dev/null

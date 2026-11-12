@@ -1,0 +1,37 @@
+% =====================================================================
+\section{What was tried and dropped}
+\label{sec:dropped}
+
+Most of what was tried did not stay. The searches of Section~\ref{sec:loop} kept
+a small share of the changes they ran (Table~\ref{tab:loop}); every change tried
+alone in the first round is in Figure~\ref{fig:loopheat}, and the losses tried in
+the first revision are in Table~\ref{tab:losses}. Table~\ref{tab:dropped} lists
+the larger things the revision tried beyond the searches and did not keep, and
+when each becomes worth trying again.
+
+\begin{table*}[t]
+\centering
+\caption{\textbf{What the revision tried beyond the searches and did not keep.}
+Each was written down before it ran.}
+\label{tab:dropped}
+\footnotesize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{p{0.25\textwidth}p{0.36\textwidth}p{0.31\textwidth}}
+\toprule
+\textbf{Tried} & \textbf{What happened} & \textbf{Worth revisiting when} \\
+\midrule
+Count likelihoods that treat zero weeks on their own (negative binomial, zero-inflated, hurdle), on the world model & Kept on M5 and Favorita (hurdle) and snacks (negative binomial); nothing on the other six data sets & Lines are slower or more often out of stock than here \\
+Pretraining the world model's encoder on the latent objective, then fitting the forecast at a lower rate & Kept on snacks only, on the search windows; with nothing kept on eight of nine data sets, Favorita's rerun on its final loss was stopped early & More unlabelled history is available than the forecast needs, as across many categories \\
+Training on other retailers' data with each own data set (RQ4) & Helped neither model by more than \rqPoolGainMax{} on any data set, and hurt LightGBM most & The other data come from the same retailer or the same categories \\
+The world model alone for series with less than 26 weeks of history & No better than the average on lines with history; worse on snacks & A longer history threshold is set from a retailer's own range data \\
+Weights fitted to earlier windows in place of equal weights & Reported in Section~\ref{sec:support} & Many more windows are available to fit them on \\
+Timestral in place of TimesFM in the three-model ensemble & Reported in Section~\ref{sec:support} & A retail-trained version is released \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+The first version of this paper also tried a stock term for the dip after a
+promotion, extra loss weight on the periods after a promotion, and a graph model
+sharing information between stores; none was kept, and they were not run again on
+the tuned models. Their record is in the first version.
+

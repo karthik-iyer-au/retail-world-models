@@ -1,0 +1,110 @@
+% =====================================================================
+\section{Supporting analyses}
+\label{sec:support}
+
+Every analysis in this section was rerun on the tuned models of
+Table~\ref{tab:final-settings}, on the same rolling windows as
+Section~\ref{sec:results}; none of its numbers comes from the settings of the
+first version.
+
+\subsection{Every model compared}
+\label{sec:sup-comparison}
+
+\textbf{The tuned pair and their average are more accurate than every model not
+tuned on the data, on every data set but one.} Table~\ref{tab:sup-comparison}
+adds the pretrained models, the Temporal Fusion Transformer and seasonal naive.
+TimesFM given the plan is the most accurate of the models not trained on the
+data on \supTfmPlanBestUntrained{} data sets. On Frat it is more accurate than
+either tuned model alone (\supFratTfmPlan{} against \supFratWm{} for the world
+model and \supFratLgb{} for LightGBM) but not than their average
+(\supFratAvg{}). Timestral given the plan forecasts far above sales on the
+weekly data, where a few extreme upper quantiles dominate the mean of its
+output: \supAnaTstPlan{} on analgesics against \supAnaTfmPlan{} for TimesFM given
+the plan.
+
+\input{generated/sup_tab_comparison}
+
+\subsection{What each member adds to the combination}
+\label{sec:sup-ablation}
+
+\textbf{Each tuned model makes the combination more accurate, and TimesFM adds a
+little at item by store.} Table~\ref{tab:sup-ablation} drops each member of the
+three-model ensemble in turn. Without the world model the ensemble is less
+accurate item by store on \supNoWmWorse{} of \supAblationSets{} data sets, and
+clearly less accurate in \supPNoWmWorse{} of \supPNoWmN{} window comparisons
+(clearly more accurate in \supPNoWmBetter{}); without LightGBM, in
+\supPNoLgbWorse{} (clearly more accurate in \supPNoLgbBetter{}). Without TimesFM,
+which leaves the average of the two tuned models, it is clearly less accurate item
+by store in \supPNoTfmWorse{} comparisons and clearly more accurate in
+\supPNoTfmBetter{}. Item by store, then, adding TimesFM with the plan to the
+average helps; over all levels the average is in the model confidence set more
+often (Section~\ref{sec:rq-grain}). A retailer whose main use is store orders can
+add it at the cost of a third model to run. Weights fitted on earlier windows to
+the item-by-store error beat equal weights in \supPFitBottomBetter{} of
+\supPFitBottomN{} comparisons and lost in \supPFitBottomWorse{}; weights fitted to
+the error over all levels beat them in \supPFitAllBetter{} and lost in
+\supPFitAllWorse{}.
+
+\input{generated/sup_tab_ablation}
+
+\subsection{Which plan inputs each model uses}
+\label{sec:sup-plan}
+
+\input{generated/sup_tab_perturbation}
+
+\subsection{What the world model's carried state does}
+\label{sec:sup-mechanism}
+
+\textbf{The tuned world model uses the timing of the plan, and carries a
+promotion forward as more sales rather than a dip.} Shuffling the plan's timing
+within each series makes its item-by-store error worse on all \supMechSets{}
+data sets, by \supTimingLo\% to \supTimingHi\% (Table~\ref{tab:sup-mechanism}):
+the forecast reads when a promotion runs, not only that one runs. A promotion and
+a price cut added in one period raise that period's forecast and still raise the
+next on most data sets (by \supPersistTwoLo\% to \supPersistTwoHi\% of the
+forecast without them), where shoppers who stocked up would buy less; the dip
+after a promotion is not in the forecast, as in the first version. The state
+rolled through the window predicts sales after it only a little better than the
+state before it (an $R^2$ gain of \supProbeGainMin{} to \supProbeGainMax{}).
+
+\input{generated/sup_tab_mechanism}
+
+\subsection{Decision costs, forecast ranges and reconciliation}
+\label{sec:sup-decisions}
+
+\paragraph{Forecast ranges}
+Each model's ranges come from its own errors in the earlier windows
+(Section~\ref{sec:setup}). Item by store, the 80\% ranges of all three forecasts
+cover close to 80\% of sales across data sets and windows (\supCovIxsWm\%,
+\supCovIxsLgb\% and \supCovIxsAvg\% for the world model, LightGBM and the
+average), and the average has the lowest scaled pinball loss (\supSplIxsAvg{},
+against \supSplIxsWm{} and \supSplIxsLgb{}). At the chain total, where each window
+adds one error to learn from, the world model's ranges are too narrow
+(\supCovTotalWm\% for 80\%) and the average's are close to target
+(\supCovTotalAvg\%); the coverage of a single data set swings with so few earlier
+windows (Table~\ref{tab:sup-intervals}).
+
+\input{generated/sup_tab_intervals}
+
+\paragraph{Decision costs}
+The average gives the lowest category-plan cost on \supCatPlanAvgLowest{} of
+\supCatPlanSets{} data sets and LightGBM on the other \supCatPlanLgbLowest{}
+(frozen entrees and snacks); the world model alone is lowest on none
+(Table~\ref{tab:sup-decisions}). Ordering each forecast's 0.8 quantile for every
+item and store costs less with the average than with LightGBM on
+\supOrderAvgBelowLgb{} data sets and less than with the world model on
+\supOrderAvgBelowWm{}. Both are simulations under stated costs, not business
+results.
+
+\input{generated/sup_tab_decisions}
+
+\paragraph{Reconciliation}
+Summing the average upward is more accurate over all levels than the best
+reconciled ETS forecast on \supAvgBeatsEts{} of \supReconSets{} data sets
+(Table~\ref{tab:sup-reconcile}). The exceptions are soft drinks and snacks,
+where reconciled ETS is more accurate at the coarse levels, which carry most of
+the all-level score; combining either tuned model with ETS above it does not do
+better than the average on most data sets.
+
+\input{generated/sup_tab_reconcile}
+

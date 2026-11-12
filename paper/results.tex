@@ -4,152 +4,10 @@
 
 \input{results_rq}
 
-% =====================================================================
-\section{Supporting analyses}
-\label{sec:support}
-
-Every analysis in this section was rerun on the tuned models of
-Table~\ref{tab:final-settings}, on the same rolling windows as
-Section~\ref{sec:results}; none of its numbers comes from the settings of the
-first version.
-
-\subsection{Every model compared}
-\label{sec:sup-comparison}
-
-\textbf{The tuned pair and their average are more accurate than every model not
-tuned on the data, on every data set but one.} Table~\ref{tab:sup-comparison}
-adds the pretrained models, the Temporal Fusion Transformer and seasonal naive.
-TimesFM given the plan is the most accurate of the models not trained on the
-data on \supTfmPlanBestUntrained{} data sets. On Frat it is more accurate than
-either tuned model alone (\supFratTfmPlan{} against \supFratWm{} for the world
-model and \supFratLgb{} for LightGBM) but not than their average
-(\supFratAvg{}). Timestral given the plan forecasts far above sales on the
-weekly data, where a few extreme upper quantiles dominate the mean of its
-output: \supAnaTstPlan{} on analgesics against \supAnaTfmPlan{} for TimesFM given
-the plan.
-
-\input{generated/sup_tab_comparison}
-
-\subsection{What each member adds to the combination}
-\label{sec:sup-ablation}
-
-\textbf{Each tuned model makes the combination more accurate, and TimesFM adds a
-little at item by store.} Table~\ref{tab:sup-ablation} drops each member of the
-three-model ensemble in turn. Without the world model the ensemble is less
-accurate item by store on \supNoWmWorse{} of \supAblationSets{} data sets, and
-clearly less accurate in \supPNoWmWorse{} of \supPNoWmN{} window comparisons
-(clearly more accurate in \supPNoWmBetter{}); without LightGBM, in
-\supPNoLgbWorse{} (clearly more accurate in \supPNoLgbBetter{}). Without TimesFM,
-which leaves the average of the two tuned models, it is clearly less accurate item
-by store in \supPNoTfmWorse{} comparisons and clearly more accurate in
-\supPNoTfmBetter{}. Item by store, then, adding TimesFM with the plan to the
-average helps; over all levels the average is in the model confidence set more
-often (Section~\ref{sec:rq-grain}). A retailer whose main use is store orders can
-add it at the cost of a third model to run. Weights fitted on earlier windows to
-the item-by-store error beat equal weights in \supPFitBottomBetter{} of
-\supPFitBottomN{} comparisons and lost in \supPFitBottomWorse{}; weights fitted to
-the error over all levels beat them in \supPFitAllBetter{} and lost in
-\supPFitAllWorse{}.
-
-\input{generated/sup_tab_ablation}
-
-\subsection{Which plan inputs each model uses}
-\label{sec:sup-plan}
-
-\input{generated/sup_tab_perturbation}
-
-\subsection{What the world model's carried state does}
-\label{sec:sup-mechanism}
-
-\textbf{The tuned world model uses the timing of the plan, and carries a
-promotion forward as more sales rather than a dip.} Shuffling the plan's timing
-within each series makes its item-by-store error worse on all \supMechSets{}
-data sets, by \supTimingLo\% to \supTimingHi\% (Table~\ref{tab:sup-mechanism}):
-the forecast reads when a promotion runs, not only that one runs. A promotion and
-a price cut added in one period raise that period's forecast and still raise the
-next on most data sets (by \supPersistTwoLo\% to \supPersistTwoHi\% of the
-forecast without them), where shoppers who stocked up would buy less; the dip
-after a promotion is not in the forecast, as in the first version. The state
-rolled through the window predicts sales after it only a little better than the
-state before it (an $R^2$ gain of \supProbeGainMin{} to \supProbeGainMax{}).
-
-\input{generated/sup_tab_mechanism}
-
-\subsection{Decision costs, forecast ranges and reconciliation}
-\label{sec:sup-decisions}
-
-\paragraph{Forecast ranges}
-Each model's ranges come from its own errors in the earlier windows
-(Section~\ref{sec:setup}). Item by store, the 80\% ranges of all three forecasts
-cover close to 80\% of sales across data sets and windows (\supCovIxsWm\%,
-\supCovIxsLgb\% and \supCovIxsAvg\% for the world model, LightGBM and the
-average), and the average has the lowest scaled pinball loss (\supSplIxsAvg{},
-against \supSplIxsWm{} and \supSplIxsLgb{}). At the chain total, where each window
-adds one error to learn from, the world model's ranges are too narrow
-(\supCovTotalWm\% for 80\%) and the average's are close to target
-(\supCovTotalAvg\%); the coverage of a single data set swings with so few earlier
-windows (Table~\ref{tab:sup-intervals}).
-
-\input{generated/sup_tab_intervals}
-
-\paragraph{Decision costs}
-The average gives the lowest category-plan cost on \supCatPlanAvgLowest{} of
-\supCatPlanSets{} data sets and LightGBM on the other \supCatPlanLgbLowest{}
-(frozen entrees and snacks); the world model alone is lowest on none
-(Table~\ref{tab:sup-decisions}). Ordering each forecast's 0.8 quantile for every
-item and store costs less with the average than with LightGBM on
-\supOrderAvgBelowLgb{} data sets and less than with the world model on
-\supOrderAvgBelowWm{}. Both are simulations under stated costs, not business
-results.
-
-\input{generated/sup_tab_decisions}
-
-\paragraph{Reconciliation}
-Summing the average upward is more accurate over all levels than the best
-reconciled ETS forecast on \supAvgBeatsEts{} of \supReconSets{} data sets
-(Table~\ref{tab:sup-reconcile}). The exceptions are soft drinks and snacks,
-where reconciled ETS is more accurate at the coarse levels, which carry most of
-the all-level score; combining either tuned model with ETS above it does not do
-better than the average on most data sets.
-
-\input{generated/sup_tab_reconcile}
-
-% =====================================================================
-\section{What was tried and dropped}
-\label{sec:dropped}
-
-Most of what was tried did not stay. The searches of Section~\ref{sec:loop} kept
-a small share of the changes they ran (Table~\ref{tab:loop}); every change tried
-alone in the first round is in Figure~\ref{fig:loopheat}, and the losses tried in
-the first revision are in Table~\ref{tab:losses}. Table~\ref{tab:dropped} lists
-the larger things the revision tried beyond the searches and did not keep, and
-when each becomes worth trying again.
-
-\begin{table*}[t]
-\centering
-\caption{\textbf{What the revision tried beyond the searches and did not keep.}
-Each was written down before it ran.}
-\label{tab:dropped}
-\footnotesize
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{p{0.25\textwidth}p{0.36\textwidth}p{0.31\textwidth}}
-\toprule
-\textbf{Tried} & \textbf{What happened} & \textbf{Worth revisiting when} \\
-\midrule
-Count likelihoods that treat zero weeks on their own (negative binomial, zero-inflated, hurdle), on the world model & Kept on M5 and Favorita (hurdle) and snacks (negative binomial); nothing on the other six data sets & Lines are slower or more often out of stock than here \\
-Pretraining the world model's encoder on the latent objective, then fitting the forecast at a lower rate & Kept on snacks only, on the search windows; with nothing kept on eight of nine data sets, Favorita's rerun on its final loss was stopped early & More unlabelled history is available than the forecast needs, as across many categories \\
-Training on other retailers' data with each own data set (RQ4) & Helped neither model by more than \rqPoolGainMax{} on any data set, and hurt LightGBM most & The other data come from the same retailer or the same categories \\
-The world model alone for series with less than 26 weeks of history & No better than the average on lines with history; worse on snacks & A longer history threshold is set from a retailer's own range data \\
-Weights fitted to earlier windows in place of equal weights & Reported in Section~\ref{sec:support} & Many more windows are available to fit them on \\
-Timestral in place of TimesFM in the three-model ensemble & Reported in Section~\ref{sec:support} & A retail-trained version is released \\
-\bottomrule
-\end{tabular}
-\end{table*}
-
-The first version of this paper also tried a stock term for the dip after a
-promotion, extra loss weight on the periods after a promotion, and a graph model
-sharing information between stores; none was kept, and they were not run again on
-the tuned models. Their record is in the first version.
+\ifjournal\else
+\input{support}
+\input{dropped}
+\fi
 
 % =====================================================================
 \section{Discussion}
@@ -171,9 +29,9 @@ the tuned models did at each on the nine data sets studied.}
 \toprule
 \textbf{Decision} & \textbf{Grain} & \textbf{Forecast to use} & \textbf{What the tuned models did} \\
 \midrule
-Store orders and inventory & Item by store, by day or week & The average & Lowest error at the item levels on all \rqAvgBestItemWord{} data sets; clearly less accurate than either model in at most \rqAvgItemWorseMax{} of \rqPAvgWmItemn{} paired comparisons \\
+Store orders and inventory & Item by store, by day or week & The average & Lowest error at the item levels on all \rqAvgBestItemWord{} data sets; clearly less accurate than either model in at most \rqAvgItemWorseMax{} of \rqPAvgWmItemn{} paired comparisons; simulated order cost below LightGBM's on \supOrderAvgBelowLgb{} of \supOrderSets{} \\
 Promotion and supplier funding & Item across stores, by week and over the promotion block & The average & Lowest at the item levels on all \rqAvgBestItemWord{}; over the whole block lowest on \rqAvgBestBlockWord{} and second on the other four; LightGBM alone drifts in total on M5, Favorita and soft drinks \\
-Category performance & Category by store and category, by week & The average & Lowest at store grain and above on \rqAvgBestCoarseWord{} of \rqNineWord{}; LightGBM lowest on snacks \\
+Category performance & Category by store and category, by week & The average & Lowest at store grain and above on \rqAvgBestCoarseWord{} of \rqNineWord{}; LightGBM lowest on snacks; lowest category-plan cost on \supCatPlanAvgLowest{} of \supCatPlanSets{} \\
 Financial plan & Chain total & The average & As for category performance; the total is the sum of the same item-by-store forecast, so it agrees with every plan below it \\
 New items and range changes & Item by store, items not yet trained on & The world model alone & Clearly more accurate than the average on all \rqKeptSets{} data sets tested; LightGBM forecast \rqFaLgbItemLo{} to \rqFaLgbItemHi{}\% of actual sales on these items \\
 New stores & Item by store, stores not yet trained on & The average & The average and the world model each clearly ahead on \rqStoreAvgBeatsWm{} data set and level on \rqStoreLevel{}; LightGBM clearly behind the world model on \rqStoreWmBeatsLgb{} of \rqKeptSets{} \\
@@ -404,41 +262,4 @@ iterations, and take full responsibility for the content of the publication.
 
 \clearpage
 \appendix
-\begin{table*}[t]
-\centering
-\caption{\textbf{Every constraint the trained models and the ensemble work
-within, with its value and where it lives in the code.}}
-\label{tab:constraints}
-\footnotesize
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{p{0.29\textwidth}p{0.29\textwidth}p{0.34\textwidth}}
-\toprule
-\textbf{Constraint} & \textbf{Value} & \textbf{Where} \\
-\midrule
-Log forecast bound (world model) & $[-10, 10]$ around the item's level & \nolinkurl{src/rwm/model/state_model.py} readout \\
-Lift when nothing is planned & Exactly zero & Readout; tested in \texttt{tests/} \\
-Baseline under a changed plan & Unchanged & Readout; tested in \texttt{tests/} \\
-Regular price & Highest price in the last 12 periods & Plan features \\
-Brand-switching share $\alpha$ & One per run, fitted on the last 8 training weeks & Dominick's world model \\
-Forecasts & Not below zero & Every model \\
-Average weights & One half each & \texttt{scripts/revision\_analysis.py} (\texttt{ensemble\_2}) \\
-Three-model ensemble weights & One third each, fixed 13 October 2026 & \texttt{scripts/revision\_analysis.py} \\
-Forecast by history & World model alone under 26 weeks (182 days) of sales & \texttt{scripts/revision\_analysis.py} (\texttt{by\_history}) \\
-Seed copies & Five fits averaged (one on M5) & \nolinkurl{src/rwm/seed_average.py} \\
-Interval pooling & Horizons pooled below 50 earlier errors per horizon & \texttt{src/rwm/evaluation/compare.py} \\
-Interval ends & Rounded outwards to whole units (not Favorita) & \texttt{src/rwm/evaluation/compare.py} \\
-TimesFM covariate fit & Groups of 2,048 series & \texttt{src/rwm/prior\_work/} \\
-Timestral context and batch & 512 periods; batch 256, halved on running out of GPU memory & \nolinkurl{src/rwm/prior_work/timestral_zero_shot.py} \\
-\bottomrule
-\end{tabular}
-\end{table*}
-
-\section{Constraints the models work within}
-\label{sec:constraints}
-
-
-
-Table~\ref{tab:constraints} lists the constraints. Each model's tuned settings are
-in Table~\ref{tab:final-settings}.
-
-\label{sec:supplement}
+\ifjournal\else\input{constraints}\fi

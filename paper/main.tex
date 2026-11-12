@@ -60,6 +60,14 @@
 \definecolor{lgbcell}{RGB}{250,222,196}
 \definecolor{avgcell}{RGB}{214,234,214}
 
+% Journal build: main_ijpe.tex (sets \journalmode) leaves the search detail, supporting
+% analyses, tried-and-dropped and constraints to the online supplement (supplement_ijpe.tex,
+% sets \supplementmode); the arXiv build (this file alone) keeps everything in one document.
+\newif\ifjournal\journalfalse
+\newif\ifsupplement\supplementfalse
+\ifdefined\journalmode\journaltrue\fi
+\ifdefined\supplementmode\journaltrue\supplementtrue\fi
+\usepackage{xr-hyper}
 \usepackage[colorlinks=true,
             linkcolor=linkblue,
             citecolor=linkblue,
@@ -181,9 +189,15 @@
 \input{generated/sup_values}
 \newcommand{\ixs}{item by store}
 
+\ifsupplement\externaldocument{main_ijpe}\else\ifjournal\externaldocument{supplement_ijpe}\fi\fi
 \begin{document}
 
 % ------------------------------------------------------------ title block -
+\ifsupplement\twocolumn[
+  \vspace*{6pt}\begin{center}{\LARGE\bfseries\color{headtint} Online supplement\par}\vspace{4pt}
+  {\large Forecasting Retail Sales at Every Grain: Trees, Foundation Models,\\ Transformers and World Models Compared on Four Public Data Sets\par}\vspace{6pt}
+  {\large Karthik Iyer \quad Madan Dabbeeru\par}\vspace{14pt}\end{center}]
+\else
 \twocolumn[
   \vspace*{6pt}
   \begin{center}
@@ -204,8 +218,9 @@
     \vspace{16pt}
   \end{center}
 ]
+\fi
 \thispagestyle{plain}
 
-\input{body}
+\ifsupplement\input{supplement_body}\else\input{body}\fi
 
 \end{document}
