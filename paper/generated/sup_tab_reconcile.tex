@@ -1,0 +1,17 @@
+\begin{table}[t]
+\centering\footnotesize\setlength{\tabcolsep}{3pt}
+\caption{Reconciliation against summing one forecast: WRMSSE averaged over all levels, mean over windows, of the best
+reconciled ETS forecast, of each tuned model combined with ETS above it by weighted least squares, and of the average
+summed upward.}
+\label{tab:sup-reconcile}
+\resizebox{\columnwidth}{!}{\begin{tabular}{lcccc}
+\toprule
+Data set & Best ETS & WM + ETS & LGB + ETS & Avg\\
+\midrule
+Analgesics & 0.814 & 0.944 & 0.988 & \cellcolor{avgcell}\textbf{0.684} \\
+Bottled juice & 0.895 & 0.892 & 0.896 & \cellcolor{avgcell}\textbf{0.547} \\
+Cheese & 0.718 & 1.515 & 1.285 & \cellcolor{avgcell}\textbf{0.444} \\
+Frozen entrees & 0.531 & 0.529 & 0.492 & \cellcolor{avgcell}\textbf{0.328} \\
+\bottomrule
+\end{tabular}}
+\end{table}

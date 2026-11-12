@@ -1,0 +1,19 @@
+\begin{table}[t]
+\centering\footnotesize\setlength{\tabcolsep}{3pt}
+\caption{Decision costs of the tuned models. Store orders: cost of ordering each forecast's 0.8 quantile, summed over
+windows, relative to LightGBM's. Category plan: absolute error in dollars over sales in dollars at category by store
+(\%), mean over windows; lowest shaded.}
+\label{tab:sup-decisions}
+\resizebox{\columnwidth}{!}{\begin{tabular}{lcccccc}
+\toprule
+ & \multicolumn{3}{c}{Store orders, ratio 0.8} & \multicolumn{3}{c}{Category plan (\%)}\\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+Data set & WM & LGB & Avg & WM & LGB & Avg\\
+\midrule
+Analgesics & 1.012 & 1.000 & 0.996 & \cellcolor{wmcell}\textbf{229072263467.5} & 231453772960.2 & 230263018423.3 \\
+Bottled juice & 0.983 & 1.000 & 0.965 & \cellcolor{wmcell}\textbf{446696983472.5} & 1188171054110.2 & 817434018801.6 \\
+Cheese & 1.077 & 1.000 & 1.006 & \cellcolor{wmcell}\textbf{2041136082896.2} & 2893856365409.1 & 2467496221462.4 \\
+Frozen entrees & 1.022 & 1.000 & 0.985 & \cellcolor{wmcell}\textbf{343561014029.6} & 421695443034.5 & 382628228477.2 \\
+\bottomrule
+\end{tabular}}
+\end{table}

@@ -1,0 +1,22 @@
+\begin{table}[t]
+\centering\footnotesize\setlength{\tabcolsep}{3pt}
+\caption{What each member adds to the three-model ensemble: WRMSSE item by store, mean over the rolling windows, of
+the ensemble, of the ensemble without each member (without TimesFM it is the average of the two tuned models), and of
+the ensemble with weights fitted on earlier windows. Lowest in bold.}
+\label{tab:sup-ablation}
+\resizebox{\columnwidth}{!}{\begin{tabular}{lccccc}
+\toprule
+Data set & Three & No WM & No LGB & No TFM & Fitted\\
+\midrule
+Analgesics & 0.655 & 0.655 & 0.664 & 0.655 & \textbf{0.651} \\
+Bottled juice & 0.584 & 0.598 & 0.589 & 0.599 & \textbf{0.558} \\
+Cheese & 0.599 & 0.609 & 0.617 & 0.605 & \textbf{0.598} \\
+Frozen entrees & 0.401 & 0.416 & 0.422 & 0.395 & \textbf{0.336} \\
+Soft drinks & \textbf{0.547} & 0.550 & 0.567 & 0.561 & 0.568 \\
+Snacks & 0.556 & 0.559 & 0.576 & 0.556 & \textbf{0.531} \\
+Frat & \textbf{0.544} & 0.547 & 0.555 & 0.550 & 0.549 \\
+M5 & \textbf{0.832} & 0.839 & \textbf{0.832} & 0.836 & 0.849 \\
+Favorita & 0.687 & 0.702 & 0.685 & 0.689 & \textbf{0.678} \\
+\bottomrule
+\end{tabular}}
+\end{table}
