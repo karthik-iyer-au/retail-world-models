@@ -688,12 +688,12 @@ the tuned models did at each on the nine data sets studied.}
 \toprule
 \textbf{Decision} & \textbf{Grain} & \textbf{Forecast to use} & \textbf{What the tuned models did} \\
 \midrule
-Store orders and inventory & Item by store, by day or week & The average & Lowest error at the item levels on all nine data sets; clearly less accurate than either model in at most 8 of 100 paired comparisons \\
-Promotion and supplier funding & Item across stores, by week and over the promotion block & The average & Lowest at the item levels on all nine; over the whole block lowest on five and second on four; LightGBM alone drifts in total on M5, Favorita and soft drinks \\
-Category performance & Category by store and category, by week & The average & Lowest at store grain and above on eight of nine; LightGBM lowest on snacks \\
+Store orders and inventory & Item by store, by day or week & The average & Lowest error at the item levels on all \rqAvgBestItemWord{} data sets; clearly less accurate than either model in at most \rqAvgItemWorseMax{} of \rqPAvgWmItemn{} paired comparisons \\
+Promotion and supplier funding & Item across stores, by week and over the promotion block & The average & Lowest at the item levels on all \rqAvgBestItemWord{}; over the whole block lowest on \rqAvgBestBlockWord{} and second on the other four; LightGBM alone drifts in total on M5, Favorita and soft drinks \\
+Category performance & Category by store and category, by week & The average & Lowest at store grain and above on \rqAvgBestCoarseWord{} of \rqNineWord{}; LightGBM lowest on snacks \\
 Financial plan & Chain total & The average & As for category performance; the total is the sum of the same item-by-store forecast, so it agrees with every plan below it \\
-New items and range changes & Item by store, items not yet trained on & The world model alone & Clearly more accurate than the average on all five data sets tested; LightGBM forecast 66 to 93\% of actual sales on these items \\
-New stores & Item by store, stores not yet trained on & The average & The average and the world model each clearly ahead on one data set and level on three; LightGBM clearly behind the world model on four of five \\
+New items and range changes & Item by store, items not yet trained on & The world model alone & Clearly more accurate than the average on all \rqKeptSets{} data sets tested; LightGBM forecast \rqFaLgbItemLo{} to \rqFaLgbItemHi{}\% of actual sales on these items \\
+New stores & Item by store, stores not yet trained on & The average & The average and the world model each clearly ahead on \rqStoreAvgBeatsWm{} data set and level on \rqStoreLevel{}; LightGBM clearly behind the world model on \rqStoreWmBeatsLgb{} of \rqKeptSets{} \\
 Choosing for another retailer & Any & Rerun the comparison & The order of models is a finding on these data; every comparison, including those that lost here, should be rerun on the retailer's own data \\
 \bottomrule
 \end{tabular}
@@ -702,7 +702,7 @@ Choosing for another retailer & Any & Rerun the comparison & The order of models
 \paragraph{Why the average works}
 The two tuned models are close in accuracy and wrong in different places. Across
 the nine data sets, each is clearly more accurate than the other in a similar
-number of paired comparisons (64 for the world model, 75 for LightGBM), and the
+number of paired comparisons (\rqPWmLgbBetter{} for the world model, \rqPWmLgbWorse{} for LightGBM), and the
 data sets on which each leads differ. An equal-weight average of two forecasts
 whose errors differ is more accurate than either on most series, and no weights
 have to be estimated, which the forecast-combination literature finds is hard to
@@ -710,9 +710,9 @@ beat \cite{smithwallis2009,wang2023}.
 
 \paragraph{What the world model brings}
 The world model's contribution is clearest where the forecast has least to go
-on. On items it was not trained on it lost at most 0.040 in scaled error, against
-up to 0.313 for LightGBM, and forecast within 11\% of actual sales; LightGBM
-forecast as little as two thirds. It reads an item's recent sales into a state
+on. On items it was not trained on it lost at most \rqCostWmItemHi{} in scaled error, against
+up to \rqCostLgbItemHi{} for LightGBM, and forecast within \rqWmFaItemOff\% of actual sales; LightGBM
+forecast as little as \rqLgbFaItemLoFrac{}. It reads an item's recent sales into a state
 and carries that state forward under the plan, so it does not need the item in
 its training data, whereas LightGBM takes the item as one of its labels and has
 learned nothing for an item it was not trained on. The same carried state keeps its totals over the
@@ -724,8 +724,8 @@ LightGBM is the more accurate of the two on frozen entrees and snacks at every
 grain, and its block totals are closer on analgesics, bottled juice and snacks.
 It needs no pretraining and trains in minutes, and on lines with history it is
 as accurate as the world model on most data sets. On snacks, where the world
-model alone is weakest (1.009 overall against 0.865 for LightGBM), the average
-stays close to LightGBM at 0.884.
+model alone is weakest (\rqSnaWm{} overall against \rqSnaLgb{} for LightGBM), the average
+stays close to LightGBM at \rqSnaAvg{}.
 
 % =====================================================================
 \section{Limitations and threats to validity}
@@ -815,8 +815,8 @@ A retailer makes decisions from the same demand at different grains, and on
 these data no single model was the most accurate at every grain. One forecast
 made item by store and summed upward, as the equal-weight average of a tuned
 world model and tuned gradient-boosted trees, was the most accurate choice at
-store grain and above on eight of nine data sets and at the item levels on all
-nine, on the fast lines and on the slow tail. For items the models had not been
+store grain and above on \rqAvgBestCoarseWord{} of \rqNineWord{} data sets and at the item levels on all
+\rqAvgBestItemWord{}, on the fast lines and on the slow tail. For items the models had not been
 trained on, the world model alone was more accurate than the average on every
 data set tested, because LightGBM under-forecast them. Settings carried from one
 retailer's data to another's, and training on other retailers' data did not

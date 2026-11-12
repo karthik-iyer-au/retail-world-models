@@ -1,6 +1,5 @@
 % Results by research question (Framework section). Tables from scripts/make_rq_tables.py; paired counts from
 % results/analysis_tuned/paired.csv (item bootstrap within each window, 90% intervals).
-\input{generated/rq_values}
 
 The results follow the four research questions. Every number comes from the
 tuned world model and the tuned LightGBM, each set by the same search on each
@@ -13,30 +12,30 @@ the equal-weight mean of the two forecasts.
 \textbf{Use the average at every grain.} Across the nine data sets and the
 three views of Table~\ref{tab:rq-grain} (store grain and above by period, item
 grain by period, and the whole window as one block), the average has the lowest
-error in 22 of 27 cases and is never the least accurate of the three. The world
-model is the least accurate in 16 cases and LightGBM in 11.
+error in \rqAvgBestCells{} of \rqCells{} cases and is never the least accurate of the three. The world
+model is the least accurate in \rqWmWorstCells{} cases and LightGBM in \rqLgbWorstCells{}.
 
 The paired tests give the same answer. They compare two forecasts level by level
 and window by window, and count a difference only when it holds after
 resampling items. Against the world model, the average is clearly more accurate
-in 128 of 312 comparisons and clearly less accurate in 27; against LightGBM, 124
-and 21. At item grain it is clearly less accurate than either model in at most 8
-of 100 comparisons. Across data sets and levels it is in the 90\% model
+in \rqPAvgWmBetter{} of \rqPAvgWmN{} comparisons and clearly less accurate in \rqPAvgWmWorse{}; against LightGBM, \rqPAvgLgbBetter{}
+and \rqPAvgLgbWorse{}. At item grain it is clearly less accurate than either model in at most \rqAvgItemWorseMax{}
+of \rqPAvgWmItemn{} comparisons. Across data sets and levels it is in the 90\% model
 confidence set in \rqMcsAverage{} of \rqMcsCells{} cases, against
 \rqMcsLightgbm{} for LightGBM and \rqMcsWorldModel{} for the world model.
 
 \textbf{Grain does not decide between the two models on their own.} The world
-model is clearly more accurate than LightGBM in 40 comparisons at store grain
-and above and clearly less accurate in 45; at item grain the counts are 24 and
-30. Neither is ahead at either grain across the data sets, so a retailer that
+model is clearly more accurate than LightGBM in \rqPWmLgbCoarsebetter{} comparisons at store grain
+and above and clearly less accurate in \rqPWmLgbCoarseworse{}; at item grain the counts are \rqPWmLgbItembetter{} and
+\rqPWmLgbItemworse{}. Neither is ahead at either grain across the data sets, so a retailer that
 picks one model for a grain is picking by data set, not by grain. The average
 removes that choice.
 
 \textbf{On the whole promotion block, the average is again the safe choice.} It
-is lowest on five of nine data sets and second on the other four. LightGBM is
+is lowest on \rqAvgBestBlockWord{} of \rqNineWord{} data sets and second on the other four. LightGBM is
 lowest on analgesics, bottled juice and snacks, but drifts in total where the
-world model does not: its block error on M5 is 0.953, against 0.598 for the world
-model and 0.589 for the average, and the same pattern shows on Favorita and soft
+world model does not: its block error on M5 is \rqBlockMfiveLgb{}, against \rqBlockMfiveWm{} for the world
+model and \rqBlockMfiveAvg{} for the average, and the same pattern shows on Favorita and soft
 drinks.
 
 \input{generated/rq_tab_grain}
@@ -46,18 +45,18 @@ drinks.
 
 \textbf{Sales are concentrated, and the average holds up on both the fast lines
 and the slow tail; where history is short, the world model is ahead of
-LightGBM.} On the six Dominick's categories, 11 to 21\% of the items make 80\% of
+LightGBM.} On the six Dominick's categories, \rqFastShareDomLo{} to \rqFastShareDomHi{}\% of the items make 80\% of
 unit sales over the year before the forecast; on M5, Frat and Favorita the head
-is flatter, at 37 to 42\% (Table~\ref{tab:rq-lines}). On the fast lines the
-average has the lowest error on eight of nine data sets, and on the slow lines
-also on eight; on snacks LightGBM is lowest on the fast lines, and on cheese the
+is flatter, at \rqFastShareRestLo{} to \rqFastShareRestHi{}\% (Table~\ref{tab:rq-lines}). On the fast lines the
+average has the lowest error on \rqAvgBestFast{} of \rqNineWord{} data sets, and on the slow lines
+on \rqAvgBestSlow{}; on snacks LightGBM is lowest on the fast lines, and on cheese the
 world model is lowest on the slow lines.
 
 On series whose first sale falls less than 26 weeks before the forecast, the
-world model's error is lower than LightGBM's on eight of nine data sets, Frat
-being the exception: for example 0.539 against 0.667 on Favorita and 0.866
-against 1.024 on M5. These series are 11 to 21\% of the series on the Dominick's
-categories, where items enter and leave the range over the years, and under 2\%
+world model's error is lower than LightGBM's on \rqShortWmBeatsLgb{} of \rqNineWord{} data sets, Frat
+being the exception: for example \rqShortFavWm{} against \rqShortFavLgb{} on Favorita and \rqShortMfiveWm{}
+against \rqShortMfiveLgb{} on M5. These series are \rqShortShareDomLo{} to \rqShortShareDomHi{}\% of the series on the Dominick's
+categories, where items enter and leave the range over the years, and under \rqShortShareRestMax{}\%
 on M5, Frat and Favorita.
 
 \input{generated/rq_tab_lines}
@@ -67,15 +66,15 @@ on M5, Frat and Favorita.
 
 \textbf{On items the models were not trained on, use the world model alone; on
 stores they were not trained on, the average serves.} With a fifth of the items
-kept out of training, the world model's error on them rises by 0.008 to 0.040,
-against 0.058 to 0.313 for LightGBM (Table~\ref{tab:rq-transfer}). LightGBM
-under-forecasts these items, at 66 to 93\% of actual sales, and that pulls the
-average down to 78 to 96\%; the world model forecasts 89 to 104\%. On the kept-out
-items the world model alone is clearly more accurate than the average on all five
+kept out of training, the world model's error on them rises by \rqCostWmItemLo{} to \rqCostWmItemHi{},
+against \rqCostLgbItemLo{} to \rqCostLgbItemHi{} for LightGBM (Table~\ref{tab:rq-transfer}). LightGBM
+under-forecasts these items, at \rqFaLgbItemLo{} to \rqFaLgbItemHi{}\% of actual sales, and that pulls the
+average down to \rqFaAvgItemLo{} to \rqFaAvgItemHi{}\%; the world model forecasts \rqFaWmItemLo{} to \rqFaWmItemHi{}\%. On the kept-out
+items the world model alone is clearly more accurate than the average on \rqItemWmBeatsAvg{} of \rqKeptSets{}
 data sets tested.
 
 With a fifth of the stores kept out, the world model is clearly more accurate
-than LightGBM on four of five data sets and level on M5. Against the average it
+than LightGBM on \rqStoreWmBeatsLgb{} of \rqKeptSets{} data sets and level on M5. Against the average it
 is clearly more accurate only on Frat; the average is clearly more accurate on
 cheese, and the two are level on snacks, M5 and Favorita.
 
@@ -86,14 +85,14 @@ cheese, and the two are level on snacks, M5 and Favorita.
 
 \textbf{The settings carry to another retailer, and training on other retailers'
 data does not help either model.} M5's tuned settings carried unchanged to
-Favorita give 0.447 overall for the world model, against 0.428 with Favorita's own
-settings, and 0.450 for LightGBM, against 0.448 (Table~\ref{tab:rq-retailer});
-at item by store the difference is 0.002 for the world model and 0.001 for
+Favorita give \rqCarriedWm{} overall for the world model, against \rqOwnWm{} with Favorita's own
+settings, and \rqCarriedLgb{} for LightGBM, against \rqOwnLgb{} (Table~\ref{tab:rq-retailer});
+at item by store the difference is \rqCarriedWmIxs{} for the world model and \rqCarriedLgbIxs{} for
 LightGBM. Training each model on its data set together with other data sets
-lowers the error by no more than 0.007 overall on any data set: by 0.004 for the
-world model on analgesics and by 0.007 for LightGBM on frozen entrees. Elsewhere
-it leaves the error unchanged or raises it, by as much as 0.141 for the world model on soft drinks and
-0.235 for LightGBM on analgesics.
+lowers the error by no more than \rqPoolGainMax{} overall on any data set: by \rqPoolGainWm{} for the
+world model on \rqPoolGainWmSet{} and by \rqPoolGainLgb{} for LightGBM on \rqPoolGainLgbSet{}. Elsewhere
+it leaves the error unchanged or raises it, by as much as \rqPoolLossWm{} for the world model on \rqPoolLossWmSet{} and
+\rqPoolLossLgb{} for LightGBM on \rqPoolLossLgbSet{}.
 
 \input{generated/rq_tab_retailer}
 
@@ -105,8 +104,8 @@ every store as the equal-weight average of a tuned world model and tuned
 gradient-boosted trees, and sum it to every grain; for an item the models have
 not been trained on, use the world model alone until they are retrained with
 it.} On the data sets studied, the average is the most accurate choice at store
-grain and above on eight of nine data sets, at the item levels on all nine, and
-on the fast lines and the slow tail on eight of nine. The two models on their own
+grain and above on \rqAvgBestCoarseWord{} of \rqNineWord{} data sets, at the item levels on all \rqAvgBestItemWord{}, and
+on the fast lines and the slow tail on \rqAvgBestFast{} of \rqNineWord{}. The two models on their own
 are close on items they were trained on; they part company on items they were
 not, where LightGBM under-forecasts and the world model does not. The trigger
 for the exception is one a merchant always knows: whether the item is new to the
@@ -119,7 +118,7 @@ recommendation of the first revision and holds on the tuned models. The
 exception was tested as part of a wider rule written down before it ran, which
 also gave the world model every series with less than 26 weeks of history; that
 half added nothing on the data with history (it was level with the average on
-eight data sets and worse on snacks), and only the new-item half held. The rule
+\rqRuleLevel{} data sets and worse on snacks, \rqRuleSna{} against \rqSnaAvg{}), and only the new-item half held. The rule
 as stated is therefore drawn from these results.
 
 The rule is a finding on these nine data sets, not a ranking of methods for any

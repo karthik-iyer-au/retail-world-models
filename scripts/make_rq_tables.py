@@ -15,6 +15,9 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
+import sys  # noqa: E402
+
+sys.path.insert(0, str(ROOT / "src"))
 A = ROOT / "results" / "analysis_tuned"
 OUT = ROOT / "paper" / "generated"
 KEYS = {"dominicks_ana": "Analgesics", "dominicks_bjc": "Bottled juice", "dominicks_che": "Cheese",
@@ -205,22 +208,164 @@ Data set & Own data & Pooled & Own data & Pooled\\
     return tab, vals
 
 
+WORDS = ["none", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"]
+CANDIDATES = ["world_model", "lightgbm", "ensemble_2", "ensemble", "timesfm_plan"]  # the models RQ1 compares
+
+
+def _w(n: int) -> str:
+    return WORDS[n] if n < len(WORDS) else str(n)
+
+
+def _paired(x: str, y: str) -> dict:
+    d = pd.read_csv(A / "paired.csv").query("set == 'rolling'").drop_duplicates()
+    g = d[((d.a == x) & (d.b == y)) | ((d.a == y) & (d.b == x))].copy()
+    s = g.a.eq(x).map({True: 1, False: -1})
+    lo, hi = g.lo.where(s > 0, -g.hi), g.hi.where(s > 0, -g.lo)
+    g["better"], g["worse"] = hi < 0, lo > 0
+    g["grain"] = g.level.map(lambda lv: "item" if "item" in lv else "coarse")
+    out = {"better": int(g.better.sum()), "worse": int(g.worse.sum()), "n": len(g)}
+    for gr, h in g.groupby("grain"):
+        out.update({f"{gr}better": int(h.better.sum()), f"{gr}worse": int(h.worse.sum()), f"{gr}n": len(h)})
+    return out
+
+
+def text_values(tr: list) -> dict:
+    """Every number quoted in the text of the results by research question, the abstract, the discussion and the
+    conclusion (plan entry of 12 November 2026: the paper is rebuilt from the result files by make)."""
+    from rwm.evaluation import compare as C
+
+    v = {}
+    s = pd.read_csv(A / "scores.csv").query("set == 'rolling'")
+    b = pd.read_csv(A / "blocks.csv").query("set == 'rolling'")
+    # RQ1: best and worst of the three in each of the 27 cells of the grain table
+    best = {m: 0 for m in TRIO}
+    worst = dict(best)
+    blk = {}
+    for k in KEYS:
+        p = s[s.key == k].groupby(["level", "model"]).wrmsse.mean().unstack()[TRIO]
+        q = b[b.key == k].groupby(["level", "model"]).wrmsse.mean().unstack()[TRIO]
+        coarse, item = _groups(p)
+        blk[k] = q.mean()
+        for col in (p.loc[coarse].mean(), p.loc[item].mean(), q.mean()):
+            best[col.idxmin()] += 1
+            worst[col.idxmax()] += 1
+    v["rqCells"] = 3 * len(KEYS)
+    v["rqAvgBestCells"], v["rqAvgWorstCells"] = best["ensemble_2"], worst["ensemble_2"]
+    v["rqWmWorstCells"], v["rqLgbWorstCells"] = worst["world_model"], worst["lightgbm"]
+    v["rqAvgSecondBlock"] = sum(1 for k in KEYS if blk[k].rank()["ensemble_2"] == 2)
+    for k, tag in (("m5", "Mfive"), ("favorita", "Fav"), ("dominicks_sdr", "Sdr")):
+        for m, mt in zip(TRIO, ("Wm", "Lgb", "Avg")):
+            v[f"rqBlock{tag}{mt}"] = f"{blk[k][m]:.3f}"
+    # paired tests
+    for (x, y), tag in {("ensemble_2", "world_model"): "AvgWm", ("ensemble_2", "lightgbm"): "AvgLgb",
+                        ("world_model", "lightgbm"): "WmLgb"}.items():
+        for k2, n in _paired(x, y).items():
+            v[f"rqP{tag}{k2.capitalize()}"] = n
+    v["rqAvgItemWorseMax"] = max(v["rqPAvgWmItemworse"], v["rqPAvgLgbItemworse"])
+    # model confidence set over the models RQ1 compares
+    kept = []
+    for (k, lv), g in s[s.model.isin(CANDIDATES)].groupby(["key", "level"]):
+        wide = g.pivot_table(index="origin", columns="model", values="wrmsse").dropna(axis=1)
+        if len(wide) >= 3 and wide.shape[1] >= 2:
+            ks = C.model_confidence_set(wide)
+            kept += [{"model": m, "in": m in ks} for m in wide.columns]
+    kp = pd.DataFrame(kept)
+    for m, n in {"world_model": "WorldModel", "lightgbm": "Lightgbm", "ensemble_2": "Average",
+                 "ensemble": "Ensemble", "timesfm_plan": "Timesfm"}.items():
+        v[f"rqMcs{n}"] = int(kp[kp.model == m]["in"].sum())
+    v["rqMcsCells"] = int((kp.model == "ensemble_2").sum())
+    # RQ2
+    g = pd.read_csv(A / "segments.csv").query("set == 'rolling' and view == 'period'")
+    dom = [k for k in KEYS if k.startswith("dominicks")]
+    rest = [k for k in KEYS if k not in dom]
+    share = g.groupby("key").fast_item_share.mean() * 100
+    shortshare = (g[g.segment == "short_history"].groupby("key").short_history_series.mean()
+                  / g.groupby("key").series.max() * 100)
+    v["rqFastShareDomLo"], v["rqFastShareDomHi"] = f"{share[dom].min():.0f}", f"{share[dom].max():.0f}"
+    v["rqFastShareRestLo"], v["rqFastShareRestHi"] = f"{share[rest].min():.0f}", f"{share[rest].max():.0f}"
+    v["rqShortShareDomLo"], v["rqShortShareDomHi"] = f"{shortshare[dom].min():.0f}", f"{shortshare[dom].max():.0f}"
+    v["rqShortShareRestMax"] = f"{np.ceil(shortshare[rest].max()):.0f}"
+    seg = {(k, sg): g[(g.key == k) & (g.segment == sg)].groupby(["level", "model"]).wrmsse.mean().unstack()[TRIO].mean()
+           for k in KEYS for sg in ("fast", "slow", "short_history")}
+    v["rqAvgBestFast"] = _w(sum(seg[(k, "fast")].idxmin() == "ensemble_2" for k in KEYS))
+    v["rqAvgBestSlow"] = _w(sum(seg[(k, "slow")].idxmin() == "ensemble_2" for k in KEYS))
+    v["rqShortWmBeatsLgb"] = _w(sum(seg[(k, "short_history")]["world_model"] < seg[(k, "short_history")]["lightgbm"]
+                                    for k in KEYS))
+    for k, tag in (("favorita", "Fav"), ("m5", "Mfive")):
+        v[f"rqShort{tag}Wm"] = f"{seg[(k, 'short_history')]['world_model']:.3f}"
+        v[f"rqShort{tag}Lgb"] = f"{seg[(k, 'short_history')]['lightgbm']:.3f}"
+    v["rqNineWord"] = _w(len(KEYS))
+    # snacks overall, and the forecast by history against the average (overall, all levels)
+    allv = {k: s[s.key == k].groupby(["level", "model"]).wrmsse.mean().unstack().mean() for k in KEYS}
+    for m, mt in zip(TRIO, ("Wm", "Lgb", "Avg")):
+        v[f"rqSna{mt}"] = f"{allv['dominicks_sna'][m]:.3f}"
+    if all("by_history" in allv[k] for k in KEYS):
+        v["rqRuleLevel"] = _w(sum(abs(allv[k]["by_history"] - allv[k]["ensemble_2"]) <= 0.005 for k in KEYS))
+        v["rqRuleSna"] = f"{allv['dominicks_sna']['by_history']:.3f}"
+    # RQ3
+    items = [r for r in tr if r["kind"] == "item"]
+    stores = [r for r in tr if r["kind"] == "store"]
+    rng_ = lambda xs, f: (f.format(min(xs)), f.format(max(xs)))  # noqa: E731
+    v["rqCostWmItemLo"], v["rqCostWmItemHi"] = rng_([r["cost"]["world_model"] for r in items], "{:.3f}")
+    v["rqCostLgbItemLo"], v["rqCostLgbItemHi"] = rng_([r["cost"]["lightgbm"] for r in items], "{:.3f}")
+    for m, tag in zip(TRIO, ("Wm", "Lgb", "Avg")):
+        lo, hi = rng_([100 * r["fa"][m] for r in items], "{:.0f}")
+        v[f"rqFa{tag}ItemLo"], v[f"rqFa{tag}ItemHi"] = lo, hi
+    v["rqWmFaItemOff"] = f"{100 * max(abs(r['fa']['world_model'] - 1) for r in items):.0f}"
+    v["rqKeptSets"] = _w(len(items))
+    v["rqItemWmBeatsAvg"] = _w(sum(r["wm_avg"] == "World model" for r in items))
+    v["rqStoreWmBeatsLgb"] = _w(sum(r["wm_lgb"] == "World model" for r in stores))
+    v["rqStoreAvgBeatsWm"] = _w(sum(r["wm_avg"] == "Average" for r in stores))
+    v["rqStoreWmBeatsAvg"] = _w(sum(r["wm_avg"] == "World model" for r in stores))
+    v["rqStoreLevel"] = _w(sum(r["wm_avg"] == "Neither" for r in stores))
+    v["rqLgbFaItemLoFrac"] = "two thirds" if min(r["fa"]["lightgbm"] for r in items) < 0.67 else \
+        f"{100 * min(r['fa']['lightgbm'] for r in items):.0f}\\%"
+    return v
+
+
+def retailer_values(vals: dict) -> dict:
+    v = {}
+    own_wm, _ = vals[("favorita", "world_model")]
+    own_lgb, _ = vals[("favorita", "lightgbm")]
+    c = vals["carried"]
+    v["rqCarriedWm"], v["rqOwnWm"] = f"{c['world_model'][0]:.3f}", f"{own_wm[0]:.3f}"
+    v["rqCarriedLgb"], v["rqOwnLgb"] = f"{c['lightgbm'][0]:.3f}", f"{own_lgb[0]:.3f}"
+    v["rqCarriedWmIxs"] = f"{c['world_model'][1] - own_wm[1]:.3f}"
+    v["rqCarriedLgbIxs"] = f"{c['lightgbm'][1] - own_lgb[1]:.3f}"
+    gains, losses = [], []
+    for k in KEYS:
+        for m in ("world_model", "lightgbm"):
+            own, pooled = vals[(k, m)]
+            if own and pooled:
+                gains.append((own[0] - pooled[0], k, m))
+                losses.append((pooled[0] - own[0], k, m))
+    v["rqPoolGainMax"] = f"{max(gains)[0]:.3f}"
+    best_wm = max(x for x in gains if x[2] == "world_model")
+    best_lgb = max(x for x in gains if x[2] == "lightgbm")
+    worst_wm = max(x for x in losses if x[2] == "world_model")
+    worst_lgb = max(x for x in losses if x[2] == "lightgbm")
+    v["rqPoolGainWm"], v["rqPoolGainWmSet"] = f"{best_wm[0]:.3f}", KEYS[best_wm[1]].lower()
+    v["rqPoolGainLgb"], v["rqPoolGainLgbSet"] = f"{best_lgb[0]:.3f}", KEYS[best_lgb[1]].lower()
+    v["rqPoolLossWm"], v["rqPoolLossWmSet"] = f"{worst_wm[0]:.3f}", KEYS[worst_wm[1]].lower()
+    v["rqPoolLossLgb"], v["rqPoolLossLgbSet"] = f"{worst_lgb[0]:.3f}", KEYS[worst_lgb[1]].lower()
+    v["rqPoolGainMaxTwo"] = f"{np.ceil(max(gains)[0] * 100) / 100:.2f}"
+    return v
+
+
 def main() -> None:
     OUT.mkdir(exist_ok=True)
     t1, wins = grain()
     t2, _ = lines()
     t3, tr = transfer()
-    t4, _ = retailer()
+    t4, rv = retailer()
     for name, t in (("rq_tab_grain", t1), ("rq_tab_lines", t2), ("rq_tab_transfer", t3), ("rq_tab_retailer", t4)):
         (OUT / f"{name}.tex").write_text(t)
-    mc = pd.read_csv(A / "mcs.csv")
-    names = {"world_model": "WorldModel", "lightgbm": "Lightgbm", "ensemble_2": "Average",
-             "ensemble": "Ensemble", "timesfm_plan": "Timesfm"}
-    vals = {f"rqMcs{n}": int(mc[mc.model == m].in_set.sum()) for m, n in names.items()}
-    vals["rqMcsCells"] = int(mc[mc.model == "ensemble_2"].shape[0])
-    vals.update({f"rqAvgBest{g.capitalize()}": n for g, n in wins.items()})
+    vals = {f"rqAvgBest{g.capitalize()}": n for g, n in wins.items()}
+    vals.update({f"rqAvgBest{g.capitalize()}Word": _w(n) for g, n in wins.items()})
+    vals.update(text_values(tr))
+    vals.update(retailer_values(rv))
     (OUT / "rq_values.tex").write_text("".join(f"\\newcommand{{\\{k}}}{{{v}}}\n" for k, v in vals.items()))
-    print(vals)
+    print(len(vals), "values")
 
 
 if __name__ == "__main__":
