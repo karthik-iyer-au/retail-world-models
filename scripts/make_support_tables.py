@@ -197,24 +197,36 @@ Data set & Price off & Plan off & Units, plan rows & Price off & Plan off & Unit
 # ------------------------------------------------------------------ mechanism tests
 def mechanism(v: dict) -> str:
     d = _read(A / "mechanism.csv")
-    if d.empty or "data" not in d:
+    if d.empty:
         return "% mechanism pending\n"
-    rows = []
+    d["data"] = d.config.str.replace("final_", "").str.replace("_world_model", "")
+    d["timing"] = 100 * (d.bottom_permuted / d.bottom_true - 1)
+    rows, worse, probe_gain = [], 0, []
     for k, name in KEYS.items():
         g = d[d.data == k]
         if g.empty:
             continue
         r = g.mean(numeric_only=True)
-        tim = r.get("total_change", np.nan)
-        rows.append(f"{name} & {r.get('bottom_change', np.nan):+.3f} & {r.get('persist_h1', np.nan):.2f} & "
-                    f"{r.get('persist_h2', np.nan):.2f} & {r.get('persist_h4', np.nan):.2f} & "
-                    f"{r.get('probe_before_r2', np.nan):.2f} & {r.get('probe_after_r2', np.nan):.2f} \\\\")
+        worse += r.timing > 0
+        probe_gain.append(r.probe_after_r2 - r.probe_before_r2)
+        pc = lambda x: "--" if not np.isfinite(x) else f"{100 * x:+.0f}\\%"  # noqa: E731
+        r2 = lambda x: "--" if not np.isfinite(x) else f"{x:.2f}"  # noqa: E731
+        rows.append(f"{name} & {r.timing:+.0f}\\% & {pc(r.persist_h1)} & {pc(r.persist_h2)} & {pc(r.persist_h4)} & "
+                    f"{r2(r.probe_before_r2)} & {r2(r.probe_after_r2)} \\\\")
+    d2 = d[d.data.isin(KEYS)]
+    v["supTimingWorse"], v["supMechSets"] = _w(int(worse)), _w(len(rows))
+    v["supTimingLo"], v["supTimingHi"] = f"{d2.groupby('data').timing.mean().min():.0f}", f"{d2.groupby('data').timing.mean().max():.0f}"
+    v["supPersistTwoLo"] = f"{100 * d2.groupby('data').persist_h2.mean().min():.0f}"
+    v["supPersistTwoHi"] = f"{100 * d2.groupby('data').persist_h2.mean().max():.0f}"
+    v["supProbeGainMax"] = f"{max(probe_gain):.2f}" if probe_gain else "--"
+    v["supProbeGainMin"] = f"{min(probe_gain):.2f}" if probe_gain else "--"
     return r"""\begin{table}[t]
 \centering\footnotesize\setlength{\tabcolsep}{3pt}
-\caption{The tuned world model's carried state. Timing: change in WRMSSE item by store when the plan's timing is
-shuffled within each series. Carry-over: forecast change in periods 1, 2 and 4 after a promotion and price cut added
-in period 1, as a share of the forecast without it. Probe: $R^2$ of log sales after the window from the state before
-the window and from the state rolled through it (first of the five copies).}
+\caption{The tuned world model's carried state, mean over windows. Timing: change in WRMSSE item by store when the
+plan's timing is shuffled within each series. Carry-over: forecast change in periods 1, 2 and 4 after a promotion and a
+20\% price cut added in period 1 to series with nothing planned, as a share of the forecast without them. Probe: $R^2$
+of log sales after the window from the state before the window and from the state rolled through it (first of the
+five copies).}
 \label{tab:sup-mechanism}
 \resizebox{\columnwidth}{!}{\begin{tabular}{lcccccc}
 \toprule
@@ -277,6 +289,12 @@ def intervals(v: dict) -> str:
     d = _cat(A / "intervals_fixed" / "intervals.csv")
     if d.empty:
         return "% intervals pending\n"
+    for lv, lt in ((ITEM_BY_STORE, "Ixs"), ("total", "Total")):
+        for m, mt in (("world_model", "Wm"), ("lightgbm", "Lgb"), ("ensemble_2", "Avg")):
+            h = d[(d.model == m) & (d.level == lv)]
+            v[f"supCov{lt}{mt}"] = f"{100 * h.coverage_80.mean():.0f}"
+            v[f"supCovNinetyFive{lt}{mt}"] = f"{100 * h.coverage_95.mean():.0f}"
+            v[f"supSpl{lt}{mt}"] = f"{h.spl.mean():.3f}"
     rows = []
     for k, name in KEYS.items():
         g = d[d.key == k]

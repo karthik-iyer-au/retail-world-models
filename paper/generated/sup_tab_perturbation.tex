@@ -1,1 +1,25 @@
-% perturbation pending
+\begin{table*}[t]
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\caption{Which plan inputs each tuned model uses. Change in WRMSSE item by store, mean over windows, when the price
+is set to the regular price (price off) and when every plan input is set to nothing planned (plan off); the change
+in forecast units on the rows where the plan had something on; and, for the world model, the largest change when its
+history before the last few periods is removed. A positive change means the input was helping.}
+\label{tab:sup-perturbation}
+\begin{tabular}{l ccc ccc c}
+\toprule
+ & \multicolumn{3}{c}{World model} & \multicolumn{3}{c}{LightGBM} & World model\\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-8}
+Data set & Price off & Plan off & Units, plan rows & Price off & Plan off & Units, plan rows & History cut\\
+\midrule
+Analgesics & +0.019 & +0.061 & -47\% & +0.037 & +0.075 & -51\% & +0.036 \\
+Bottled juice & +0.065 & +0.095 & -53\% & +0.072 & +0.098 & -55\% & +0.102 \\
+Cheese & -- & -- & -- & +0.114 & +0.143 & -56\% & -- \\
+Frozen entrees & -- & -- & -- & -- & -- & -- & -- \\
+Soft drinks & -- & -- & -- & -- & -- & -- & -- \\
+Snacks & -- & -- & -- & -- & -- & -- & -- \\
+Frat & -- & -- & -- & -- & -- & -- & -- \\
+M5 & -- & -- & -- & -- & -- & -- & -- \\
+Favorita & -- & -- & -- & -- & -- & -- & -- \\
+\bottomrule
+\end{tabular}
+\end{table*}

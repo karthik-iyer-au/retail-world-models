@@ -66,8 +66,20 @@ the error over all levels beat them in \supPFitAllBetter{} and lost in
 \subsection{Decision costs, forecast ranges and reconciliation}
 \label{sec:sup-decisions}
 
-\input{generated/sup_tab_decisions}
+\paragraph{Forecast ranges}
+Each model's ranges come from its own errors in the earlier windows
+(Section~\ref{sec:setup}). Item by store, the 80\% ranges of all three forecasts
+cover close to 80\% of sales across data sets and windows (\supCovIxsWm\%,
+\supCovIxsLgb\% and \supCovIxsAvg\% for the world model, LightGBM and the
+average), and the average has the lowest scaled pinball loss (\supSplIxsAvg{},
+against \supSplIxsWm{} and \supSplIxsLgb{}). At the chain total, where each window
+adds one error to learn from, the world model's ranges are too narrow
+(\supCovTotalWm\% for 80\%) and the average's are close to target
+(\supCovTotalAvg\%); the coverage of a single data set swings with so few earlier
+windows (Table~\ref{tab:sup-intervals}).
+
 \input{generated/sup_tab_intervals}
+\input{generated/sup_tab_decisions}
 \input{generated/sup_tab_reconcile}
 
 % =====================================================================
