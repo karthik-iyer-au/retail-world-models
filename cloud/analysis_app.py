@@ -26,7 +26,7 @@ def analyse(commit: str, keys: list[str], parts: list[str], boot: int) -> str:
     _checkout(commit)
     runs = Path("/tmp/runs")
     runs.mkdir(exist_ok=True)
-    for src in ("final", "cleanrev"):
+    for src in ("final", "cleanrev", "ftransfer"):
         for d in Path(RESULTS, src).iterdir():
             if (d / "forecasts.csv").exists() and (d / "manifest.json").exists() and "_piece_" not in d.name:
                 (runs / d.name).symlink_to(d)

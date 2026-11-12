@@ -44,6 +44,10 @@ def label(config_name: str) -> tuple[str, str, str] | None:
         m = re.fullmatch(r"final_(dominicks_\w{3}|frat|m5|favorita)_(world_model|lightgbm)", n)
         if m:
             return m.group(1), "rolling", m.group(2)
+        # the transfer test's runs, for the forecast by history on kept-out series (plan entry of 12 November 2026)
+        m = re.fullmatch(r"ftransfer_(dominicks_\w{3}|frat|m5|favorita)_(item|store)_(world_model|lightgbm)_(kept_out|trained_on_all)", n)
+        if m:
+            return m.group(1), f"{m.group(4)}_{m.group(2)}", m.group(3)
         m = re.fullmatch(r"(?:cleanrev|rev)_(dominicks_\w{3}|frat|m5|favorita)_rolling_(timesfm_plan)", n)
         if m and not (m.group(1).startswith("dominicks") and n.startswith("rev_")):
             return m.group(1), "rolling", m.group(2)
@@ -102,7 +106,42 @@ def matrices(fr, fcs, origin):
     for name, members in VARIANTS.items():
         if all(m in mats for m in members):
             mats[name] = np.mean([mats[m] for m in members], axis=0)
+    if TUNED and "world_model" in mats and "lightgbm" in mats:
+        # the forecast by history (plan entry of 12 November 2026): the world model alone for series with less than
+        # 26 weeks (182 days) of sales before the forecast, the average of the two models for the rest
+        short = C.line_segments(fr, origin)[0]["short_history"]
+        mats["by_history"] = np.where(short[:, None], mats["world_model"], (mats["world_model"] + mats["lightgbm"]) / 2)
     return mats
+
+
+def kept_out_scores(results: Path, rows: pd.DataFrame, key: str, wset: str) -> list[dict]:
+    """The transfer test's kept-out series scored for each model, the average and the forecast by history (which
+    is the world model alone on series the model was not trained on). The kept-out share is drawn as in
+    rwm.experiments.run."""
+    from rwm.evaluation.hierarchy import rmsse_where
+
+    cfg, _ = C.load_run(results / rows["run"].iloc[0])
+    tr = cfg["evaluation"]["transfer"]
+    fr, fcs = frames_and_forecasts(results, rows)
+    values = np.sort(fr.attrs[tr["by"]].astype(str).unique())
+    rng = np.random.default_rng(tr.get("seed", 0))
+    kept = set(rng.choice(values, max(1, int(round(tr["share"] * len(values)))), replace=False))
+    is_out = fr.attrs[tr["by"]].astype(str).isin(kept).to_numpy()
+    out = []
+    for o in sorted({o for f in fcs.values() for o in f["origin"].unique()}):
+        mats = {m: C.forecast_matrix(f, fr, o) for m, f in fcs.items() if o in set(f["origin"])}
+        if {"world_model", "lightgbm"} <= set(mats):
+            mats["ensemble_2"] = (mats["world_model"] + mats["lightgbm"]) / 2
+            mats["by_history"] = mats["world_model"]
+        t0, t1, rev = fr.cut(o)
+        actual = fr.units[:, t0:t1]
+        there = ~np.isnan(actual)
+        where = there & is_out[:, None]
+        for m, f in mats.items():
+            out.append(dict(key=key, set=wset, origin=o, model=m,
+                            kept_out=rmsse_where(fr.units[:, :t0], actual, f, where, rev, fr.lag)["wrmsse"],
+                            forecast_to_actual=float(np.nansum(f[where]) / max(np.nansum(actual[where]), 1e-9))))
+    return out
 
 
 def save(acc: dict, out: Path) -> None:
@@ -132,9 +171,16 @@ def main(argv=None):
     keys = a.keys or sorted(idx["key"].unique())
     acc = {part: [] for part in a.parts}
     for key in keys:
-        for wset in ("final", "rolling"):
+        extra = sorted(w for w in idx.loc[idx["key"] == key, "set"].unique() if w not in ("final", "rolling"))
+        for wset in ("final", "rolling", *extra):
             rows = idx[(idx["key"] == key) & (idx["set"] == wset)]
             if rows.empty:
+                continue
+            if wset in extra:
+                if "keptout" in acc:
+                    acc["keptout"] += kept_out_scores(results, rows, key, wset)
+                continue
+            if "keptout" in acc and len(acc) == 1:
                 continue
             t_start = time.time()
             fr, fcs = frames_and_forecasts(results, rows)

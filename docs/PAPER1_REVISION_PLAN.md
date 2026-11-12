@@ -1253,3 +1253,16 @@ Correction, 17:25 UTC: the save read as "step 27,000" was a stale one from the b
 c7eefdec), which the restart of 11 November 09:21 local (tree 308ffc46) does not use. The run's own save, under
 308ffc46, stands at step 15,000 of 30,000 on the new machine. Whether the first machine had hung is not known; it was
 working on this run, not stuck at 27,000. The finish is hours away, not minutes.
+
+**12 November 2026, the forecast by history, written down before it runs.** Karthik (12 November) asked how a
+retailer decides when the answer for lines with history (the average) differs from the answer for lines without
+it (the world model), and agreed to test one rule ("Yes"). The forecast by history is: the world model alone for
+each item-by-store series with less than 26 weeks (182 days on the daily data) of sales before the forecast, or not
+in the model's training; the equal-weight average of the tuned world model and the tuned LightGBM for every other
+series. Nothing is fitted; the 26-week cut is the one already fixed for RQ2. It is scored (a) on all nine data sets'
+windows, at every level, by period, as a block and by line type, against the average alone and both models, and in
+the model confidence set; and (b) on the transfer test's kept-out items and stores, where it equals the world model,
+against LightGBM and the average of the two kept-out runs, with the cost of not training on those series measured
+against the trained-on-all runs as before (part `keptout` of scripts/revision_analysis.py). If the rule is no better
+than the average alone on seen data and the average is no worse than the world model on unseen series, the paper
+recommends the average for every series and says so.
