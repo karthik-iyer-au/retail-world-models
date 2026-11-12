@@ -33,5 +33,59 @@ Timestral in place of TimesFM in the three-model ensemble & Reported in Section~
 The first version of this paper also tried a stock term for the dip after a
 promotion, extra loss weight on the periods after a promotion, and a graph model
 sharing information between stores; none was kept, and they were not run again on
-the tuned models. Their record is in the first version.
+the tuned models. Their record is in the first version; the loss experiments among them are in
+Figure~\ref{fig:sup-devlosses}.
+
+\subsection{Losses and pretraining explored}
+\label{sec:sup-explore}
+
+\textbf{Count likelihoods helped on three data sets and JEPA pretraining on one;
+the plain loss stayed everywhere else.} After each search, the world model had a
+round of count likelihoods and a round of JEPA pretraining
+(Section~\ref{sec:loop}). The likelihood round screened \sfLossTried{}
+likelihoods on each of \sfLossSets{} data sets with one seed each, \sfLossScreens{}
+screens in all, of which \sfLossScreenBetter{} came in below the starting score;
+the best went on to three seeds, and a change was kept only where it beat the
+start by more than the keep bar (Figure~\ref{fig:sup-explore}a and
+Table~\ref{tab:sup-explore}). It was kept on \sfLossKeptSets{}: \sfLossKeptNames{}.
+The JEPA round pretrained the encoder on the latent term alone
+(Section~\ref{sec:losses}), for a short and a long run, then fitted the forecast
+at a lower rate. Of its \sfJepaScreens{}
+screens, \sfJepaScreenBetter{} came in below the start, and it was kept on
+\sfJepaKeptNames{} only (Figure~\ref{fig:sup-explore}b).
+
+The first version tried \sfDevChanges{} changes to the world model's loss in
+\sfDevRuns{} runs on the development windows, \sfDevScored{} of them scored
+against the settings they changed (Figure~\ref{fig:sup-devlosses}); the other
+\sfDevNotRun{} were not run on the full data. \sfDevBetter{} of the
+\sfDevScored{} lowered the error. Latent pretraining and the latent term, in
+every form tried, moved the score by at most \sfDevLatentMax{} either way. Extra
+weight on the periods after a promotion and the combined peak, dollar and
+Tweedie weighting moved it most, in both directions: every form helped cheese
+and hurt snacks and analgesics, so none was kept for every category.
+The settings searches of Section~\ref{sec:loop} then tried the loss weights again
+one at a time on each data set (Figure~\ref{fig:loopheat}).
+
+\input{generated/sup_tab_explore}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_sup_explore.pdf}
+\caption{The likelihood and JEPA pretraining rounds of the tuned world model.
+Change in WRMSSE on the search windows against the settings each round started
+from, for each one-seed screen (faint) and three-seed try (solid); stars mark the
+change kept. A change was kept only where its three-seed mean beat the start by
+more than the keep bar; the grey band is the mean keep bar over data sets.}
+\label{fig:sup-explore}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_sup_devlosses.pdf}
+\caption{Every loss change of the first version against the settings it changed,
+on the development windows. Each dot is one run, coloured by data set; the bar
+spans the runs of a change, and the right-hand column counts them. Changes not
+run on the full data are not shown.}
+\label{fig:sup-devlosses}
+\end{figure*}
 

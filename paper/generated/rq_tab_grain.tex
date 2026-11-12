@@ -4,7 +4,7 @@
 (Avg), averaged over the levels at store grain and above, over the item levels, and over every level for the whole
 forecast window summed as one block; mean over the paper's windows. Shading marks the lowest of the three: \colorbox{wmcell}{world model}, \colorbox{lgbcell}{LightGBM}, \colorbox{avgcell}{average}.}
 \label{tab:rq-grain}
-\resizebox{\textwidth}{!}{\begin{tabular}{l ccc ccc ccc}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{l ccc ccc ccc}
 \toprule
  & \multicolumn{3}{c}{Store and above} & \multicolumn{3}{c}{Item levels} & \multicolumn{3}{c}{Whole block}\\
 \cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}
@@ -20,5 +20,5 @@ Frat & 0.471 & 0.479 & \cellcolor{avgcell}\textbf{0.449} & 0.528 & 0.524 & \cell
 M5 & 0.660 & 0.634 & \cellcolor{avgcell}\textbf{0.591} & 0.859 & 0.886 & \cellcolor{avgcell}\textbf{0.856} & 0.598 & 0.953 & \cellcolor{avgcell}\textbf{0.589} \\
 Favorita & 0.314 & 0.325 & \cellcolor{avgcell}\textbf{0.278} & 0.655 & 0.696 & \cellcolor{avgcell}\textbf{0.653} & 0.482 & 0.565 & \cellcolor{avgcell}\textbf{0.412} \\
 \bottomrule
-\end{tabular}}
+\end{tabular}\end{adjustbox}
 \end{table*}

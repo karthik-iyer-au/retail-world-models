@@ -45,7 +45,29 @@ the item-by-store error beat equal weights in \supPFitBottomBetter{} of
 the error over all levels beat them in \supPFitAllBetter{} and lost in
 \supPFitAllWorse{}.
 
+Figure~\ref{fig:sup-ablation}a shows the same comparison data set by data set.
+Dropping the world model raises the item-by-store error on \sfAblNoWmWorse{}
+data sets, dropping LightGBM on \sfAblNoLgbWorse{} and dropping TimesFM on
+\sfAblNoTfmWorse{}; fitted weights lower the error most on frozen entrees,
+bottled juice and snacks. Fitted to the item-by-store error, the mean
+weights are \sfWtWmBottomMean{} for the world model, \sfWtLgbBottomMean{} for
+LightGBM and \sfWtTfmBottomMean{} for TimesFM given the plan
+(Figure~\ref{fig:sup-ablation}b); fitted to the total, TimesFM's weight falls to
+\sfWtTfmTotalMean{}, and the weights move from data set to data set.
+
 \input{generated/sup_tab_ablation}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_sup_ablation.pdf}
+\caption{What each member adds to the three-model ensemble. (a) Change in WRMSSE
+item by store, mean over windows, when one member is dropped or the weights are
+fitted on earlier windows, against the ensemble with equal weights; right of the
+line, the dropped member was helping. (b) Weights fitted on earlier windows, mean
+over windows, when fitted to the item-by-store error (upper bar) and to the total
+(lower bar).}
+\label{fig:sup-ablation}
+\end{figure*}
 
 \subsection{Which plan inputs each model uses}
 \label{sec:sup-plan}
@@ -64,7 +86,34 @@ lift from a promotion. Cutting the world model's history to the last few periods
 makes its error worse on \supPertHistHelps{} of \supPertSets{}, so its carried
 state draws on more than the latest sales.
 
+Figure~\ref{fig:sup-occlusion} breaks the plan into its parts. On the
+Dominick's categories and Frat, price and the promotion flag carry the plan;
+display, feature advertising and a price cut on its own add less on Frat, the one
+data set that records them. The promotion flag helps the world model on
+\sfPromoWmHelps{} of the \sfPromoSets{} data sets that carry it and LightGBM on
+\sfPromoLgbHelps{}. Events, SNAP days and paydays change the error by at most
+\sfCalendarMax{}. Shuffling an input across the periods of each series, which
+keeps how often it is on but breaks its timing, moves the error the same way as
+switching it off for \sfPermAgree{} of \sfPermPairs{} pairs of input and data
+set. Keeping only the last few periods of history raises the world model's error
+on \sfHistShortWorse{} of \sfHistSets{} data sets at the shortest cut
+(Figure~\ref{fig:sup-occlusion}c). The cut lengths are 4, 13 and 26 periods on
+every data set but M5, which used 28 and 56 days; on Favorita, which is daily,
+the shortest keeps four days and the error rises by \sfFavHistFour{}.
+
 \input{generated/sup_tab_perturbation}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_sup_occlusion.pdf}
+\caption{Which plan inputs the tuned models use. (a, b) Change in WRMSSE item by
+store, mean over windows, when one input is set to nothing planned (the price to
+the regular price), for the world model and LightGBM; grey cells are inputs a
+data set does not carry. (c) The world model's change in WRMSSE item by store
+when its history is cut to the last 4, 13 or 26 periods (M5: 28 or 56 days); the
+vertical scale is linear below 0.05 and logarithmic above.}
+\label{fig:sup-occlusion}
+\end{figure*}
 
 \subsection{What the world model's carried state does}
 \label{sec:sup-mechanism}
@@ -84,10 +133,11 @@ state before it (an $R^2$ gain of \supProbeGainMin{} to \supProbeGainMax{}).
 
 \input{generated/sup_tab_mechanism}
 
-\subsection{Decision costs, forecast ranges and reconciliation}
-\label{sec:sup-decisions}
+\subsection{Calibration and reliability of the forecast ranges}
+\label{sec:sup-calibration}
 
-\paragraph{Forecast ranges}
+\textbf{The ranges are calibrated item by store and too narrow above the
+store.}
 Each model's ranges come from its own errors in the earlier windows
 (Section~\ref{sec:setup}). Item by store, the 80\% ranges of all three forecasts
 cover close to 80\% of sales across data sets and windows (\supCovIxsWm\%,
@@ -99,7 +149,47 @@ adds one error to learn from, the world model's ranges are too narrow
 (\supCovTotalAvg\%); the coverage of a single data set swings with so few earlier
 windows (Table~\ref{tab:sup-intervals}).
 
+Figure~\ref{fig:sup-calibration} sets each stated coverage against the share of
+sales that fell inside. Item by store, the 50\% ranges hold \sfCovFiftyIxsWm\%,
+\sfCovFiftyIxsLgb\% and \sfCovFiftyIxsAvg\% of sales for the world model,
+LightGBM and the average, and the 95\% ranges \supCovNinetyFiveIxsWm\%,
+\supCovNinetyFiveIxsLgb\% and \supCovNinetyFiveIxsAvg\%, so all three lie on the
+diagonal on average. Data set by data set the 80\% coverage item by store runs
+from \sfCovEightyMinIxsAvg\% to \sfCovEightyMaxIxsAvg\% for the average. At the
+total the world model's 80\% coverage runs from \sfCovEightyMinTotalWm\% to
+\sfCovEightyMaxTotalWm\% across data sets; a single window at the total holds
+one actual against one range, so its coverage is anywhere from
+\sfCovTotalWindowMin\% to \sfCovTotalWindowMax\%, and the
+\sfCalWindows{} to \sfCalWindowsMax{} scored windows of each data set give a coarse
+estimate. By level (Figure~\ref{fig:sup-calibration}c), the 80\% ranges are too
+narrow at the store (\sfCovLevelStoreWm\%, \sfCovLevelStoreLgb\% and
+\sfCovLevelStoreAvg\%) and for the item across stores (\sfCovLevelItemWm\%,
+\sfCovLevelItemLgb\% and \sfCovLevelItemAvg\%): the earlier windows' errors at
+those levels understate the next window's. A planner who orders from the 80\%
+range at item by store gets what it says; one who plans store labour from the
+store-level range needs a wider one.
+
+The reliability of a single run is a separate question: the world model's
+scores vary from seed to seed, by a standard deviation of \loopSeedSdOne\% of the score on
+the Dominick's categories for a single fit and \loopSeedSdFive\% for the five-copy average
+the tuned model uses (Figure~\ref{fig:loopnoise}). Every comparison in this paper
+uses the five-copy average and three seeds where a change is tried.
+
 \input{generated/sup_tab_intervals}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_sup_calibration.pdf}
+\caption{Calibration of the forecast ranges, from each model's own errors in the
+earlier windows. (a, b) Share of actual sales inside the 50\%, 80\% and 95\%
+ranges, item by store and at the total; faint dots are data sets, lines their
+mean; the dashed line is perfect calibration. (c) Coverage of the 80\% range by
+level, mean over the nine data sets.}
+\label{fig:sup-calibration}
+\end{figure*}
+
+\subsection{Decision costs and reconciliation}
+\label{sec:sup-decisions}
 
 \paragraph{Decision costs}
 The average gives the lowest category-plan cost on \supCatPlanAvgLowest{} of

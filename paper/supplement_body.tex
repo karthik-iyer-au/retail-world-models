@@ -4,17 +4,21 @@
 \renewcommand{\thefigure}{S\arabic{figure}}
 
 This supplement holds the detail behind the main text: every run of the settings
-searches, the supporting analyses rerun on the tuned models, what was tried and
-dropped, and every constraint the models work within. Every number is generated
+searches; the supporting analyses rerun on the tuned models, among them the
+ensemble ablation, the plan-input occlusion, the carried-state tests and the
+calibration of the forecast ranges; what was tried and dropped, with every loss
+and pretraining recipe explored; and every constraint the models work within. Every number is generated
 from the same result files as the main text.
 
 \section{Searching the settings in detail}
 \label{sec:loopdetail}
 \input{loop_detail}
 
+\FloatBarrier
 \input{support}
+\FloatBarrier
 \input{dropped}
-
+\FloatBarrier
 \input{constraints}
-
+\clearpage
 \input{references}

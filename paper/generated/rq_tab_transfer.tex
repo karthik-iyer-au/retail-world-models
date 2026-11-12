@@ -6,7 +6,7 @@ WRMSSE minus the WRMSSE on the same fifth of the same forecast trained on everyt
 fifth. Means over windows. The last two columns name the forecast that is clearly lower on the kept-out fifth when a
 90\% bootstrap interval over windows of the difference excludes zero. Shading marks the lowest of the three: \colorbox{wmcell}{world model}, \colorbox{lgbcell}{LightGBM}, \colorbox{avgcell}{average}.}
 \label{tab:rq-transfer}
-\resizebox{\textwidth}{!}{\begin{tabular}{ll ccc ccc ccc ll}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{ll ccc ccc ccc ll}
 \toprule
  & & \multicolumn{3}{c}{WRMSSE, kept out} & \multicolumn{3}{c}{Cost of not training on them} & \multicolumn{3}{c}{Forecast over actual} & \multicolumn{2}{c}{Clearly lower}\\
 \cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}\cmidrule(lr){12-13}
@@ -23,5 +23,5 @@ M5 & Stores & 0.874 & 0.886 & \cellcolor{avgcell}\textbf{0.869} & 0.022 & 0.020 
 Favorita & Items & \cellcolor{wmcell}\textbf{0.709} & 0.899 & 0.768 & 0.010 & 0.171 & 0.070 & 1.01 & 0.77 & 0.89 & \cellcolor{wmcell}World model & \cellcolor{wmcell}World model \\
 Favorita & Stores & \cellcolor{wmcell}\textbf{0.729} & 0.766 & 0.731 & 0.020 & 0.017 & 0.020 & 0.97 & 0.98 & 0.97 & \cellcolor{wmcell}World model & Neither \\
 \bottomrule
-\end{tabular}}
+\end{tabular}\end{adjustbox}
 \end{table*}

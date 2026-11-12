@@ -5,7 +5,7 @@ trained on it together with other data sets (each Dominick's category with the o
 six Dominick's categories; M5 with Favorita and Favorita with M5). The last row carries M5's tuned settings
 unchanged to Favorita, to be read against Favorita's own-data row.}
 \label{tab:rq-retailer}
-\resizebox{\textwidth}{!}{\begin{tabular}{l cc cc}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{l cc cc}
 \toprule
  & \multicolumn{2}{c}{World model} & \multicolumn{2}{c}{LightGBM}\\
 \cmidrule(lr){2-3}\cmidrule(lr){4-5}
@@ -23,5 +23,5 @@ Favorita & 0.428 / 0.690 & 0.448 / 0.699 & 0.448 / 0.722 & 0.459 / 0.738 \\
 \midrule
 Favorita, M5's settings & 0.447 / 0.692 & & 0.450 / 0.723 & \\
 \bottomrule
-\end{tabular}}
+\end{tabular}\end{adjustbox}
 \end{table*}

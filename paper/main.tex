@@ -36,6 +36,7 @@
 \usepackage{array}
 \usepackage{graphicx}
 \usepackage{adjustbox}
+\usepackage{placeins}
 \usepackage{rotating}
 % Bounds for rotated floats. Inside a sidewaystable the page-geometry lengths
 % are swapped, so these are derived from \paperwidth/\paperheight, which are
@@ -187,6 +188,7 @@
 \input{generated/compute_values}
 \input{generated/build_values}
 \input{generated/sup_values}
+\input{generated/supfig_values}
 \newcommand{\ixs}{item by store}
 
 \ifsupplement\externaldocument{main_ijpe}\else\ifjournal\externaldocument{supplement_ijpe}\fi\fi

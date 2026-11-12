@@ -78,14 +78,14 @@ def grain() -> tuple[str, dict]:
 (Avg), averaged over the levels at store grain and above, over the item levels, and over every level for the whole
 forecast window summed as one block; mean over the paper's windows. """ + KEY + r"""}
 \label{tab:rq-grain}
-\resizebox{\textwidth}{!}{\begin{tabular}{l ccc ccc ccc}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{l ccc ccc ccc}
 \toprule
  & \multicolumn{3}{c}{Store and above} & \multicolumn{3}{c}{Item levels} & \multicolumn{3}{c}{Whole block}\\
 \cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}
 Data set & WM & LGB & Avg & WM & LGB & Avg & WM & LGB & Avg\\
 \midrule
 """ + "\n".join(rows) + "\n" + r"""\bottomrule
-\end{tabular}}
+\end{tabular}\end{adjustbox}
 \end{table*}
 """
     return tab, wins
@@ -111,14 +111,14 @@ WRMSSE averaged over every level, by period, on the fast lines (those items), th
 series with short history (first sale less than 26 weeks or 182 days before the forecast). WM, LGB and Avg as in
 Table~\ref{tab:rq-grain}. """ + KEY + r"""}
 \label{tab:rq-lines}
-\resizebox{\textwidth}{!}{\begin{tabular}{l c ccc ccc ccc}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{l c ccc ccc ccc}
 \toprule
  & Items making & \multicolumn{3}{c}{Fast lines} & \multicolumn{3}{c}{Slow lines} & \multicolumn{3}{c}{Short history}\\
 \cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}
 Data set & 80\% of units & WM & LGB & Avg & WM & LGB & Avg & WM & LGB & Avg\\
 \midrule
 """ + "\n".join(rows) + "\n" + r"""\bottomrule
-\end{tabular}}
+\end{tabular}\end{adjustbox}
 \end{table*}
 """
     return tab, facts
@@ -162,14 +162,14 @@ WRMSSE minus the WRMSSE on the same fifth of the same forecast trained on everyt
 fifth. Means over windows. The last two columns name the forecast that is clearly lower on the kept-out fifth when a
 90\% bootstrap interval over windows of the difference excludes zero. """ + KEY + r"""}
 \label{tab:rq-transfer}
-\resizebox{\textwidth}{!}{\begin{tabular}{ll ccc ccc ccc ll}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{ll ccc ccc ccc ll}
 \toprule
  & & \multicolumn{3}{c}{WRMSSE, kept out} & \multicolumn{3}{c}{Cost of not training on them} & \multicolumn{3}{c}{Forecast over actual} & \multicolumn{2}{c}{Clearly lower}\\
 \cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}\cmidrule(lr){12-13}
 Data set & Kept out & WM & LGB & Avg & WM & LGB & Avg & WM & LGB & Avg & WM or LGB & WM or Avg\\
 \midrule
 """ + "\n".join(lines_) + "\n" + r"""\bottomrule
-\end{tabular}}
+\end{tabular}\end{adjustbox}
 \end{table*}
 """
     return tab, out
@@ -210,14 +210,14 @@ trained on it together with other data sets (each Dominick's category with the o
 six Dominick's categories; M5 with Favorita and Favorita with M5). The last row carries M5's tuned settings
 unchanged to Favorita, to be read against Favorita's own-data row.}
 \label{tab:rq-retailer}
-\resizebox{\textwidth}{!}{\begin{tabular}{l cc cc}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{l cc cc}
 \toprule
  & \multicolumn{2}{c}{World model} & \multicolumn{2}{c}{LightGBM}\\
 \cmidrule(lr){2-3}\cmidrule(lr){4-5}
 Data set & Own data & Pooled & Own data & Pooled\\
 \midrule
 """ + "\n".join(rows) + "\n" + r"""\bottomrule
-\end{tabular}}
+\end{tabular}\end{adjustbox}
 \end{table*}
 """
     return tab, vals

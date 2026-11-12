@@ -111,12 +111,12 @@ are scored on cleaned prices on Dominick's; on M5, Frat and Favorita they are th
 same windows, since nothing in them was tuned. -- marks a model not run on that data set. """ + \
         r"""Shading marks the lowest: \colorbox{wmcell}{world model}, \colorbox{lgbcell}{LightGBM}, \colorbox{avgcell}{average}.}
 \label{tab:sup-comparison}
-\resizebox{\textwidth}{!}{\begin{tabular}{l""" + "c" * len(COMP) + r"""}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{l""" + "c" * len(COMP) + r"""}
 \toprule
 Data set & """ + head + r"""\\
 \midrule
 """ + "\n".join(rows) + "\n" + r"""\bottomrule
-\end{tabular}}
+\end{tabular}\end{adjustbox}
 \end{table*}
 """
 
@@ -151,12 +151,12 @@ def ablation(v: dict) -> str:
 the ensemble, of the ensemble without each member (without TimesFM it is the average of the two tuned models), and of
 the ensemble with weights fitted on earlier windows. Lowest in bold.}
 \label{tab:sup-ablation}
-\resizebox{\columnwidth}{!}{\begin{tabular}{lccccc}
+\begin{adjustbox}{max width=\columnwidth}\begin{tabular}{lccccc}
 \toprule
 Data set & Three & No WM & No LGB & No TFM & Fitted\\
 \midrule
 """ + "\n".join(rows) + "\n" + r"""\bottomrule
-\end{tabular}}
+\end{tabular}\end{adjustbox}
 \end{table}
 """
 
@@ -253,12 +253,12 @@ plan's timing is shuffled within each series. Carry-over: forecast change in per
 of log sales after the window from the state before the window and from the state rolled through it (first of the
 five copies).}
 \label{tab:sup-mechanism}
-\resizebox{\columnwidth}{!}{\begin{tabular}{lcccccc}
+\begin{adjustbox}{max width=\columnwidth}\begin{tabular}{lcccccc}
 \toprule
 Data set & Timing & Period 1 & Period 2 & Period 4 & Probe before & Probe after\\
 \midrule
 """ + "\n".join(rows) + "\n" + r"""\bottomrule
-\end{tabular}}
+\end{tabular}\end{adjustbox}
 \end{table}
 """
 
@@ -310,14 +310,14 @@ def decisions(v: dict) -> str:
 windows, relative to LightGBM's. Category plan: absolute error in dollars over sales in dollars at category by store
 (\%), mean over windows; lowest shaded.}
 \label{tab:sup-decisions}
-\resizebox{\columnwidth}{!}{\begin{tabular}{lcccccc}
+\begin{adjustbox}{max width=\columnwidth}\begin{tabular}{lcccccc}
 \toprule
  & \multicolumn{3}{c}{Store orders, ratio 0.8} & \multicolumn{3}{c}{Category plan (\%)}\\
 \cmidrule(lr){2-4}\cmidrule(lr){5-7}
 Data set & WM & LGB & Avg & WM & LGB & Avg\\
 \midrule
 """ + "\n".join(rows) + "\n" + r"""\bottomrule
-\end{tabular}}
+\end{tabular}\end{adjustbox}
 \end{table}
 """
 
@@ -348,14 +348,14 @@ def intervals(v: dict) -> str:
 \caption{Coverage (\%) of each model's 80\% interval, from its own errors in earlier windows, item by store and at
 the total, mean over the scored windows.}
 \label{tab:sup-intervals}
-\resizebox{\columnwidth}{!}{\begin{tabular}{lcccccc}
+\begin{adjustbox}{max width=\columnwidth}\begin{tabular}{lcccccc}
 \toprule
  & \multicolumn{3}{c}{Item by store} & \multicolumn{3}{c}{Total}\\
 \cmidrule(lr){2-4}\cmidrule(lr){5-7}
 Data set & WM & LGB & Avg & WM & LGB & Avg\\
 \midrule
 """ + "\n".join(rows) + "\n" + r"""\bottomrule
-\end{tabular}}
+\end{tabular}\end{adjustbox}
 \end{table}
 """
 
@@ -386,12 +386,12 @@ def reconcile(v: dict) -> str:
 reconciled ETS forecast, of each tuned model combined with ETS above it by weighted least squares, and of the average
 summed upward.}
 \label{tab:sup-reconcile}
-\resizebox{\columnwidth}{!}{\begin{tabular}{lcccc}
+\begin{adjustbox}{max width=\columnwidth}\begin{tabular}{lcccc}
 \toprule
 Data set & Best ETS & WM + ETS & LGB + ETS & Avg\\
 \midrule
 """ + "\n".join(rows) + "\n" + r"""\bottomrule
-\end{tabular}}
+\end{tabular}\end{adjustbox}
 \end{table}
 """
 

@@ -33,6 +33,7 @@ figures:
 	cd figs && $(PY) make_figures.py
 	cd figs && $(PY) make_revision_figures.py
 	cd figs && $(PY) make_loop_figures.py
+	cd figs && $(PY) make_supplement_figures.py
 
 tables:
 	cd figs && $(PY) make_tables.py

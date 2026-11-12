@@ -71,6 +71,6 @@ def test_every_generated_macro_used_is_defined():
         defined |= set(re.findall(r"\\newcommand\{\\([A-Za-z]+)\}", f.read_text()))
     used = set()
     for f in PAPER.glob("*.tex"):
-        used |= set(re.findall(r"\\((?:rq|sup|loop|compute|build)[A-Z][A-Za-z]*)", f.read_text()))
+        used |= set(re.findall(r"\\((?:rq|sup|sf|loop|compute|build)[A-Z][A-Za-z]*)", f.read_text()))
     assert len(used) > 100
     assert not sorted(used - defined), sorted(used - defined)

@@ -1,0 +1,25 @@
+\begin{table*}[t]
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\caption{Every likelihood and JEPA pretraining recipe tried on the tuned world model, WRMSSE on the search windows.
+Start: the settings each round began from.
+A number in brackets is a one-seed screen that did not earn a three-seed try; a plain number is the three-seed mean;
+bold marks the change kept, which had to beat the start by more than the keep bar on the search windows.}
+\label{tab:sup-explore}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{l ccccc ccc}
+\toprule
+ & \multicolumn{5}{c}{Likelihood round} & \multicolumn{3}{c}{JEPA pretraining round}\\
+\cmidrule(lr){2-6}\cmidrule(lr){7-9}
+Data set & Start & NB & NB, spread by item & ZINB, spread by item & Hurdle NB, spread by item & Start & Short & Long\\
+\midrule
+Analgesics & 0.509 & (0.518) & (0.515) & (0.518) & (0.539) & 0.509 & 0.511 & (0.537) \\
+Bottled juice & 0.587 & (0.592) & (0.601) & (0.614) & (0.604) & 0.587 & (0.635) & (0.615) \\
+Cheese & 0.392 & (0.450) & 0.403 & 0.396 & 0.382 & 0.392 & (0.401) & (0.406) \\
+Frozen entrees & 0.216 & 0.214 & 0.218 & 0.215 & 0.216 & 0.216 & (0.267) & (0.255) \\
+Soft drinks & 0.572 & (0.613) & (0.604) & (0.606) & (0.598) & 0.572 & 0.612 & (0.603) \\
+Snacks & 0.439 & (0.481) & \textbf{0.420} & 0.427 & 0.429 & 0.420 & (0.428) & \textbf{0.400} \\
+Frat & 0.547 & (0.584) & (0.600) & (0.585) & (0.590) & 0.547 & (0.572) & (0.566) \\
+M5 & 0.547 & (0.553) & (0.558) & 0.552 & \textbf{0.533} & 0.533 & (0.537) & (0.544) \\
+Favorita & 0.483 & 0.488 & (0.476) & 0.469 & \textbf{0.468} & 0.483 & (0.527) & (0.523) \\
+\bottomrule
+\end{tabular}\end{adjustbox}
+\end{table*}
