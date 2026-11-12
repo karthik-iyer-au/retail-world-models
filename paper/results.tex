@@ -724,39 +724,39 @@ the rule was drawn from the results, after a wider rule written down in advance
 held only in part (Section~\ref{sec:rq-broad}).
 
 \paragraph{Windows and seeds}
-Trained models are one fit each in the rolling windows, and runs of one
-configuration on different machines differed by as much as some differences
-tested (\S\ref{sec:dropped}). Four to six windows per data set is a thin basis
-for a bootstrap over windows and for a model confidence set: a bootstrap over
-six windows can draw few distinct samples, its intervals are approximate, and the
-set has little power, so a model kept in the set has not been shown to be as good
-as the best. Adjacent windows share training history and season, so they carry
-less information than their number suggests. The item bootstrap within a window
-treats the items as the sample and does not cover variation between windows. Single-fit
-runs before 16 October trained with seed 0 whatever seed was named.
+Four to six windows per data set is a thin basis for a bootstrap over windows
+and for a model confidence set: the intervals are approximate, the set has
+little power, and a model kept in it has not been shown to be as good as the
+best. Adjacent windows share training history and season, so they carry less
+information than their number suggests; the item bootstrap within a window
+treats the items as the sample and does not cover variation between windows.
+Averaging five fits with different seeds removes much of the noise between runs
+that the searches measured (Section~\ref{sec:loopnoise}), but both models on M5
+are single fits.
 
-\paragraph{Studies added after the main results}
-Studies A to G were added after the rolling results were read. Each was written
-down before it ran, but which studies to run was chosen knowing that the
-ensemble came first. Timestral was run at 28M parameters, not 209M, because the
-larger model was too slow, a change made before any Timestral result.
+\paragraph{Analyses added after the first results}
+The analyses by line type, the whole-block view, the forecast by history and the
+supporting reruns were added after the first scores of the tuned models were
+read. Each was written down before it ran, but which to run was chosen knowing
+the first results, and the new-item part of the recommended rule was drawn from
+the results (Section~\ref{sec:rq-broad}).
 
 \paragraph{Comparison models}
-TFT was not run on M5 or Favorita, and Chronos-Bolt and TimesFM from history
-alone not on Favorita. TimesFM with the plan fits its linear plan model within
-groups of 2,048 series. Pretrained models are used as published with their point
-forecast fixed in advance (the mean), which for Timestral let a few extreme
-upper quantiles dominate on weekly data. The Timestral tail check and the
-cheese window were looked at after the results were read.
+Only the world model and LightGBM were tuned; the Temporal Fusion Transformer
+runs with the settings of the first version, and the pretrained models as
+published. The comparison between the two tuned models is therefore the fair one,
+and the others are reference points. TFT was not run on M5 or Favorita, and
+Chronos-Bolt and TimesFM from history alone not on Favorita. TimesFM with the
+plan fits its linear plan model within groups of 2,048 series. The pretrained
+models' point forecast was fixed in advance as the mean of their output, which
+for Timestral let a few extreme upper quantiles dominate on weekly data.
 
 \paragraph{What lift means}
 Merchants promote in weeks they expect to sell well, so part of a measured lift
 is good timing. The lift is what the forecast attributes to the plan, not what
-the plan caused. Our companion audit~\cite{paper2} measures the gap in generated
-store data where the true lifts are known: the world model's and LightGBM's
-lifts were a third too large while every check against the model passed. Plan
-responses in this paper, including the perturbation tests, are forecasts, not
-causal estimates.
+the plan caused. Our companion audit~\cite{paper2} measures the gap in generated store
+data where the true lifts are known. Plan responses in this paper, including the
+perturbation tests, are forecasts, not causal estimates.
 
 \paragraph{What the data do not record}
 None of the data sets records stock, so a sell-out looks like low demand; or

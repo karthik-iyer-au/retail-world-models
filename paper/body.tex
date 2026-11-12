@@ -399,8 +399,8 @@ Table~\ref{tab:models} lists every model. The world model and LightGBM were
 each tuned on every data set by the same search (Section~\ref{sec:loop}); their
 final settings are in Table~\ref{tab:final-settings}, and the constraints each
 works within are in Appendix~\ref{sec:constraints}. Each tuned model's forecast
-is the average of five fits with different seeds, except on M5, where one fit
-was kept to bound the cost of its larger model.
+is the average of five fits with different seeds, except on M5, where each
+model is a single fit to bound the cost of the larger data set.
 
 \begin{table}[t]
 \centering
@@ -596,7 +596,7 @@ made before the results it governs were read unless the entry says otherwise.
 Each data set's world model and LightGBM run in every rolling window with the
 final settings of their searches (Table~\ref{tab:final-settings}), unchanged
 from window to window; each forecast is the average of five fits with different
-seeds (one on M5's world model). No result on the rolling windows changed a
+seeds (a single fit on M5). No result on the rolling windows changed a
 setting, and every model, window and test is reported.
 
 \paragraph{Comparing two models}

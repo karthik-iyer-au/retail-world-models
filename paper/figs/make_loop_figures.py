@@ -256,6 +256,7 @@ def main():
     fig_heldout()
     fig_slopes()
     write_table()
+    write_values()
 
 
 def write_table():
@@ -286,6 +287,72 @@ def write_table():
     lines += [r"\bottomrule", r"\end{tabular}", r"\end{table*}"]
     out = ROOT / "paper" / "generated" / "tab_loop.tex"
     out.write_text("\n".join(lines) + "\n")
+    print(f"  wrote {out}")
+
+
+def write_values():
+    """paper/generated/loop_values.tex: every number quoted in the text of the search section."""
+    def word(n):
+        return ["none", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"][n] if n < 10 else str(n)
+
+    v = {}
+    for model, chains, tag in (("World model", WM, "Wm"), ("LightGBM", LGB, "Lgb")):
+        tries = kept = improved = 0
+        bars, gains = [], []
+        worse = []
+        for d in DATA:
+            names = [n for n in chains[d] if rows(n)]
+            if not names:
+                continue
+            st = first_start(names[0])
+            end = next((r for r in reversed(rows(names[-1])) if r["kind"] == "end"), None)
+            tries += sum(1 for n in names for r in rows(n) if r["kind"] in ("rung", "try"))
+            kept += sum(1 for n in names for r in rows(n) if r["kind"] == "kept")
+            if d.startswith("dominicks") or tag == "Lgb":
+                bars.append(st["keep_bar"])
+            if end:
+                improved += end["score"] < st["score"]
+                gains.append((st["score"] - end["score"], d, st["score"], end["score"]))
+                if end["held_out"] > st["held_out"]:
+                    worse.append((end["held_out"] - st["held_out"], d, st["held_out"], end["held_out"]))
+        v[f"loopTries{tag}"], v[f"loopKept{tag}"] = tries, kept
+        v[f"loopImproved{tag}"] = word(improved)
+        v[f"loopBarLo{tag}"], v[f"loopBarHi{tag}"] = f"{min(bars):.3f}", f"{max(bars):.3f}"
+        g = max(gains)
+        v[f"loopGain{tag}Set"], v[f"loopGain{tag}From"], v[f"loopGain{tag}To"] = TITLE[g[1]], f"{g[2]:.3f}", f"{g[3]:.3f}"
+        v[f"loopHeldWorse{tag}"] = word(len(worse))
+        w = max(worse) if worse else None
+        if w:
+            v[f"loopHeldWorst{tag}Set"], v[f"loopHeldWorst{tag}From"], v[f"loopHeldWorst{tag}To"] = (
+                TITLE[w[1]].lower(), f"{w[2]:.3f}", f"{w[3]:.3f}")
+    v["loopTries"] = f"{v['loopTriesWm'] + v['loopTriesLgb']:,}"
+    v["loopKept"] = v["loopKeptWm"] + v["loopKeptLgb"]
+    # correlation between the change on the search windows and on the held-out window (as in fig_heldout)
+    for model, chains, tag in (("world", WM, "Wm"), ("lgb", LGB, "Lgb")):
+        xs, ys = [], []
+        for d in DATA:
+            for name in chains[d]:
+                st = first_start(name)
+                if not st or st.get("held_out") is None:
+                    continue
+                for r in rows(name):
+                    if r["kind"] == "try" and r.get("held_out") is not None:
+                        xs.append((r["score"] - st["score"]) / st["score"])
+                        ys.append((r["held_out"] - st["held_out"]) / st["held_out"])
+        v[f"loopHeldCorr{tag}"] = f"{np.corrcoef(xs, ys)[0, 1]:.2f}"
+    # seed noise of the starting settings: one copy against five (as in fig_noise)
+    for label, names, tag in (("one", ONE, "One"), ("five", FIVE, "Five")):
+        dev = []
+        for d, n in names.items():
+            st = first_start(n)
+            if st:
+                sc = np.array(st["seed_scores"])
+                dev += list(100 * (sc - sc.mean()) / sc.mean())
+        v[f"loopSeedSd{tag}"] = f"{np.std(dev, ddof=1):.1f}"
+    st = first_start(ONE["dominicks_che"])
+    v["loopOneCheBar"] = f"{st['keep_bar']:.3f}" if st else "--"
+    out = ROOT / "paper" / "generated" / "loop_values.tex"
+    out.write_text("".join(f"\\newcommand{{\\{k}}}{{{x}}}\n" for k, x in v.items()))
     print(f"  wrote {out}")
 
 

@@ -5,7 +5,7 @@
 \label{sec:loop}
 
 Both models were tuned with the same procedure on every data set. On the windows the searches
-scored, tuning improved LightGBM on all nine data sets and the world model on six, and the gains
+scored, tuning improved LightGBM on all \loopImprovedLgb{} data sets and the world model on \loopImprovedWm{}, and the gains
 were mostly small next to the differences between data sets. The held-out window agreed with the
 search windows only weakly, so the paper judges the models on later windows the searches never
 saw. Table~\ref{tab:loop} gives every search from its starting settings to its final settings, and
@@ -56,15 +56,15 @@ runs on into its likelihood and JEPA rounds after its own loop ends.}
 
 \subsection{What the searches kept}
 
-The searches made 1,020 runs, 463 of the world model and 557 of LightGBM, and kept 22 changes, 9 for the world model and 13 for LightGBM.
+The searches made \loopTries{} runs, \loopTriesWm{} of the world model and \loopTriesLgb{} of LightGBM, and kept \loopKept{} changes, \loopKeptWm{} for the world model and \loopKeptLgb{} for LightGBM.
 LightGBM kept at least one change on every data set and the world model kept nothing on three of
 the six Dominick's categories. No single change helped the world model everywhere
 (Figure~\ref{fig:loopheat}). Weighting the loss toward high-volume series made the first seed worse on most data sets. The seven-step latent
 check, kept on Favorita, was among the changes that moved Favorita most and did little elsewhere.
 
-On the search windows the world model improved on six of the nine data sets and LightGBM on all
-nine (Figure~\ref{fig:loopslopes}). The largest gain of either model was LightGBM on Favorita,
-from 0.922 to 0.580. The world model's largest was also Favorita, from 0.547 to 0.483.
+On the search windows the world model improved on \loopImprovedWm{} of the nine data sets and LightGBM on all
+\loopImprovedLgb{} (Figure~\ref{fig:loopslopes}). The largest gain of either model was LightGBM on \loopGainLgbSet{},
+from \loopGainLgbFrom{} to \loopGainLgbTo{}. The world model's largest was on \loopGainWmSet{}, from \loopGainWmFrom{} to \loopGainWmTo{}.
 
 \begin{figure}[t]
 \centering
@@ -78,11 +78,11 @@ data set's menu.}
 \subsection{Did the held-out window agree?}
 
 Only partly. Across every three-seed run, the change on the search windows and the change on the
-held-out window are correlated at 0.29 for the world model and 0.05 for LightGBM
+held-out window are correlated at \loopHeldCorrWm{} for the world model and \loopHeldCorrLgb{} for LightGBM
 (Figure~\ref{fig:loopheldout}). A change that helps on the search windows is a weak guide to the
 next window. The world model's final settings were worse than its starting settings on the
-held-out window on two data sets, Frat (0.591 to 0.608) and snacks (0.568 to 0.608), and
-LightGBM's on five, most on soft drinks (0.435 to 0.507). This is why the paper reports the final settings on windows that the
+held-out window on \loopHeldWorseWm{} data sets, most on \loopHeldWorstWmSet{} (\loopHeldWorstWmFrom{} to \loopHeldWorstWmTo{}), and
+LightGBM's on \loopHeldWorseLgb{}, most on \loopHeldWorstLgbSet{} (\loopHeldWorstLgbFrom{} to \loopHeldWorstLgbTo{}). This is why the paper reports the final settings on windows that the
 searches never saw, in Section~\ref{sec:results}, and not the search scores.
 
 \begin{figure}[t]
@@ -98,11 +98,11 @@ window, both against the starting settings of its search.}
 
 A single world-model fit is noisy enough to hide most of the changes the loop tries. On the six
 Dominick's categories the three seeds of the starting settings differ from their mean by a
-standard deviation of 6.3\% for a single fit and 1.8\% for a five-copy average
+standard deviation of \loopSeedSdOne\% for a single fit and \loopSeedSdFive\% for a five-copy average
 (Figure~\ref{fig:loopnoise}). The
-single-fit search on cheese had a bar of 0.040 and kept nothing; with the average the bars on the
-Dominick's categories were between 0.004 and 0.034. LightGBM's seeds differ much less, and its
-bars were between 0.002 and 0.010.
+single-fit search on cheese had a bar of \loopOneCheBar{} and kept nothing; with the average the bars on the
+Dominick's categories were between \loopBarLoWm{} and \loopBarHiWm{}. LightGBM's seeds differ much less, and its
+bars were between \loopBarLoLgb{} and \loopBarHiLgb{}.
 
 \begin{figure}[t]
 \centering
