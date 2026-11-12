@@ -101,7 +101,10 @@ def lightgbm_model(cfg: dict, train: pd.DataFrame, threads: int | None):
 
     params = dict(cfg["model"].get("params", {}))
     if threads:
-        params["threads"] = threads
+        if cfg["model"]["name"] == "seed_average":  # the tuned LightGBM is a five-copy average; threads go to each copy
+            params["params"] = {**params.get("params", {}), "threads": threads}
+        else:
+            params["threads"] = threads
     return build_model(cfg["model"]["name"], **params).fit(train)
 
 
