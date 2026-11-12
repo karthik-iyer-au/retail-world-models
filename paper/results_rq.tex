@@ -35,8 +35,8 @@ removes that choice.
 is lowest on \rqAvgBestBlockWord{} of \rqNineWord{} data sets and second on the other four. LightGBM is
 lowest on analgesics, bottled juice and snacks, but drifts in total where the
 world model does not: its block error on M5 is \rqBlockMfiveLgb{}, against \rqBlockMfiveWm{} for the world
-model and \rqBlockMfiveAvg{} for the average, and the same pattern shows on Favorita and soft
-drinks.
+model and \rqBlockMfiveAvg{} for the average, and the same pattern shows on Frat, Favorita and
+soft drinks.
 
 \input{generated/rq_tab_grain}
 
@@ -53,8 +53,8 @@ on \rqAvgBestSlow{}; on snacks LightGBM is lowest on the fast lines, and on chee
 world model is lowest on the slow lines.
 
 On series whose first sale falls less than 26 weeks before the forecast, the
-world model's error is lower than LightGBM's on \rqShortWmBeatsLgb{} of \rqNineWord{} data sets, Frat
-being the exception: for example \rqShortFavWm{} against \rqShortFavLgb{} on Favorita and \rqShortMfiveWm{}
+world model's error is lower than LightGBM's on \rqShortWmBeatsLgb{} of \rqNineWord{} data sets,
+\rqShortExceptions{} \rqShortExceptionsVerb{}: for example \rqShortFavWm{} against \rqShortFavLgb{} on Favorita and \rqShortMfiveWm{}
 against \rqShortMfiveLgb{} on M5. These series are \rqShortShareDomLo{} to \rqShortShareDomHi{}\% of the series on the Dominick's
 categories, where items enter and leave the range over the years, and under \rqShortShareRestMax{}\%
 on M5, Frat and Favorita.
@@ -65,7 +65,8 @@ on M5, Frat and Favorita.
 \label{sec:rq-unseen}
 
 \textbf{On items the models were not trained on, use the world model alone; on
-stores they were not trained on, the average serves.} With a fifth of the items
+stores they were not trained on, the world model and the average are level, and
+the average serves.} With a fifth of the items
 kept out of training, the world model's error on them rises by \rqCostWmItemLo{} to \rqCostWmItemHi{},
 against \rqCostLgbItemLo{} to \rqCostLgbItemHi{} for LightGBM (Table~\ref{tab:rq-transfer}). LightGBM
 under-forecasts these items, at \rqFaLgbItemLo{} to \rqFaLgbItemHi{}\% of actual sales, and that pulls the
@@ -75,8 +76,9 @@ data sets tested.
 
 With a fifth of the stores kept out, the world model is clearly more accurate
 than LightGBM on \rqStoreWmBeatsLgb{} of \rqKeptSets{} data sets and level on M5. Against the average it
-is clearly more accurate only on Frat; the average is clearly more accurate on
-cheese, and the two are level on snacks, M5 and Favorita.
+has the lower error on \rqStoreWmLowest{} of \rqKeptSets{} but is clearly more accurate only on Frat; the
+average is clearly more accurate on cheese, and the two are level on snacks, M5
+and Favorita.
 
 \input{generated/rq_tab_transfer}
 
@@ -117,7 +119,7 @@ a third model to run.
 
 Two parts of this rule were reached differently, and the difference matters to
 a reader who would use it. Averaging models was the recommendation of the first
-revision, and the average of the two tuned models holds it up here. The
+version, and the average of the two tuned models holds it up here. The
 exception was tested as part of a wider rule written down before it ran, which
 also gave the world model every series with less than 26 weeks of history; that
 half added nothing on the data with history (it was level with the average on
@@ -128,7 +130,8 @@ The rule is a finding on these nine data sets, not a ranking of methods for any
 retailer. A retailer, or a researcher, adopting the framework should rerun the
 full set of comparisons on its own data, including the models and combinations
 that lost here: the pretrained models, the Temporal Fusion Transformer, the
-three-model ensemble, pooling across retailers and the forecast by history. Their
-order may change on data with other levers, other lines and other history; the
+three-model ensemble, pooling across retailers and the forecast by history. These
+results do not settle their order on data with other levers, other lines and
+other history; the
 code to do so is released with the paper. Section~\ref{sec:limits} sets out what
 the study does not cover, including forecasts longer than 8 weeks or 28 days.

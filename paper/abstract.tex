@@ -17,8 +17,8 @@ the line, on seen and unseen data, and across retailers. On lines and stores the
 models were trained on, the tuned world model and LightGBM are close, each ahead
 on different data sets and grains, and their average is the most accurate
 choice across grains: it is in the 90\% model confidence set at \rqMcsAverage{} of \rqMcsCells{}
-data-set-and-grain pairs, for the fast lines that carry most sales and for the
-slow tail. On items kept out of training, the world model loses at most \rqCostWmItemHi{} in
+levels of the nine data sets' hierarchies, and the most accurate on the fast
+lines that carry most sales and on the slow tail on \rqAvgBestFast{} of the nine data sets. On items kept out of training, the world model loses at most \rqCostWmItemHi{} in
 scaled error and forecasts within \rqWmFaItemOff\% of actual sales, while LightGBM loses up
 to \rqCostLgbItemHi{} and forecasts as little as \rqLgbFaItemLoFrac{} of actual sales, which pulls the
 average below the world model alone on all \rqKeptSets{} data sets tested. Settings tuned

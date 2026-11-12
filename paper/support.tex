@@ -50,6 +50,19 @@ the error over all levels beat them in \supPFitAllBetter{} and lost in
 \subsection{Which plan inputs each model uses}
 \label{sec:sup-plan}
 
+\textbf{Both tuned models forecast from the plan.} Setting the price to the
+regular price makes the item-by-store error of the world model worse on
+\supPertPriceHelpsWm{} of \supPertSets{} data sets and of LightGBM on
+\supPertPriceHelpsLgb{}; setting every plan input to nothing planned makes it
+worse on \supPertPlanHelpsWm{} and \supPertPlanHelpsLgb{}
+(Table~\ref{tab:sup-perturbation}). With the plan removed, the world model's
+forecast on the rows where the plan had something on falls by
+\supPertUnitsWmLo\% to \supPertUnitsWmHi\%, and LightGBM's by
+\supPertUnitsLgbLo\% to \supPertUnitsLgbHi\%: the two read about the same
+lift from a promotion. Cutting the world model's history to the last few periods
+makes its error worse on \supPertHistHelps{} of \supPertSets{}, so its carried
+state draws on more than the latest sales.
+
 \input{generated/sup_tab_perturbation}
 
 \subsection{What the world model's carried state does}
@@ -61,8 +74,9 @@ within each series makes its item-by-store error worse on all \supMechSets{}
 data sets, by \supTimingLo\% to \supTimingHi\% (Table~\ref{tab:sup-mechanism}):
 the forecast reads when a promotion runs, not only that one runs. A promotion and
 a price cut added in one period raise that period's forecast and still raise the
-next on most data sets (by \supPersistTwoLo\% to \supPersistTwoHi\% of the
-forecast without them), where shoppers who stocked up would buy less; the dip
+next on \supPersistRiseSets{} of \supMechSets{} data sets (the change in the next
+period runs from \supPersistTwoLo\% to +\supPersistTwoHi\% of the forecast
+without them), where shoppers who stocked up would buy less; the dip
 after a promotion is not in the forecast, as in the first version. The state
 rolled through the window predicts sales after it only a little better than the
 state before it (an $R^2$ gain of \supProbeGainMin{} to \supProbeGainMax{}).

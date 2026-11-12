@@ -30,7 +30,7 @@ the tuned models did at each on the nine data sets studied.}
 \textbf{Decision} & \textbf{Grain} & \textbf{Forecast to use} & \textbf{What the tuned models did} \\
 \midrule
 Store orders and inventory & Item by store, by day or week & The average & Lowest error at the item levels on all \rqAvgBestItemWord{} data sets; clearly less accurate than either model in at most \rqAvgItemWorseMax{} of \rqPAvgWmItemn{} paired comparisons; simulated order cost below LightGBM's on \supOrderAvgBelowLgb{} of \supOrderSets{} \\
-Promotion and supplier funding & Item across stores, by week and over the promotion block & The average & Lowest at the item levels on all \rqAvgBestItemWord{}; over the whole block lowest on \rqAvgBestBlockWord{} and second on the other four; LightGBM alone drifts in total on M5, Favorita and soft drinks \\
+Promotion and supplier funding & Item across stores, by week and over the promotion block & The average & Lowest at the item levels on all \rqAvgBestItemWord{}; over the whole block lowest on \rqAvgBestBlockWord{} and second on the other four; LightGBM alone drifts in total on Frat, M5, Favorita and soft drinks \\
 Category performance & Category by store and category, by week & The average & Lowest at store grain and above on \rqAvgBestCoarseWord{} of \rqNineWord{}; LightGBM lowest on snacks; lowest category-plan cost on \supCatPlanAvgLowest{} of \supCatPlanSets{} \\
 Financial plan & Chain total & The average & As for category performance; the total is the sum of the same item-by-store forecast, so it agrees with every plan below it \\
 New items and range changes & Item by store, items not yet trained on & The world model alone & Clearly more accurate than the average on all \rqKeptSets{} data sets tested; LightGBM forecast \rqFaLgbItemLo{} to \rqFaLgbItemHi{}\% of actual sales on these items \\
@@ -62,7 +62,8 @@ drinks.
 
 \paragraph{What the trees bring}
 LightGBM is the more accurate of the two on frozen entrees and snacks at every
-grain, and its block totals are closer on analgesics, bottled juice and snacks.
+grain, and its block totals are closer than the world model's on every
+Dominick's category but soft drinks.
 It needs no pretraining and trains in minutes, and on lines with history it is
 as accurate as the world model on most data sets. On snacks, where the world
 model alone is weakest (\rqSnaWm{} overall against \rqSnaLgb{} for LightGBM), the average
@@ -77,11 +78,11 @@ stays close to LightGBM at \rqSnaAvg{}.
 The paper addresses price and promotion. It forecasts items newly added to a
 range but does not decide product (which items to range) or place (space,
 distribution), and it does not solve the four Ps together; a unified forecast across them does not exist in
-this work, and one could change which model works best at each grain. The data
-are four public data sets with their own plan inputs and constraints. A single
-retailer's data, with its own levers, stock and space records, could give a
-different ordering of models, and the grain comparison should be repeated on
-it before a choice is made.
+this work, and the study does not show which model would work best at each grain
+under one. The data are four public data sets with their own plan inputs and
+constraints. The ordering of models is not established for a single retailer's
+data, with its own levers, stock and space records, and the grain comparison
+should be repeated on it before a choice is made.
 
 \paragraph{Adapting the findings}
 The rule of Section~\ref{sec:rq-broad} and the ordering of models behind it hold
@@ -95,8 +96,8 @@ order. The code and settings for every comparison are released for that purpose.
 Every forecast in the study runs 8 weeks ahead on the weekly data and 28 days
 ahead on the daily data. Whether the models' accuracy, and the order between
 them, holds over the 26- and 52-week horizons of range, space and supplier
-reviews was not tested: a longer forecast may degrade, and may degrade
-differently for each model. Testing it needs a retailer's own plans and range
+reviews was not tested, nor whether accuracy falls with the horizon at the same
+rate for each model. Testing it needs a retailer's own plans and range
 decisions to score against and is left for separate work.
 
 \paragraph{New items}

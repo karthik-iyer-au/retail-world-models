@@ -26,6 +26,18 @@ KEYS = {"dominicks_ana": "Analgesics", "dominicks_bjc": "Bottled juice", "domini
 TRIO = ["world_model", "lightgbm", "ensemble_2"]
 
 
+# Each Dominick's data set is one category, so its category levels repeat other levels exactly (total = cat_id,
+# store_id = cat_idxstore_id in every window). They are counted once (correction of 13 November 2026).
+DUPLICATE_LEVELS = {"cat_id", "cat_idxstore_id"}
+
+
+def _read(name: str) -> pd.DataFrame:
+    d = pd.read_csv(A / name)
+    if "level" in d and "key" in d:
+        d = d[~(d.key.str.startswith("dominicks") & d.level.isin(DUPLICATE_LEVELS))]
+    return d
+
+
 CELL = ["wmcell", "lgbcell", "avgcell"]  # world model, LightGBM, average (paper/main.tex)
 KEY = (r"Shading marks the lowest of the three: \colorbox{wmcell}{world model}, \colorbox{lgbcell}{LightGBM}, "
        r"\colorbox{avgcell}{average}.")
@@ -49,8 +61,8 @@ def _groups(p: pd.DataFrame) -> tuple[list, list]:
 
 
 def grain() -> tuple[str, dict]:
-    s = pd.read_csv(A / "scores.csv").query("set == 'rolling'")
-    b = pd.read_csv(A / "blocks.csv").query("set == 'rolling'")
+    s = _read("scores.csv").query("set == 'rolling'")
+    b = _read("blocks.csv").query("set == 'rolling'")
     rows, wins = [], {"coarse": 0, "item": 0, "block": 0}
     for k, name in KEYS.items():
         p = s[s.key == k].groupby(["level", "model"]).wrmsse.mean().unstack()[TRIO]
@@ -80,7 +92,7 @@ Data set & WM & LGB & Avg & WM & LGB & Avg & WM & LGB & Avg\\
 
 
 def lines() -> tuple[str, dict]:
-    d = pd.read_csv(A / "segments.csv").query("set == 'rolling' and view == 'period'")
+    d = _read("segments.csv").query("set == 'rolling' and view == 'period'")
     rows, facts = [], {}
     for k, name in KEYS.items():
         g = d[d.key == k]
@@ -115,7 +127,7 @@ Data set & 80\% of units & WM & LGB & Avg & WM & LGB & Avg & WM & LGB & Avg\\
 def transfer() -> tuple[str, list]:
     """Kept-out series scored for each model and the average (part keptout of scripts/revision_analysis.py, which
     reproduces the transfer runs' own kept-out scores); the cost is against the trained-on-all runs."""
-    d = pd.read_csv(A / "keptout.csv")
+    d = _read("keptout.csv")
     M = ["world_model", "lightgbm", "ensemble_2"]
     rng = np.random.default_rng(0)
     out, lines_ = [], []
@@ -169,7 +181,10 @@ def _score(pattern: str) -> tuple[float, float] | None:
         return None
     m = json.load(open(fs[-1]))
     ib = [lv["wrmsse"] for s in m["splits"] for lv in s["by_level"] if lv["level"] == "item_idxstore_id"]
-    return m["wrmsse"], float(np.mean(ib))
+    dom = "dominicks" in pattern  # overall = mean over the distinct levels (DUPLICATE_LEVELS counted once)
+    overall = np.mean([np.mean([lv["wrmsse"] for lv in s["by_level"] if not (dom and lv["level"] in DUPLICATE_LEVELS)])
+                       for s in m["splits"]])
+    return float(overall), float(np.mean(ib))
 
 
 def retailer() -> tuple[str, dict]:
@@ -217,7 +232,7 @@ def _w(n: int) -> str:
 
 
 def _paired(x: str, y: str) -> dict:
-    d = pd.read_csv(A / "paired.csv").query("set == 'rolling'").drop_duplicates()
+    d = _read("paired.csv").query("set == 'rolling'").drop_duplicates()
     g = d[((d.a == x) & (d.b == y)) | ((d.a == y) & (d.b == x))].copy()
     s = g.a.eq(x).map({True: 1, False: -1})
     lo, hi = g.lo.where(s > 0, -g.hi), g.hi.where(s > 0, -g.lo)
@@ -235,8 +250,8 @@ def text_values(tr: list) -> dict:
     from rwm.evaluation import compare as C
 
     v = {}
-    s = pd.read_csv(A / "scores.csv").query("set == 'rolling'")
-    b = pd.read_csv(A / "blocks.csv").query("set == 'rolling'")
+    s = _read("scores.csv").query("set == 'rolling'")
+    b = _read("blocks.csv").query("set == 'rolling'")
     # RQ1: best and worst of the three in each of the 27 cells of the grain table
     best = {m: 0 for m in TRIO}
     worst = dict(best)
@@ -275,7 +290,7 @@ def text_values(tr: list) -> dict:
         v[f"rqMcs{n}"] = int(kp[kp.model == m]["in"].sum())
     v["rqMcsCells"] = int((kp.model == "ensemble_2").sum())
     # RQ2
-    g = pd.read_csv(A / "segments.csv").query("set == 'rolling' and view == 'period'")
+    g = _read("segments.csv").query("set == 'rolling' and view == 'period'")
     dom = [k for k in KEYS if k.startswith("dominicks")]
     rest = [k for k in KEYS if k not in dom]
     share = g.groupby("key").fast_item_share.mean() * 100
@@ -291,6 +306,10 @@ def text_values(tr: list) -> dict:
     v["rqAvgBestSlow"] = _w(sum(seg[(k, "slow")].idxmin() == "ensemble_2" for k in KEYS))
     v["rqShortWmBeatsLgb"] = _w(sum(seg[(k, "short_history")]["world_model"] < seg[(k, "short_history")]["lightgbm"]
                                     for k in KEYS))
+    exc = [KEYS[k] if k in ("frat", "m5", "favorita") else KEYS[k].lower() for k in KEYS
+           if seg[(k, "short_history")]["world_model"] >= seg[(k, "short_history")]["lightgbm"]]
+    v["rqShortExceptions"] = " and ".join(exc) if len(exc) < 3 else ", ".join(exc[:-1]) + " and " + exc[-1]
+    v["rqShortExceptionsVerb"] = "being the exception" if len(exc) == 1 else "being the exceptions"
     for k, tag in (("favorita", "Fav"), ("m5", "Mfive")):
         v[f"rqShort{tag}Wm"] = f"{seg[(k, 'short_history')]['world_model']:.3f}"
         v[f"rqShort{tag}Lgb"] = f"{seg[(k, 'short_history')]['lightgbm']:.3f}"
@@ -318,6 +337,7 @@ def text_values(tr: list) -> dict:
     v["rqStoreAvgBeatsWm"] = _w(sum(r["wm_avg"] == "Average" for r in stores))
     v["rqStoreWmBeatsAvg"] = _w(sum(r["wm_avg"] == "World model" for r in stores))
     v["rqStoreLevel"] = _w(sum(r["wm_avg"] == "Neither" for r in stores))
+    v["rqStoreWmLowest"] = _w(sum(r["score"]["world_model"] < r["score"]["ensemble_2"] for r in stores))
     v["rqLgbFaItemLoFrac"] = "two thirds" if min(r["fa"]["lightgbm"] for r in items) < 0.67 else \
         f"{100 * min(r['fa']['lightgbm'] for r in items):.0f}\\%"
     return v

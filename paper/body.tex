@@ -57,7 +57,7 @@ against, which no public data set carries, and is left for work with an
 industry partner. Of the four Ps of retail, the study covers price and
 promotion, through the plan inputs these data record; product and place are out
 of scope. Every analysis was written down before it ran; the few added after
-the first results were read are marked where they appear.
+the first results were read are listed in Section~\ref{sec:limits}.
 
 Section~\ref{sec:framework} sets out the framework, and the results follow it
 part by part: grain, the nature of the line, seen and unseen data, and
@@ -66,8 +66,8 @@ transferability, with the broad view last.
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figs/fig_study.pdf}
-\caption{\textbf{Every result is scored on rolling windows that no choice of
-setting saw, and the forecast recommended is the average of the two tuned
+\caption{\textbf{Every result of Section~\ref{sec:results} is scored on rolling
+windows that no choice of setting saw, and the forecast recommended is the average of the two tuned
 models.} \textbf{(a)} Windows by data set, in windows before the end of the data:
 the rolling windows scored in this paper; and the development and final windows
 of the first version, which are not scored here. The searches that tuned each
@@ -398,7 +398,9 @@ where $t_j$ is the series' first period with sales and $w_j$ is its share of the
 level's dollar sales (units on Favorita) over the last weeks of training. We
 report item by store, where orders and promotions are decided, the chain total,
 which a financial plan is set against, and the mean over all levels (the M5
-score). Lower is better.
+score). Each Dominick's data set is one category, so its category level repeats
+the total and its category-by-store level repeats the store level; the results
+count each distinct level once, four levels on Dominick's. Lower is better.
 
 % =====================================================================
 \section{Models}
@@ -573,7 +575,7 @@ list was fixed without it. Chronos-Bolt and TimesFM from history alone were
 not run on Favorita either. \emph{TimesFM}~\cite{timesfm,timesfm25}:
 the 200M-parameter TimesFM~2.5 checkpoint given each series' last 512 periods;
 we use its mean output, chosen in the first version because its median forecast
-fell 27\% to 31\% below M5 totals. \emph{TimesFM with the plan}: the same model
+fell well below M5 totals, as the median of intermittent daily sales does. \emph{TimesFM with the plan}: the same model
 through its covariate method, a linear model on the plan inputs fitted over
 groups of 2,048 series, then TimesFM on what that model leaves.
 \emph{Chronos-Bolt}~\cite{chronos}: the base checkpoint, zero-shot, the mean of

@@ -15,7 +15,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from make_rq_tables import CELL, KEYS, _w  # noqa: E402
+from make_rq_tables import CELL, DUPLICATE_LEVELS, KEYS, _w  # noqa: E402
 
 A = ROOT / "results" / "analysis_tuned"
 GEN = ROOT / "paper" / "generated"
@@ -39,12 +39,19 @@ def shade_low(vals: list[float], colours: list[str] | None = None) -> list[str]:
     return out
 
 
+def _dedup(d: pd.DataFrame) -> pd.DataFrame:
+    """Each Dominick's set is one category: its category levels repeat other levels and are counted once."""
+    if "level" in d and "key" in d:
+        d = d[~(d.key.astype(str).str.startswith("dominicks") & d.level.isin(DUPLICATE_LEVELS))]
+    return d
+
+
 def _read(path: Path) -> pd.DataFrame:
-    return pd.read_csv(path) if path.exists() else pd.DataFrame()
+    return _dedup(pd.read_csv(path)) if path.exists() else pd.DataFrame()
 
 
 def _cat(*paths: Path, keys=("key", "set", "origin", "model", "level")) -> pd.DataFrame:
-    frames = [pd.read_csv(p) for p in paths if p.exists()]
+    frames = [_dedup(pd.read_csv(p)) for p in paths if p.exists()]
     if not frames:
         return pd.DataFrame()
     d = pd.concat(frames, ignore_index=True)
@@ -58,7 +65,7 @@ COMP = [("world_model", "WM"), ("lightgbm", "LGB"), ("ensemble_2", "Avg"), ("ens
 
 
 def comparison(v: dict) -> str:
-    tuned = pd.read_csv(A / "scores.csv").query("set == 'rolling'")
+    tuned = _read(A / "scores.csv").query("set == 'rolling'")
     comp = _cat(A / "comparison" / "scores.csv", A / "comparison_rest" / "scores.csv").query("set == 'rolling'")
     sf = _cat(ROOT / "results/paper1_revision/scores/studyF_scores_daily.csv",
               ROOT / "results/paper1_revision/scores/studyF_scores_weekly.csv")
@@ -116,7 +123,7 @@ Data set & """ + head + r"""\\
 
 # ------------------------------------------------------------------ ensemble ablation
 def ablation(v: dict) -> str:
-    sc = pd.read_csv(A / "ablation" / "scores.csv")
+    sc = _read(A / "ablation" / "scores.csv")
     names = [("ensemble", "Three-model"), ("without_world_model", "No world model"), ("without_lightgbm", "No LightGBM"),
              ("without_timesfm", "No TimesFM"), ("fitted_all_levels", "Fitted weights")]
     rows = []
@@ -171,6 +178,12 @@ def perturbation(v: dict) -> str:
             x = occ.xs((m, inp), level=("model", "input")) if (m, inp) in occ.droplevel(0).index else pd.Series(dtype=float)
             v[f"supPert{itag}Helps{tag}"] = _w(int((x > 0).sum()))
     v["supPertSets"] = _w(int(d.key.nunique()))
+    un = d[(d.input == "whole_plan") & (d.operation == "occlude")].groupby(["key", "model"]).units_change_on.mean()
+    for m, tag in (("world_model", "Wm"), ("lightgbm", "Lgb")):
+        x = 100 * un.xs(m, level="model")
+        v[f"supPertUnits{tag}Lo"], v[f"supPertUnits{tag}Hi"] = f"{-x.max():.0f}", f"{-x.min():.0f}"
+    h = d[(d.model == "world_model") & d.input.str.startswith("history_last")].groupby("key").dbottom.max()
+    v["supPertHistHelps"] = _w(int((h > 0).sum()))
     rows = []
     for k, name in KEYS.items():
         cells = []
@@ -229,6 +242,7 @@ def mechanism(v: dict) -> str:
     v["supTimingLo"], v["supTimingHi"] = f"{d2.groupby('data').timing.mean().min():.0f}", f"{d2.groupby('data').timing.mean().max():.0f}"
     v["supPersistTwoLo"] = f"{100 * d2.groupby('data').persist_h2.mean().min():.0f}"
     v["supPersistTwoHi"] = f"{100 * d2.groupby('data').persist_h2.mean().max():.0f}"
+    v["supPersistRiseSets"] = _w(int((d2.groupby('data').persist_h2.mean() > 0).sum()))
     v["supProbeGainMax"] = f"{max(probe_gain):.2f}" if probe_gain else "--"
     v["supProbeGainMin"] = f"{min(probe_gain):.2f}" if probe_gain else "--"
     return r"""\begin{table}[t]
@@ -285,8 +299,9 @@ def decisions(v: dict) -> str:
         g = d[(d.key == k) & (d.decision == "replenish_0.8")]
         if not g.empty:
             order[k] = {m: g[g.model == m].cost.sum() for m, _ in TRIO}
-    v["supOrderAvgBelowLgb"] = _w(sum(o["ensemble_2"] < o["lightgbm"] for o in order.values()))
-    v["supOrderAvgBelowWm"] = _w(sum(o["ensemble_2"] < o["world_model"] for o in order.values()))
+    # below means below at the table's three decimals (snacks against LightGBM is 0.99994 and shows as 1.000)
+    v["supOrderAvgBelowLgb"] = _w(sum(round(o["ensemble_2"] / o["lightgbm"], 3) < 1 for o in order.values()))
+    v["supOrderAvgBelowWm"] = _w(sum(round(o["ensemble_2"] / o["world_model"], 3) < 1 for o in order.values()))
     v["supOrderSets"] = _w(len(order))
     v["supCatPlanSets"] = _w(len(rows))
     return r"""\begin{table}[t]
@@ -347,7 +362,7 @@ Data set & WM & LGB & Avg & WM & LGB & Avg\\
 
 def reconcile(v: dict) -> str:
     r = _cat(A / "reconcile.csv", *sorted(A.glob("idr*/reconcile.csv")), keys=("key", "origin", "method", "level"))
-    s = pd.read_csv(A / "scores.csv").query("set == 'rolling'")
+    s = _read(A / "scores.csv").query("set == 'rolling'")
     if r.empty:
         return "% reconciliation pending\n"
     rows = []

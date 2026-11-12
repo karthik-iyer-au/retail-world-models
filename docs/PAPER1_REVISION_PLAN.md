@@ -1302,3 +1302,15 @@ for all nine data sets (analysis_tuned/decisions_fixed_<key>). The replenishment
 The plan-input test (input_perturbation.py, tuned models) ran as one job and finished three Dominick's categories
 in about twelve hours. The remaining data sets were started as the same script, one data set per container
 (perturbation_<key>.csv), with no change to the method; the table reads a data set from its own file where there is one.
+
+### 13 November: Dominick's levels counted once (correction after the fresh-reader check)
+Each Dominick's data set is one category, so its category level equals the total and its category-by-store level
+equals the store level in every window. The tables and counts of the results had counted these twice (60 confidence-set
+cells, 312 paired comparisons). They now count each distinct level once (48 cells, 240 comparisons), and the overall
+score of a Dominick's data set in the tables is the mean over its four distinct levels. No model was rerun. The
+searches scored the six levels as written; their records are left as they ran. Effects: the average's confidence-set
+share is 39 of 48 (was 51 of 60); the world model's short-history lead over LightGBM is on seven data sets (frozen
+entrees joins Frat as an exception, 1.473 against 1.471).
+Other fixes from the same check: Frat added to the data sets where LightGBM drifts in total over the block; the
+store-order count read at the table's precision (six, snacks level); RQ3 on new stores states that the world model and
+the average are level; hedged sentences in the limitations restated.

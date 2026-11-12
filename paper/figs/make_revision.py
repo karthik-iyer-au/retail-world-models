@@ -999,7 +999,7 @@ it changed in at most half its comparisons.}} Each row is one change to the Twee
 model, scored on the development windows against the configuration with the same data, windows and every other
 setting. WRMSSE: overall (mean of the hierarchy levels), averaged over the seeds and windows both ran and over the
 data sets in the row. Lower: the number of data sets (or category and model pairs) in which the change had the lower
-error. The weight after a promotion comes from study E, where the world model was rerun in the same job. Rows marked
+error. The weight after a promotion comes from a separate rerun of the world model in the same job. Rows marked
 not run were configured but have no full-data run in the records. Built by \\texttt{{scripts/loss\\_ledger.py}}.}}
 \\label{{tab:losses}}
 \\footnotesize
