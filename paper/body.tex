@@ -13,10 +13,10 @@ demand at a different grain and over a different span of time.
 Since there is no single grain, there is no reason to expect one model to be
 the most accurate at every grain and every horizon. Retailers do not want a
 separate model at each grain either. Separate models disagree, and value leaks
-at each hand-off from a coarse long-range plan to a finer short-range one: the
+at each hand-off from a coarse long-range plan to a finer short-range one. The
 annual plan agreed with a supplier is broken into promotion blocks, weeks and
-store orders, and where the finer forecasts do not add back to the plan the gap
-is paid for in stock, markdowns or lost sales. The forecasting literature treats
+store orders. Where the finer forecasts do not add back to the plan, the gap is
+paid for in stock, markdowns or lost sales. The forecasting literature treats
 this as coherence across the levels of the product and store hierarchy
 \cite{hyndman2011,mint} and across levels of time \cite{athanasopoulos2017},
 usually by forecasting each level and reconciling the forecasts. This paper
@@ -29,7 +29,7 @@ combination of models, does that best.
 
 Lines differ as much as grains do. In grocery a short head of fast lines
 carries most of the units, and a long tail of slow lines sells a few units a
-week or none; on the Dominick's categories studied here, \rqFastShareDomLo{}
+week or none. On the Dominick's categories studied here, \rqFastShareDomLo{}
 to \rqFastShareDomHi{}\% of the items make 80\% of unit sales. Ranges also
 change: items are added and delisted and stores open, so part of every forecast
 is for a line or a store with little or no history. A forecast that serves the
