@@ -45,7 +45,7 @@ def label(config_name: str) -> tuple[str, str, str] | None:
         if m:
             return m.group(1), "rolling", m.group(2)
         # the transfer test's runs, for the forecast by history on kept-out series (plan entry of 12 November 2026)
-        m = re.fullmatch(r"ftransfer_(dominicks_\w{3}|frat|m5|favorita)_(item|store)_(world_model|lightgbm)_(kept_out|trained_on_all)", n)
+        m = re.fullmatch(r"ftransfer_(dominicks_\w{3}|frat|m5|favorita)_(item|store)_(world_model|lightgbm)(?:_pooled)?_(kept_out|trained_on_all)", n)
         if m:
             return m.group(1), f"{m.group(4)}_{m.group(2)}", m.group(3)
         m = re.fullmatch(r"(?:cleanrev|rev)_(dominicks_\w{3}|frat|m5|favorita)_rolling_(timesfm_plan)", n)
@@ -182,6 +182,7 @@ def main(argv=None):
                     got = kept_out_scores(results, rows, key, wset)
                     acc["keptout"] += got
                     print(key, wset, sorted(rows["model"]), len(got), flush=True)
+                    save(acc, out)
                 continue
             if "keptout" in acc and len(acc) == 1:
                 continue
