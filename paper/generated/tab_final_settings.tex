@@ -1,0 +1,25 @@
+\begin{table*}[t]
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\caption{The tuned settings used for every result of Section~\ref{sec:results}, read from the final configurations.
+Copies: forecasts averaged over that many fits with different seeds. Size: state width by encoder layers. Steps:
+training steps (and pretraining steps on the latent objective, where used). Periods: training periods read. The
+changes each search kept are listed in Table~\ref{tab:loop}.}
+\label{tab:final-settings}
+\begin{tabular}{l ccccc cccc}
+\toprule
+ & \multicolumn{5}{c}{World model} & \multicolumn{4}{c}{LightGBM}\\
+\cmidrule(lr){2-6}\cmidrule(lr){7-10}
+Data set & Copies & Size & Steps & Periods & Loss & Copies & Rounds & Periods & Objective\\
+\midrule
+M5 & 1 & 128$\times$3 & 30,000 & 730 & Hurdle negative binomial & 1 & 800 & 730 & Tweedie \\
+Favorita & 5 & 128$\times$3 & 30,000 & 730 & Hurdle negative binomial & 5 & 800 & 730 & Poisson \\
+Frat & 5 & 64$\times$2 & 3,000 & 90 & Tweedie & 5 & 500 & 90 & Tweedie \\
+Analgesics & 5 & 64$\times$2 & 6,000 & 156 & Tweedie & 5 & 500 & 156 & Tweedie \\
+Bottled juice & 5 & 64$\times$2 & 6,000 & 156 & Tweedie & 5 & 500 & 156 & Poisson \\
+Cheese & 5 & 64$\times$2 & 6,000 & 156 & Tweedie & 5 & 500 & 156 & Tweedie \\
+Frozen entrees & 5 & 64$\times$2 & 6,000 & 156 & Tweedie & 5 & 500 & 156 & Tweedie \\
+Soft drinks & 5 & 64$\times$2 & 6,000 & 156 & Tweedie & 5 & 500 & 156 & Tweedie \\
+Snacks & 5 & 64$\times$2 & 6,000, pretrained 18,000 steps & 156 & Negative binomial & 5 & 1000 & 156 & Tweedie \\
+\bottomrule
+\end{tabular}
+\end{table*}

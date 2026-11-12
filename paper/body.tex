@@ -397,34 +397,36 @@ score). Lower is better.
 \section{Models}
 \label{sec:models}
 
-Table~\ref{tab:models} lists every model. Each trained model's technique, loss
-and settings are in this section and Table~\ref{tab:settings}; the constraints
-each works within are in Appendix~\ref{sec:constraints}.
+Table~\ref{tab:models} lists every model. The world model and LightGBM were
+each tuned on every data set by the same search (Section~\ref{sec:loop}); their
+final settings are in Table~\ref{tab:final-settings}, and the constraints each
+works within are in Appendix~\ref{sec:constraints}. Each tuned model's forecast
+is the average of five fits with different seeds, except on M5, where one fit
+was kept to bound the cost of its larger model.
 
 \begin{table}[t]
 \centering
 \caption{\textbf{Every forecast compared.} Plan: sees the plan for the
-forecast periods. Trained: fitted on the data set. Timestral is also run from
-history alone.}
+forecast periods. Trained: fitted on the data set. Tuned: settings set by the
+search of Section~\ref{sec:loop}.}
 \label{tab:models}
 \footnotesize
 \renewcommand{\arraystretch}{1.15}
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{p{0.33\columnwidth}ccp{0.38\columnwidth}}
+\begin{tabular}{p{0.30\columnwidth}cccp{0.33\columnwidth}}
 \toprule
-\textbf{Model} & \textbf{Plan} & \textbf{Trained} & \textbf{Technique and loss} \\
+\textbf{Model} & \textbf{Plan} & \textbf{Trained} & \textbf{Tuned} & \textbf{Technique} \\
 \midrule
-Ensemble & yes & yes & Equal-weight mean of world model, LightGBM, TimesFM with the plan \\
-World model & yes & yes & Item state rolled forward under the plan; Tweedie \\
-Lift model & yes & yes & Same network, no roll-forward; Tweedie \\
-LightGBM & yes & yes & Direct tree model per store; Tweedie \\
-Temporal Fusion Transformer & yes & yes & Attention over history and plan; negative binomial \\
-Graph model (M5 final only) & yes & yes & LightGBM's inputs with message passing; Tweedie \\
-TimesFM with the plan & yes & no & TimesFM~2.5 with its covariate method \\
-Timestral with the plan & yes & no & Timestral-28M with known future inputs \\
-TimesFM & no & no & TimesFM~2.5, 512 periods of units \\
-Chronos-Bolt & no & no & Chronos-Bolt base \\
-Seasonal naive & no & no & Sales one season earlier \\
+Average & yes & yes & yes & Equal-weight mean of the world model and LightGBM \\
+Three-model ensemble & yes & yes & yes & Equal-weight mean of the world model, LightGBM and TimesFM with the plan \\
+World model & yes & yes & yes & Item state rolled forward under the plan \\
+LightGBM & yes & yes & yes & Direct gradient-boosted trees \\
+Temporal Fusion Transformer & yes & yes & no & Attention over history and plan \\
+TimesFM with the plan & yes & no & no & TimesFM~2.5 with its covariate method \\
+Timestral with the plan & yes & no & no & Timestral-28M with known future inputs \\
+TimesFM & no & no & no & TimesFM~2.5, 512 periods of units \\
+Chronos-Bolt & no & no & no & Chronos-Bolt base \\
+Seasonal naive & no & no & no & Sales one season earlier \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -485,57 +487,35 @@ of lift, not an identified estimate of where promoted sales come from, because
 promotions are not assigned at random. On Dominick's three fits with different
 seeds are averaged in each run.
 
-\input{generated/tab_settings}
-
-\paragraph{What the state holds}
-A probe on the frozen world model shows that the carried state takes in the
-plan (Figure~\ref{fig:readback}): the day's discount can be read back from the
-rolled state with $R^2$ 0.58 to 0.83 across three M5 windows, against $-0.01$ to
-0.02 from the state before the window, and still at 0.46 to 0.59 seven days
-later. That the plan is in the state does not show that the forecast uses it
-well, which \S\ref{sec:res-plan} tests.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\columnwidth]{figs/fig_readback.pdf}
-\caption{\textbf{The rolled state holds the plan, and still holds most of it a
-week later.} $R^2$ of a ridge read-out of the day's discount from the frozen
-world model's state, fitted on half of 6,000 item-store pairs and scored on the
-other half. Blue: the state after rolling through the window's plan. Grey: the
-state before the window. Seed 1 in three M5 windows.}
-\label{fig:readback}
-\end{figure}
-
-\subsection{Lift model}
-The same model without the roll-forward: $s_{t+h}(p) = s_t$ for every $h$. On
-M5, Dominick's and Favorita the two share encoder, readout, size, inputs, training
-steps and regularisation, so the difference between them is the carried state; it
-is the transition ablation. On Frat the lift model's settings, carried over from
-the first version, add readout dropout~\cite{dropout} of 0.2 and decoupled weight
-decay~\cite{adamw} of 0.01 that the world model does not use; study G reruns it
-with the world model's settings (\S\ref{sec:res-adds}).
+\input{generated/tab_final_settings}
 
 \subsection{Training losses}
 \label{sec:losses}
 
 \paragraph{The loss used}
-The world model and the lift model are trained on sales relative to the item's
-level, $z = y/\ell_i$, with the Tweedie deviance for a mean $\mu$ and power
+The world model is trained on sales relative to the item's level,
+$z = y/\ell_i$, by default with the Tweedie deviance for a mean $\mu$ and power
 $p = 1.5$,
 \begin{equation}
 L_p(z, \mu) = -\frac{z\,\mu^{1-p}}{1-p} + \frac{\mu^{2-p}}{2-p},
 \end{equation}
 the negative log-likelihood, up to terms free of $\mu$, of a compound
 Poisson--gamma distribution with a point mass at zero~\cite{jorgensen1987}.
-Because the loss is on $z$, every item counts alike whatever its volume.
-LightGBM uses the same deviance with $p = 1.1$ on units, so large items count for
-more, and the Temporal Fusion Transformer a negative binomial likelihood on
-units.
+Because the loss is on $z$, every item counts alike whatever its volume. The
+search replaced it on three data sets (Table~\ref{tab:final-settings}): on M5
+and Favorita by a hurdle negative binomial, a probability of any sale times a
+negative binomial for the units sold when there is one, and on snacks by a
+negative binomial; in each the spread of the negative binomial is learnt for
+each item. LightGBM uses the Tweedie deviance with $p = 1.1$ on units, so large
+items count for more, or the Poisson deviance where its search chose it, and the
+Temporal Fusion Transformer a negative binomial likelihood on units.
 
 \paragraph{The changes tried}
 Each change below adds to or replaces $L_p$ for one batch $B$ of item, store and
-period examples; Table~\ref{tab:losses} scores every one against the
-configuration it changed. None became a default.
+period examples. Table~\ref{tab:losses} scores each against the configuration it
+changed in the first revision, where none was kept; the search of
+Section~\ref{sec:loop} tried them again on the tuned settings, with the
+likelihoods above, and kept the changes listed in Table~\ref{tab:loop}.
 \begin{itemize}\setlength{\itemsep}{1pt}
 \item \emph{Negative binomial} on units, $-\log\mathrm{NB}(y;\,\mu\ell_i, r)$
 with the spread $r$ learnt.
@@ -565,25 +545,26 @@ forecast loss.
 
 \input{generated/rev_tab_losses}
 
-\subsection{Ensemble}
-The equal-weight mean of the forecasts of the world model, LightGBM and TimesFM
-with the plan for each item, store and period, fixed on 13 October 2026 before
-any revision result, with no weights fitted. Its intervals come from its
-own past errors like any other model's (\S\ref{sec:setup}).
+\subsection{Average and ensemble}
+The average is the equal-weight mean of the tuned world model's and the tuned
+LightGBM's forecasts for each item, store and period, with no weights fitted.
+The three-model ensemble adds TimesFM with the plan, also with equal weights; it
+was fixed on 13 October 2026, before any result of the revision, and is reported
+beside the average. The forecast by history of Section~\ref{sec:rq-broad} uses
+the world model alone for series with less than 26 weeks of sales and the
+average for the rest.
 
 \subsection{Comparison models}
-\emph{LightGBM}~\cite{lightgbm}: one direct model per store, Tweedie loss,
-sales at lags no shorter than the horizon, rolling averages and spread of
-sales, price against the item's highest recent price, calendar and plan inputs.
+\emph{LightGBM}~\cite{lightgbm}: a direct model, one per store on M5 and
+Favorita, reading sales at lags no shorter than the horizon, rolling averages and
+spread of sales, price against the item's highest recent price, the calendar and
+the plan inputs, with the item as a label; tuned as in Table~\ref{tab:final-settings}.
 \emph{Temporal Fusion Transformer}~\cite{tft}: one model per data set on
 Dominick's and Frat, fitted on the last 156 weeks with the plan as known future
 inputs and a negative binomial likelihood, 1,500 steps; it was not run on M5, where its
 training cost was beyond the compute available, nor on Favorita, whose model
 list was fixed without it. Chronos-Bolt and TimesFM from history alone were
-not run on Favorita either. \emph{Graph model}: LightGBM's
-inputs with one round of GraphSAGE-style message passing~\cite{graphsage}
-between the same item in other stores and items of the same department in the
-same store; run on the M5 final windows only. \emph{TimesFM}~\cite{timesfm,timesfm25}:
+not run on Favorita either. \emph{TimesFM}~\cite{timesfm,timesfm25}:
 the 200M-parameter TimesFM~2.5 checkpoint given each series' last 512 periods;
 we use its mean output, because its median forecasts 27\% to 31\% below M5
 totals (\S\ref{sec:dropped-first}). \emph{TimesFM with the plan}: the same model

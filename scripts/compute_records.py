@@ -8,6 +8,7 @@ start and finish times.
 """
 import argparse
 import json
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -19,10 +20,19 @@ def main(argv=None):
     p.add_argument("--out", required=True)
     a = p.parse_args(argv)
     rows = []
-    for m in Path(a.root).rglob("manifest.json"):
+    def manifests(folder: Path, depth: int):
+        # run folders sit one to three levels down; partial saves and other "_" folders are skipped
+        for e in os.scandir(folder):
+            if not e.is_dir() or e.name.startswith("_"):
+                continue
+            m = Path(e.path) / "manifest.json"
+            if m.exists():
+                yield m
+            elif depth > 1:
+                yield from manifests(Path(e.path), depth - 1)
+
+    for m in manifests(Path(a.root), 3):
         rel = m.parent.relative_to(a.root)
-        if rel.parts[0].startswith("_"):
-            continue
         try:
             d = json.loads(m.read_text())
         except (OSError, json.JSONDecodeError):
