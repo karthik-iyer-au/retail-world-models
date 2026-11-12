@@ -91,9 +91,7 @@ models. Sections~\ref{sec:data} to \ref{sec:setup} give the data, the models and
 the experimental setup. Section~\ref{sec:results} reports the results,
 Section~\ref{sec:dropped} what was tried and dropped, and
 Sections~\ref{sec:discussion} to \ref{sec:conclusion} discuss what the results
-mean for a retailer, their limits, and conclude. The development study is in
-Supplement~\ref{sec:supplementdev}, and the final windows and dropped changes of
-the first version in Supplement~\ref{sec:supplementfinal}.
+mean for a retailer, their limits, and conclude.
 
 % =====================================================================
 \section{Framework}
@@ -304,21 +302,18 @@ transition so that what the carried state adds is measured on its own.
 
 \subsection{What this paper adds}
 
-Two findings here are not new. That an equal-weight average of different models
-is hard to beat, and that fitted weights rarely help, is the forecast
-combination puzzle~\cite{smithwallis2009,wang2023}; that a gradient-boosted tree
-is a strong single model on retail panels was the lesson of M5~\cite{m5accuracy}.
-Hierarchical forecasting asks how to make forecasts at different levels agree,
-and scores them over all levels together~\cite{hyndman2011,mint,m5accuracy}. This
-paper asks a different question: which model to choose for the grain at which a
-given decision is made, when the price and promotion plan is known. It adds
-three things to the work above. It scores each grain separately, ties each to
-the decision made there, and reports how many models each grain's data can
-separate, rather than one score averaged over levels; on these data the answer
-differed between fine and coarse grains. It compares trained plan-aware models
-with pretrained models given the plan as covariates on the same windows and
-grains. And it measures, inside the average, what a model that carries a state
-forward under the plan adds beyond the same network without it.
+Two results here are not new: an equal-weight average of different models is
+hard to beat \cite{smithwallis2009,wang2023}, and gradient-boosted trees are
+strong on retail panels \cite{m5accuracy}. The paper adds four things. It scores
+one forecast at every grain a retailer decides at, period by period and over the
+whole promotion block, so that the choice of model is read grain by grain rather
+than from one score averaged over levels. It reads the same comparison by the
+kind of line, separating the fast lines that carry most sales from the slow tail
+and from lines with short history. It tests what each model loses on items and
+stores it was not trained on, and whether its settings and training data carry
+across retailers. And it gives every model under comparison the same search for
+its settings, so that the comparison between a world model and gradient-boosted
+trees is between two tuned models.
 
 % =====================================================================
 \section{Data}

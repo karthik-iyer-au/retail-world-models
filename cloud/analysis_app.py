@@ -40,9 +40,7 @@ def analyse(commit: str, keys: list[str], parts: list[str], boot: int, out_dir: 
     return done.stdout[-4000:] + done.stderr[-4000:]
 
 
-@app.function(image=image, volumes={DATA: data_volume, RESULTS: results_volume}, cpu=16, memory=96 * 1024, gpu="L4",
-              timeout=12 * 3600)
-def script(commit: str, name: str, args: list[str], out: str) -> str:
+def _script(commit: str, name: str, args: list[str], out: str) -> str:
     """Any analysis script over the tuned runs (the supporting analyses rerun on the tuned models, plan entry of
     12 November 2026): `{runs}` in args is the folder of linked runs, `{out}` rwm-results/<out>."""
     _checkout(commit)
@@ -60,10 +58,23 @@ def script(commit: str, name: str, args: list[str], out: str) -> str:
     return done.stdout[-4000:] + done.stderr[-4000:]
 
 
+# the saved world models run on a GPU; any of these that is free (an L4 alone waited for hours on 12 November)
+@app.function(image=image, volumes={DATA: data_volume, RESULTS: results_volume}, cpu=16, memory=96 * 1024,
+              gpu=["L4", "A10G", "L40S", "A100-40GB", "T4"], timeout=12 * 3600)
+def script(commit: str, name: str, args: list[str], out: str) -> str:
+    return _script(commit, name, args, out)
+
+
+@app.function(image=image, volumes={DATA: data_volume, RESULTS: results_volume}, cpu=16, memory=96 * 1024,
+              timeout=12 * 3600)
+def script_cpu(commit: str, name: str, args: list[str], out: str) -> str:
+    return _script(commit, name, args, out)
+
+
 @app.local_entrypoint()
 def main(commit: str, keys: str = "", parts: str = "scores,paired,mcs", boot: int = 1000, run: str = "", args: str = "",
-         out: str = "analysis_tuned"):
-    if run:  # --run <script> --args "<space-separated args>"
-        print(script.remote(commit, run, args.split(), out))
+         out: str = "analysis_tuned", cpu: bool = False):
+    if run:  # --run <script> --args "<space-separated args>" [--cpu]
+        print((script_cpu if cpu else script).remote(commit, run, args.split(), out))
     else:
         print(analyse.remote(commit, [k for k in keys.split(",") if k], parts.split(","), boot, out))
