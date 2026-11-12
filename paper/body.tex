@@ -199,6 +199,31 @@ structure. Dominick's Finer Foods ran pricing experiments across its
 stores~\cite{hoch1995}, and its scanner data are behind much of this
 work~\cite{dominicks}.
 
+\subsection{Decisions across grains and lines}
+
+Retail decisions read the same demand at different grains and over different
+spans: replenishment item by store by day, promotions item by week, category
+reviews by week, and range, space and supplier terms over a year or more
+\cite{fildes2022}. Forecasts made separately for each grain need not agree, and
+the literature restores agreement by reconciliation, across the product and store
+hierarchy \cite{hyndman2011,mint}, across levels of time
+\cite{athanasopoulos2017}, and across both together
+\cite{kourentzes2019crosstemporal}. The alternative studied here, a single
+forecast at the finest grain summed upward, is coherent by construction and is
+the way the M5 competition scored its entries \cite{m5accuracy}; its cost is
+that one model must serve every grain.
+
+Lines also differ in how much they sell and how much history they have. A small
+share of items carries most of the units, and the long tail sells a few units a
+week or none, which led to dedicated methods for intermittent demand
+\cite{croston,syntetos2005}. Lines with little or no history are forecast from
+the histories of similar products: by matching a new product to the life-cycle
+curves of earlier ones \cite{hu2019newproduct}, or from product attributes
+\cite{vansteenbergen2020}. Global models trained across many series
+\cite{montero2021} can forecast a series they were not trained on from its
+recent sales alone, which is how the models in this study meet new items and
+new stores.
+
 \subsection{Hierarchies, combinations and evaluation}
 
 Forecasts that must add up across a hierarchy are studied as hierarchical

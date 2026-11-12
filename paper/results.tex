@@ -672,62 +672,60 @@ windows absorb part of it, not all.
 \section{Discussion}
 \label{sec:discussion}
 
-The grain a decision is made at bore on which model forecast it best on these
-data (Table~\ref{tab:advice}). The rows are observations on these data sets,
-within the scope set out in \S\ref{sec:limitations}, not a ranking for every
-retailer.
+Table~\ref{tab:advice} maps the rule of Section~\ref{sec:rq-broad} to the
+decisions a retailer makes from the forecast. Each row is what the tuned models
+did on the nine data sets studied, within the scope of
+Section~\ref{sec:limits}.
 
 \begin{table*}[t]
 \centering
-\caption{\textbf{Each decision has its own grain, and on these data the model
-that forecast it best differed by grain.} Observations on the four public data
-sets of this paper.}
+\caption{The decisions a retailer makes from one item-by-store forecast, and what
+the tuned models did at each on the nine data sets studied.}
 \label{tab:advice}
 \footnotesize
 \renewcommand{\arraystretch}{1.2}
-\begin{tabular}{p{0.23\textwidth}p{0.18\textwidth}p{0.51\textwidth}}
+\begin{tabular}{p{0.21\textwidth}p{0.17\textwidth}p{0.18\textwidth}p{0.36\textwidth}}
 \toprule
-\textbf{Decision} & \textbf{Grain} & \textbf{What was observed on these data} \\
+\textbf{Decision} & \textbf{Grain} & \textbf{Forecast to use} & \textbf{What the tuned models did} \\
 \midrule
-Store orders and inventory & Item by store, day or week & The average lowest error on \rgrain{ixs}{ens}{best} of nine, LightGBM on \rgrain{ixs}{lgb}{best}; one or two models in the confidence set; the average or LightGBM lowest order cost on every data set at critical ratios 0.5 and 0.8 \\
-Supplier funding, promotion and price decisions & Item across stores, by week, under a planned change & The average lowest error on \rgrain{item}{ens}{best} of nine; a model that reads the plan is needed, since history alone forecast \promoTfmLo\% to \promoTfmHi\% of promoted-week sales; after a promotion the world model forecast more rather than the dip \\
-Category performance by store & Category by store, by week & Not separated by these windows: the average lowest on \rgrain{catstore}{ens}{best}, LightGBM on \rgrain{catstore}{lgb}{best}; a median of \rgrain{catstore}{set}{median} models in the confidence set \\
-Category sales and margin plans & Category by store over the window; category across stores & The average or LightGBM lowest planning cost on seven of eight, ahead of the world model by a paired interval; the world model lowest on M5; by WRMSSE not separated (median \rgrain{cat}{set}{median} models in the set) \\
-Financial plan & Chain total & Not separated by these windows; the average in the confidence set on all nine \\
-Choosing a model & Any & Score several windows with paired tests; one test month reversed the ranking on M5, and runs on different machines differed by as much as the changes tested \\
-Adopting a new pretrained model & Any & Check its totals and its upper quantiles before use; Timestral's tails made its mean forecast 3 to 6 times sales in analgesics \\
+Store orders and inventory & Item by store, by day or week & The average & Lowest error at the item levels on all nine data sets; clearly less accurate than either model in at most 8 of 100 paired comparisons \\
+Promotion and supplier funding & Item across stores, by week and over the promotion block & The average & Lowest at the item levels on all nine; over the whole block lowest on five and second on four; LightGBM alone drifts in total on M5, Favorita and soft drinks \\
+Category performance & Category by store and category, by week & The average & Lowest at store grain and above on eight of nine; LightGBM lowest on snacks \\
+Financial plan & Chain total & The average & As for category performance; the total is the sum of the same item-by-store forecast, so it agrees with every plan below it \\
+New items and range changes & Item by store, items not yet trained on & The world model alone & Clearly more accurate than the average on all five data sets tested; LightGBM forecast 66 to 93\% of actual sales on these items \\
+New stores & Item by store, stores not yet trained on & The average & The average and the world model each clearly ahead on one data set and level on three; LightGBM clearly behind the world model on four of five \\
+Choosing for another retailer & Any & Rerun the comparison & The order of models is a finding on these data; every comparison, including those that lost here, should be rerun on the retailer's own data \\
 \bottomrule
 \end{tabular}
 \end{table*}
 
-\paragraph{Why an equal-weight average}
-On these data the three members failed in different places. LightGBM is the most accurate single
-model item by store on most data sets and the member the ensemble can least do
-without. TimesFM with the plan brings a pretrained view of each series' history.
-The world model is the weakest of the three alone, and the ensemble without it
-is less accurate item by store on \rcount{withoutworldmodelixsens} data sets. An average of three models whose errors
-differ has a lower mean error item by store than any of them on
-\rcount{enslowestixs} of nine data sets, and by the paired test beats LightGBM
-on \rcount{ensbeatslgbixs} of eight; weights fitted on a few earlier windows did not
-beat equal weights, as the forecast combination literature leads one to
-expect~\cite{smithwallis2009,wang2023}.
+\paragraph{Why the average works}
+The two tuned models are close in accuracy and wrong in different places. Across
+the nine data sets, each is clearly more accurate than the other in a similar
+number of paired comparisons (64 for the world model, 75 for LightGBM), and the
+data sets on which each leads differ. An equal-weight average of two forecasts
+whose errors differ is more accurate than either on most series, and no weights
+have to be estimated, which the forecast-combination literature finds is hard to
+beat \cite{smithwallis2009,wang2023}.
 
-\paragraph{What the carried state adds}
-Against the lift model, the world model on its own showed no detected difference
-in most data sets, and we detected it adding to the ensemble beyond its
-lift-model replacement only on \rcount{bothaddixslist} item by store. The carried state holds the plan (Figure~\ref{fig:readback}), but the
-rolled state does not predict sales beyond the window better than the state
-before it, and it carries a promotion forward as more lift rather than a dip.
-On these data we found little case for the carried state beyond the M5 totals,
-and where the world model helped the average we mostly could not tell its help
-from the lift model's.
+\paragraph{What the world model brings}
+The world model's contribution is clearest where the forecast has least to go
+on. On items it was not trained on it lost at most 0.040 in scaled error, against
+up to 0.313 for LightGBM, and forecast within 11\% of actual sales; LightGBM
+forecast as little as two thirds. It reads an item's recent sales into a state
+and carries that state forward under the plan, so it does not need the item in
+its training data, whereas LightGBM takes the item as one of its labels and has
+learned nothing for an item it was not trained on. The same carried state keeps its totals over the
+promotion block closer to actual sales than LightGBM's on M5, Favorita and soft
+drinks.
 
-\paragraph{Two cautions}
-A plan-driven forecast responds to plans unlike history with a size the data do
-not fix: one lift-model seed and Timestral's upper quantiles both produced
-forecasts many times any sale. And a forecast that is accurate item by store
-can be several percent off the category total, which is the number a merchant
-plans against.
+\paragraph{What the trees bring}
+LightGBM is the more accurate of the two on frozen entrees and snacks at every
+grain, and its block totals are closer on analgesics, bottled juice and snacks.
+It needs no pretraining and trains in minutes, and on lines with history it is
+as accurate as the world model on most data sets. On snacks, where the world
+model alone is weakest (1.009 overall against 0.865 for LightGBM), the average
+stays close to LightGBM at 0.884.
 
 % =====================================================================
 \section{Limitations and threats to validity}
@@ -813,18 +811,21 @@ data set. The decision costs are simulations under stated costs.
 \section{Conclusion}
 \label{sec:conclusion}
 
-On these data, which forecasting model worked best depended on the grain of the
-decision it serves. On four public data sets with price and promotion plans, an equal-weight
-average of a world model, LightGBM and TimesFM given the plan had the lowest
-error for items by store and items across stores on most data sets, with few
-models close to it; for categories and the chain total the best model changed
-from data set to data set and four to six windows did not separate several of
-them; and the category-planning cost was lowest for the average or LightGBM on
-seven of eight data sets. LightGBM was the strongest single model at the fine grains, and
-averaging added to it. These observations cover price and promotion on public
-data (\S\ref{sec:limitations}). The grain comparison itself, run over several windows
-with paired tests and the losing models stated, is what we propose a retailer
-repeats on its own data before choosing a model.
+A retailer makes decisions from the same demand at different grains, and on
+these data no single model was the most accurate at every grain. One forecast
+made item by store and summed upward, as the equal-weight average of a tuned
+world model and tuned gradient-boosted trees, was the most accurate choice at
+store grain and above on eight of nine data sets and at the item levels on all
+nine, on the fast lines and on the slow tail. For items the models had not been
+trained on, the world model alone was more accurate than the average on every
+data set tested, because LightGBM under-forecast them. Settings carried from one
+retailer's data to another's, and training on other retailers' data did not
+help. The rule that follows, the average everywhere and the world model alone
+for new items, is a finding on these data for forecasts of 8 weeks and 28 days
+under price and promotion plans. The comparison behind it, run over several
+windows with paired tests and every losing model reported, is what we propose a
+retailer reruns on its own data, and over its own planning horizons, before
+adopting it.
 
 \section{Reproducibility and compute}
 \label{sec:repro}
