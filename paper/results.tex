@@ -61,6 +61,18 @@ the error over all levels beat them in \supPFitAllBetter{} and lost in
 \subsection{What the world model's carried state does}
 \label{sec:sup-mechanism}
 
+\textbf{The tuned world model uses the timing of the plan, and carries a
+promotion forward as more sales rather than a dip.} Shuffling the plan's timing
+within each series makes its item-by-store error worse on all \supMechSets{}
+data sets, by \supTimingLo\% to \supTimingHi\% (Table~\ref{tab:sup-mechanism}):
+the forecast reads when a promotion runs, not only that one runs. A promotion and
+a price cut added in one period raise that period's forecast and still raise the
+next on most data sets (by \supPersistTwoLo\% to \supPersistTwoHi\% of the
+forecast without them), where shoppers who stocked up would buy less; the dip
+after a promotion is not in the forecast, as in the first version. The state
+rolled through the window predicts sales after it only a little better than the
+state before it (an $R^2$ gain of \supProbeGainMin{} to \supProbeGainMax{}).
+
 \input{generated/sup_tab_mechanism}
 
 \subsection{Decision costs, forecast ranges and reconciliation}
@@ -79,7 +91,27 @@ adds one error to learn from, the world model's ranges are too narrow
 windows (Table~\ref{tab:sup-intervals}).
 
 \input{generated/sup_tab_intervals}
+
+\paragraph{Decision costs}
+The average gives the lowest category-plan cost on \supCatPlanAvgLowest{} of
+\supCatPlanSets{} data sets and LightGBM on the other \supCatPlanLgbLowest{}
+(frozen entrees and snacks); the world model alone is lowest on none
+(Table~\ref{tab:sup-decisions}). Ordering each forecast's 0.8 quantile for every
+item and store costs less with the average than with LightGBM on
+\supOrderAvgBelowLgb{} data sets and less than with the world model on
+\supOrderAvgBelowWm{}. Both are simulations under stated costs, not business
+results.
+
 \input{generated/sup_tab_decisions}
+
+\paragraph{Reconciliation}
+Summing the average upward is more accurate over all levels than the best
+reconciled ETS forecast on \supAvgBeatsEts{} of \supReconSets{} data sets
+(Table~\ref{tab:sup-reconcile}). The exceptions are soft drinks and snacks,
+where reconciled ETS is more accurate at the coarse levels, which carry most of
+the all-level score; combining either tuned model with ETS above it does not do
+better than the average on most data sets.
+
 \input{generated/sup_tab_reconcile}
 
 % =====================================================================

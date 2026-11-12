@@ -1,0 +1,7 @@
+key,set,origin,model,decision,cost
+dominicks_sdr,rolling,0,lightgbm,category_planning,0.19413399577316756
+dominicks_sdr,rolling,0,timesfm_plan,category_planning,0.15337401021868396
+dominicks_sdr,rolling,0,world_model,category_planning,0.14577608283902407
+dominicks_sdr,rolling,0,ensemble,category_planning,0.137947430370276
+dominicks_sdr,rolling,0,ensemble_2,category_planning,0.14216034386036583
+dominicks_sdr,rolling,0,by_history,category_planning,0.1417674989596043

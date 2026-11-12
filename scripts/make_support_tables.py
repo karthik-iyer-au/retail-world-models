@@ -267,6 +267,16 @@ def decisions(v: dict) -> str:
                 cells += [f"{x / ref:.3f}" if ref else "--" for x in tot]
         rows.append(f"{name} & " + " & ".join(cells) + r" \\")
     v["supCatPlanAvgLowest"] = _w(low["ensemble_2"])
+    v["supCatPlanLgbLowest"] = _w(low["lightgbm"])
+    v["supCatPlanWmLowest"] = _w(low["world_model"])
+    order = {}
+    for k in KEYS:
+        g = d[(d.key == k) & (d.decision == "replenish_0.8")]
+        if not g.empty:
+            order[k] = {m: g[g.model == m].cost.sum() for m, _ in TRIO}
+    v["supOrderAvgBelowLgb"] = _w(sum(o["ensemble_2"] < o["lightgbm"] for o in order.values()))
+    v["supOrderAvgBelowWm"] = _w(sum(o["ensemble_2"] < o["world_model"] for o in order.values()))
+    v["supOrderSets"] = _w(len(order))
     v["supCatPlanSets"] = _w(len(rows))
     return r"""\begin{table}[t]
 \centering\footnotesize\setlength{\tabcolsep}{3pt}
