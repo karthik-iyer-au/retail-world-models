@@ -39,6 +39,7 @@ tables:
 	cd figs && $(PY) make_revision.py
 	cd .. && $(PY) scripts/make_rq_tables.py
 	cd .. && $(PY) scripts/make_settings_table.py
+	cd .. && $(PY) scripts/make_compute_table.py
 
 # Three passes: the second resolves labels and reflows floats, the third
 # settles references that moved.

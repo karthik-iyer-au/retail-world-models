@@ -1,0 +1,23 @@
+\begin{table}[t]
+\centering
+\caption{\textbf{Run time of the revision, from each run's manifest.} Runs counts every run folder, the pieces of
+split runs included; hours is their summed wall-clock time; machines are the GPUs or CPU hosts the runs used, with the
+number of runs on each. A run resumed from a partway save records only its last stretch, so the hours are a floor;
+the machine time paid for is in the text.}
+\label{tab:compute-revision}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{0.36\columnwidth}rrp{0.32\columnwidth}}
+\toprule
+\textbf{Study} & \textbf{Runs} & \textbf{Hours} & \textbf{Machines} \\
+\midrule
+Searches of both models' settings & 3,958 & 4,305 & RTX 4090 (1182), RTX 5090 (54), L4 (868), CPU (1288), other GPUs (566) \\
+Final runs on the rolling windows & 245 & 41 & RTX 4090 (220), RTX 5090 (16), other GPUs (9) \\
+Transfer and new-retailer tests & 358 & 150 & RTX 4090 (252), RTX 5090 (85), other GPUs (21) \\
+Training on other retailers' data & 249 & 176 & RTX 4090 (216), RTX 5090 (17), other GPUs (16) \\
+Comparison models on cleaned prices & 60 & 8 & RTX 4090 (48), other GPUs (12) \\
+\midrule
+All & 4,870 & 4,679 & \\
+\bottomrule
+\end{tabular}
+\end{table}
