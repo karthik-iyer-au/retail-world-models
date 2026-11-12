@@ -189,13 +189,17 @@ def main(argv=None):
                 anyon = np.any([switched_on(plan, c, regular) for c in inputs], axis=0)
                 record("whole_plan", "occlude", np.asarray(model.predict(every), dtype=float), anyon)
                 if model_name != "lightgbm":
-                    keep_past = model._past
+                    # a five-copy average (the tuned world model): mask every copy's history, then predict the average
+                    copies = model.models if hasattr(model, "models") else [model]
+                    keep = [c._past for c in copies]
                     for k in HISTORY["m5" if key == "m5" else "default"]:
-                        model._past = masked_history(model, k)
+                        for c in copies:
+                            c._past = masked_history(c, k)
                         try:
                             record(f"history_last_{k}", "occlude", np.asarray(model.predict(plan), dtype=float))
                         finally:
-                            model._past = keep_past
+                            for c, kp in zip(copies, keep):
+                                c._past = kp
                 pd.DataFrame(rows).to_csv(out, index=False)
                 print(f"{key} {model_name} window {origin}: refit gap {match:.2e}, {time.time() - t_start:.0f} s",
                       flush=True)
