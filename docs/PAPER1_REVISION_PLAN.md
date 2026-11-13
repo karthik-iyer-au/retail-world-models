@@ -1314,3 +1314,14 @@ entrees joins Frat as an exception, 1.473 against 1.471).
 Other fixes from the same check: Frat added to the data sets where LightGBM drifts in total over the block; the
 store-order count read at the table's precision (six, snacks level); RQ3 on new stores states that the world model and
 the average are level; hedged sentences in the limitations restated.
+
+**13 November 2026, before it runs: LightGBM without the item label on the kept-out items (Karthik, 13 November,
+"all fixes together in one", after an external review asked whether the world model's lead on items kept out of
+training comes from LightGBM's use of the item as a label).** On the five item kept-out tests (cheese, snacks, Frat,
+M5, Favorita), LightGBM is run again with its tuned settings unchanged except that `item_id` is removed from its
+categorical inputs; the store label and every other input stay (the item's sales at lags 0 to 4, rolling means over 4
+to 52 periods, their spread, price against the recent highest, the plan). It runs kept out and trained on all, as
+the original test did (`scripts/run_lightgbm_noid.py`). Scored as the original test: WRMSSE on the kept-out fifth,
+the cost of not training on it (kept out minus trained on all, same series), and forecast over actual. The paper
+reports, for each data set, whether the world model's kept-out WRMSSE and its cost of not training stay below those
+of LightGBM without the label, and says so either way. No setting of either model changes.

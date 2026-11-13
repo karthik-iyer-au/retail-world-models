@@ -46,7 +46,7 @@ def label(config_name: str) -> tuple[str, str, str] | None:
         if m:
             return m.group(1), "rolling", m.group(2)
         # the transfer test's runs, for the forecast by history on kept-out series (plan entry of 12 November 2026)
-        m = re.fullmatch(r"ftransfer_(dominicks_\w{3}|frat|m5|favorita)_(item|store)_(world_model|lightgbm)(?:_pooled)?_(kept_out|trained_on_all)", n)
+        m = re.fullmatch(r"ftransfer_(dominicks_\w{3}|frat|m5|favorita)_(item|store)_(world_model|lightgbm_noid|lightgbm)(?:_pooled)?_(kept_out|trained_on_all)", n)
         if m:
             return m.group(1), f"{m.group(4)}_{m.group(2)}", m.group(3)
         if COMPARISON:  # every comparison model on the rolling windows, beside the tuned pair (plan entry of 12 November)
