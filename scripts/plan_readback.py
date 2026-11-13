@@ -111,8 +111,6 @@ def main(argv=None):
     p.add_argument("--out", default=None)
     args = p.parse_args(argv)
 
-    from rwm.model.state_model import StateModel
-
     config = yaml.safe_load(Path(args.config).read_text())
     ev = config["evaluation"]
     ds = load_dataset(config["dataset"]["name"], **config["dataset"].get("params", {}))
@@ -123,7 +121,10 @@ def main(argv=None):
     test = panel[panel[DATE].isin(dates[-ev["horizon"]:])].reset_index(drop=True)
     del panel, ds
 
-    model = StateModel.load(Path(args.run) / "checkpoint_origin0.pt")
+    from rwm.audit.runs import load_checkpoint
+    model = load_checkpoint(Path(args.run), 0)
+    if hasattr(model, "models"):  # an average of copies: read the first copy, as C2 does (amendment of 13 Nov 2026)
+        model = model.models[0]
     state, roll, plan = collect(model, test, args.max_items, args.seed)
     rows = readback(state, roll, plan, plan_columns(model), args.seed)
     table = pd.DataFrame(rows)
