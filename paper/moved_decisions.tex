@@ -7,11 +7,13 @@ The average gives the lowest category-plan cost on \supCatPlanAvgLowest{} of
 (frozen entrees and snacks); the world model alone is lowest on none
 (Table~\ref{tab:sup-decisions}). Ordering each forecast's 0.8 quantile for every
 item and store, with each unit over costing 1 and each unit short 4
-\ifjournal (Section~\ref{sec:sup-method})\else (Section~\ref{sec:setup})\fi, costs less with the average than with LightGBM on
+\ifjournal (Section~\ref{sec:sup-method})\else (Section~\ref{sec:setup})\fi, gives a lower simulated loss with the average than with LightGBM on
 \supOrderAvgBelowLgb{} data sets and less than with the world model on
 \supOrderAvgBelowWm{}. Both are simulations under stated costs, not business
 results: the ordering loss is for a single period, with no stock carried over, no
 lead time and no shelf life, and the category-plan cost is a forecast error in
-dollars, not a realised commercial outcome.
+dollars, not a realised commercial outcome. They rank the forecasts by a stated
+cost; they do not establish inventory savings in a deployed retailer, which would
+need a multi-period inventory system with the retailer's own stock records.
 
 \input{generated/sup_tab_decisions}
