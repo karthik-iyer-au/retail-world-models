@@ -1,0 +1,58 @@
+# 52-week test (plan entry of 13 November 2026): final_dominicks_sdr_lightgbm.yaml with only the distance ahead changed (blocks, window 1); written by scripts/make_long_horizon_configs.py.
+name: h52_dominicks_sdr_lightgbm_blocks_w1
+seed: 0
+dataset:
+  name: dominicks
+  params:
+    categories:
+    - sdr
+    clean_prices: 5
+model:
+  name: blocks
+  params:
+    model: seed_average
+    block: 13
+    params:
+      model: lightgbm_direct
+      members: 5
+      seed: 0
+      params:
+        horizon: 13
+        train_periods: 156
+        categorical:
+        - item_id
+        - store_id
+        extra:
+        - promo
+        - cost
+        lags:
+        - 0
+        - 1
+        - 2
+        - 4
+        windows:
+        - 4
+        - 8
+        - 13
+        - 26
+        spread_window: 13
+        price_window: 12
+        price_lag: 1
+        rounds: 500
+        threads: 16
+        params:
+          num_leaves: 15
+          min_data_in_leaf: 50
+          max_bin: 255
+evaluation:
+  horizon: 52
+  n_origins: 1
+  holdout_periods: 24
+  scale_lag: 1
+  weight_window: 13
+  conditions:
+  - promo
+  after_promo:
+    levers:
+    - promo
+    periods: 2

@@ -50,6 +50,7 @@ def build_model(name: str, **params) -> Forecaster:
     import rwm.seed_average  # noqa: F401  (registers the seed-average wrapper)
     import rwm.combination  # noqa: F401  (registers the forecast combination)
     import rwm.pooled  # noqa: F401  (registers the pooled fit)
+    import rwm.blocks  # noqa: F401  (registers forecasting in blocks)
 
     if name not in _MODELS:
         raise KeyError(f"unknown model '{name}'. Known: {sorted(_MODELS)}")

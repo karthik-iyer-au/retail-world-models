@@ -1354,3 +1354,9 @@ as in RQ1, by block and data set. Reported: which forecast is clearly lowest, ov
 comparison; and the world model against the better of LightGBM's two setups, so the world model is compared with
 LightGBM at its best. No setting of any model is tuned for this test, and nothing seen in it changes the paper's
 other results.
+Notes added before any run starts, from writing the configs (scripts/make_long_horizon_configs.py): each window is
+run as its own config (window 0 is the earlier one, its held-out periods 26 weeks or 182 days longer), so that each
+fits in one job. M5's final runs use one copy of each model, not five, and so does this test. A world model whose
+`validation_periods` is shorter than its horizon has it raised to the horizon, as the model requires. M5's direct
+world model is not run: rolling its state 364 days in training is beyond this test's compute (its final run took
+about an hour per window at 28 days), so on M5 the world model is run in blocks only; LightGBM runs both ways there.
