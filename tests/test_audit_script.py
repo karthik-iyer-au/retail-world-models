@@ -62,3 +62,16 @@ def test_seed_average_audit_scores_copy_agreement(tmp_path):
     ca = rec["copy_agreement"]
     assert ca["copies"] == 3 and -1 <= ca["lift"] <= 1 and -1 <= ca["forecast"] <= 1
     assert "zero_lift_own_plan" in rec["construction"]
+
+
+def test_lightgbm_average_audit(tmp_path):
+    """The final LightGBM is an average of copies: audited with on/off contributions and averaged TreeSHAP."""
+    lp = {"horizon": 7, "train_periods": 100, "group_by": "store_id", "categorical": ["item_id"], "extra": ["promo"],
+          "rounds": 20, "lags": [0, 7], "windows": [7, 14]}
+    lcfg = {"name": "lavg", "seed": 0, "dataset": DATA, "evaluation": EV,
+            "model": {"name": "seed_average", "params": {"model": "lightgbm_direct", "members": 2, "seed": 0, "params": lp}}}
+    cfg = tmp_path / "lavg.yaml"
+    cfg.write_text(yaml.safe_dump(lcfg))
+    audit_runs.main(["lightgbm", "--config", str(cfg), "--results", str(tmp_path)])
+    out = tmp_path / "paper2_lightgbm_lavg"
+    assert (out / "audit_origin0.json").exists()

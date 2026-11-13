@@ -43,7 +43,8 @@ def audit_model(model, train, test, cfg, randomise=True) -> tuple[dict, pd.DataF
     t0 = time.time()
     parts = lever_contributions(model, test, regular, levers)
     rec = {"levers": levers, "rows": len(test)}
-    if hasattr(model, "breakdown"):
+    members = getattr(model, "models", [model])
+    if all(hasattr(m, "breakdown") for m in members):  # an average of LightGBM copies has no baseline and lift
         rec["construction"] = construction_checks(model, test, regular, levers)
     rec["monotonicity"] = price_monotonicity(model, test)
     on = np.zeros(len(test), dtype=bool)
@@ -146,7 +147,12 @@ def cmd_lightgbm(a):
             continue
         model = build_model(cfg["model"]["name"], **cfg["model"]["params"]).fit(train)
         rec, lifts = audit_model(model, train, test, cfg, randomise=False)
-        shap = model.shap(test.drop(columns=[UNITS]))
+        plan = test.drop(columns=[UNITS])
+        if hasattr(model, "models"):  # an average of copies: the copies' TreeSHAP values averaged
+            each = [m.shap(plan) for m in model.models]
+            shap = sum(each) / len(each)
+        else:
+            shap = model.shap(plan)
         price_cols = [c for c in shap.columns if c.startswith("price")]
         lifts["shap_price"] = shap[price_cols].sum(axis=1).to_numpy()
         for c in rec["levers"]:
