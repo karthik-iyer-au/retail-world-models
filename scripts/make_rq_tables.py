@@ -434,6 +434,7 @@ def noid_values(f: dict) -> dict:
     v["rqWmNoidLevel"] = _w(sum(x["clear"] == "Neither" for x in r))
     v["rqWmLowerNoid"] = _w(sum(x["ko"]["world_model"] < x["ko"]["lightgbm_noid"] for x in r))
     v["rqNoidSeenWorse"] = _w(sum(x["al"]["lightgbm_noid"] > x["al"]["lightgbm"] for x in r))
+    v["rqWmNoidLevelSets"] = ", ".join(KEYS[k] for k, x in f.items() if x["clear"] == "Neither") or "none"
     v["rqNoidLower"] = ", ".join(KEYS[k] for k, x in f.items() if x["ko"]["lightgbm_noid"] < x["ko"]["world_model"]) or "none"
     return v
 

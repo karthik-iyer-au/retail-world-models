@@ -336,7 +336,7 @@ whole promotion block, so that the choice of model is read grain by grain rather
 than from one score averaged over levels. It reads the same comparison by the
 kind of line, separating the fast lines that carry most sales from the slow tail
 and from lines with short history. It tests what each model loses on items and
-stores it was not trained on, and whether its settings and training data carry
+stores it was not trained on, with LightGBM also run without the item label, and whether its settings and training data carry
 across retailers. And it tunes the world model and gradient-boosted trees by a common search
 procedure, each over its own settings, so that the comparison is between two
 tuned models.

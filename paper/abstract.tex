@@ -23,7 +23,9 @@ in \rqPAvgWmBetter{} of \rqPAvgWmN{} comparisons (clearly less in \rqPAvgWmWorse
 lines that carry most sales and on the slow tail on \rqAvgBestFast{} of the nine data sets. On items kept out of training, the world model loses at most \rqCostWmItemHi{} in
 scaled error and forecasts within \rqWmFaItemOff\% of actual sales, while LightGBM loses up
 to \rqCostLgbItemHi{} and forecasts as little as \rqLgbFaItemLoFrac{} of actual sales, which pulls the
-average below the world model alone on all \rqKeptSets{} data sets tested. In the one
+average below the world model alone on all \rqKeptSets{} data sets tested. Fitted without the
+item label, LightGBM loses at most \rqNoidCostHi{}, but the world model stays clearly more
+accurate on \rqWmBeatsNoid{} of \rqNoidSets{} data sets. In the one
 transfer between retailers tested, settings tuned on M5 carried to Favorita, and training on other retailers' data
 improved neither model by more than \rqPoolGainMax{}. On these data, the rule that follows is
 one forecast for every item in every store, the average of the tuned world model

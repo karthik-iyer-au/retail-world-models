@@ -1,0 +1,22 @@
+\begin{table*}[t]
+\centering\footnotesize\setlength{\tabcolsep}{3pt}
+\caption{RQ3, LightGBM without the item label. The kept-out item test of Table~\ref{tab:rq-transfer} with LightGBM fitted
+without the item label as a feature (LGB$-$), every other setting unchanged. WRMSSE on the kept-out fifth; WRMSSE on the
+same fifth when every item is trained on; the cost of not training on them; forecast over actual on the kept-out
+fifth. Means over windows. The last column names the forecast that is clearly lower on the kept-out fifth when a 90\%
+bootstrap interval over windows of the difference excludes zero.}
+\label{tab:rq-noid}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{l cc ccc ccc ccc l}
+\toprule
+ & \multicolumn{2}{c}{Kept out} & \multicolumn{3}{c}{Trained on all} & \multicolumn{3}{c}{Cost of not training on them} & \multicolumn{3}{c}{Forecast over actual} & Clearly lower\\
+\cmidrule(lr){2-3}\cmidrule(lr){4-6}\cmidrule(lr){7-9}\cmidrule(lr){10-12}
+Data set & WM & LGB$-$ & WM & LGB & LGB$-$ & WM & LGB & LGB$-$ & WM & LGB & LGB$-$ & WM or LGB$-$\\
+\midrule
+Cheese & \cellcolor{wmcell}\textbf{0.678} & 0.732 & 0.667 & 0.673 & 0.730 & 0.011 & 0.058 & 0.002 & 0.99 & 0.93 & 1.05 & \cellcolor{wmcell}World model \\
+Snacks & \cellcolor{wmcell}\textbf{0.626} & 0.663 & 0.614 & 0.591 & 0.650 & 0.012 & 0.162 & 0.013 & 0.89 & 0.68 & 0.85 & \cellcolor{wmcell}World model \\
+Frat & \cellcolor{wmcell}\textbf{0.546} & 0.603 & 0.538 & 0.532 & 0.542 & 0.008 & 0.311 & 0.061 & 0.95 & 0.66 & 0.90 & \cellcolor{wmcell}World model \\
+M5 & 0.862 & \cellcolor{lgbcell}\textbf{0.851} & 0.822 & 0.835 & 0.841 & 0.040 & 0.083 & 0.009 & 1.04 & 0.84 & 0.97 & Neither \\
+Favorita & \cellcolor{wmcell}\textbf{0.709} & 0.797 & 0.699 & 0.728 & 0.754 & 0.010 & 0.171 & 0.043 & 1.01 & 0.77 & 0.95 & \cellcolor{wmcell}World model \\
+\bottomrule
+\end{tabular}\end{adjustbox}
+\end{table*}

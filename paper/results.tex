@@ -33,7 +33,7 @@ Store orders and inventory & Item by store, by day or week & The average & Lowes
 Promotion and supplier funding & Item across stores, by week and over the promotion block & The average & Lowest at the item levels on all \rqAvgBestItemWord{}; over the whole block lowest on \rqAvgBestBlockWord{} and second on the other four; LightGBM alone drifts in total on Frat, M5, Favorita and soft drinks \\
 Category performance & Category by store and category, by week & The average & Lowest at store grain and above on \rqAvgBestCoarseWord{} of \rqNineWord{}; LightGBM lowest on snacks; lowest category-plan cost on \supCatPlanAvgLowest{} of \supCatPlanSets{} \\
 Financial plan & Chain total & The average & As for category performance; the total is the sum of the same item-by-store forecast, so it agrees with every plan below it \\
-New items and range changes & Item by store, items not yet trained on & The world model alone & Clearly more accurate than the average on all \rqKeptSets{} data sets tested; LightGBM forecast \rqFaLgbItemLo{} to \rqFaLgbItemHi{}\% of actual sales on these items \\
+New items and range changes & Item by store, items not yet trained on & The world model alone & Clearly more accurate than the average on all \rqKeptSets{} data sets tested, and than LightGBM without the item label on \rqWmBeatsNoid{} of \rqNoidSets{}; LightGBM with the label forecast \rqFaLgbItemLo{} to \rqFaLgbItemHi{}\% of actual sales on these items \\
 New stores & Item by store, stores not yet trained on & The average & The average and the world model each clearly ahead on \rqStoreAvgBeatsWm{} data set and level on \rqStoreLevel{}; LightGBM clearly behind the world model on \rqStoreWmBeatsLgb{} of \rqKeptSets{} \\
 Choosing for another retailer & Any & Rerun the comparison & The order of models is a finding on these data; every comparison, including those that lost here, should be rerun on the retailer's own data \\
 \bottomrule
@@ -55,8 +55,9 @@ on. On items it was not trained on it lost at most \rqCostWmItemHi{} in scaled e
 up to \rqCostLgbItemHi{} for LightGBM, and forecast within \rqWmFaItemOff\% of actual sales; LightGBM
 forecast as little as \rqLgbFaItemLoFrac{}. It reads an item's recent sales into a state
 and carries that state forward under the plan, so it does not need the item in
-its training data, whereas LightGBM takes the item as one of its labels and has
-learned nothing for an item it was not trained on. The same carried state keeps its totals over the
+its training data. LightGBM leans on the item label: without it, LightGBM loses
+little on these items but is less accurate on the items it was trained on, and is
+still behind the world model on the kept-out items on \rqWmBeatsNoid{} of \rqNoidSets{} data sets. The same carried state keeps its totals over the
 promotion block closer to actual sales than LightGBM's on M5, Favorita and soft
 drinks.
 
@@ -178,7 +179,8 @@ store grain and above on \rqAvgBestCoarseWord{} of \rqNineWord{} data sets and a
 \rqAvgBestItemWord{}, on the fast lines and on the slow tail. The combination held across grains, but the choice of model changed for items
 absent from training: there the world model alone was more accurate than the
 average on every data set tested, because LightGBM with the item label
-under-forecast them. In the one transfer between
+under-forecast them; without the label LightGBM came closer but was still less
+accurate on \rqWmBeatsNoid{} of \rqNoidSets{}. In the one transfer between
 retailers tested, settings tuned on M5 carried to Favorita, and training on other retailers' data did not
 help. The rule that follows, the average everywhere and the world model alone
 for items not trained on, is a finding on these data for forecasts of 8 weeks and 28 days

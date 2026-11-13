@@ -67,8 +67,9 @@ on M5, Frat and Favorita.
 \subsection{RQ3: seen and unseen data}
 \label{sec:rq-unseen}
 
-\textbf{On items the models were not trained on, use the world model alone rather
-than the average with LightGBM fitted with the item label; on
+\textbf{On items the models were not trained on, use the world model alone: it is
+more accurate there than the average, and than LightGBM with or without the item
+label on most data sets tested; on
 stores they were not trained on, the world model and the average are level, and
 the average serves.} With a fifth of the items
 kept out of training, the world model's error on them rises by \rqCostWmItemLo{} to \rqCostWmItemHi{},
@@ -79,6 +80,21 @@ average down to \rqFaAvgItemLo{} to \rqFaAvgItemHi{}\%; the world model forecast
 items the world model alone is clearly more accurate than the average on \rqItemWmBeatsAvg{} of \rqKeptSets{}
 data sets tested.
 
+\textbf{Most of LightGBM's loss on these items comes from the item label, and the
+world model stays ahead without it.} As planned before it ran, LightGBM was fitted
+again on the kept-out item tests without the item label, every other setting
+unchanged (Table~\ref{tab:rq-noid}). Its cost of not training on the items falls to
+\rqNoidCostLo{} to \rqNoidCostHi{}, and it forecasts \rqNoidFaLo{} to \rqNoidFaHi\% of actual sales on them. On the
+kept-out items the world model is still clearly more accurate on \rqWmBeatsNoid{} of
+\rqNoidSets{} data sets and level on \rqWmNoidLevelSets{}; LightGBM without the label is clearly more
+accurate on \rqNoidBeatsWm{}. Without the label, LightGBM is less accurate on the same items
+when it is trained on them, on \rqNoidSeenWorse{} of \rqNoidSets{} data sets. So LightGBM has to choose: with
+the label it serves the items it was trained on, without it the items it was not.
+The world model also takes the item label, but it reads each item's recent sales
+into its state, so a label it never saw costs it little and one model serves both.
+The gap in Table~\ref{tab:rq-transfer} overstates what the world model's design adds: most of it
+is LightGBM meeting a label it never saw.
+
 With a fifth of the stores kept out, the world model is clearly more accurate
 than LightGBM on \rqStoreWmBeatsLgb{} of \rqKeptSets{} data sets and level on M5. Against the average it
 has the lower error on \rqStoreWmLowest{} of \rqKeptSets{} but is clearly more accurate only on Frat; the
@@ -86,6 +102,7 @@ average is clearly more accurate on cheese, and the two are level on snacks, M5
 and Favorita.
 
 \input{generated/rq_tab_transfer}
+\input{generated/rq_tab_noid}
 
 \subsection{RQ4: transferability}
 \label{sec:rq-transfer}
