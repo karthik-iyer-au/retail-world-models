@@ -1,0 +1,25 @@
+\small
+\textbf{Abstract.}
+Retailers plan store orders, promotions, category reviews and supplier terms
+from the same demand at different grains. This paper asks whether one forecast, made for every item in
+every store and summed to each coarser grain, can serve all of these decisions,
+and which model does it best. It compares gradient-boosted trees,
+pretrained foundation models, the Temporal Fusion Transformer and a world model that carries each item's state
+forward under the price and promotion plan, on four public data sets (M5, six
+Dominick's categories, Breakfast at the Frat and Corporaci\'on Favorita). The
+world model and LightGBM are tuned by the same search, and every result is
+scored on windows the search never saw. On items and stores seen in training,
+the tuned world model and LightGBM are close, and their average is the
+most accurate choice: it is in the 90\% model confidence set at \rqMcsAverage{}
+of \rqMcsCells{} levels and the most accurate on the fast lines and the slow tail
+on \rqAvgBestFast{} of the nine data sets. On items kept out of training, the
+world model loses at most \rqCostWmItemHi{} in scaled error, against up to
+\rqCostLgbItemHi{} for LightGBM. Settings tuned on one retailer carry to another,
+and pooling other retailers' data improved neither model by more than
+\rqPoolGainMax{}. The rule that follows is their average summed to every grain, with
+the world model alone for items not yet trained on. It holds for these data sets; adopters should rerun every comparison on
+their own data.
+
+\vspace{4pt}
+\textbf{Keywords:} retail forecasting; forecast grain; hierarchical evaluation;
+forecast combination; promotions; world models; foundation models.

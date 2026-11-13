@@ -1,0 +1,5 @@
+One forecast per item and store, summed upwards, serves every planning grain
+The average of a tuned world model and LightGBM is the most accurate across grains
+The world model loses least accuracy on items kept out of training
+Settings tuned on one retailer carry to another retailer's data
+Four public data sets; every result scored on windows no search saw

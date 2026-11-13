@@ -58,3 +58,15 @@ clean:
 journal: tables figures
 	for i in 1 2; do $(XELATEX) -interaction=nonstopmode main_ijpe.tex >/dev/null; $(XELATEX) -interaction=nonstopmode supplement_ijpe.tex >/dev/null; done
 	$(XELATEX) -interaction=nonstopmode main_ijpe.tex >/dev/null
+
+# the IJPE submission files (guide for authors read 13 Nov 2026): anonymised manuscript and supplement, title page,
+# highlights, and each figure of the manuscript as its own file in the order it appears
+ijpe-package: journal
+	cd ijpe && $(XELATEX) -interaction=nonstopmode title_page.tex >/dev/null
+	rm -rf ijpe/package && mkdir -p ijpe/package
+	cp main_ijpe.pdf ijpe/package/manuscript_anonymised.pdf
+	cp supplement_ijpe.pdf ijpe/package/supplement_anonymised.pdf
+	cp ijpe/title_page.pdf ijpe/package/title_page.pdf
+	cp ijpe/highlights.txt ijpe/package/highlights.txt
+	n=0; for f in $$(grep -o '<use figs/[a-z_0-9]*\.pdf>' main_ijpe.log | awk '!s[$$0]++' | sed 's/<use //;s/>//'); do \
+	  n=$$((n+1)); cp $$f ijpe/package/Figure_$$n.pdf; done

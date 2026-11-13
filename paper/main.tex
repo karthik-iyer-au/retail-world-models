@@ -231,7 +231,7 @@
 \ifsupplement\twocolumn[
   \vspace*{6pt}\begin{center}{\LARGE\bfseries\color{headtint} Online supplement\par}\vspace{4pt}
   {\large Forecasting Retail Sales at Every Grain: Trees, Foundation Models,\\ Transformers and World Models Compared on Four Public Data Sets\par}\vspace{6pt}
-  {\large Karthik Iyer \quad Madan Dabbeeru\par}\vspace{14pt}\end{center}]
+  \vspace{14pt}\end{center}]
 \else
 \twocolumn[
   \vspace*{6pt}
@@ -240,15 +240,17 @@
      Trees, Foundation Models, Transformers and World Models\\[2pt]
      Compared on Four Public Data Sets\par}
     \vspace{10pt}
+    \ifjournal\else
     {\large Karthik Iyer \quad Madan Dabbeeru\par}
     \vspace{3pt}
     {\footnotesize Correspondence:
      \href{mailto:karthik.iyer.au@gmail.com}{karthik.iyer.au@gmail.com}
      \quad ORCID:
      \href{https://orcid.org/0009-0004-0593-1602}{0009-0004-0593-1602}\par}
+    \fi
     \vspace{18pt}
     \begin{minipage}{0.86\textwidth}
-      \input{abstract}
+      \ifjournal\input{abstract_ijpe}\else\input{abstract}\fi
     \end{minipage}
     \vspace{16pt}
   \end{center}

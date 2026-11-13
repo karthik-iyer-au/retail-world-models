@@ -1,0 +1,35 @@
+% The changes to the loss tried: in the main text for arXiv, in the online supplement for the journal.
+\paragraph{The changes tried}
+Each change below adds to or replaces $L_p$ for one batch $B$ of item, store and
+period examples. Table~\ref{tab:losses} scores each against the configuration it
+changed in the first revision, where none was kept; the search of
+Section~\ref{sec:loop} tried them again on the tuned settings, with the
+likelihoods above, and kept the changes listed in Table~\ref{tab:loop}.
+\begin{itemize}\setlength{\itemsep}{1pt}
+\item \emph{Negative binomial} on units, $-\log\mathrm{NB}(y;\,\mu\ell_i, r)$
+with the spread $r$ learnt.
+\item \emph{Totals term}: the loss adds
+$\lambda_T\,\mathrm{mean}_t\big[(\sum_{b\in B_t}\hat y_b - \sum_{b\in B_t} y_b) /
+\max(1, \sum_{b\in B_t} y_b)\big]^2$, the relative gap between summed forecasts
+and sales over the examples $B_t$ sharing a date, so that a small bias in the
+same direction on many items is penalised ($\lambda_T = 1$).
+\item \emph{Volume and dollar weights}: each example's loss times
+$\ell_i^{\,\gamma}$, or $(\ell_i\bar\pi_i)^{\gamma}$ with $\bar\pi_i$ the item's
+usual price, normalised to mean one in the batch, with $\gamma = 0.9$ and
+$p = 1.1$, which makes the loss close to LightGBM's on units or dollars.
+\item \emph{Peak weight}: each period's loss times
+$1 + \kappa\min(|z_t - 1|, 5)$, normalised to mean one, so that peaks and dips
+count for more ($\kappa = 0.5$, with the dollar weight above).
+\item \emph{After-promotion weight}: each period with no lever on that follows a
+period with one counts $1 + w$ times, normalised to mean one ($w = 2$ or $5$).
+\item \emph{Latent term}: from the state now and the plan, the transition
+predicts the state the encoder gives once those periods are history, against a
+slowly updated copy of the encoder; the loss adds
+$\lambda_Z \sum_h \delta^h \lVert s_{t+h}(p) - \bar s_{t+h}\rVert^2$ with
+$\delta \le 1$ discounting far periods, and optionally a variance and covariance
+penalty on the state~\cite{vicreg}. It was also used alone to pretrain the
+encoder, which was then frozen, trained at a lower rate or trained fully on the
+forecast loss.
+\end{itemize}
+
+\input{generated/rev_tab_losses}

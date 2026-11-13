@@ -133,8 +133,8 @@ retailer meets them:
   and does training on other retailers' data make it more accurate?
 \end{description}
 
-\noindent These are the questions retailers ask of a forecast in practice
-(Section~\ref{sec:background}). Each question fixes what is measured before any
+\noindent These are the questions retailers ask of a forecast in practice\ifjournal\else{}
+(Section~\ref{sec:background})\fi. Each question fixes what is measured before any
 model is compared,
 and the results are reported in the same order (Section~\ref{sec:results}).
 The broad view then brings the four answers together.
@@ -304,7 +304,7 @@ AD-WM~\cite{adwm} trains world models to tell actions apart for counterfactual
 planning. Stable-worldmodel~\cite{stablewm} evaluates world models under
 controlled changes, as our perturbation tests do. Closest to us,
 WorldTS~\cite{worldts} learns covariate-conditioned latent dynamics for
-forecasting with known future inputs. Our earlier work, M-JEPA~\cite{mjepa},
+forecasting with known future inputs. \ifjournal Earlier work, M-JEPA~\cite{mjepa},\else Our earlier work, M-JEPA~\cite{mjepa},\fi{}
 compared JEPA fine-tuning recipes with leakage-resistant splits. In retail the
 actions are the plan. Our world model uses a recurrent transition~\cite{gru}
 with layer normalisation~\cite{layernorm} on a transformer
@@ -520,40 +520,13 @@ each item. LightGBM uses the Tweedie deviance with $p = 1.1$ on units, so large
 items count for more, or the Poisson deviance where its search chose it, and the
 Temporal Fusion Transformer a negative binomial likelihood on units.
 
-\paragraph{The changes tried}
-Each change below adds to or replaces $L_p$ for one batch $B$ of item, store and
-period examples. Table~\ref{tab:losses} scores each against the configuration it
-changed in the first revision, where none was kept; the search of
-Section~\ref{sec:loop} tried them again on the tuned settings, with the
-likelihoods above, and kept the changes listed in Table~\ref{tab:loop}.
-\begin{itemize}\setlength{\itemsep}{1pt}
-\item \emph{Negative binomial} on units, $-\log\mathrm{NB}(y;\,\mu\ell_i, r)$
-with the spread $r$ learnt.
-\item \emph{Totals term}: the loss adds
-$\lambda_T\,\mathrm{mean}_t\big[(\sum_{b\in B_t}\hat y_b - \sum_{b\in B_t} y_b) /
-\max(1, \sum_{b\in B_t} y_b)\big]^2$, the relative gap between summed forecasts
-and sales over the examples $B_t$ sharing a date, so that a small bias in the
-same direction on many items is penalised ($\lambda_T = 1$).
-\item \emph{Volume and dollar weights}: each example's loss times
-$\ell_i^{\,\gamma}$, or $(\ell_i\bar\pi_i)^{\gamma}$ with $\bar\pi_i$ the item's
-usual price, normalised to mean one in the batch, with $\gamma = 0.9$ and
-$p = 1.1$, which makes the loss close to LightGBM's on units or dollars.
-\item \emph{Peak weight}: each period's loss times
-$1 + \kappa\min(|z_t - 1|, 5)$, normalised to mean one, so that peaks and dips
-count for more ($\kappa = 0.5$, with the dollar weight above).
-\item \emph{After-promotion weight}: each period with no lever on that follows a
-period with one counts $1 + w$ times, normalised to mean one ($w = 2$ or $5$).
-\item \emph{Latent term}: from the state now and the plan, the transition
-predicts the state the encoder gives once those periods are history, against a
-slowly updated copy of the encoder; the loss adds
-$\lambda_Z \sum_h \delta^h \lVert s_{t+h}(p) - \bar s_{t+h}\rVert^2$ with
-$\delta \le 1$ discounting far periods, and optionally a variance and covariance
-penalty on the state~\cite{vicreg}. It was also used alone to pretrain the
-encoder, which was then frozen, trained at a lower rate or trained fully on the
-forecast loss.
-\end{itemize}
+\ifjournal
+The changes to the loss tried in the first version and again in the search are
+described and scored in Section~\ref{sec:sup-method} of the online supplement.
 
-\input{generated/rev_tab_losses}
+\else
+\input{moved_losses}
+\fi
 
 \subsection{Average and ensemble}
 The average is the equal-weight mean of the tuned world model's and the tuned
@@ -635,69 +608,14 @@ therefore also count, over levels and windows, the comparisons in which one mode
 is clearly more accurate than the other by the item bootstrap
 (Section~\ref{sec:rq-grain}).
 
-\paragraph{Intervals}
-Each model's interval forecasts come from its own errors in the earlier rolling
-windows of the same data set, a rolling form of conformal
-calibration~\cite{vovk2005}. With $e_{j,h} = (y_{j,t+h} - \hat y_{j,t+h})/\sigma_j$
-the scaled errors of the earlier windows at horizon $h$ ($\sigma_j$ the series'
-one-step scale), the interval at level $1-\alpha$ is
-$\big[\hat y_{j,t+h} + \sigma_j q_{\alpha/2,h},\ \hat y_{j,t+h} + \sigma_j
-q_{1-\alpha/2,h}\big]$, with $q_{\cdot,h}$ the empirical quantiles of the pooled
-$e_{\cdot,h}$. Where a level has fewer than 50
-earlier errors for each horizon, all horizons are pooled into one set of
-quantiles, and interval ends are rounded outwards to whole units except on
-Favorita; this fix was added on 16 October after the first intervals covered
-far less than planned at the totals, and is used throughout. The first
-rolling window has no earlier window and is not scored. We report the scaled
-pinball loss averaged over the quantiles, weighted as in the M5 uncertainty
-competition~\cite{m5uncertainty}, and coverage at 50\%, 80\% and 95\%. Models
-that give quantiles of their own (Chronos-Bolt, TFT) are also scored on them,
-over every window.
+\ifjournal
+\paragraph{Supporting analyses} Forecast ranges come from each model's own errors in
+the earlier rolling windows~\cite{vovk2005}; decision costs, reconciliation and ranking are
+set out with their results in the online supplement (Section~\ref{sec:sup-method}).
 
-\paragraph{Decisions}
-Three simulations turn forecasts into costs. \emph{Store orders}: for each
-item-store-period, order the model's interval quantile at a critical ratio $r$
-of 0.5, 0.8 or 0.95; each unit over costs 1 and each unit short $r/(1-r)$.
-\emph{Category plan}: for category-by-store nodes $n$ with sales $y_{n,t}$,
-forecast $\hat y_{n,t}$ and average price $\bar\pi_n$ before the window,
-\begin{equation}
-C = \frac{\sum_n \bar\pi_n \sum_{t} |y_{n,t} - \hat y_{n,t}|}{\sum_n \bar\pi_n \sum_t y_{n,t}},
-\end{equation}
-the absolute error in dollars over sales in dollars. \emph{Promotion decisions}: in the generated
-store worlds of the companion paper~\cite{paper2}, where each promotion's true
-lift is known, promote when the predicted lift times margin exceeds a fixed
-cost; regret is the value lost against deciding with the true lift. The first
-two are reported against seasonal naive. All are simulations under stated
-costs, not business results.
-
-\paragraph{Reconciliation}
-Base forecasts at every node come from AutoETS fitted on the history before each
-window (seasonal at the aggregate nodes, non-seasonal item by store). They are
-reconciled bottom-up, top-down by historical proportions, and by the MinT
-family~\cite{mint}. With $S$ the summing matrix (nodes by item-store series) and
-$\hat{\mathbf y}$ the base forecasts at every node, the reconciled item-store
-forecasts are
-\begin{equation}
-\tilde{\mathbf b} = (S^\top W^{-1} S)^{-1} S^\top W^{-1}\hat{\mathbf y},
-\end{equation}
-with $W = I$ (ordinary least squares), $W = \mathrm{diag}(S\mathbf 1)$ (structural
-weights), $W$ the diagonal of in-sample error variances, or $W = \lambda
-\mathrm{diag}(\hat\Sigma) + (1-\lambda)\hat\Sigma$ with the Sch\"afer--Strimmer
-intensity $\lambda$ (MinT-shrink, where the hierarchy has at most 6,000 nodes:
-Frat); nodes with no
-in-sample error are given the smallest variance of the others. Each model's own
-item-by-store forecasts are also combined with ETS above them by weighted least
-squares.
-
-\paragraph{Ranking}
-Accuracy says how close a forecast is, not whether it puts items in the right
-order. For every window we report the Spearman correlation, across item-store
-series that sold in the window before, between the forecast change (horizon
-total over the previous horizon's total) and the actual change; the share of the
-tenth of nodes forecast to grow most that are in the actual top tenth (0.10 by
-chance); the Spearman correlation across promoted periods between forecast and
-actual units over the series' unpromoted level; and bias, forecast over actual.
-These were written down before they ran and have no pass rule.
+\else
+\input{moved_setup}
+\fi
 
 \paragraph{Analyses added after the first results}
 Four analyses were added after the first scores of the tuned models were read,

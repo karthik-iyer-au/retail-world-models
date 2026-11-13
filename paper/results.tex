@@ -139,7 +139,7 @@ for Timestral let a few extreme upper quantiles dominate on weekly data.
 \paragraph{What lift means}
 Merchants promote in weeks they expect to sell well, so part of a measured lift
 is good timing. The lift is what the forecast attributes to the plan, not what
-the plan caused. Our companion audit~\cite{paper2} measures the gap in generated store
+the plan caused. \ifjournal An audit of these models~\cite{paper2}\else Our companion audit~\cite{paper2}\fi{} measures the gap in generated store
 data where the true lifts are known. Plan responses in this paper, including the
 perturbation tests, are forecasts, not causal estimates.
 
@@ -169,42 +169,23 @@ windows with paired tests and every losing model reported, is what we propose a
 retailer reruns on its own data, and over its own planning horizons, before
 adopting it.
 
-\section{Reproducibility and compute}
-\label{sec:repro}
+\ifjournal\else
+\input{moved_repro}
+\fi
 
-\paragraph{Records}
-All code, configuration files and tests are in the repository. A run refuses to
-start on uncommitted code and writes a manifest holding the code commit, the
-full configuration and its checksum, the seed, checksums of every data file
-read, package versions, the machine and run times. The scores and manifests of
-the final, transfer and pooled runs, every try of the searches, and the
-analyses of the tuned models are committed under \nolinkurl{results/final/},
-\nolinkurl{results/ftransfer/}, \nolinkurl{results/pooled/},
-\nolinkurl{results/research/} and \nolinkurl{results/analysis_tuned/}; the plan
-and every dated entry are in \nolinkurl{docs/PAPER1_REVISION_PLAN.md}.
-\texttt{make} in \texttt{paper/} rebuilds every figure, table and quoted number
-from these files (\buildSeconds{} seconds from a fresh clone of the repository,
-\buildDate). Forecast files and model checkpoints are kept outside the
-repository on the results volume, with their checksums recorded.
+\ifjournal
+\section{Data availability}
+\label{sec:licence}
+M5 is available from the competition's Kaggle page~\cite{m5accuracy};
+Dominick's from the Kilts Center for Marketing, University of Chicago Booth
+School of Business~\cite{dominicks}; Breakfast at the Frat from
+dunnhumby~\cite{frat}; Corporaci\'on Favorita from its Kaggle
+competition~\cite{favorita}. The code, configuration files and every result file
+behind the tables and figures are archived in a public repository, linked on the
+title page and withheld here for anonymised review; how they rebuild the paper is
+set out in Section~\ref{sec:repro} of the online supplement.
 
-\paragraph{Compute}
-The first version ran on one Google Colab machine with an NVIDIA \computeGpu{}
-(Table~\ref{tab:compute}: \computeRuns{} timed runs, \computeHours{}
-machine-hours). The revision ran on rented machines: the searches, final runs,
-transfer tests and pooled training on GPUs from Vast, managed and analysed on
-Modal. Table~\ref{tab:compute-revision} gives the run time recorded in each of
-the \computeRevRuns{} run folders, \computeRevHours{} hours in all, most on RTX
-4090 GPUs; because a resumed run records only its last stretch, this is a floor.
-The machine time paid for on Vast was \computeVastGpuHours{} GPU-hours
-(US\$\computeVastGpuUsd{}), and the revision cost US\$\computeTotalUsd{} in all
-from 26 October to 12 November 2026: US\$\computeVastUsd{} on Vast, including
-storage and data transfer, and US\$\computeModalUsd{} on Modal. The total
-includes every run made, the searches' screens, repeats after machine failures
-and runs lost when a machine stopped, not only the runs reported.
-
-\input{generated/tab_compute}
-\input{generated/tab_compute_revision}
-
+\else
 \section{Data, code and licence}
 \label{sec:licence}
 
@@ -249,6 +230,7 @@ from practice is the set of questions retailers ask of a forecast, which shaped
 the research questions in Section~\ref{sec:framework}. The first author's
 research focus is world models; the second author widened the scientific
 options considered for answering each question.
+\fi
 
 \section{Declaration of generative AI and AI-assisted technologies}
 \label{sec:ai}
