@@ -20,7 +20,7 @@ import pandas as pd
 from rwm.evaluation import compare as C
 from rwm.evaluation.splits import Split
 
-NAME = re.compile(r"h52_(dominicks_\w{3}|m5)_(world_model|lightgbm|seasonal_naive|chronos|timesfm_mean|timesfm_plan|tft)_(blocks|direct|rollon|byblock)_w(\d)")
+NAME = re.compile(r"h52_(dominicks_\w{3}|m5)_(world_model|lightgbm|seasonal_naive|chronos|timesfm_mean|timesfm_plan|timestral_plan|tft)_(blocks|direct|rollon|byblock)_w(\d)")
 
 
 def index(results: Path) -> pd.DataFrame:

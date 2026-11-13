@@ -51,12 +51,14 @@ def make(base: dict, key: str, which: str, setup: str, window: int) -> dict:
     return cfg
 
 
-OTHERS = {  # added 14 November 2026: the other models paper 1 compares, each forecasting all 52 weeks its own way
+OTHERS = {  # added 14 November 2026: the other models of paper 1's model table, each forecasting all 52 weeks its own
+    # way, with the settings of paper 1's rolling runs (configs/experiments/rev_<key>_rolling_<model>.yaml)
     "seasonal_naive": lambda key: {"name": "seasonal_naive", "params": {"season": 364 if key == "m5" else 52}},
-    "chronos": lambda key: None if key == "m5" else _model_of(f"cleanrev_{key}_rolling_chronos"),
-    "timesfm_mean": lambda key: _model_of("m5_confirm_apr_timesfm_mean" if key == "m5" else f"cleanrev_{key}_rolling_timesfm_mean"),
-    "timesfm_plan": lambda key: _model_of("m5_confirm_apr_timesfm_plan" if key == "m5" else f"cleanrev_{key}_rolling_timesfm_plan"),
-    "tft": lambda key: None if key == "m5" else _model_of(f"cleanrev_{key}_rolling_tft"),
+    "chronos": lambda key: _model_of(f"rev_{key}_rolling_chronos"),
+    "timesfm_mean": lambda key: _model_of(f"rev_{key}_rolling_timesfm_mean"),
+    "timesfm_plan": lambda key: _model_of(f"rev_{key}_rolling_timesfm_plan"),
+    "timestral_plan": lambda key: _model_of(f"rev_{key}_rolling_timestral_plan"),
+    "tft": lambda key: None if key == "m5" else _model_of(f"rev_{key}_rolling_tft"),
 }
 
 
@@ -66,7 +68,7 @@ def _model_of(name: str) -> dict:
 
 def others() -> int:
     """Each model as paper 1 ran it, on the final runs' data and windows, forecasting 52 weeks (364 days) at once.
-    Chronos-Bolt and the Temporal Fusion Transformer were not run on M5 in paper 1 and are not here."""
+    The Temporal Fusion Transformer was not run on M5 in paper 1 and is not here."""
     n = 0
     for key in KEYS:
         base = yaml.safe_load((ROOT / f"configs/experiments/final_{key}_lightgbm.yaml").read_text())

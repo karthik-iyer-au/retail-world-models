@@ -1,0 +1,15 @@
+# 52-week test, other models (plan entry of 14 November 2026): the model as paper 1 ran it, forecasting all 52 weeks at once; written by scripts/make_long_horizon_configs.py.
+name: h52_m5_chronos_direct_w1
+seed: 0
+dataset:
+  name: m5
+model:
+  name: chronos
+  params:
+    context: 512
+evaluation:
+  horizon: 364
+  n_origins: 1
+  scale_lag: 1
+  weight_window: 28
+  holdout_periods: 84

@@ -1385,6 +1385,9 @@ mean light Gbm also gets this treatment so it's apples to apples? What about the
   on with LightGBM by block.
 - The other models paper 1 compares, each forecasting all 52 weeks (364 days) at once its own way, with paper 1's
   settings, on the final runs' data and windows: same week last year (seasonal naive, 52 weeks; 364 days on M5),
-  Chronos-Bolt, TimesFM with and without the plan, and the Temporal Fusion Transformer (its horizon set to 52).
-  Chronos-Bolt and the Temporal Fusion Transformer were not run on M5 in paper 1 and are not run here.
+  Chronos-Bolt, TimesFM with and without the plan, Timestral with the plan, and the Temporal Fusion Transformer (its
+  horizon set to 52), with the settings of paper 1's rolling runs. The Temporal Fusion Transformer was not run on M5
+  in paper 1 and is not run here. (Corrected 07:20 the same day, before any of these was scored, after Karthik
+  pointed out that Chronos-Bolt and Timestral had been run on every data set: Timestral added, Chronos-Bolt added on
+  M5.)
 Scored with the rest of the 52-week test; reported as added after seeing the planned result.
