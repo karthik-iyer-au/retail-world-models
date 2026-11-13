@@ -1,6 +1,5 @@
 % =====================================================================
-\section{Every model compared}
-\label{sec:support}
+\section{Every model compared}\seclabel{sec:support}
 
 \label{sec:sup-comparison}
 Every analysis in this and the next five sections (the ablation, the occlusion,
@@ -106,7 +105,7 @@ the shortest keeps four days and the error rises by \sfFavHistFour{}.
 
 \input{generated/sup_tab_perturbation}
 
-\begin{figure*}[t]
+\begin{topfigure}
 \centering
 \includegraphics[width=\textwidth]{figs/fig_sup_occlusion.pdf}
 \caption{Which plan inputs the tuned models use. (a, b) Change in WRMSSE item by
@@ -116,7 +115,7 @@ data set does not carry. (c) The world model's change in WRMSSE item by store
 when its history is cut to the last 4, 13 or 26 periods (M5: 28 or 56 days); the
 vertical scale is linear below 0.05 and logarithmic above.}
 \label{fig:sup-occlusion}
-\end{figure*}
+\end{topfigure}
 
 \secbarrier
 \section{Carried-state tests: what the world model's state does}
@@ -141,6 +140,23 @@ state before it (an $R^2$ gain of \supProbeGainMin{} to \supProbeGainMax{}).
 \section{Calibration and reliability of the forecast ranges}
 \label{sec:sup-calibration}
 
+\begin{topfigure}
+\centering
+\includegraphics[width=\textwidth]{figs/fig_sup_probabilistic.pdf}
+\caption{Reliability of the whole forecast distribution. (a to c) Share of
+actuals below each quantile of the forecast, item by store, at the store and at
+the total, for the world model, LightGBM and the average; faint lines are data
+sets, solid lines their mean, and the dashed line is perfect calibration. For
+whole-unit sales each share is the midpoint of the shares strictly below and at
+or below the quantile. (d) Reliability of the forecast chance of selling
+nothing, item by store: node-periods grouped by their forecast chance in tenths,
+pooled over data sets and windows (groups of fewer than 100 left out). (e)
+Scaled CRPS item by store, mean over windows. (f) Coverage of the 80\% range by
+level, mean over the nine data sets; the dashed line is the stated 80\%.}
+\label{fig:sup-probabilistic}
+\end{topfigure}
+
+
 \textbf{The ranges are calibrated item by store and too narrow above the
 store.}
 Each model's ranges come from its own errors in the earlier windows
@@ -154,8 +170,7 @@ adds one error to learn from, the world model's ranges are too narrow
 (\supCovTotalAvg\%); the coverage of a single data set swings with so few earlier
 windows (Table~\ref{tab:sup-intervals}).
 
-Figure~\ref{fig:sup-calibration} sets each stated coverage against the share of
-sales that fell inside. Item by store, the 50\% ranges hold \sfCovFiftyIxsWm\%,
+Item by store, the 50\% ranges hold \sfCovFiftyIxsWm\%,
 \sfCovFiftyIxsLgb\% and \sfCovFiftyIxsAvg\% of sales for the world model,
 LightGBM and the average, and the 95\% ranges \supCovNinetyFiveIxsWm\%,
 \supCovNinetyFiveIxsLgb\% and \supCovNinetyFiveIxsAvg\%, so all three lie on the
@@ -166,7 +181,7 @@ total the world model's 80\% coverage runs from \sfCovEightyMinTotalWm\% to
 one actual against one range, so its coverage is anywhere from
 \sfCovTotalWindowMin\% to \sfCovTotalWindowMax\%, and the
 \sfCalWindows{} to \sfCalWindowsMax{} scored windows of each data set give a coarse
-estimate. By level (Figure~\ref{fig:sup-calibration}c), the 80\% ranges are too
+estimate. By level (Figure~\ref{fig:sup-probabilistic}f), the 80\% ranges are too
 narrow at the store (\sfCovLevelStoreWm\%, \sfCovLevelStoreLgb\% and
 \sfCovLevelStoreAvg\%) and for the item across stores (\sfCovLevelItemWm\%,
 \sfCovLevelItemLgb\% and \sfCovLevelItemAvg\%): the earlier windows' errors at
@@ -209,21 +224,6 @@ use only its point forecast.
 
 \input{generated/sup_tab_probabilistic}
 
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{figs/fig_sup_probabilistic.pdf}
-\caption{Reliability of the whole forecast distribution. (a to c) Share of
-actuals below each quantile of the forecast, item by store, at the store and at
-the total, for the world model, LightGBM and the average; faint lines are data
-sets, solid lines their mean, and the dashed line is perfect calibration. For
-whole-unit sales each share is the midpoint of the shares strictly below and at
-or below the quantile. (d) Reliability of the forecast chance of selling
-nothing, item by store: node-periods grouped by their forecast chance in tenths,
-pooled over data sets and windows (groups of fewer than 100 left out). (e)
-Scaled CRPS item by store, mean over windows.}
-\label{fig:sup-probabilistic}
-\end{figure*}
-
 The reliability of a single run is a separate question: the world model's
 scores vary from seed to seed, by a standard deviation of \loopSeedSdOne\% of the score on
 the Dominick's categories for a single fit and \loopSeedSdFive\% for the five-copy average
@@ -232,16 +232,6 @@ uses the five-copy average and three seeds where a change is tried.
 
 \input{generated/sup_tab_intervals}
 
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{figs/fig_sup_calibration.pdf}
-\caption{Calibration of the forecast ranges, from each model's own errors in the
-earlier windows. (a, b) Share of actual sales inside the 50\%, 80\% and 95\%
-ranges, item by store and at the total; faint dots are data sets, lines their
-mean; the dashed line is perfect calibration. (c) Coverage of the 80\% range by
-level, mean over the nine data sets.}
-\label{fig:sup-calibration}
-\end{figure*}
 
 \secbarrier
 \section{Decision costs and reconciliation}

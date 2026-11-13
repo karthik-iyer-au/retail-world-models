@@ -68,25 +68,37 @@
 \newif\ifsupplement\supplementfalse
 \ifdefined\journalmode\journaltrue\fi
 \ifdefined\supplementmode\journaltrue\supplementtrue\fi
-% The supplement is set in one column (Karthik, 13 November 2026): figures and tables sit by their first mention
-% instead of waiting for the top of a later page, which left pages part empty in two columns.
+\newcommand{\colfig}{\columnwidth}
+\newcommand{\secbarrier}{}
+% topfigure: a full-width figure that floats to the top of the next page in every build
+\makeatletter
+\expandafter\let\expandafter\origdblfigure\csname figure*\endcsname
+\expandafter\let\expandafter\endorigdblfigure\csname endfigure*\endcsname
+\makeatother
+\newenvironment{topfigure}{\origdblfigure[t]}{\endorigdblfigure}
+\makeatletter
+\expandafter\let\expandafter\origdbltable\csname table*\endcsname
+\expandafter\let\expandafter\endorigdbltable\csname endtable*\endcsname
+\makeatother
+\newenvironment{toptable}{\origdbltable[t]}{\endorigdbltable}
+\newcommand{\seclabel}[1]{\label{#1}}
+% Online supplement, two columns as the paper (Karthik, 13 November 2026): a column-width figure or table is set in
+% its column where it is written (float, H); a full-width one stays a float at the top of a page, written in the
+% source just before the text it belongs with.
 \ifsupplement
-  \geometry{margin=1in}
   \usepackage{float}
   \makeatletter
-  % every float sits exactly where it is written, after the paragraph that cites it
   \let\suporigfigure\figure\let\endsuporigfigure\endfigure
   \let\suporigtable\table\let\endsuporigtable\endtable
   \renewenvironment{figure}[1][]{\suporigfigure[H]}{\endsuporigfigure}
   \renewenvironment{table}[1][]{\suporigtable[H]}{\endsuporigtable}
-  \renewenvironment{figure*}[1][]{\begin{figure}}{\end{figure}}
-  \renewenvironment{table*}[1][]{\begin{table}}{\end{table}}
   \makeatother
-  \newcommand{\colfig}{0.62\textwidth}
-  \newcommand{\secbarrier}{}
-\else
-  \newcommand{\colfig}{\columnwidth}
-  \newcommand{\secbarrier}{}
+  % full-width floats: bottom of the page they are written on when they fit (stfloats), else top of the next
+  \usepackage{stfloats}
+  \renewenvironment{figure*}[1][]{\origdblfigure[!tb]}{\endorigdblfigure}
+  \renewenvironment{table*}[1][]{\origdbltable[!tb]}{\endorigdbltable}
+  \renewenvironment{topfigure}{\origdblfigure[!tb]}{\endorigdblfigure}
+  \renewenvironment{toptable}{\origdbltable[!tb]}{\endorigdbltable}
 \fi
 \usepackage{xr-hyper}
 \usepackage[colorlinks=true,
@@ -215,10 +227,10 @@
 \begin{document}
 
 % ------------------------------------------------------------ title block -
-\ifsupplement\onecolumn
+\ifsupplement\twocolumn[
   \vspace*{6pt}\begin{center}{\LARGE\bfseries\color{headtint} Online supplement\par}\vspace{4pt}
   {\large Forecasting Retail Sales at Every Grain: Trees, Foundation Models,\\ Transformers and World Models Compared on Four Public Data Sets\par}\vspace{6pt}
-  {\large Karthik Iyer \quad Madan Dabbeeru\par}\vspace{14pt}\end{center}
+  {\large Karthik Iyer \quad Madan Dabbeeru\par}\vspace{14pt}\end{center}]
 \else
 \twocolumn[
   \vspace*{6pt}

@@ -36,6 +36,16 @@ sharing information between stores; none was kept, and they were not run again o
 the tuned models. Their record is in the first version; the loss experiments among them are in
 Figure~\ref{fig:sup-devlosses}.
 
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_sup_devlosses.pdf}
+\caption{Every loss change of the first version against the settings it changed,
+on the development windows. Each dot is one run, coloured by data set; the bar
+spans the runs of a change, and the right-hand column counts them. Changes not
+run on the full data are not shown.}
+\label{fig:sup-devlosses}
+\end{figure*}
+
 \subsection{Losses and pretraining explored}
 \label{sec:sup-explore}
 
@@ -79,13 +89,4 @@ more than the keep bar; the grey band is the mean keep bar over data sets.}
 \label{fig:sup-explore}
 \end{figure*}
 
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{figs/fig_sup_devlosses.pdf}
-\caption{Every loss change of the first version against the settings it changed,
-on the development windows. Each dot is one run, coloured by data set; the bar
-spans the runs of a change, and the right-hand column counts them. Changes not
-run on the full data are not shown.}
-\label{fig:sup-devlosses}
-\end{figure*}
 

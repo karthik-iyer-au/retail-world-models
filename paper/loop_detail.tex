@@ -1,5 +1,15 @@
 % Detail of the searches: in the main text for arXiv, in the online supplement for the journal.
 
+\begin{topfigure}
+\centering
+\includegraphics[width=\textwidth]{figs/fig_loop_path.pdf}
+\caption{Every run of every search, in the order it was made. Faint dots are first-seed screens,
+open circles are three-seed confirmations, and the step line is the best settings so far. The band
+under the line is the keep bar: a change had to land below it to be kept. The world model's line
+runs on into its likelihood and JEPA rounds after its own loop ends.}
+\label{fig:looppath}
+\end{topfigure}
+
 \subsection{What the searches kept}
 
 The searches made \loopTries{} runs, \loopTriesWm{} of the world model and \loopTriesLgb{} of LightGBM, and kept \loopKept{} changes, \loopKeptWm{} for the world model and \loopKeptLgb{} for LightGBM.
@@ -11,16 +21,6 @@ check, kept on Favorita, was among the changes that moved Favorita most and did 
 On the search windows the world model improved on \loopImprovedWm{} of the nine data sets and LightGBM on all
 \loopImprovedLgb{} (Figure~\ref{fig:loopslopes}). The largest gain of either model was LightGBM on \loopGainLgbSet{},
 from \loopGainLgbFrom{} to \loopGainLgbTo{}. The world model's largest was on \loopGainWmSet{}, from \loopGainWmFrom{} to \loopGainWmTo{}.
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{figs/fig_loop_path.pdf}
-\caption{Every run of every search, in the order it was made. Faint dots are first-seed screens,
-open circles are three-seed confirmations, and the step line is the best settings so far. The band
-under the line is the keep bar: a change had to land below it to be kept. The world model's line
-runs on into its likelihood and JEPA rounds after its own loop ends.}
-\label{fig:looppath}
-\end{figure*}
 
 \begin{figure}[t]
 \centering

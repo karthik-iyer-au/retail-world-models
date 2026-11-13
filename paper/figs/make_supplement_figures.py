@@ -265,7 +265,7 @@ def fig_calibration(v: dict):
     ax.grid(axis="y")
     despine(ax)
     panel_label(ax, "c")
-    save(fig, HERE / "fig_sup_calibration.pdf")
+    plt.close(fig)  # its panels now live in fig_sup_probabilistic (a to c, f); the numbers below are kept
     for lv, lt in ((IXS, "Ixs"), ("total", "Total")):
         for m, mt in (("world_model", "Wm"), ("lightgbm", "Lgb"), ("ensemble_2", "Avg")):
             g = per_key.xs((m, lv), level=("model", "level"))
@@ -352,7 +352,7 @@ def fig_probabilistic(v: dict):
     despine(ax)
     panel_label(ax, "d")
     # CRPS by data set, item by store, relative to LightGBM
-    ax = fig.add_subplot(gs[1, 1:])
+    ax = fig.add_subplot(gs[1, 1])
     c_ixs = d[d.level == IXS].groupby(["key", "model"]).crps.mean().unstack()
     c_tot = d[d.level == "total"].groupby(["key", "model"]).crps.mean().unstack()
     x = np.arange(len(KEYS))
@@ -360,12 +360,27 @@ def fig_probabilistic(v: dict):
         vals = [c_ixs.loc[k, m] if k in c_ixs.index else np.nan for k in KEYS]
         ax.scatter(x + (j - 1) * 0.18, vals, marker=mk, s=20, color=c, edgecolor="white", linewidth=0.5, label=lab,
                    zorder=3)
-    ax.set_xticks(x, NAMES, rotation=30, ha="right")
+    ax.set_xticks(x, NAMES, rotation=55, ha="right", fontsize=6.4)
     ax.set_ylabel("Scaled CRPS, item by store")
-    ax.set_title("CRPS by data set (lower is better)")
+    ax.set_title("CRPS (lower is better)")
     ax.grid(axis="y")
     despine(ax)
     panel_label(ax, "e")
+    # coverage of the 80% range by level, from the interval run with the agreed fix
+    ax = fig.add_subplot(gs[1, 2])
+    iv = _cat(A / "intervals_fixed" / "intervals.csv").groupby(["key", "model", "level"]).coverage_80.mean()
+    lv_keep = [(lv, lab) for lv, lab in LEVELS if lv not in ("cat_id", "cat_idxstore_id")]
+    for m, lab, c, mk in TRIO:
+        ys = [100 * iv.xs((m, lv), level=("model", "level")).mean() for lv, _ in lv_keep]
+        ax.plot(range(len(lv_keep)), ys, marker=mk, ms=4, color=c, lw=1.0, label=lab, markeredgecolor="white",
+                markeredgewidth=0.5)
+    ax.axhline(80, color=EDGE, lw=0.7, ls="--")
+    ax.set_xticks(range(len(lv_keep)), [lab for _, lab in lv_keep], fontsize=6.4)
+    ax.set_ylabel("Coverage of the 80% range (%)")
+    ax.set_title("80% range by level")
+    ax.grid(axis="y")
+    despine(ax)
+    panel_label(ax, "f")
     save(fig, HERE / "fig_sup_probabilistic.pdf")
     # numbers and table
     br = bot.groupby(["key", "model"])[["brier", "brier_clim", "zero_share"]].mean()
