@@ -1,14 +1,15 @@
 % =====================================================================
-\section{Supporting analyses}
+\section{Every model compared}
 \label{sec:support}
 
-Every analysis in this section was rerun on the tuned models of
+\label{sec:sup-comparison}
+Every analysis in this and the next five sections (the ablation, the occlusion,
+the carried-state tests, the calibration and reliability of the forecast ranges,
+and the decision costs) was rerun on the tuned models of
 Table~\ref{tab:final-settings}, on the same rolling windows as
 Section~\ref{sec:results}; none of its numbers comes from the settings of the
 first version.
 
-\subsection{Every model compared}
-\label{sec:sup-comparison}
 
 \textbf{The tuned pair and their average are more accurate than every model not
 tuned on the data, on every data set but one.} Table~\ref{tab:sup-comparison}
@@ -24,7 +25,7 @@ the plan.
 
 \input{generated/sup_tab_comparison}
 
-\subsection{What each member adds to the combination}
+\section{Ablation: what each model adds to the combination}
 \label{sec:sup-ablation}
 
 \textbf{Each tuned model makes the combination more accurate, and TimesFM adds a
@@ -69,7 +70,7 @@ over windows, when fitted to the item-by-store error (upper bar) and to the tota
 \label{fig:sup-ablation}
 \end{figure*}
 
-\subsection{Which plan inputs each model uses}
+\section{Occlusion: which plan inputs each model uses}
 \label{sec:sup-plan}
 
 \textbf{Both tuned models forecast from the plan.} Setting the price to the
@@ -115,7 +116,7 @@ vertical scale is linear below 0.05 and logarithmic above.}
 \label{fig:sup-occlusion}
 \end{figure*}
 
-\subsection{What the world model's carried state does}
+\section{Carried-state tests: what the world model's state does}
 \label{sec:sup-mechanism}
 
 \textbf{The tuned world model uses the timing of the plan, and carries a
@@ -133,7 +134,7 @@ state before it (an $R^2$ gain of \supProbeGainMin{} to \supProbeGainMax{}).
 
 \input{generated/sup_tab_mechanism}
 
-\subsection{Calibration and reliability of the forecast ranges}
+\section{Calibration and reliability of the forecast ranges}
 \label{sec:sup-calibration}
 
 \textbf{The ranges are calibrated item by store and too narrow above the
@@ -169,6 +170,41 @@ those levels understate the next window's. A planner who orders from the 80\%
 range at item by store gets what it says; one who plans store labour from the
 store-level range needs a wider one.
 
+\paragraph{The whole distribution} Coverage checks three ranges;
+Figure~\ref{fig:sup-probabilistic} checks every quantile of the forecast
+distribution and scores it whole (Table~\ref{tab:sup-probabilistic}). Item by
+store, \sfRelTenAvg\% of actuals fall below the average's 10th percentile,
+\sfRelHalfAvg\% below its median and \sfRelNinetyAvg\% below its 90th: the
+lower quantiles of a slow item are zero and many actuals are zero too, so the
+curve is read at the midpoint of the shares strictly below and at or below each
+quantile. At the total, \sfRelTenTotWm\% of actuals fall below the world model's
+10th percentile and \sfRelNinetyTotWm\% below its 90th; for LightGBM the shares
+are \sfRelTenTotLgb\% and \sfRelNinetyTotLgb\%. %PROBTOTAL%
+On the continuous ranked probability score (CRPS), which scores the whole
+distribution, the average is lowest item by store on \sfCrpsAvgBestIxs{} of
+\sfProbSets{} data sets, LightGBM on \sfCrpsLgbBestIxs{} and the world model on
+\sfCrpsWmBestIxs{}; at the total the average is lowest on \sfCrpsAvgBestTot{},
+LightGBM on \sfCrpsLgbBestTot{} and the world model on \sfCrpsWmBestTot{}.
+
+\paragraph{The chance of selling nothing} %PROBBRIER%
+
+\input{generated/sup_tab_probabilistic}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_sup_probabilistic.pdf}
+\caption{Reliability of the whole forecast distribution. (a to c) Share of
+actuals below each quantile of the forecast, item by store, at the store and at
+the total, for the world model, LightGBM and the average; faint lines are data
+sets, solid lines their mean, and the dashed line is perfect calibration. For
+whole-unit sales each share is the midpoint of the shares strictly below and at
+or below the quantile. (d) Reliability of the forecast chance of selling
+nothing, item by store: node-periods grouped by their forecast chance in tenths,
+pooled over data sets and windows (groups of fewer than 100 left out). (e)
+Scaled CRPS item by store, mean over windows.}
+\label{fig:sup-probabilistic}
+\end{figure*}
+
 The reliability of a single run is a separate question: the world model's
 scores vary from seed to seed, by a standard deviation of \loopSeedSdOne\% of the score on
 the Dominick's categories for a single fit and \loopSeedSdFive\% for the five-copy average
@@ -188,7 +224,7 @@ level, mean over the nine data sets.}
 \label{fig:sup-calibration}
 \end{figure*}
 
-\subsection{Decision costs and reconciliation}
+\section{Decision costs and reconciliation}
 \label{sec:sup-decisions}
 
 \paragraph{Decision costs}

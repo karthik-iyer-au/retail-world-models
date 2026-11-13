@@ -1,0 +1,18 @@
+\begin{table*}[t]
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\caption{Probabilistic scores of the forecast ranges, mean over windows. Scaled CRPS item by store and at the
+total, from each model's point forecast and the quantiles of its scaled errors in earlier windows on a grid of 23
+quantiles, weighted by revenue as WRMSSE. Brier score of the forecast chance of selling nothing, item by store,
+against each series' share of zero-sale periods over the year before (Past). Lowest in bold.}
+\label{tab:sup-probabilistic}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{l ccc ccc cccc c}
+\toprule
+ & \multicolumn{3}{c}{CRPS, item by store} & \multicolumn{3}{c}{CRPS, total} & \multicolumn{4}{c}{Brier score, zero sales} & Periods\\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-11}
+Data set & WM & LGB & Avg & WM & LGB & Avg & WM & LGB & Avg & Past & with none\\
+\midrule
+Snacks & 0.525 & 0.507 & \textbf{0.501} & 1.430 & \textbf{0.898} & 1.047 & 0.194 & 0.189 & 0.192 & \textbf{0.148} & 26\% \\
+Frat & 0.469 & 0.471 & \textbf{0.457} & \textbf{0.248} & 0.344 & 0.275 & 0.023 & 0.024 & \textbf{0.023} & 0.051 & 8\% \\
+\bottomrule
+\end{tabular}\end{adjustbox}
+\end{table*}

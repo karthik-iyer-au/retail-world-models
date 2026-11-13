@@ -98,6 +98,20 @@ it leaves the error unchanged or raises it, by as much as \rqPoolLossWm{} for th
 
 \input{generated/rq_tab_retailer}
 
+\subsection{Ablation, occlusion and calibration}
+\label{sec:rq-checks}
+
+\textbf{Each tuned model earns its place in the combination, both read the
+plan, and the forecast ranges hold what they state item by store.} Dropping the
+world model from the three-model ensemble makes the item-by-store forecast less
+accurate on \sfAblNoWmWorse{} of \rqNineWord{} data sets, and dropping LightGBM
+on \sfAblNoLgbWorse{} (Section~\ref{sec:sup-ablation}). Switching the plan off
+makes the world model less accurate on \supPertPlanHelpsWm{} of \supPertSets{}
+data sets and LightGBM on \supPertPlanHelpsLgb{}; on the Dominick's categories
+and Frat, price and the promotion flag carry it, and events, SNAP days and
+paydays change the error by at most \sfCalendarMax{}
+(Section~\ref{sec:sup-plan}). %CALIBRATION%
+
 \subsection{The broad view}
 \label{sec:rq-broad}
 

@@ -23,6 +23,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(ROOT / "scripts"))
+sys.path.insert(0, str(ROOT / "src"))
 from style import COLOR, EDGE, FULL, GRID, INK, MUTED, despine, panel_label, save, use_style  # noqa: E402
 from make_rq_tables import KEYS, _w  # noqa: E402
 from make_support_tables import _cat, _read  # noqa: E402
@@ -291,6 +292,139 @@ LOSSES = [("negative_binomial", "NB"), ("negative_binomial_item_spread", "NB,\ns
 JEPA = [("jepa_hybrid", "Short\npretraining"), ("jepa_hybrid_long", "Long\npretraining")]
 
 
+def _prob() -> pd.DataFrame:
+    fs = sorted((A / "probabilistic").glob("*.csv"))
+    return pd.concat([_read(f) for f in fs], ignore_index=True) if fs else pd.DataFrame()
+
+
+def fig_probabilistic(v: dict):
+    """Quantile reliability diagrams, the zero-sales reliability diagram, CRPS and the Brier score
+    (Karthik, 13 November 2026), from results/analysis_tuned/probabilistic."""
+    d = _prob()
+    if d.empty:
+        return
+    from rwm.evaluation.compare import QFINE, ZERO_BINS
+    d = d[d.model.isin([m for m, *_ in TRIO])]
+    mid = {qv: (d[f"le_{qv}"] + d[f"lt_{qv}"]) / 2 for qv in QFINE}
+    for qv in QFINE:
+        d[f"mid_{qv}"] = mid[qv]
+    fig = plt.figure(figsize=(FULL, 5.0))
+    gs = fig.add_gridspec(2, 3, hspace=0.55, wspace=0.42)
+    qs = np.array(QFINE)
+    for j, (lv, title) in enumerate(((IXS, "Item by store"), ("store_id", "Store"), ("total", "Total"))):
+        ax = fig.add_subplot(gs[0, j])
+        ax.plot([0, 1], [0, 1], color=EDGE, lw=0.7, ls="--")
+        for m, lab, c, mk in TRIO:
+            g = d[(d.model == m) & (d.level == lv)].groupby("key")[[f"mid_{x}" for x in QFINE]].mean()
+            for _, row in g.iterrows():
+                ax.plot(qs, row.to_numpy(), color=c, alpha=0.18, lw=0.6)
+            ax.plot(qs, g.mean().to_numpy(), color=c, lw=1.3, label=lab)
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+        ax.set_aspect("equal")
+        ax.set_xlabel("Quantile of the forecast")
+        ax.set_ylabel("Share of actuals below it")
+        ax.set_title(title)
+        ax.grid()
+        despine(ax)
+        panel_label(ax, "abc"[j])
+        if j == 0:
+            ax.legend(loc="upper left", fontsize=6.4)
+    # zero-sales reliability, pooled over data sets and windows
+    ax = fig.add_subplot(gs[1, 0])
+    bot = d[d.level == IXS]
+    ax.plot([0, 1], [0, 1], color=EDGE, lw=0.7, ls="--")
+    for m, lab, c, mk in TRIO:
+        g = bot[bot.model == m]
+        n = np.array([g[f"zb{i}_n"].sum() for i in range(ZERO_BINS)])
+        p = np.array([g[f"zb{i}_p"].sum() for i in range(ZERO_BINS)])
+        y = np.array([g[f"zb{i}_y"].sum() for i in range(ZERO_BINS)])
+        ok = n > 100
+        ax.plot(p[ok] / n[ok], y[ok] / n[ok], marker=mk, ms=3.5, color=c, lw=1.0, label=lab,
+                markeredgecolor="white", markeredgewidth=0.4)
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.set_aspect("equal")
+    ax.set_xlabel("Forecast chance of selling nothing")
+    ax.set_ylabel("Share that sold nothing")
+    ax.set_title("Zero sales, item by store")
+    ax.grid()
+    despine(ax)
+    panel_label(ax, "d")
+    # CRPS by data set, item by store, relative to LightGBM
+    ax = fig.add_subplot(gs[1, 1:])
+    c_ixs = d[d.level == IXS].groupby(["key", "model"]).crps.mean().unstack()
+    c_tot = d[d.level == "total"].groupby(["key", "model"]).crps.mean().unstack()
+    x = np.arange(len(KEYS))
+    for j, (m, lab, c, mk) in enumerate(TRIO):
+        vals = [c_ixs.loc[k, m] if k in c_ixs.index else np.nan for k in KEYS]
+        ax.scatter(x + (j - 1) * 0.18, vals, marker=mk, s=20, color=c, edgecolor="white", linewidth=0.5, label=lab,
+                   zorder=3)
+    ax.set_xticks(x, NAMES, rotation=30, ha="right")
+    ax.set_ylabel("Scaled CRPS, item by store")
+    ax.set_title("CRPS by data set (lower is better)")
+    ax.grid(axis="y")
+    despine(ax)
+    panel_label(ax, "e")
+    save(fig, HERE / "fig_sup_probabilistic.pdf")
+    # numbers and table
+    br = bot.groupby(["key", "model"])[["brier", "brier_clim", "zero_share"]].mean()
+    v["sfProbSets"] = _w(c_ixs.shape[0])
+    best_ixs = c_ixs[["world_model", "lightgbm", "ensemble_2"]].idxmin(axis=1)
+    best_tot = c_tot[["world_model", "lightgbm", "ensemble_2"]].idxmin(axis=1)
+    v["sfCrpsAvgBestIxs"] = _w(int((best_ixs == "ensemble_2").sum()))
+    v["sfCrpsLgbBestIxs"] = _w(int((best_ixs == "lightgbm").sum()))
+    v["sfCrpsWmBestIxs"] = _w(int((best_ixs == "world_model").sum()))
+    v["sfCrpsAvgBestTot"] = _w(int((best_tot == "ensemble_2").sum()))
+    v["sfCrpsLgbBestTot"] = _w(int((best_tot == "lightgbm").sum()))
+    v["sfCrpsWmBestTot"] = _w(int((best_tot == "world_model").sum()))
+    for m, mt in (("world_model", "Wm"), ("lightgbm", "Lgb"), ("ensemble_2", "Avg")):
+        b = br.xs(m, level="model")
+        v[f"sfBrierBeatsClim{mt}"] = _w(int((b.brier < b.brier_clim).sum()))
+        v[f"sfBrier{mt}"] = f"{b.brier.mean():.3f}"
+        g = d[(d.model == m) & (d.level == IXS)].groupby("key")[[f"mid_{x}" for x in QFINE]].mean().mean()
+        v[f"sfRelNinety{mt}"] = f"{100 * g['mid_0.9']:.0f}"
+        v[f"sfRelTen{mt}"] = f"{100 * g['mid_0.1']:.0f}"
+        v[f"sfRelHalf{mt}"] = f"{100 * g['mid_0.5']:.0f}"
+        gt = d[(d.model == m) & (d.level == "total")].groupby("key")[[f"mid_{x}" for x in QFINE]].mean().mean()
+        v[f"sfRelNinetyTot{mt}"] = f"{100 * gt['mid_0.9']:.0f}"
+        v[f"sfRelTenTot{mt}"] = f"{100 * gt['mid_0.1']:.0f}"
+    v["sfBrierClim"] = f"{br.xs('ensemble_2', level='model').brier_clim.mean():.3f}"
+    rows = []
+    for k, name in KEYS.items():
+        if k not in c_ixs.index:
+            continue
+        cells = []
+        for tab in (c_ixs, c_tot):
+            vals = [tab.loc[k, m] for m in ("world_model", "lightgbm", "ensemble_2")]
+            lo = min(vals)
+            cells += [f"\\textbf{{{x:.3f}}}" if x == lo else f"{x:.3f}" for x in vals]
+        bv = [br.loc[(k, m), "brier"] for m in ("world_model", "lightgbm", "ensemble_2")]
+        clim = br.loc[(k, "ensemble_2"), "brier_clim"]
+        lo = min(bv + [clim])
+        cells += [f"\\textbf{{{x:.3f}}}" if x == lo else f"{x:.3f}" for x in bv + [clim]]
+        cells.append(f"{100 * br.loc[(k, 'ensemble_2'), 'zero_share']:.0f}\\%")
+        rows.append(f"{name} & " + " & ".join(cells) + r" \\")
+    tex = r"""\begin{table*}[t]
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\caption{Probabilistic scores of the forecast ranges, mean over windows. Scaled CRPS item by store and at the
+total, from each model's point forecast and the quantiles of its scaled errors in earlier windows on a grid of 23
+quantiles, weighted by revenue as WRMSSE. Brier score of the forecast chance of selling nothing, item by store,
+against each series' share of zero-sale periods over the year before (Past). Lowest in bold.}
+\label{tab:sup-probabilistic}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{l ccc ccc cccc c}
+\toprule
+ & \multicolumn{3}{c}{CRPS, item by store} & \multicolumn{3}{c}{CRPS, total} & \multicolumn{4}{c}{Brier score, zero sales} & Periods\\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-11}
+Data set & WM & LGB & Avg & WM & LGB & Avg & WM & LGB & Avg & Past & with none\\
+\midrule
+""" + "\n".join(rows) + "\n" + r"""\bottomrule
+\end{tabular}\end{adjustbox}
+\end{table*}
+"""
+    (GEN / "sup_tab_probabilistic.tex").write_text(tex)
+
+
 def _round(prefix: str, changes: list) -> dict:
     """Per data set: start score and keep bar, one-seed screen and three-seed try per change, and what was kept."""
     out = {}
@@ -448,6 +582,7 @@ def main():
     fig_ablation(v)
     fig_occlusion(v)
     fig_calibration(v)
+    fig_probabilistic(v)
     fig_explore(v)
     fig_devlosses(v)
     (GEN / "supfig_values.tex").write_text("".join(f"\\newcommand{{\\{k}}}{{{x}}}\n" for k, x in sorted(v.items())))
