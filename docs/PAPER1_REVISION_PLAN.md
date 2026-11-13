@@ -1325,3 +1325,32 @@ the original test did (`scripts/run_lightgbm_noid.py`). Scored as the original t
 the cost of not training on it (kept out minus trained on all, same series), and forecast over actual. The paper
 reports, for each data set, whether the world model's kept-out WRMSSE and its cost of not training stay below those
 of LightGBM without the label, and says so either way. No setting of either model changes.
+
+**13 November 2026, before it runs: forecasts 52 weeks ahead (Karthik, 13 November, 20:35, "Yes", to a 52-week
+test of 13 weeks four times, for paper 1, not paper 2; paper 1 is not held for it).** The question: over 52 weeks,
+which of the tuned world model, tuned LightGBM and their average is most accurate, and how fast does each one's error
+grow with distance ahead? It is a test, written down before it runs; the result is reported either way.
+
+Data: the six Dominick's categories and M5. Frat (2009 to 2012) and Favorita (from 2015) are too short to train and
+still leave 52-week windows. Windows: the held-out final periods stay out as in the final runs (24 weeks; 84 days on
+M5). Two windows of 52 weeks (364 days on M5), their starts 26 weeks (182 days) apart, the later one ending where the
+final runs' data end. Training as in the final runs (`train_periods` unchanged), ending at each window's start.
+
+Models: each model's tuned settings from the final runs (configs/experiments/final_<key>_{world_model,lightgbm}.yaml),
+five seed copies as there, with only the distance ahead changed:
+1. Blocks (the main comparison, like for like): each model is fitted to forecast 13 weeks (91 days on M5) and
+   forecasts the 52 weeks in four blocks. After each block its forecast (the five copies' average) is taken in as if
+   it were the sales of those weeks, with the plan as recorded, and the next block is forecast from there without
+   refitting (`rwm.blocks`, through each model's `refresh`). LightGBM's lags start 13 weeks back, as its design
+   requires for a 13-week forecast; the world model's rollout in training is 13 weeks.
+2. Direct: each model fitted to forecast all 52 weeks at once (LightGBM's lags then start 52 weeks back; the world
+   model rolls its state 52 weeks). Reported beside the blocks, so that neither model is judged only in a setup that may
+   not suit it.
+The average is the equal average of the world model and LightGBM in the same setup.
+
+Scoring: WRMSSE over the 52 weeks at every level, as in the paper (Dominick's levels counted once), and for each block
+of 13 weeks on its own (weeks 1 to 13, 14 to 26, 27 to 39, 40 to 52), with forecast over actual. Paired item bootstrap
+as in RQ1, by block and data set. Reported: which forecast is clearly lowest, overall and by block, for the main
+comparison; and the world model against the better of LightGBM's two setups, so the world model is compared with
+LightGBM at its best. No setting of any model is tuned for this test, and nothing seen in it changes the paper's
+other results.
