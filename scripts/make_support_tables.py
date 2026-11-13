@@ -30,7 +30,7 @@ def shade_low(vals: list[float], colours: list[str] | None = None) -> list[str]:
     out = []
     for j, v in enumerate(arr):
         if not np.isfinite(v):
-            out.append("--")
+            out.append("n/a")
         elif abs(v - best) < 5e-4:
             c = colours[j] if colours and colours[j] else None
             out.append((f"\\cellcolor{{{c}}}" if c else "") + f"\\textbf{{{v:.3f}}}")
@@ -99,7 +99,7 @@ def comparison(v: dict) -> str:
         for m, mt in (("timesfm_plan", "TfmPlan"), ("world_model", "Wm"), ("lightgbm", "Lgb"), ("ensemble_2", "Avg"),
                       ("timestral_plan", "TstPlan")):
             x = table[k].get(m)
-            v[f"sup{tag}{mt}"] = f"{x:.3f}" if x is not None else "--"
+            v[f"sup{tag}{mt}"] = f"{x:.3f}" if x is not None else "n/a"
     head = " & ".join(lab for _, lab in COMP)
     return r"""\begin{table*}[t]
 \centering\footnotesize\setlength{\tabcolsep}{3pt}
@@ -108,7 +108,7 @@ world model and LightGBM; Avg: their average; Ens: the three-model ensemble with
 TFM: TimesFM with and without the plan; Chr: Chronos-Bolt; TST+ and TST: Timestral with and without the plan; TFT:
 the Temporal Fusion Transformer, with the settings of the first version; SN: seasonal naive. The comparison models
 are scored on cleaned prices on Dominick's; on M5, Frat and Favorita they are the runs of the first revision on the
-same windows, since nothing in them was tuned. -- marks a model not run on that data set. """ + \
+same windows, since nothing in them was tuned. n/a marks a model not run on that data set. """ + \
         r"""Shading marks the lowest: \colorbox{wmcell}{world model}, \colorbox{lgbcell}{LightGBM}, \colorbox{avgcell}{average}.}
 \label{tab:sup-comparison}
 \begin{adjustbox}{max width=\textwidth}\begin{tabular}{l""" + "c" * len(COMP) + r"""}
@@ -196,7 +196,7 @@ def perturbation(v: dict) -> str:
         hist = d[(d.key == k) & (d.model == "world_model") & d.input.str.startswith("history_last")]
         hmax = hist.dbottom.max() if len(hist) else np.nan
         cells.append(hmax)
-        fmt = lambda x, pct=False: "--" if not np.isfinite(x) else (f"{x:+.0f}\\%" if pct else f"{x:+.3f}")  # noqa: E731
+        fmt = lambda x, pct=False: "n/a" if not np.isfinite(x) else (f"{x:+.0f}\\%" if pct else f"{x:+.3f}")  # noqa: E731
         rows.append(f"{name} & {fmt(cells[0])} & {fmt(cells[1])} & {fmt(cells[2], True)} & {fmt(cells[3])} & "
                     f"{fmt(cells[4])} & {fmt(cells[5], True)} & {fmt(cells[6])} \\\\")
     return r"""\begin{table*}[t]
@@ -233,8 +233,8 @@ def mechanism(v: dict) -> str:
         r = g.mean(numeric_only=True)
         worse += r.timing > 0
         probe_gain.append(r.probe_after_r2 - r.probe_before_r2)
-        pc = lambda x: "--" if not np.isfinite(x) else f"{100 * x:+.0f}\\%"  # noqa: E731
-        r2 = lambda x: "--" if not np.isfinite(x) else f"{x:.2f}"  # noqa: E731
+        pc = lambda x: "n/a" if not np.isfinite(x) else f"{100 * x:+.0f}\\%"  # noqa: E731
+        r2 = lambda x: "n/a" if not np.isfinite(x) else f"{x:.2f}"  # noqa: E731
         rows.append(f"{name} & {r.timing:+.0f}\\% & {pc(r.persist_h1)} & {pc(r.persist_h2)} & {pc(r.persist_h4)} & "
                     f"{r2(r.probe_before_r2)} & {r2(r.probe_after_r2)} \\\\")
     d2 = d[d.data.isin(KEYS)]
@@ -243,8 +243,8 @@ def mechanism(v: dict) -> str:
     v["supPersistTwoLo"] = f"{100 * d2.groupby('data').persist_h2.mean().min():.0f}"
     v["supPersistTwoHi"] = f"{100 * d2.groupby('data').persist_h2.mean().max():.0f}"
     v["supPersistRiseSets"] = _w(int((d2.groupby('data').persist_h2.mean() > 0).sum()))
-    v["supProbeGainMax"] = f"{max(probe_gain):.2f}" if probe_gain else "--"
-    v["supProbeGainMin"] = f"{min(probe_gain):.2f}" if probe_gain else "--"
+    v["supProbeGainMax"] = f"{max(probe_gain):.2f}" if probe_gain else "n/a"
+    v["supProbeGainMin"] = f"{min(probe_gain):.2f}" if probe_gain else "n/a"
     return r"""\begin{table}[t]
 \centering\footnotesize\setlength{\tabcolsep}{3pt}
 \caption{The tuned world model's carried state, mean over windows. Timing: change in WRMSSE item by store when the
@@ -289,7 +289,7 @@ def decisions(v: dict) -> str:
             else:
                 tot = [g[(g.model == m) & (g.decision == dec)].cost.sum() for m, _ in TRIO]
                 ref = tot[1]
-                cells += [f"{x / ref:.3f}" if ref else "--" for x in tot]
+                cells += [f"{x / ref:.3f}" if ref else "n/a" for x in tot]
         rows.append(f"{name} & " + " & ".join(cells) + r" \\")
     v["supCatPlanAvgLowest"] = _w(low["ensemble_2"])
     v["supCatPlanLgbLowest"] = _w(low["lightgbm"])
@@ -341,7 +341,7 @@ def intervals(v: dict) -> str:
         for lv in (ITEM_BY_STORE, "total"):
             for m, _ in TRIO:
                 h = g[(g.model == m) & (g.level == lv)]
-                cells.append(f"{100 * h.coverage_80.mean():.0f}" if len(h) else "--")
+                cells.append(f"{100 * h.coverage_80.mean():.0f}" if len(h) else "n/a")
         rows.append(f"{name} & " + " & ".join(cells) + r" \\")
     return r"""\begin{table}[t]
 \centering\footnotesize\setlength{\tabcolsep}{3pt}
