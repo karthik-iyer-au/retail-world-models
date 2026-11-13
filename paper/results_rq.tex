@@ -22,7 +22,10 @@ in \rqPAvgWmBetter{} of \rqPAvgWmN{} comparisons and clearly less accurate in \r
 and \rqPAvgLgbWorse{}. At item grain it is clearly less accurate than either model in at most \rqAvgItemWorseMax{}
 of \rqPAvgWmItemn{} comparisons. Across data sets and levels it is in the 90\% model
 confidence set in \rqMcsAverage{} of \rqMcsCells{} cases, against
-\rqMcsLightgbm{} for LightGBM and \rqMcsWorldModel{} for the world model.
+\rqMcsLightgbm{} for LightGBM and \rqMcsWorldModel{} for the world model. The paired
+item tests are the main evidence: the window bootstrap behind the confidence set
+treats adjacent windows, which share most of their training data, as
+independent, and so overstates its confidence (Section~\ref{sec:setup}).
 
 \textbf{Grain does not decide between the two models on their own.} The world
 model is clearly more accurate than LightGBM in \rqPWmLgbCoarsebetter{} comparisons at store grain

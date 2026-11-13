@@ -444,6 +444,18 @@ Seasonal naive & no & no & no & Sales one season earlier \\
 
 \subsection{World model}
 
+We use \emph{world model} for an action-conditioned state model: a learned
+state for each item, carried forward period by period under the plan, which
+plays the part of the action, and read out as sales. The same model can be
+rolled forward under a plan that was never made, which is the question a
+merchant asks of it. It is trained end to end on sales. The objective that
+trains the state to predict its own later values, the latent term of
+Section~\ref{sec:losses} and JEPA pretraining, was tried on every data set and
+kept on two of the nine, Favorita and snacks (Section~\ref{sec:loop}). The case
+for the model therefore rests on what the carried state adds to the forecast,
+which the carried-state tests measure (Section~\ref{sec:sup-mechanism}), and not
+on that objective.
+
 \paragraph{Encoder and state}
 For item $i$ in one store, an encoder (a transformer over the last $L$
 periods) reads sales and price, each scaled by the item's recent level
@@ -538,6 +550,12 @@ the world model alone for series with less than 26 weeks of sales and the
 average for the rest.
 
 \subsection{Comparison models}
+The Temporal Fusion Transformer and the pretrained models are untuned reference
+models: the Temporal Fusion Transformer keeps the settings of the \firstver{},
+and the pretrained models run as published. Searching each of them on nine data
+sets as the two tuned models were searched was beyond the compute of this study,
+so the comparisons that decide the rule of Section~\ref{sec:rq-broad} are
+between the two tuned models and their average.
 \emph{LightGBM}~\cite{lightgbm}: a direct model, one per store on M5 and
 Favorita, reading sales at lags no shorter than the horizon, rolling averages and
 spread of sales, price against the item's highest recent price, the calendar and

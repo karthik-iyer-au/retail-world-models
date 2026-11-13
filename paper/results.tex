@@ -69,6 +69,16 @@ as accurate as the world model on most data sets. On snacks, where the world
 model alone is weakest (\rqSnaWm{} overall against \rqSnaLgb{} for LightGBM), the average
 stays close to LightGBM at \rqSnaAvg{}.
 
+\paragraph{Why run both}
+Running both models means a second pipeline, a GPU-trained network beside trees
+that train in minutes, and on lines with history the average gains little over
+the better single model. The case for it rests on totals: over the promotion block LightGBM alone drifts
+in total on M5, Frat, Favorita and soft drinks, where the world model does not.
+On M5 its block error is \rqBlockMfiveLgb{}, against \rqBlockMfiveWm{} for the world
+model and \rqBlockMfiveAvg{} for the average (Section~\ref{sec:rq-grain}). A retailer
+whose plans are summed to the category and the chain pays for that drift at every
+level above the item.
+
 % =====================================================================
 \section{Limitations and threats to validity}
 \label{sec:limits}
