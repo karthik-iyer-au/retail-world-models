@@ -17,8 +17,14 @@ def main(argv=None):
     p.add_argument("--configs", nargs="+", required=True)
     p.add_argument("--out", required=True)
     a = p.parse_args(argv)
+    cfgs = {n: yaml.safe_load((ROOT / f"configs/experiments/{n}.yaml").read_text()) for n in a.configs}
+    if any(c["model"]["name"] == "tft" for c in cfgs.values()):  # the Temporal Fusion Transformer's library
+        import subprocess
+        import sys
+
+        subprocess.run([sys.executable, "-m", "pip", "install", "-q", "neuralforecast==3.3.0"], check=True)
     for name in a.configs:
-        cfg = yaml.safe_load((ROOT / f"configs/experiments/{name}.yaml").read_text())
+        cfg = cfgs[name]
         print(f"wrote {run(cfg, out_root=Path(a.out))}", flush=True)
 
 

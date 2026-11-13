@@ -78,6 +78,8 @@ def others() -> int:
             if model is None:
                 continue
             model = copy.deepcopy(model)
+            if which == "chronos" and key == "m5":  # 364 days for every M5 series did not fit a 22 GB GPU at 1,024
+                model["params"]["batch_size"] = 128
             if "horizon" in model["params"]:
                 model["params"]["horizon"] = long
             for window in (0, 1):
