@@ -234,3 +234,31 @@ test is rerun comparing only configurations fitted on the same data and scored
 on the same window, seeds averaged, with a permutation that moves whole
 configurations within each data and a bootstrap over configurations. The tests
 fixed in advance are reported unchanged beside it.
+
+**13 November 2026, before any audit of the tuned models: the audit moves to each data set's final tuned world
+model.** Karthik, 10 November: "u have pikck the world model that is the correct one after all these runs". The
+paper's main results become the audit of the world model paper 1 reports for each data set, and the
+checks-against-accuracy question moves to the versions the settings searches saved.
+
+1. Models. The nine final tuned world models of paper 1 (six Dominick's categories, Frat, M5, Favorita): the merged
+   run folders in `rwm-results/final/` named `final_<key>_world_model_<sha>`, one saved model per rolling window
+   (six windows on Dominick's, four elsewhere). Each is the average of five copies with different seeds.
+2. C1 to C5 as fixed on 13 October, by `scripts/audit_runs.py checkpoints`, randomisation (C2) on the first copy as
+   before. C1 is scored twice, under the audit's nothing-planned plan (as fixed) and under the model's own
+   (`nothing_planned`, as amended 18 October); the pass rule is applied to both and both are reported.
+3. C3 for a final model, which has one seed: the rank agreement of item-period lifts between its five copies,
+   averaged over the ten pairs, and the same for forecasts. Pass if the lift agreement is at least 0.7, the
+   threshold fixed on 13 October.
+4. C6 against each data set's final tuned LightGBM, refitted on the same windows by `audit_runs.py lightgbm` with the
+   final LightGBM config; pass if the rank agreement of total lift is at least 0.5.
+5. C7 on the six Dominick's categories with each category's final world-model and LightGBM settings, on the 38
+   scored episodes already listed; compared on the pooled slope and its interval, as amended 13 October.
+6. C8 plan read-back on each final model's first window.
+7. Checks against accuracy: every world-model version the settings searches saved with a model per search window
+   (`rwm-results/research/`: the searches of paper 1's final settings and their likelihood and JEPA rounds), audited
+   with C1 to C5; the test of 18 October (configurations fitted on the same data and scored on the same window,
+   seeds averaged, permutation moving whole configurations within each data set, bootstrap over configurations).
+   Accuracy is the search-window WRMSSE in each run's metrics.json.
+8. The October audit of the pre-revision versions stays in the record (`results/paper2/summary`) and is not the
+   paper's result. Thresholds, the known-answer study and the C7 episode list are unchanged. No audit result changes
+   any model setting.
