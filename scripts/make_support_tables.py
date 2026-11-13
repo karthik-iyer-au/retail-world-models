@@ -70,6 +70,9 @@ def comparison(v: dict) -> str:
     sf = _cat(ROOT / "results/paper1_revision/scores/studyF_scores_daily.csv",
               ROOT / "results/paper1_revision/scores/studyF_scores_weekly.csv")
     sf = sf[sf.set == "rolling"] if "set" in sf else sf
+    # the models the first version left off M5 and Favorita, run on 14 November 2026 so that every model runs on every
+    # data set (the Temporal Fusion Transformer on both; Chronos-Bolt and TimesFM from history on Favorita)
+    every = _read(A / "comparison_every" / "scores.csv").query("set == 'rolling'")
     rows, beat, table = [], {m: 0 for m, _ in COMP}, {}
     for k, name in KEYS.items():
         score = table[k] = {}
@@ -80,6 +83,8 @@ def comparison(v: dict) -> str:
                 src = comp[(comp.key == k) & (comp.model == m)]
             else:
                 src = sf[(sf.key == k) & (sf.model == m)]
+                if not len(src):
+                    src = every[(every.key == k) & (every.model == m)]
             score[m] = src.groupby("level").wrmsse.mean().mean() if len(src) else None
         vals = [score[m] for m, _ in COMP]
         colours = ["wmcell", "lgbcell", "avgcell"] + [None] * (len(COMP) - 3)
@@ -108,7 +113,8 @@ world model and LightGBM; Avg: their average; Ens: the three-model ensemble with
 TFM: TimesFM with and without the plan; Chr: Chronos-Bolt; TST+ and TST: Timestral with and without the plan; TFT:
 the Temporal Fusion Transformer, with the settings of the \firstver{}; SN: seasonal naive. The comparison models
 are scored on cleaned prices on Dominick's; on M5, Frat and Favorita they are the runs of the \firstver{} on the
-same windows, since nothing in them was tuned. n/a marks a model not run on that data set. """ + \
+same windows, since nothing in them was tuned; the models that version left off (the Temporal Fusion Transformer on M5
+and Favorita, Chronos-Bolt and TimesFM on Favorita) were run for \thisrev{} with the same settings. """ + \
         r"""Shading marks the lowest: \colorbox{wmcell}{world model}, \colorbox{lgbcell}{LightGBM}, \colorbox{avgcell}{average}.}
 \label{tab:sup-comparison}
 \begin{adjustbox}{max width=\textwidth}\begin{tabular}{l""" + "c" * len(COMP) + r"""}

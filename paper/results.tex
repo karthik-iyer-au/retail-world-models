@@ -147,8 +147,8 @@ the results (Section~\ref{sec:rq-broad}).
 Only the world model and LightGBM were tuned; the Temporal Fusion Transformer
 runs with the settings of the \firstver{}, and the pretrained models as
 published. The comparison between the two tuned models is therefore the fair one,
-and the others are reference points. TFT was not run on M5 or Favorita, and
-Chronos-Bolt and TimesFM from history alone not on Favorita. TimesFM with the
+and the others are reference points. Every model was run on every data set.
+TimesFM with the
 plan fits its linear plan model within groups of 2,048 series. The pretrained
 models' point forecast was fixed in advance as the mean of their output, which
 for Timestral let a few extreme upper quantiles dominate on weekly data.

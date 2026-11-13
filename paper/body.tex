@@ -575,12 +575,10 @@ between the two tuned models and their average.
 Favorita, reading sales at lags no shorter than the horizon, rolling averages and
 spread of sales, price against the item's highest recent price, the calendar and
 the plan inputs, with the item as a label; tuned as in Table~\ref{tab:final-settings}.
-\emph{Temporal Fusion Transformer}~\cite{tft}: one model per data set on
-Dominick's and Frat, fitted on the last 156 weeks with the plan as known future
-inputs and a negative binomial likelihood, 1,500 steps; it was not run on M5, where its
-training cost was beyond the compute available, nor on Favorita, whose model
-list was fixed without it. Chronos-Bolt and TimesFM from history alone were
-not run on Favorita either. \emph{TimesFM}~\cite{timesfm,timesfm25}:
+\emph{Temporal Fusion Transformer}~\cite{tft}: one model per data set,
+fitted on the last 156 weeks (730 days with 112 days of input on M5 and
+Favorita) with the plan as known future inputs and a negative binomial
+likelihood, 1,500 steps; on M5 its four windows took 14 minutes on one GPU. \emph{TimesFM}~\cite{timesfm,timesfm25}:
 the 200M-parameter TimesFM~2.5 checkpoint given each series' last 512 periods;
 we use its mean output, chosen in the \firstver{} because its median forecast
 fell well below M5 totals, as the median of intermittent daily sales does. \emph{TimesFM with the plan}: the same model
