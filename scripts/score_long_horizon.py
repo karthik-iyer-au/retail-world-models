@@ -86,7 +86,9 @@ def main(argv=None):
                                          ("average_blocks", "world_model_blocks"),
                                          ("average_blocks", "lightgbm_blocks"),
                                          ("world_model_blocks", "lightgbm_direct"),
-                                         ("world_model_direct", "lightgbm_direct")] if x in sub and y in sub]
+                                         ("world_model_direct", "lightgbm_direct"),
+                                         ("average_direct", "lightgbm_direct"),
+                                         ("average_direct", "world_model_direct")] if x in sub and y in sub]
             bs = C.Bootstrap(view, 0, n=a.boot, seed=window)
             boot = bs.scores({m: sub[m] for m in {m for pr in pairs for m in pr}})
             for r in C.paired(boot, point, bs.level_names, pairs).to_dict("records"):
