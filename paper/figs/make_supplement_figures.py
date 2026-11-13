@@ -390,6 +390,8 @@ def fig_probabilistic(v: dict):
         v[f"sfRelNinetyTot{mt}"] = f"{100 * gt['mid_0.9']:.0f}"
         v[f"sfRelTenTot{mt}"] = f"{100 * gt['mid_0.1']:.0f}"
     v["sfBrierClim"] = f"{br.xs('ensemble_2', level='model').brier_clim.mean():.3f}"
+    ba = br.xs("ensemble_2", level="model")
+    v["sfBrierBeatsClimNames"] = ", ".join(KEYS[k] for k in ba.index if ba.loc[k, "brier"] < ba.loc[k, "brier_clim"]) or "none"
     rows = []
     for k, name in KEYS.items():
         if k not in c_ixs.index:

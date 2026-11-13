@@ -110,7 +110,13 @@ makes the world model less accurate on \supPertPlanHelpsWm{} of \supPertSets{}
 data sets and LightGBM on \supPertPlanHelpsLgb{}; on the Dominick's categories
 and Frat, price and the promotion flag carry it, and events, SNAP days and
 paydays change the error by at most \sfCalendarMax{}
-(Section~\ref{sec:sup-plan}). %CALIBRATION%
+(Section~\ref{sec:sup-plan}). The forecast ranges, built from each model's
+errors in earlier windows, hold about what they state item by store and are too
+narrow at the store; on the continuous ranked probability score the average is
+the most accurate item by store on \sfCrpsAvgBestIxs{} of \rqNineWord{} data
+sets. None of the models forecasts the chance of selling nothing better than
+each series' own past share of zero-sale periods, except on
+\sfBrierBeatsClimNames{} (Section~\ref{sec:sup-calibration}).
 
 \subsection{The broad view}
 \label{sec:rq-broad}

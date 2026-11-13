@@ -25,6 +25,7 @@ the plan.
 
 \input{generated/sup_tab_comparison}
 
+\FloatBarrier
 \section{Ablation: what each model adds to the combination}
 \label{sec:sup-ablation}
 
@@ -70,6 +71,7 @@ over windows, when fitted to the item-by-store error (upper bar) and to the tota
 \label{fig:sup-ablation}
 \end{figure*}
 
+\FloatBarrier
 \section{Occlusion: which plan inputs each model uses}
 \label{sec:sup-plan}
 
@@ -116,6 +118,7 @@ vertical scale is linear below 0.05 and logarithmic above.}
 \label{fig:sup-occlusion}
 \end{figure*}
 
+\FloatBarrier
 \section{Carried-state tests: what the world model's state does}
 \label{sec:sup-mechanism}
 
@@ -134,6 +137,7 @@ state before it (an $R^2$ gain of \supProbeGainMin{} to \supProbeGainMax{}).
 
 \input{generated/sup_tab_mechanism}
 
+\FloatBarrier
 \section{Calibration and reliability of the forecast ranges}
 \label{sec:sup-calibration}
 
@@ -179,14 +183,29 @@ lower quantiles of a slow item are zero and many actuals are zero too, so the
 curve is read at the midpoint of the shares strictly below and at or below each
 quantile. At the total, \sfRelTenTotWm\% of actuals fall below the world model's
 10th percentile and \sfRelNinetyTotWm\% below its 90th; for LightGBM the shares
-are \sfRelTenTotLgb\% and \sfRelNinetyTotLgb\%. %PROBTOTAL%
+are \sfRelTenTotLgb\% and \sfRelNinetyTotLgb\%. The ranges at the total lie
+close to the diagonal with the upper tail a little short; item by store the
+upper tail is shorter, with \sfRelNinetyAvg\% of actuals below the 90th
+percentile.
 On the continuous ranked probability score (CRPS), which scores the whole
 distribution, the average is lowest item by store on \sfCrpsAvgBestIxs{} of
 \sfProbSets{} data sets, LightGBM on \sfCrpsLgbBestIxs{} and the world model on
 \sfCrpsWmBestIxs{}; at the total the average is lowest on \sfCrpsAvgBestTot{},
 LightGBM on \sfCrpsLgbBestTot{} and the world model on \sfCrpsWmBestTot{}.
 
-\paragraph{The chance of selling nothing} %PROBBRIER%
+\paragraph{The chance of selling nothing} The ranges do not forecast whether an
+item sells at all. Built from errors scaled to each series, they put the chance
+of a zero too low at every level: in each group of forecast chance, more
+node-periods sold nothing than the chance says
+(Figure~\ref{fig:sup-probabilistic}d). Their Brier score is
+\sfBrierAvg{} for the average, \sfBrierWm{} for the world model and
+\sfBrierLgb{} for LightGBM, against \sfBrierClim{} for each series' own share of
+zero-sale periods over the year before; the models beat that share on
+\sfBrierBeatsClimNames{} only (Table~\ref{tab:sup-probabilistic}). A retailer
+who needs the chance of no sale, to check availability or prune the range,
+should forecast it directly: the hurdle likelihood kept on M5 and Favorita
+(Section~\ref{sec:sup-explore}) does so inside the world model, but these ranges
+use only its point forecast.
 
 \input{generated/sup_tab_probabilistic}
 
@@ -224,6 +243,7 @@ level, mean over the nine data sets.}
 \label{fig:sup-calibration}
 \end{figure*}
 
+\FloatBarrier
 \section{Decision costs and reconciliation}
 \label{sec:sup-decisions}
 
