@@ -49,44 +49,44 @@ def main(argv=None):
         return int((q.hi < 0).sum()), int((q.lo > 0).sum()), len(q)
 
     rows, v = [], {}
-    wins = {"world_model_blocks": 0, "lightgbm_blocks": 0, "average_blocks": 0}
+    SIX = [f"{m}_{st}" for st in ("blocks", "direct") for m in ("world_model", "lightgbm", "average")]
+    colour = {m: CELL[m.replace("_direct", "_blocks")] for m in SIX}
+    lowest = {m: 0 for m in SIX}
     wm_beats_best, best_beats_wm = 0, 0
     for k in keys:
         o = over.loc[k, "all"]
-        vals = [o.get(m, np.nan) for m in TRIO]
+        vals = [o.get(m, np.nan) for m in SIX]
         best = np.nanmin(vals)
-        wins[TRIO[int(np.nanargmin(vals))]] += 1
+        lowest[SIX[int(np.nanargmin(vals))]] += 1
         cells = ["n/a" if np.isnan(x) else
-                 (f"\\cellcolor{{{CELL[m]}}}\\textbf{{{x:.3f}}}" if abs(x - best) < 5e-4 else f"{x:.3f}")
-                 for m, x in zip(TRIO, vals)]
+                 (f"\\cellcolor{{{colour[m]}}}\\textbf{{{x:.3f}}}" if abs(x - best) < 5e-4 else f"{x:.3f}")
+                 for m, x in zip(SIX, vals)]
         lgb_best = "lightgbm_direct" if o.get("lightgbm_direct", np.inf) < o.get("lightgbm_blocks", np.inf) \
             else "lightgbm_blocks"
-        wl = clear(k, "all", "world_model_blocks", "lightgbm_blocks")
-        wd = clear(k, "all", "world_model_blocks", "lightgbm_direct")
         if o.get("world_model_blocks", np.inf) < o.get(lgb_best, np.inf):
             wm_beats_best += 1
         else:
             best_beats_wm += 1
-        f = lambda m: f"{o[m]:.3f}" if m in o and np.isfinite(o[m]) else "n/a"  # noqa: E731
+        wl = clear(k, "all", "world_model_blocks", "lightgbm_blocks")
+        ad = clear(k, "all", "average_direct", "lightgbm_direct")
+        pair = lambda t: f"{t[0]} / {t[1]} of {t[2]}" if t[2] else "n/a"  # noqa: E731
         growth = [item.get((k, str(b), m), np.nan) for m in ("world_model_blocks", "lightgbm_blocks") for b in (1, 4)]
-        rows.append(f"{KEYS[k]} & " + " & ".join(cells) + f" & {f('lightgbm_direct')} & {f('world_model_direct')} & "
-                    f"{wl[0]} / {wl[1]} of {wl[2]} & {wd[0]} / {wd[1]} of {wd[2]} & "
+        rows.append(f"{KEYS[k]} & " + " & ".join(cells) + f" & {pair(wl)} & {pair(ad)} & "
                     + " & ".join("n/a" if np.isnan(x) else f"{x:.3f}" for x in growth) + r" \\")
     tab = r"""\begin{table*}[t]
 \centering\footnotesize\setlength{\tabcolsep}{3pt}
 \caption{Forecasts 52 weeks ahead (364 days on M5). WRMSSE over the 52 weeks, mean over levels and two windows, for
-the world model (WM), LightGBM (LGB) and their average (Avg), each forecasting four blocks of 13 weeks with each block's
-forecast taken in as sales before the next; and each model forecasting all 52 weeks at once (direct; not run for M5's
-world model). Paired item bootstrap over levels and windows: the number of comparisons in which the world model in
-blocks is clearly lower / clearly higher. Last four columns: WRMSSE item by store in the first and last block of 13
-weeks. Shading marks the lowest of the three in blocks: \colorbox{wmcell}{world model}, \colorbox{lgbcell}{LightGBM},
-\colorbox{avgcell}{average}.}
+the world model (WM), LightGBM (LGB) and their average (Avg). In blocks: each model forecasts four blocks of 13 weeks,
+each block's forecast taken in as sales before the next. Direct: each model forecasts all 52 weeks at once (not run for
+M5's world model). Paired item bootstrap over levels and windows: comparisons clearly lower / clearly higher, of all.
+Last four columns: WRMSSE item by store in the first and last block of 13 weeks, in blocks. Shading marks the lowest
+of the six: \colorbox{wmcell}{world model}, \colorbox{lgbcell}{LightGBM}, \colorbox{avgcell}{average}.}
 \label{tab:long-horizon}
-\begin{adjustbox}{max width=\textwidth}\begin{tabular}{l ccc cc cc cc cc}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{l ccc ccc cc cc cc}
 \toprule
- & \multicolumn{3}{c}{In blocks} & \multicolumn{2}{c}{Direct} & \multicolumn{2}{c}{WM in blocks against} & \multicolumn{2}{c}{WM, item by store} & \multicolumn{2}{c}{LGB, item by store}\\
-\cmidrule(lr){2-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}\cmidrule(lr){11-12}
-Data set & WM & LGB & Avg & LGB & WM & LGB in blocks & LGB direct & Weeks 1--13 & 40--52 & Weeks 1--13 & 40--52\\
+ & \multicolumn{3}{c}{In blocks} & \multicolumn{3}{c}{Direct} & \multicolumn{2}{c}{Paired} & \multicolumn{2}{c}{WM, item by store} & \multicolumn{2}{c}{LGB, item by store}\\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-9}\cmidrule(lr){10-11}\cmidrule(lr){12-13}
+Data set & WM & LGB & Avg & WM & LGB & Avg & WM vs LGB, blocks & Avg vs LGB, direct & Weeks 1--13 & 40--52 & Weeks 1--13 & 40--52\\
 \midrule
 """ + "\n".join(rows) + "\n" + r"""\bottomrule
 \end{tabular}\end{adjustbox}
@@ -95,7 +95,18 @@ Data set & WM & LGB & Avg & LGB & WM & LGB in blocks & LGB direct & Weeks 1--13 
     (OUT / "generated" / "lh_tab.tex").write_text(tab.replace("1--13", "1 to 13").replace("40--52", "40 to 52"))
     n = len(keys)
     v["lhSets"] = _w(n)
-    v["lhWmBest"], v["lhLgbBest"], v["lhAvgBest"] = (_w(wins[m]) for m in TRIO)
+    for m in SIX:
+        v["lhLowest" + "".join(w.capitalize() for w in m.replace("world_model", "wm").replace("lightgbm", "lgb")
+                                   .replace("average", "avg").split("_"))] = _w(lowest[m])
+    over_all = over.xs("all", level="span")
+    for m, tag in (("world_model", "Wm"), ("lightgbm", "Lgb")):
+        both = [k for k in keys if (k, f"{m}_direct") in over_all.index and (k, f"{m}_blocks") in over_all.index]
+        v[f"lhDirectBeatsBlocks{tag}"] = _w(sum(over_all[(k, f"{m}_direct")] < over_all[(k, f"{m}_blocks")] for k in both))
+        v[f"lhDirectSets{tag}"] = _w(len(both))
+    tot = [clear(k, "all", "average_direct", "lightgbm_direct") for k in keys]
+    v["lhPAvgDirBetter"], v["lhPAvgDirWorse"], v["lhPAvgDirN"] = (str(sum(t[i] for t in tot)) for i in range(3))
+    tot = [clear(k, "all", "average_direct", "world_model_direct") for k in keys]
+    v["lhPAvgDirWmBetter"], v["lhPAvgDirWmWorse"] = (str(sum(t[i] for t in tot)) for i in range(2))
     v["lhWmBeatsLgbBest"], v["lhLgbBestBeatsWm"] = _w(wm_beats_best), _w(best_beats_wm)
     tot = [clear(k, "all", "world_model_blocks", "lightgbm_blocks") for k in keys]
     v["lhPWmBetter"], v["lhPWmWorse"], v["lhPN"] = (str(sum(t[i] for t in tot)) for i in range(3))
@@ -106,7 +117,7 @@ Data set & WM & LGB & Avg & LGB & WM & LGB in blocks & LGB direct & Weeks 1--13 
     # growth from the first to the last block, item by store, mean over data sets
     for m, tag in (("world_model_blocks", "Wm"), ("lightgbm_blocks", "Lgb"), ("average_blocks", "Avg")):
         g = [item.get((k, "4", m), np.nan) - item.get((k, "1", m), np.nan) for k in keys]
-        v[f"lhGrow{tag}Lo"], v[f"lhGrow{tag}Hi"] = f"{np.nanmin(g):+.3f}", f"{np.nanmax(g):+.3f}"
+        v[f"lhGrow{tag}Lo"], v[f"lhGrow{tag}Hi"] = f"{np.nanmin(g):+.3f}".replace("-", "\u2212"), f"{np.nanmax(g):+.3f}".replace("-", "\u2212")
         r = [fa.get((k, "all", m), np.nan) for k in keys]
         v[f"lhFa{tag}Lo"], v[f"lhFa{tag}Hi"] = f"{100 * np.nanmin(r):.0f}", f"{100 * np.nanmax(r):.0f}"
     (OUT / "generated" / "lh_values.tex").write_text("".join(f"\\newcommand{{\\{k}}}{{{x}}}\n" for k, x in v.items()))

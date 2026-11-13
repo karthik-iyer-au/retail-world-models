@@ -21,6 +21,7 @@ results/*
 # The tuned-model analyses and the scores of the final, transfer and pooled runs, which the paper is built from
 # (paper/Makefile; plan entry of 12 November 2026). Forecasts and checkpoints stay on the results volume.
 !results/analysis_tuned/
+!results/long_horizon/
 !results/final/
 results/final/*/*
 !results/final/*/metrics.json

@@ -1,0 +1,80 @@
+% Draft section for paper 1: the 52-week test (pre-registered 13 November 2026, docs/PAPER1_REVISION_PLAN.md).
+% Not part of the arXiv or IJPE build until Karthik agrees. Build: cd paper/drafts && xelatex long_horizon.tex
+% Numbers come from generated/lh_values.tex and generated/lh_tab.tex, written by
+% scripts/make_long_horizon_tables.py from results/long_horizon/.
+\documentclass[10pt,twocolumn,letterpaper]{article}
+\usepackage[letterpaper,margin=0.72in,columnsep=0.28in]{geometry}
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Pagella}
+\usepackage{amsmath,booktabs,array,graphicx,adjustbox}
+\usepackage[font=small,labelfont=bf,skip=6pt]{caption}
+\usepackage{xcolor,colortbl}
+\usepackage[verbose=silent]{microtype}
+\usepackage{titlesec}
+\definecolor{accent}{RGB}{38,78,120}
+\definecolor{headtint}{RGB}{24,42,64}
+\definecolor{wmcell}{RGB}{207,224,240}
+\definecolor{lgbcell}{RGB}{250,222,196}
+\definecolor{avgcell}{RGB}{214,234,214}
+\newcommand{\secsquare}{\textcolor{accent}{\rule[0.14em]{0.52em}{0.52em}}\hspace{0.42em}}
+\titleformat{\section}{\normalfont\large\bfseries\color{headtint}}{\secsquare\thesection}{0.45em}{}
+\titleformat{\paragraph}[runin]{\normalfont\bfseries\color{headtint}}{}{0pt}{}[.]
+\titlespacing*{\paragraph}{0pt}{6pt plus 2pt}{0.6em}
+\input{generated/lh_values}
+\begin{document}
+\twocolumn[{\centering{\Large\bfseries\color{headtint} Forecasting 52 weeks ahead}\\[4pt]
+{\small Draft section for paper 1, for review. Planned before it ran (13 November 2026).}\\[10pt]}]
+
+\section{Forecasting 52 weeks ahead}
+
+\textbf{Over 52 weeks the world model alone is not the most accurate forecast on any
+data set. The average of the two models, each forecasting all 52 weeks at once, is
+the most accurate on \lhLowestAvgDirect{} of \lhSets{} data sets, and LightGBM on the other three.}
+Table~\ref{tab:long-horizon} and Figure~\ref{fig:long-horizon} give the scores. The test
+was written down before it ran: the six Dominick's categories and M5, two windows of
+52 weeks each (364 days on M5), the tuned settings of the final runs with only the
+distance ahead changed, scored at every level as in the rest of the paper.
+
+\paragraph{Main comparison, in blocks}
+Each model forecasts 13 weeks, takes its forecast in as the sales of those weeks,
+and forecasts the next 13, four times. Here the world model is clearly less
+accurate than LightGBM in \lhPWmWorse{} of \lhPN{} paired comparisons and clearly more
+accurate in \lhPWmBetter{}. Against the better of LightGBM's two setups on each data set it
+is behind on \lhLgbBestBeatsWm{} of \lhSets{}. The average in blocks is clearly more accurate
+than the world model alone in \lhPAvgWmBetter{} comparisons (clearly less in \lhPAvgWmWorse{}), and
+than LightGBM in \lhPAvgLgbBetter{} (clearly less in \lhPAvgLgbWorse{}).
+
+\paragraph{Taking in its own forecasts costs the world model most}
+Forecasting all 52 weeks at once, the world model is more accurate than in blocks on
+\lhDirectBeatsBlocksWm{} of \lhDirectSetsWm{} data sets; LightGBM is on \lhDirectBeatsBlocksLgb{} of \lhDirectSetsLgb{}. In blocks, the
+world model's item by store error changes by \lhGrowWmLo{} to \lhGrowWmHi{} from the first 13
+weeks to the last, LightGBM's by \lhGrowLgbLo{} to \lhGrowLgbHi{}. The world model rolls its state
+forward from the sales it takes in; when those are its own forecasts, its errors are
+carried into the state and grow with each block.
+
+\paragraph{The rule carries to 52 weeks}
+The paper's rule, the average of the two models, holds at 52 weeks when each model
+forecasts the whole year at once. In paired tests the average forecasting directly is
+clearly more accurate than LightGBM forecasting directly in \lhPAvgDirBetter{} of
+\lhPAvgDirN{} comparisons and clearly less in \lhPAvgDirWorse{}; against the world model forecasting
+directly it is clearly more accurate in \lhPAvgDirWmBetter{} and clearly less in \lhPAvgDirWmWorse{}.
+These two comparisons were added after the planned ones.
+
+\paragraph{Limits}
+Two windows per data set and two retailers (six Dominick's categories and M5). The
+plan is the one recorded, as everywhere in the paper. The settings were tuned for 8
+weeks (28 days on M5) and not tuned again for 52. M5's world model was not run
+forecasting all 52 weeks at once, because rolling its state 364 days in training is
+beyond the compute of this test.
+
+\input{generated/lh_tab}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_long_horizon.pdf}
+\caption{WRMSSE, mean over levels and two windows, in each block of 13 weeks (91 days
+on M5), for the world model, LightGBM and their average forecasting in blocks.}
+\label{fig:long-horizon}
+\end{figure*}
+
+\end{document}
