@@ -63,11 +63,16 @@ def construction_checks(model, future: pd.DataFrame, regular: pd.Series, levers:
     plan = future.drop(columns=[UNITS], errors="ignore")
     on, off = model.breakdown(plan), model.breakdown(off_plan(plan, regular, levers))
     top = max(float(on["forecast"].max()), 1e-9)
-    return {
+    out = {
         "zero_lift_when_nothing_planned": float(np.abs(off["lift"]).max() / top),
         "baseline_moves_with_plan": float(np.abs(on["baseline"] - off["baseline"]).max() / top),
         "parts_do_not_add_up": float(np.abs(on["baseline"] + on["lift"] - on["forecast"]).max() / top),
     }
+    if hasattr(model, "nothing_planned"):  # the same, under the model's own nothing-planned plan (18 October 2026)
+        own = model.breakdown(model.nothing_planned(plan))
+        out["zero_lift_own_plan"] = float(np.abs(own["lift"]).max() / top)
+        out["baseline_moves_own_plan"] = float(np.abs(on["baseline"] - own["baseline"]).max() / top)
+    return out
 
 
 PARTS = {  # the network parts re-initialised in turn, from the output back to the input

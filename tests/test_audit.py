@@ -40,6 +40,8 @@ def test_construction_holds(split, fitted, regular):
     assert c["zero_lift_when_nothing_planned"] < 1e-3
     assert c["baseline_moves_with_plan"] < 1e-4
     assert c["parts_do_not_add_up"] < 1e-6
+    # under the model's own nothing-planned plan the lift is zero to rounding (amendment of 18 October 2026)
+    assert c["zero_lift_own_plan"] < 1e-6
 
 
 def test_contributions_find_the_promotion(split, fitted, regular):

@@ -50,3 +50,15 @@ def test_summary_reads_the_records(tmp_path):
     v = pd.read_csv(tmp_path / "s" / "versions.csv")
     st = pd.read_csv(tmp_path / "s" / "stability.csv")
     assert len(v) == 2 and "wrmsse" in v and len(st) == 1 and st["seeds"].iloc[0] == 2
+
+
+def test_seed_average_audit_scores_copy_agreement(tmp_path):
+    """A final tuned model is an average of copies: the audit scores C3 as agreement between its copies."""
+    run({"name": "avg", "seed": 0, "dataset": DATA, "evaluation": EV,
+         "model": {"name": "seed_average", "params": {"model": "state_model", "members": 3, "seed": 0,
+                                                      "params": STATE}}}, out_root=tmp_path)
+    audit_runs.main(["checkpoints", "--results", str(tmp_path)])
+    rec = json.loads(next(tmp_path.glob("*/audit/audit_origin0.json")).read_text())
+    ca = rec["copy_agreement"]
+    assert ca["copies"] == 3 and -1 <= ca["lift"] <= 1 and -1 <= ca["forecast"] <= 1
+    assert "zero_lift_own_plan" in rec["construction"]

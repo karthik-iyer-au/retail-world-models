@@ -16,6 +16,7 @@ the per-row lifts as CSV, so seed stability (C3) and agreement (C6) can be
 computed afterwards by `scripts/audit_summary.py`.
 """
 import argparse
+import itertools
 import json
 import re
 import sys
@@ -117,6 +118,14 @@ def audit_folder(d, cfg, out):
             rec["randomisation"] = {
                 name: rank_agreement(base, lever_contributions(m, test, regular, rec["levers"])["total_lift"])
                 for name, m in randomised_copies(model.models[0], seed=0)
+            }
+            # C3 for a model with one seed: agreement between its copies (plan amendment of 13 November 2026)
+            each = [lever_contributions(m, test, regular, rec["levers"]) for m in model.models]
+            pairs = list(itertools.combinations(range(len(each)), 2))
+            rec["copy_agreement"] = {
+                "copies": len(each),
+                "lift": float(np.mean([rank_agreement(each[i]["total_lift"], each[j]["total_lift"]) for i, j in pairs])),
+                "forecast": float(np.mean([rank_agreement(each[i]["forecast"], each[j]["forecast"]) for i, j in pairs])),
             }
         else:
             rec, lifts = audit_model(model, train, test, cfg)

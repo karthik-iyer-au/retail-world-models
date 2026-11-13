@@ -52,6 +52,9 @@ def flat(rec: dict) -> dict:
     for k, v in rec["against_sales"].items():
         out[f"c5_{k}_bias"], out[f"c5_{k}_rank"], out[f"c5_{k}_n"] = v["bias"], v["rank"], v["n"]
     out["interaction_share"] = rec.get("share_of_lift_in_interaction")
+    if "copy_agreement" in rec:  # C3 for an average of copies (plan amendment of 13 November 2026)
+        out["c3_copy_lift"] = rec["copy_agreement"]["lift"]
+        out["c3_copy_forecast"] = rec["copy_agreement"]["forecast"]
     return out
 
 
