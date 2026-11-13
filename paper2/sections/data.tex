@@ -2,26 +2,32 @@
 \label{sec:versions}
 
 \paragraph{Data}
-The three public data sets of the companion paper~\cite{rwm}: M5, daily
-Walmart sales of 3,049 items in 10 stores from 2011 to 2016, with prices, event
-days and SNAP days~\cite{m5accuracy}; Dominick's Finer Foods, weekly scanner
-data by store for a Chicago chain from 1989 to 1997, with price, a promotion
-code and cost~\cite{dominicks}, of which the companion paper's six final
-categories are audited (cheese, snack crackers, soft drinks, bottled juice,
-analgesics, frozen entrees); and Breakfast at the Frat, weekly sales of 55
-breakfast items in 77 stores from 2009 to 2012, with display, feature and
-tag-only price reduction flags~\cite{frat}. No raw data is redistributed.
+The four public data sets of the companion paper~\cite{rwm}. \emph{M5} holds
+daily Walmart sales of 3,049 items in 10 stores from 2011 to 2016, with prices,
+event days and SNAP days~\cite{m5accuracy}. \emph{Dominick's Finer Foods} holds
+weekly scanner data by store for a Chicago chain from 1989 to 1997, with price,
+a promotion code and cost~\cite{dominicks}; the companion paper's six
+categories are audited one by one (cheese, snack crackers, soft drinks, bottled
+juice, analgesics, frozen entrees). \emph{Breakfast at the Frat} holds weekly
+sales of 55 breakfast items in 77 stores from 2009 to 2012, with display,
+feature and tag-only price reduction flags~\cite{frat}. \emph{Corporaci\'on
+Favorita} holds daily sales of an Ecuadorian grocery chain to August
+2017~\cite{favorita}: the 10 stores with the most units in 2016 crossed with the
+items sold in all ten, with the promotion flag, holidays, events and paydays,
+and no prices. That makes nine data sets. No raw data is redistributed.
 
-\paragraph{Model versions}
-Every saved world-model and lift-model checkpoint from the companion paper is
-audited: the development and final windows of Frat, the development versions on
-Dominick's, and the M5 practice, confirmation and test windows. The Dominick's
-final world models, each an average of three fits, were not saved in the
-companion paper; they are refitted with settings unchanged for the audit,
-three seeds each, and the companion paper keeps the scores of its original
-runs. Each version's accuracy is read from its own run record. LightGBM is
-refitted on the Dominick's and Frat final windows and the M5 test month for
-C6, with the settings of the companion paper.
+\paragraph{Models audited}
+The audit reads the world model the companion paper reports for each data set:
+settings tuned by a search on that data set, fitted on its rolling windows (six
+on each Dominick's category, four on Frat, M5 and Favorita), each the average of
+five copies fitted with different seeds, with the fitted model of every window
+saved. LightGBM with its own tuned settings, refitted on the same windows, gives
+the comparison for C6. The question of whether passing the checks goes with
+accuracy uses the versions the settings searches saved: every change tried on
+every data set, one seed when screened and three when confirmed, each with a
+fitted model per search window and its search-window accuracy. The audit of the
+companion paper's first-version models, made in October 2026, stays in the
+repository's record; this paper reports the tuned models.
 
 \paragraph{Protocol}
 The audit reads models and never tunes them. Every check runs on every version
