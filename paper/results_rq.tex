@@ -2,7 +2,7 @@
 % paired counts from results/analysis_tuned/paired.csv (item bootstrap within each window, 95% intervals).
 
 The results follow the four research questions. Every number comes from the
-tuned world model and the tuned LightGBM, each set by the same search on each
+tuned world model and the tuned LightGBM, each set by a common search procedure on each
 data set (Section~\ref{sec:loop}), scored on the paper's windows. The average is
 the equal-weight mean of the two forecasts.
 
@@ -67,12 +67,14 @@ on M5, Frat and Favorita.
 \subsection{RQ3: seen and unseen data}
 \label{sec:rq-unseen}
 
-\textbf{On items the models were not trained on, use the world model alone; on
+\textbf{On items the models were not trained on, use the world model alone rather
+than the average with LightGBM fitted with the item label; on
 stores they were not trained on, the world model and the average are level, and
 the average serves.} With a fifth of the items
 kept out of training, the world model's error on them rises by \rqCostWmItemLo{} to \rqCostWmItemHi{},
-against \rqCostLgbItemLo{} to \rqCostLgbItemHi{} for LightGBM (Table~\ref{tab:rq-transfer}). LightGBM
-under-forecasts these items, at \rqFaLgbItemLo{} to \rqFaLgbItemHi{}\% of actual sales, and that pulls the
+against \rqCostLgbItemLo{} to \rqCostLgbItemHi{} for LightGBM (Table~\ref{tab:rq-transfer}). The tuned
+LightGBM reads the item label as a feature, so on a kept-out item it meets a label
+it never saw; it under-forecasts these items, at \rqFaLgbItemLo{} to \rqFaLgbItemHi{}\% of actual sales, and that pulls the
 average down to \rqFaAvgItemLo{} to \rqFaAvgItemHi{}\%; the world model forecasts \rqFaWmItemLo{} to \rqFaWmItemHi{}\%. On the kept-out
 items the world model alone is clearly more accurate than the average on \rqItemWmBeatsAvg{} of \rqKeptSets{}
 data sets tested.
@@ -88,8 +90,8 @@ and Favorita.
 \subsection{RQ4: transferability}
 \label{sec:rq-transfer}
 
-\textbf{The settings carry to another retailer, and training on other retailers'
-data does not help either model.} M5's tuned settings carried unchanged to
+\textbf{In the one transfer between retailers tested, M5's settings carried to
+Favorita, and training on other retailers' data did not help either model.} M5's tuned settings carried unchanged to
 Favorita give \rqCarriedWm{} overall for the world model, against \rqOwnWm{} with Favorita's own
 settings, and \rqCarriedLgb{} for LightGBM, against \rqOwnLgb{} (Table~\ref{tab:rq-retailer});
 at item by store the difference is \rqCarriedWmIxs{} for the world model and \rqCarriedLgbIxs{} for
@@ -141,8 +143,8 @@ on the fast lines and the slow tail on \rqAvgBestFast{} of \rqNineWord{}. The tw
 are close on items they were trained on; they part company on items they were
 not, where LightGBM under-forecasts and the world model does not. The trigger
 for the exception is one a merchant always knows: whether the item is new to the
-range. Settings carry from one retailer's data to another's, and training on
-other retailers' data does not help. Where the forecast is used only for store
+range. In the one transfer between retailers tested, M5's settings carried to
+Favorita, and training on other retailers' data did not help. Where the forecast is used only for store
 orders, adding TimesFM given the plan as a third member makes item-by-store
 forecasts a little more accurate (Section~\ref{sec:sup-ablation}), at the cost of
 a third model to run.

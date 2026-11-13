@@ -79,9 +79,10 @@ model and \rqBlockMfiveAvg{} for the average (Section~\ref{sec:rq-grain}). A ret
 whose plans are summed to the category and the chain pays for that drift at every
 level above the item.
 The searches behind the tuned settings took \computeSearchHours{} hours of run time
-across the nine data sets (Section~\ref{sec:repro}), a one-off cost. Settings tuned on
-one retailer's data carried to another's (Section~\ref{sec:rq-transfer}), so a retailer adopting the rule
-fits both models on its own data with those settings and does not repeat the search.
+across the nine data sets (Section~\ref{sec:repro}), a one-off cost. In the one transfer
+between retailers tested, settings tuned on M5 carried to Favorita
+(Section~\ref{sec:rq-transfer}), so a retailer may not need to repeat the search; one transfer
+does not establish that, and a retailer should check it on its own data.
 
 % =====================================================================
 \section{Limitations and threats to validity}
@@ -93,8 +94,8 @@ The paper addresses price and promotion. It forecasts items newly added to a
 range but does not decide product (which items to range) or place (space,
 distribution), and it does not solve the four Ps together; a unified forecast across them does not exist in
 this work, and the study does not show which model would work best at each grain
-under one. The data are four public data sets with their own plan inputs and
-constraints. The ordering of models is not established for a single retailer's
+under one. The nine data sets come from four retailers, and six of them are categories of
+one retailer (Dominick's), so the evidence across retailers rests on four. The ordering of models is not established for a single retailer's
 data, with its own levers, stock and space records, and the grain comparison
 should be repeated on it before a choice is made.
 
@@ -115,10 +116,11 @@ rate for each model. Testing it needs a retailer's own plans and range
 decisions to score against and is left for separate work.
 
 \paragraph{New items}
-The kept-out items of the transfer test were not trained on, but each model read
-their recent sales before forecasting them. An item with no sales at all, on its
+The kept-out items are existing items held out of training, not new products. Each
+model read their recent sales before forecasting them. An item with no sales at all, on its
 first day in range, was not tested; the new-item part of the rule covers items
-the models have not been trained on, not items with no history. That part of
+the models have not been trained on, not new products with no history; a new
+product launch, with no sales and often no like item, needs its own test. That part of
 the rule was drawn from the results, after a wider rule written down in advance
 held only in part (Section~\ref{sec:rq-broad}).
 
@@ -172,12 +174,13 @@ these data no single model was the most accurate at every grain. One forecast
 made item by store and summed upward, as the equal-weight average of a tuned
 world model and tuned gradient-boosted trees, was the most accurate choice at
 store grain and above on \rqAvgBestCoarseWord{} of \rqNineWord{} data sets and at the item levels on all
-\rqAvgBestItemWord{}, on the fast lines and on the slow tail. For items the models had not been
-trained on, the world model alone was more accurate than the average on every
-data set tested, because LightGBM under-forecast them. Settings carried from one
-retailer's data to another's, and training on other retailers' data did not
+\rqAvgBestItemWord{}, on the fast lines and on the slow tail. The combination held across grains, but the choice of model changed for items
+absent from training: there the world model alone was more accurate than the
+average on every data set tested, because LightGBM with the item label
+under-forecast them. In the one transfer between
+retailers tested, settings tuned on M5 carried to Favorita, and training on other retailers' data did not
 help. The rule that follows, the average everywhere and the world model alone
-for new items, is a finding on these data for forecasts of 8 weeks and 28 days
+for items not trained on, is a finding on these data for forecasts of 8 weeks and 28 days
 under price and promotion plans. The comparison behind it, run over several
 windows with paired tests and every losing model reported, is what we propose a
 retailer reruns on its own data, and over its own planning horizons, before

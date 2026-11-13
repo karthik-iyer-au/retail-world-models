@@ -44,12 +44,14 @@ Fusion Transformer is an attention-based model trained on it. World models, the
 newest of the four, learn a state for each item and carry it forward one period
 at a time under the price and promotion plan; ours is shown in
 Figure~\ref{fig:overview}. The world model and LightGBM were each tuned by the
-same search on every data set, and the average of forecasts is tested
+common search procedure on every data set, and the average of forecasts is tested
 alongside them.\ifjournal{} Because retailers order stock and plan categories from the
-forecast, each model is also scored by what those decisions cost: store orders
-set at a quantile of the forecast, and the dollar error of the category plan
-(Section~\ref{sec:rq-decisions}).\fi The data are four public data sets: M5, six categories of
-Dominick's, Breakfast at the Frat, and Corporaci\'on Favorita.
+forecast, each model is also scored by a simulated cost of those decisions: a
+single-period store order set at a quantile of the forecast, and the dollar error
+of the category plan
+(Section~\ref{sec:rq-decisions}).\fi{} The data are nine data sets from four retailers' public data: M5, six categories
+of Dominick's, Breakfast at the Frat, and Corporaci\'on Favorita. Six of the nine
+are categories of one retailer, so the evidence across retailers rests on four.
 
 The study covers the short end of the planning cycle. Forecasts run 8 weeks
 ahead on the weekly data and 28 days ahead on the daily data, and are scored at
@@ -318,23 +320,26 @@ forecasting with known future inputs. \ifjournal Earlier work, M-JEPA~\cite{mjep
 compared JEPA fine-tuning recipes with leakage-resistant splits. In retail the
 actions are the plan. Our world model uses a recurrent transition~\cite{gru}
 with layer normalisation~\cite{layernorm} on a transformer
-encoder~\cite{transformer}, and is compared with the same model without the
-transition so that what the carried state adds is measured on its own.
+encoder~\cite{transformer}. It is not compared here with the same network
+without the transition; the carried-state tests (Section~\ref{sec:sup-mechanism})
+show what the state does, not how much accuracy it adds over a network without one.
 
 \subsection{What this paper adds}
 
 Two results here are not new: an equal-weight average of different models is
 hard to beat \cite{smithwallis2009,wang2023}, and gradient-boosted trees are
-strong on retail panels \cite{m5accuracy}. The paper adds four things. It scores
+strong on retail panels \cite{m5accuracy}. The finding here is that the average
+of a tuned world model and tuned trees is robust across grains, but the choice of
+model changes for items absent from training. The paper adds four things. It scores
 one forecast at every grain a retailer decides at, period by period and over the
 whole promotion block, so that the choice of model is read grain by grain rather
 than from one score averaged over levels. It reads the same comparison by the
 kind of line, separating the fast lines that carry most sales from the slow tail
 and from lines with short history. It tests what each model loses on items and
 stores it was not trained on, and whether its settings and training data carry
-across retailers. And it gives every model under comparison the same search for
-its settings, so that the comparison between a world model and gradient-boosted
-trees is between two tuned models.
+across retailers. And it tunes the world model and gradient-boosted trees by a common search
+procedure, each over its own settings, so that the comparison is between two
+tuned models.
 
 % =====================================================================
 \section{Data}
@@ -419,7 +424,7 @@ count each distinct level once, four levels on Dominick's. Lower is better.
 \label{sec:models}
 
 Table~\ref{tab:models} lists every model. The world model and LightGBM were
-each tuned on every data set by the same search (Section~\ref{sec:loop}); their
+each tuned on every data set by a common search procedure (Section~\ref{sec:loop}); their
 final settings are in Table~\ref{tab:final-settings}, and the constraints each
 works within are in Appendix~\ref{sec:constraints}. Each tuned model's forecast
 is the average of five fits with different seeds, except on M5, where each

@@ -247,7 +247,10 @@ reconciled ETS forecast on \supAvgBeatsEts{} of \supReconSets{} data sets
 (Table~\ref{tab:sup-reconcile}). The exceptions are soft drinks and snacks,
 where reconciled ETS is more accurate at the coarse levels, which carry most of
 the all-level score; combining either tuned model with ETS above it does not do
-better than the average on most data sets.
+better than the average on most data sets. The comparison is with
+reconciled ETS only, which does not read the price and promotion plan; it shows
+that summing the average upward is a reasonable default here, not that it beats
+reconciling the tuned models themselves, which was not tested.
 
 \input{generated/sup_tab_reconcile}
 
