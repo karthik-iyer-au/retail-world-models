@@ -524,7 +524,7 @@ def _cell(e: dict, ch: str) -> str:
     if t is not None:
         txt = f"{t[0]:.3f}"
         return f"\\textbf{{{txt}}}" if ch in e["kept"] else txt
-    return f"({s:.3f})" if s is not None else "--"
+    return f"({s:.3f})" if s is not None else "n/a"
 
 
 def _explore_table(loss: dict, jepa: dict):
@@ -534,7 +534,7 @@ def _explore_table(loss: dict, jepa: dict):
         if not e:
             continue
         cells = [f"{e['start']:.3f}"] + [_cell(e, c) for c, _ in LOSSES]
-        cells += [f"{f['start']:.3f}" if f else "--"] + ([_cell(f, c) for c, _ in JEPA] if f else ["--", "--"])
+        cells += [f"{f['start']:.3f}" if f else "n/a"] + ([_cell(f, c) for c, _ in JEPA] if f else ["n/a", "n/a"])
         rows.append(f"{name} & " + " & ".join(cells) + r" \\")
     tex = r"""\begin{table*}[t]
 \centering\footnotesize\setlength{\tabcolsep}{4pt}

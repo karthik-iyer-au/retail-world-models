@@ -5,7 +5,7 @@ world model and LightGBM; Avg: their average; Ens: the three-model ensemble with
 TFM: TimesFM with and without the plan; Chr: Chronos-Bolt; TST+ and TST: Timestral with and without the plan; TFT:
 the Temporal Fusion Transformer, with the settings of the first version; SN: seasonal naive. The comparison models
 are scored on cleaned prices on Dominick's; on M5, Frat and Favorita they are the runs of the first revision on the
-same windows, since nothing in them was tuned. -- marks a model not run on that data set. Shading marks the lowest: \colorbox{wmcell}{world model}, \colorbox{lgbcell}{LightGBM}, \colorbox{avgcell}{average}.}
+same windows, since nothing in them was tuned. n/a marks a model not run on that data set. Shading marks the lowest: \colorbox{wmcell}{world model}, \colorbox{lgbcell}{LightGBM}, \colorbox{avgcell}{average}.}
 \label{tab:sup-comparison}
 \begin{adjustbox}{max width=\textwidth}\begin{tabular}{lccccccccccc}
 \toprule
@@ -18,8 +18,8 @@ Frozen entrees & 0.357 & 0.338 & \cellcolor{avgcell}\textbf{0.332} & 0.349 & 0.4
 Soft drinks & 0.705 & 0.680 & \cellcolor{avgcell}\textbf{0.650} & 0.655 & 0.770 & 0.909 & 0.976 & 2.281 & 0.858 & 0.815 & 1.001 \\
 Snacks & 0.893 & \cellcolor{lgbcell}\textbf{0.778} & 0.790 & 0.795 & 0.855 & 1.079 & 2.316 & 8.666 & 3.277 & 0.959 & 1.399 \\
 Frat & 0.490 & 0.494 & 0.469 & \textbf{0.454} & 0.482 & 0.691 & 0.722 & 1.002 & 0.685 & 0.571 & 1.038 \\
-M5 & 0.709 & 0.697 & \cellcolor{avgcell}\textbf{0.658} & 0.729 & 0.982 & 0.964 & 1.184 & 1.038 & 0.988 & -- & 1.146 \\
-Favorita & 0.428 & 0.448 & \cellcolor{avgcell}\textbf{0.403} & 0.419 & 0.501 & -- & -- & 0.515 & 0.548 & -- & 0.662 \\
+M5 & 0.709 & 0.697 & \cellcolor{avgcell}\textbf{0.658} & 0.729 & 0.982 & 0.964 & 1.184 & 1.038 & 0.988 & n/a & 1.146 \\
+Favorita & 0.428 & 0.448 & \cellcolor{avgcell}\textbf{0.403} & 0.419 & 0.501 & n/a & n/a & 0.515 & 0.548 & n/a & 0.662 \\
 \bottomrule
 \end{tabular}\end{adjustbox}
 \end{table*}

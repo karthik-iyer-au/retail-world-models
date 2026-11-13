@@ -26,7 +26,7 @@ macros: dict[str, str] = {}
 
 
 def f3(x):
-    return "--" if x is None else f"{x:.3f}"
+    return "n/a" if x is None else f"{x:.3f}"
 
 
 def put(name, value):
@@ -298,7 +298,7 @@ def tab_settings():
             ("Training steps", "steps"), ("Batch size", "batch"), ("Learning rate", "lr")]
     lines = []
     for label, k in keys:
-        lines.append(f"{label} & " + " & ".join(str(out[n][0].get(k, "--")) for n in pick) + " \\\\")
+        lines.append(f"{label} & " + " & ".join(str(out[n][0].get(k, "n/a")) for n in pick) + " \\\\")
     yesno = lambda b: "yes" if b else "no"
     lines.append("Normalised roll-forward & " + " & ".join(yesno(out[n][0].get("roll_norm")) for n in pick) + " \\\\")
     lines.append("Level from the last 8 weeks & " + " & ".join(yesno(out[n][0].get("scale_window") == 8) for n in pick) + " \\\\")

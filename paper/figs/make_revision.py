@@ -70,7 +70,7 @@ def put(cmd: str, *keys, value) -> None:
 
 def f3(x) -> str:
     if x is None or (isinstance(x, float) and np.isnan(x)):
-        return "--"
+        return "n/a"
     s = f"{x:.3f}"
     return s.replace("-", "\\textminus ") if s.startswith("-") else s
 
@@ -435,7 +435,7 @@ def tab_rolling(acc, sets):
             for m in models:
                 v = row[m]
                 s = f3(v)
-                if s != "--" and v == lo:
+                if s != "n/a" and v == lo:
                     s = f"\\textbf{{{s}}}"
                 if m in inset:
                     s += "$^{\\circ}$"
@@ -470,7 +470,7 @@ or Favorita, Chronos-Bolt, TimesFM and TFT not on Favorita. Timestral+plan is Ti
 
 def cell(r):
     if r is None:
-        return "--"
+        return "n/a"
     s = f3(r.mean_diff)
     if r.lo > 0:
         return f"\\textbf{{{s}}}"
@@ -581,7 +581,7 @@ def tab_perturbation():
                         v = g.loc[(dset, m, inp, "occlude"), fld]
                     except KeyError:
                         v = np.nan
-                    cells.append("--" if np.isnan(v) else pct(v).replace("-", "\\textminus "))
+                    cells.append("n/a" if np.isnan(v) else pct(v).replace("-", "\\textminus "))
             lines.append(f"{lab[inp]} & " + " & ".join(cells) + " \\\\")
     head = " & ".join(["World & Lift & LGB"] * 3)
     tex = f"""\\begin{{table*}}[t]
@@ -983,7 +983,7 @@ def tab_losses():
         where = ", ".join(sorted({dsname.get(x, x) for x in g.dataset}))
         label = ch.replace("low lr", "at a lower rate")
         if sc.empty:
-            lines.append(f"{label} & {where} & -- & -- & Not run on full data \\\\")
+            lines.append(f"{label} & {where} & n/a & n/a & Not run on full data \\\\")
             continue
         n, better = len(sc), int((sc["diff"] < 0).sum())
         lines.append(f"{label} & {where} & {f3(sc.wrmsse.mean())} & {f3(sc.wrmsse_ref.mean())} & "

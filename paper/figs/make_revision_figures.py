@@ -305,7 +305,7 @@ def fig_study():
     bx.text(x0 + 0.35, vb_top - 0.3, "The forecast used", ha="left", va="top", fontsize=7.0, color=INK,
             fontweight="bold")
     for j, t in enumerate(lines):
-        bx.text(x0 + 0.35, vb_top - 1.05 - j * 0.82, ("–  " if not t.startswith("    ") else "   ") + t.strip(),
+        bx.text(x0 + 0.35, vb_top - 1.05 - j * 0.82, ("•  " if not t.startswith("    ") else "   ") + t.strip(),
                 ha="left", va="top", fontsize=SMALL + 0.3, color=INK)
     save(fig, OUT / "fig_study.pdf")
     return lay
@@ -807,7 +807,7 @@ def fig_heatmaps():
                 x, y = xs[j], i
                 if np.isnan(v):
                     ax.add_patch(Rectangle((x, y), 1, 1, facecolor="#f3f4f6", edgecolor="white", lw=0.8))
-                    ax.text(x + 0.5, y + 0.5, "–", ha="center", va="center", fontsize=SMALL, color=MUTED)
+                    ax.text(x + 0.5, y + 0.5, "n/a", ha="center", va="center", fontsize=SMALL, color=MUTED)
                     continue
                 t = min((v - 1) / (cap - 1), 1.0)
                 face = cmap(t)

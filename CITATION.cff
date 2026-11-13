@@ -6,6 +6,7 @@ authors:
   - family-names: Iyer
     given-names: Karthik
     orcid: "https://orcid.org/0009-0004-0593-1602"
+    affiliation: "La Trobe University"
 repository-code: "https://github.com/karthik-iyer-au/retail-world-models"
 license: PolyForm-Noncommercial-1.0.0
 keywords:
