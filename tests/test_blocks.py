@@ -64,3 +64,19 @@ def test_runs_through_the_experiment_runner(tmp_path):
     out = run(cfg, out_root=tmp_path)
     s = json.loads((out / "metrics.json").read_text())["splits"]
     assert len(s) == 2
+
+
+def test_roll_on_matches_the_model_within_its_horizon_and_runs_past_it():
+    pytest.importorskip("torch")
+    train, test = _split(21)
+    future = test.drop(columns=[UNITS])
+    dates = np.sort(test[DATE].unique())
+    first = future[DATE].isin(dates[:7]).to_numpy()
+    own = build_model("state_model", **WM).fit(train).predict(future[first])
+    m = build_model("roll_on", model="state_model", params=WM).fit(train)
+    f = m.predict(future)
+    assert np.all(np.isfinite(f)) and f.sum() > 0
+    # the first seven periods: rolling on for 21 changes nothing in them
+    assert np.allclose(f[first], own, rtol=1e-4, atol=1e-6)
+    # and back to the trained horizon again
+    assert np.allclose(m.predict(future[first]), own, rtol=1e-4, atol=1e-6)

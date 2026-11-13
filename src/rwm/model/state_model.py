@@ -411,7 +411,10 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
             state = self.state(hist)
             labels = [e(cats[:, i]) for i, e in enumerate(self.emb)]
             fixed = torch.cat([state] + labels, dim=1)[:, None, :].expand(-1, h, -1)
-            steps = self.step(torch.arange(h, device=fut.device))[None].expand(len(fut), -1, -1)
+            # past the horizon trained for (forecasting further by rolling the state on, rwm.roll_on), the last
+            # trained step's embedding is used for every later step
+            idx = torch.arange(h, device=fut.device).clamp(max=self.step.num_embeddings - 1)
+            steps = self.step(idx)[None].expand(len(fut), -1, -1)
             rest, w = [torch.cat(labels, dim=1)[:, None, :].expand(-1, h, -1)] if labels else [], None
             rest.append(steps)
             if self.neighbours:

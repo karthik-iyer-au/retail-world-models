@@ -1,0 +1,56 @@
+# 52-week test (plan entry of 13 November 2026): final_dominicks_ana_world_model.yaml with only the distance ahead changed (rollon, window 0); written by scripts/make_long_horizon_configs.py.
+name: h52_dominicks_ana_world_model_rollon_w0
+seed: 0
+dataset:
+  name: dominicks
+  params:
+    categories:
+    - ana
+    clean_prices: 5
+model:
+  name: roll_on
+  params:
+    model: seed_average
+    params:
+      model: state_model
+      members: 5
+      seed: 0
+      params:
+        horizon: 13
+        history: 26
+        train_periods: 156
+        categorical:
+        - item_id
+        - store_id
+        extra:
+        - promo
+        - cost
+        levers:
+        - promo
+        d_model: 64
+        layers: 2
+        heads: 4
+        steps: 6000
+        batch: 512
+        lr: 0.001
+        regular_price: true
+        lift_readout: true
+        rollout: true
+        validation_periods: 13
+        scale_window: 8
+        switching:
+        - store_id
+        roll_norm: true
+        weight_average: 0.999
+evaluation:
+  horizon: 52
+  n_origins: 1
+  holdout_periods: 50
+  scale_lag: 1
+  weight_window: 13
+  conditions:
+  - promo
+  after_promo:
+    levers:
+    - promo
+    periods: 2

@@ -29,7 +29,7 @@ def inner_params(model: dict) -> dict:
 def make(base: dict, key: str, which: str, setup: str, window: int) -> dict:
     daily = key == "m5"
     long, block, gap = (364, 91, 182) if daily else (52, 13, 26)
-    h = block if setup == "blocks" else long
+    h = block if setup in ("blocks", "rollon") else long
     cfg = copy.deepcopy(base)
     p = inner_params(cfg["model"])
     p["horizon"] = h
@@ -38,6 +38,8 @@ def make(base: dict, key: str, which: str, setup: str, window: int) -> dict:
     if setup == "blocks":
         cfg["model"] = {"name": "blocks", "params": {"model": cfg["model"]["name"], "block": block,
                                                      "params": cfg["model"]["params"]}}
+    elif setup == "rollon":  # added 14 November 2026: fitted for 13 weeks, the state rolled on for 52 (rwm.roll_on)
+        cfg["model"] = {"name": "roll_on", "params": {"model": cfg["model"]["name"], "params": cfg["model"]["params"]}}
     ev = cfg["evaluation"]
     ev["horizon"], ev["n_origins"] = long, 1
     ev.pop("step", None)
@@ -52,7 +54,9 @@ def main():
         for which in ("world_model", "lightgbm"):
             src = ROOT / f"configs/experiments/final_{key}_{which}.yaml"
             base = yaml.safe_load(src.read_text())
-            for setup in ("blocks", "direct"):
+            for setup in ("blocks", "direct", "rollon"):
+                if setup == "rollon" and which != "world_model":
+                    continue
                 if key == "m5" and which == "world_model" and setup == "direct":
                     continue
                 for window in (0, 1):

@@ -20,7 +20,7 @@ import pandas as pd
 from rwm.evaluation import compare as C
 from rwm.evaluation.splits import Split
 
-NAME = re.compile(r"h52_(dominicks_\w{3}|m5)_(world_model|lightgbm)_(blocks|direct)_w(\d)")
+NAME = re.compile(r"h52_(dominicks_\w{3}|m5)_(world_model|lightgbm)_(blocks|direct|rollon)_w(\d)")
 
 
 def index(results: Path) -> pd.DataFrame:
@@ -68,6 +68,10 @@ def main(argv=None):
         for setup in ("blocks", "direct"):
             if f"world_model_{setup}" in mats and f"lightgbm_{setup}" in mats:
                 mats[f"average_{setup}"] = (mats[f"world_model_{setup}"] + mats[f"lightgbm_{setup}"]) / 2
+        # added 14 November 2026: the world model rolled on, averaged with LightGBM forecasting directly (neither
+        # takes in its own forecasts)
+        if "world_model_rollon" in mats and "lightgbm_direct" in mats:
+            mats["average_rollon"] = (mats["world_model_rollon"] + mats["lightgbm_direct"]) / 2
         t0, t1, _ = fr.cut(0)
         h = t1 - t0
         q = h // 4
@@ -88,7 +92,11 @@ def main(argv=None):
                                          ("world_model_blocks", "lightgbm_direct"),
                                          ("world_model_direct", "lightgbm_direct"),
                                          ("average_direct", "lightgbm_direct"),
-                                         ("average_direct", "world_model_direct")] if x in sub and y in sub]
+                                         ("average_direct", "world_model_direct"),
+                                         ("world_model_rollon", "lightgbm_direct"),
+                                         ("world_model_rollon", "world_model_blocks"),
+                                         ("average_rollon", "lightgbm_direct"),
+                                         ("average_rollon", "world_model_rollon")] if x in sub and y in sub]
             bs = C.Bootstrap(view, 0, n=a.boot, seed=window)
             boot = bs.scores({m: sub[m] for m in {m for pr in pairs for m in pr}})
             for r in C.paired(boot, point, bs.level_names, pairs).to_dict("records"):

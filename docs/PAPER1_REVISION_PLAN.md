@@ -1360,3 +1360,19 @@ fits in one job. M5's final runs use one copy of each model, not five, and so do
 `validation_periods` is shorter than its horizon has it raised to the horizon, as the model requires. M5's direct
 world model is not run: rolling its state 364 days in training is beyond this test's compute (its final run took
 about an hour per window at 28 days), so on M5 the world model is run in blocks only; LightGBM runs both ways there.
+
+**14 November 2026, added after the 52-week result and before this runs: rolling the world model's state on
+(Karthik, 14 November 06:41: "passing 13 weeks into the next 13 weeks was not perhaps the right design, explore what
+is the right solution").** In the planned test the world model, taking each 13-week block's forecast in as sales,
+drifted upward block after block (forecast over actual at item by store from 0.95 to 1.07 in weeks 1 to 13, to 0.95 to
+1.26 in weeks 40 to 52 on the Dominick's categories), while forecasting all 52 weeks at once it did not. The encoder was
+trained on real sales, with their zeros and spikes; a forecast is a smooth average it never saw, and on skewed counts it
+reads one as more demand than it is. The design that fits a world model is to roll its state on rather than to turn its
+forecasts back into sales. Added, fixed before it runs and run once:
+- Rolled on (`rwm.roll_on`): the world model fitted for 13 weeks (91 days on M5), as in the blocks setup, reads its state
+  from the latest sales once and rolls it forward under the plan for all 52 weeks; past week 13 the transition runs as
+  trained and the readout uses week 13's step embedding. Same data sets, windows and settings as the planned test,
+  M5 included.
+- Compared with LightGBM forecasting directly (no forecast taken in either), and their average.
+Scored and tested as the planned test. The planned result is reported as it ran; this is reported beside it as added
+after seeing it. A second fix, taking in sampled sales paths instead of averages, is held back unless this one fails.
