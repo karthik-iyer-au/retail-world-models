@@ -143,7 +143,7 @@ def cmd_lightgbm(a):
     out = Path(a.results) / f"paper2_lightgbm_{cfg['name']}"
     out.mkdir(parents=True, exist_ok=True)
     for origin, train, test in windows(cfg):
-        if (out / f"audit_origin{origin}.json").exists():
+        if (out / f"audit_origin{origin}.json").exists() or (a.origins and origin not in a.origins):
             continue
         model = build_model(cfg["model"]["name"], **cfg["model"]["params"]).fit(train)
         rec, lifts = audit_model(model, train, test, cfg, randomise=False)
@@ -235,6 +235,7 @@ def main(argv=None):
     l = sub.add_parser("lightgbm")
     l.add_argument("--config", required=True)
     l.add_argument("--results", required=True)
+    l.add_argument("--origins", nargs="*", type=int, help="only these windows (to run windows in parallel jobs)")
     z = sub.add_parser("zones")
     z.add_argument("--episodes", required=True)
     z.add_argument("--world-config", required=True)
