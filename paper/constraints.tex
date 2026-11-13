@@ -1,4 +1,4 @@
-\onecolumn
+\ifsupplement\else\onecolumn\fi
 \section{Constraints the models work within}
 \label{sec:constraints}
 
@@ -11,7 +11,7 @@ in Table~\ref{tab:final-settings}.
 
 \label{sec:supplement}
 
-\begin{center}
+\ifsupplement\begin{table}\centering\else\begin{center}\fi
 \captionof{table}{\textbf{Every constraint the trained models and the ensemble work
 within, with its value and where it lives in the code.}}
 \label{tab:constraints}
@@ -37,5 +37,5 @@ TimesFM covariate fit & Groups of 2,048 series & \texttt{src/rwm/prior\_work/} \
 Timestral context and batch & 512 periods; batch 256, halved on running out of GPU memory & \nolinkurl{src/rwm/prior_work/timestral_zero_shot.py} \\
 \bottomrule
 \end{tabular}
-\end{center}
-\twocolumn
+\ifsupplement\end{table}\else\end{center}\fi
+\ifsupplement\else\twocolumn\fi

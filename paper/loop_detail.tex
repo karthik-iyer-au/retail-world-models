@@ -1,13 +1,4 @@
 % Detail of the searches: in the main text for arXiv, in the online supplement for the journal.
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{figs/fig_loop_path.pdf}
-\caption{Every run of every search, in the order it was made. Faint dots are first-seed screens,
-open circles are three-seed confirmations, and the step line is the best settings so far. The band
-under the line is the keep bar: a change had to land below it to be kept. The world model's line
-runs on into its likelihood and JEPA rounds after its own loop ends.}
-\label{fig:looppath}
-\end{figure*}
 
 \subsection{What the searches kept}
 
@@ -21,9 +12,19 @@ On the search windows the world model improved on \loopImprovedWm{} of the nine 
 \loopImprovedLgb{} (Figure~\ref{fig:loopslopes}). The largest gain of either model was LightGBM on \loopGainLgbSet{},
 from \loopGainLgbFrom{} to \loopGainLgbTo{}. The world model's largest was on \loopGainWmSet{}, from \loopGainWmFrom{} to \loopGainWmTo{}.
 
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_loop_path.pdf}
+\caption{Every run of every search, in the order it was made. Faint dots are first-seed screens,
+open circles are three-seed confirmations, and the step line is the best settings so far. The band
+under the line is the keep bar: a change had to land below it to be kept. The world model's line
+runs on into its likelihood and JEPA rounds after its own loop ends.}
+\label{fig:looppath}
+\end{figure*}
+
 \begin{figure}[t]
 \centering
-\includegraphics[width=\columnwidth]{figs/fig_loop_heat.pdf}
+\includegraphics[width=\colfig]{figs/fig_loop_heat.pdf}
 \caption{Each change tried alone on the world model in the first round, against that data set's
 starting settings on the first seed. Blue is better. A blank cell is a change that was not on that
 data set's menu.}
@@ -42,7 +43,7 @@ searches never saw, in Section~\ref{sec:results}, and not the search scores.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\columnwidth]{figs/fig_loop_heldout.pdf}
+\includegraphics[width=\colfig]{figs/fig_loop_heldout.pdf}
 \caption{Each three-seed run's change on the search windows against its change on the held-out
 window, both against the starting settings of its search.}
 \label{fig:loopheldout}
@@ -61,7 +62,7 @@ bars were between \loopBarLoLgb{} and \loopBarHiLgb{}.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\columnwidth]{figs/fig_loop_noise.pdf}
+\includegraphics[width=\colfig]{figs/fig_loop_noise.pdf}
 \caption{The starting settings' three seed scores on each Dominick's category, as a share of their
 mean, for a single world-model fit and for the five-copy average. Ticks are the scores.}
 \label{fig:loopnoise}
