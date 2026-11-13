@@ -11,22 +11,22 @@ the final, transfer and pooled runs, every try of the searches, and the
 analyses of the tuned models are committed under \nolinkurl{results/final/},
 \nolinkurl{results/ftransfer/}, \nolinkurl{results/pooled/},
 \nolinkurl{results/research/} and \nolinkurl{results/analysis_tuned/}; the plan
-and every dated entry are in \nolinkurl{docs/PAPER1_REVISION_PLAN.md}.
+and every dated entry are in \cpath{docs/PAPER1_REVISION_PLAN.md}{the plan file}.
 \texttt{make} in \texttt{paper/} rebuilds every figure, table and quoted number
 from these files (\buildSeconds{} seconds from a fresh clone of the repository,
 \buildDate). Forecast files and model checkpoints are kept outside the
 repository on the results volume, with their checksums recorded.
 
 \paragraph{Compute}
-The first version ran on one Google Colab machine with an NVIDIA \computeGpu{}
+The \firstver{} ran on one Google Colab machine with an NVIDIA \computeGpu{}
 (Table~\ref{tab:compute}: \computeRuns{} timed runs, \computeHours{}
-machine-hours). The revision ran on rented machines: the searches, final runs,
+machine-hours). \ifjournal The tuning, final, transfer and pooled runs\else The \revn{}\fi{} ran on rented machines: the searches, final runs,
 transfer tests and pooled training on GPUs from Vast, managed and analysed on
 Modal. Table~\ref{tab:compute-revision} gives the run time recorded in each of
 the \computeRevRuns{} run folders, \computeRevHours{} hours in all, most on RTX
 4090 GPUs; because a resumed run records only its last stretch, this is a floor.
 The machine time paid for on Vast was \computeVastGpuHours{} GPU-hours
-(US\$\computeVastGpuUsd{}), and the revision cost US\$\computeTotalUsd{} in all
+(US\$\computeVastGpuUsd{}), and \ifjournal those runs\else the \revn{}\fi{} cost US\$\computeTotalUsd{} in all
 from 26 October to 12 November 2026: US\$\computeVastUsd{} on Vast, including
 storage and data transfer, and US\$\computeModalUsd{} on Modal. The total
 includes every run made, the searches' screens, repeats after machine failures

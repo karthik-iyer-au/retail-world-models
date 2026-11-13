@@ -69,6 +69,14 @@
 \ifdefined\journalmode\journaltrue\fi
 \ifdefined\supplementmode\journaltrue\supplementtrue\fi
 \newcommand{\colfig}{\columnwidth}
+% Revision wording: the arXiv version is a revision of its first version; the journal submission is a new paper
+% under anonymised review, so there the same phases are named without reference to an earlier version.
+\newcommand{\firstver}{\ifjournal development phase\else first version\fi}
+\newcommand{\fvpaper}{\ifjournal development phase\else first version of this paper\fi}
+\newcommand{\thisrev}{\ifjournal this study\else this revision\fi}
+\newcommand{\revn}{\ifjournal study\else revision\fi}
+% a path in the code: shown in full for arXiv, named generically under anonymised review
+\newcommand{\cpath}[2]{\ifjournal #2\else\nolinkurl{#1}\fi}
 \newcommand{\secbarrier}{}
 % topfigure: a full-width figure that floats to the top of the next page in every build
 \makeatletter

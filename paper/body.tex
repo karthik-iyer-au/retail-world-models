@@ -70,7 +70,7 @@ transferability, with the broad view last.
 windows that no choice of setting saw, and the forecast recommended is the average of the two tuned
 models.} \textbf{(a)} Windows by data set, in windows before the end of the data:
 the rolling windows scored in this paper; and the development and final windows
-of the first version, which are not scored here. The searches that tuned each
+\ifjournal used to develop the models\else of the \firstver{}\fi{}, which are not scored here. The searches that tuned each
 model scored windows earlier than the rolling windows. \textbf{(b)} The forecast
 that the results support: the equal-weight average of the tuned world model and
 the tuned LightGBM for every item and store, the world model alone for an item
@@ -356,7 +356,7 @@ holds weekly sales of 55 breakfast items in 77 stores from 2009 to 2012, with
 the shelf price, base price, and whether the item was on display, in the weekly
 circular (feature) or on a tag-only price reduction~\cite{frat}.
 \emph{Corporaci\'on Favorita} holds daily sales of an Ecuadorian grocery chain
-to 15 August 2017~\cite{favorita}. It was added in this revision as a data set
+to 15 August 2017~\cite{favorita}. It was added in \thisrev{} as a data set
 kept out of development: the series are the 10 stores with the most units sold
 in 2016 crossed with the items sold in all ten that year, from 1 January 2015;
 returns are set to zero; the plan is the promotion flag, national holidays and
@@ -367,7 +367,7 @@ data is redistributed.
 \begin{table}[t]
 \centering
 \caption{\textbf{Four public data sets, all scored item by store and at every
-level above it.} Rolling windows were added in this revision and precede every
+level above it.} Rolling windows were added in \thisrev{} and precede every
 window used for development.}
 \label{tab:data}
 \footnotesize
@@ -521,7 +521,7 @@ items count for more, or the Poisson deviance where its search chose it, and the
 Temporal Fusion Transformer a negative binomial likelihood on units.
 
 \ifjournal
-The changes to the loss tried in the first version and again in the search are
+The changes to the loss tried in the \firstver{} and again in the search are
 described and scored in Section~\ref{sec:sup-method} of the online supplement.
 
 \else
@@ -532,7 +532,7 @@ described and scored in Section~\ref{sec:sup-method} of the online supplement.
 The average is the equal-weight mean of the tuned world model's and the tuned
 LightGBM's forecasts for each item, store and period, with no weights fitted.
 The three-model ensemble adds TimesFM with the plan, also with equal weights; it
-was fixed on 13 October 2026, before any result of the revision, and is reported
+was fixed on 13 October 2026, before any result of the \revn{}, and is reported
 beside the average. The forecast by history of Section~\ref{sec:rq-broad} uses
 the world model alone for series with less than 26 weeks of sales and the
 average for the rest.
@@ -549,7 +549,7 @@ training cost was beyond the compute available, nor on Favorita, whose model
 list was fixed without it. Chronos-Bolt and TimesFM from history alone were
 not run on Favorita either. \emph{TimesFM}~\cite{timesfm,timesfm25}:
 the 200M-parameter TimesFM~2.5 checkpoint given each series' last 512 periods;
-we use its mean output, chosen in the first version because its median forecast
+we use its mean output, chosen in the \firstver{} because its median forecast
 fell well below M5 totals, as the median of intermittent daily sales does. \emph{TimesFM with the plan}: the same model
 through its covariate method, a linear model on the plan inputs fitted over
 groups of 2,048 series, then TimesFM on what that model leaves.
@@ -571,12 +571,12 @@ on Frat, and four 28-day windows on M5 (November 2015 to February 2016) and on
 Favorita (the last ending on its last day), each forecast from everything
 earlier. The searches of Section~\ref{sec:loop} scored windows before these,
 and held the latest of their own windows out of every decision. The windows used
-to develop the first version of the models lie after the rolling windows and are
+to develop \ifjournal the models' first settings\else the \firstver{} of the models\fi{} lie after the rolling windows and are
 not scored in this paper (Figure~\ref{fig:study}a).
 
 \paragraph{Rules fixed in advance}
-The revision plan, with every window, model, test and pass rule, was written down
-before the revision's first run, and every change to it is a dated entry,
+The \revn{} plan, with every window, model, test and pass rule, was written down
+before the \revn{}'s first run, and every change to it is a dated entry,
 made before the results it governs were read unless the entry says otherwise.
 Each data set's world model and LightGBM run in every rolling window with the
 final settings of their searches (Table~\ref{tab:final-settings}), unchanged

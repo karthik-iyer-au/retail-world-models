@@ -106,8 +106,8 @@ def comparison(v: dict) -> str:
 \caption{Every model on the rolling windows: WRMSSE averaged over all levels, mean over windows. WM and LGB: the tuned
 world model and LightGBM; Avg: their average; Ens: the three-model ensemble with TimesFM given the plan; TFM+ and
 TFM: TimesFM with and without the plan; Chr: Chronos-Bolt; TST+ and TST: Timestral with and without the plan; TFT:
-the Temporal Fusion Transformer, with the settings of the first version; SN: seasonal naive. The comparison models
-are scored on cleaned prices on Dominick's; on M5, Frat and Favorita they are the runs of the first revision on the
+the Temporal Fusion Transformer, with the settings of the \firstver{}; SN: seasonal naive. The comparison models
+are scored on cleaned prices on Dominick's; on M5, Frat and Favorita they are the runs of the \firstver{} on the
 same windows, since nothing in them was tuned. n/a marks a model not run on that data set. """ + \
         r"""Shading marks the lowest: \colorbox{wmcell}{world model}, \colorbox{lgbcell}{LightGBM}, \colorbox{avgcell}{average}.}
 \label{tab:sup-comparison}

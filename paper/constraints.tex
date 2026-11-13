@@ -20,20 +20,20 @@ within, with its value and where it lives in the code.}}
 \toprule
 \textbf{Constraint} & \textbf{Value} & \textbf{Where} \\
 \midrule
-Log forecast bound (world model) & $[-10, 10]$ around the item's level & \nolinkurl{src/rwm/model/state_model.py} readout \\
-Lift when nothing is planned & Exactly zero & Readout; tested in \texttt{tests/} \\
-Baseline under a changed plan & Unchanged & Readout; tested in \texttt{tests/} \\
+Log forecast bound (world model) & $[-10, 10]$ around the item's level & \cpath{src/rwm/model/state_model.py}{model code} readout \\
+Lift when nothing is planned & Exactly zero & Readout; tested in the code's tests \\
+Baseline under a changed plan & Unchanged & Readout; tested in the code's tests \\
 Regular price & Highest price in the last 12 periods & Plan features \\
 Brand-switching share $\alpha$ & One per run, fitted on the last 8 training weeks & Dominick's world model \\
 Forecasts & Not below zero & Every model \\
-Average weights & One half each & \texttt{scripts/revision\_analysis.py} (\texttt{ensemble\_2}) \\
-Three-model ensemble weights & One third each, fixed 13 October 2026 & \texttt{scripts/revision\_analysis.py} \\
-Forecast by history & World model alone under 26 weeks (182 days) of sales & \texttt{scripts/revision\_analysis.py} (\texttt{by\_history}) \\
-Seed copies & Five fits averaged (one on M5) & \nolinkurl{src/rwm/seed_average.py} \\
-Interval pooling & Horizons pooled below 50 earlier errors per horizon & \texttt{src/rwm/evaluation/compare.py} \\
-Interval ends & Rounded outwards to whole units (not Favorita) & \texttt{src/rwm/evaluation/compare.py} \\
-TimesFM covariate fit & Groups of 2,048 series & \texttt{src/rwm/prior\_work/} \\
-Timestral context and batch & 512 periods; batch 256, halved on running out of GPU memory & \nolinkurl{src/rwm/prior_work/timestral_zero_shot.py} \\
+Average weights & One half each & \cpath{scripts/revision_analysis.py}{analysis code} (\texttt{ensemble\_2}) \\
+Three-model ensemble weights & One third each, fixed 13 October 2026 & \cpath{scripts/revision_analysis.py}{analysis code} \\
+Forecast by history & World model alone under 26 weeks (182 days) of sales & \cpath{scripts/revision_analysis.py}{analysis code} (\texttt{by\_history}) \\
+Seed copies & Five fits averaged (one on M5) & \cpath{src/rwm/seed_average.py}{model code} \\
+Interval pooling & Horizons pooled below 50 earlier errors per horizon & \cpath{src/rwm/evaluation/compare.py}{evaluation code} \\
+Interval ends & Rounded outwards to whole units (not Favorita) & \cpath{src/rwm/evaluation/compare.py}{evaluation code} \\
+TimesFM covariate fit & Groups of 2,048 series & \cpath{src/rwm/prior_work/}{comparison-model code} \\
+Timestral context and batch & 512 periods; batch 256, halved on running out of GPU memory & \cpath{src/rwm/prior_work/timestral_zero_shot.py}{comparison-model code} \\
 \bottomrule
 \end{tabular}
 \end{center}

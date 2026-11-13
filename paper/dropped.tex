@@ -5,13 +5,13 @@
 Most of what was tried did not stay. The searches of Section~\ref{sec:loop} kept
 a small share of the changes they ran (Table~\ref{tab:loop}); every change tried
 alone in the first round is in Figure~\ref{fig:loopheat}, and the losses tried in
-the first revision are in Table~\ref{tab:losses}. Table~\ref{tab:dropped} lists
-the larger things the revision tried beyond the searches and did not keep, and
+the \firstver{} are in Table~\ref{tab:losses}. Table~\ref{tab:dropped} lists
+the larger things the \revn{} tried beyond the searches and did not keep, and
 when each becomes worth trying again.
 
 \begin{table*}[t]
 \centering
-\caption{\textbf{What the revision tried beyond the searches and did not keep.}
+\caption{\textbf{What the \revn{} tried beyond the searches and did not keep.}
 Each was written down before it ran.}
 \label{tab:dropped}
 \footnotesize
@@ -30,16 +30,16 @@ Timestral in place of TimesFM in the three-model ensemble & Reported in Section~
 \end{tabular}
 \end{table*}
 
-The first version of this paper also tried a stock term for the dip after a
+The \fvpaper{} also tried a stock term for the dip after a
 promotion, extra loss weight on the periods after a promotion, and a graph model
 sharing information between stores; none was kept, and they were not run again on
-the tuned models. Their record is in the first version; the loss experiments among them are in
+the tuned models. \ifjournal The\else Their record is in the \firstver{}; the\fi{} loss experiments among them are in
 Figure~\ref{fig:sup-devlosses}.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figs/fig_sup_devlosses.pdf}
-\caption{Every loss change of the first version against the settings it changed,
+\caption{Every loss change of the \firstver{} against the settings it changed,
 on the development windows. Each dot is one run, coloured by data set; the bar
 spans the runs of a change, and the right-hand column counts them. Changes not
 run on the full data are not shown.}
@@ -64,7 +64,7 @@ at a lower rate. Of its \sfJepaScreens{}
 screens, \sfJepaScreenBetter{} came in below the start, and it was kept on
 \sfJepaKeptNames{} only (Figure~\ref{fig:sup-explore}b).
 
-The first version tried \sfDevChanges{} changes to the world model's loss in
+The \firstver{} tried \sfDevChanges{} changes to the world model's loss in
 \sfDevRuns{} runs on the development windows, \sfDevScored{} of them scored
 against the settings they changed (Figure~\ref{fig:sup-devlosses}); the other
 \sfDevNotRun{} were not run on the full data. \sfDevBetter{} of the

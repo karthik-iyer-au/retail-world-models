@@ -576,7 +576,7 @@ def fig_devlosses(v: dict):
         ax.text(0.37, y, f"{len(g)}", va="center", ha="right", fontsize=6, color=MUTED)
     ax.axvline(0, color=INK, lw=0.6)
     ax.set_yticks(range(len(order))[::-1], order, fontsize=6.6)
-    ax.set_xlabel("Change in WRMSSE against the settings it changed (first version, development windows; left is better)")
+    ax.set_xlabel("Change in WRMSSE against the settings it changed (development windows of the earlier settings; left is better)")
     ax.set_xlim(-0.3, 0.4)
     ax.grid(axis="x")
     despine(ax)

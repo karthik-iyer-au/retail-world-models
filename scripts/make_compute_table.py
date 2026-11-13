@@ -77,7 +77,7 @@ def table() -> None:
                 computeVastGpuUsd=f"{sp[(sp.provider == 'Vast') & (sp.item == 'GPU')].usd.sum():,.0f}")
     tab = r"""\begin{table}[t]
 \centering
-\caption{\textbf{Run time of the revision, from each run's manifest.} Runs counts every run folder, the pieces of
+\caption{\textbf{Run time of the \revn{}, from each run's manifest.} Runs counts every run folder, the pieces of
 split runs included; hours is their summed wall-clock time; machines are the GPUs or CPU hosts the runs used, with the
 number of runs on each. A run resumed from a partway save records only its last stretch, so the hours are a floor;
 the machine time paid for is in the text.}
