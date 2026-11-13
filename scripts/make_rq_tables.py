@@ -373,18 +373,86 @@ def retailer_values(vals: dict) -> dict:
     return v
 
 
+def noid() -> tuple[str, dict]:
+    """LightGBM without the item label on the kept-out item tests (pre-registered 13 November 2026,
+    docs/PAPER1_REVISION_PLAN.md). Empty when the runs are not in keptout.csv."""
+    d = _read("keptout.csv")
+    d = d[d.set.str.endswith("_item")]
+    M = ["world_model", "lightgbm", "lightgbm_noid"]
+    rng = np.random.default_rng(0)
+    rows, facts = [], {}
+    for key in KEYS:
+        g = d[d.key == key]
+        ko = g[g.set == "kept_out_item"].pivot_table(index="origin", columns="model", values="kept_out")
+        al = g[g.set == "trained_on_all_item"].pivot_table(index="origin", columns="model", values="kept_out")
+        if ko.empty or not set(M) <= set(ko.columns) or not set(M) <= set(al.columns):
+            continue
+        x = (ko.world_model - ko.lightgbm_noid).to_numpy()
+        lo, hi = np.quantile(rng.choice(x, (10000, len(x))).mean(1), [0.05, 0.95])
+        clear = "World model" if hi < 0 else ("LightGBM" if lo > 0 else "Neither")
+        fa = g[g.set == "kept_out_item"].groupby("model").forecast_to_actual.mean()
+        cost = (ko[M] - al[M]).mean()
+        facts[key] = dict(ko=ko[M].mean(), al=al[M].mean(), cost=cost, fa=fa[M], clear=clear)
+        f3 = lambda xs: " & ".join(f"{v:.3f}" for v in xs)  # noqa: E731
+        rows.append(f"{KEYS[key]} & " + " & ".join(_fmt([ko.world_model.mean(), ko.lightgbm_noid.mean()])) + " & "
+                    + f3(al[M].mean()) + " & " + f3(cost[M]) + " & "
+                    + " & ".join(f"{v:.2f}" for v in fa[M]) + f" & {_shade(clear)} \\\\")
+    if not rows:
+        return "", facts
+    tab = r"""\begin{table*}[t]
+\centering\footnotesize\setlength{\tabcolsep}{3pt}
+\caption{RQ3, LightGBM without the item label. The kept-out item test of Table~\ref{tab:rq-transfer} with LightGBM fitted
+without the item label as a feature (LGB$-$), every other setting unchanged. WRMSSE on the kept-out fifth; WRMSSE on the
+same fifth when every item is trained on; the cost of not training on them; forecast over actual on the kept-out
+fifth. Means over windows. The last column names the forecast that is clearly lower on the kept-out fifth when a 90\%
+bootstrap interval over windows of the difference excludes zero.}
+\label{tab:rq-noid}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{l cc ccc ccc ccc l}
+\toprule
+ & \multicolumn{2}{c}{Kept out} & \multicolumn{3}{c}{Trained on all} & \multicolumn{3}{c}{Cost of not training on them} & \multicolumn{3}{c}{Forecast over actual} & Clearly lower\\
+\cmidrule(lr){2-3}\cmidrule(lr){4-6}\cmidrule(lr){7-9}\cmidrule(lr){10-12}
+Data set & WM & LGB$-$ & WM & LGB & LGB$-$ & WM & LGB & LGB$-$ & WM & LGB & LGB$-$ & WM or LGB$-$\\
+\midrule
+""" + "\n".join(rows) + "\n" + r"""\bottomrule
+\end{tabular}\end{adjustbox}
+\end{table*}
+"""
+    return tab, facts
+
+
+def noid_values(f: dict) -> dict:
+    if not f:
+        return {}
+    r = list(f.values())
+    v = {"rqNoidSets": _w(len(r))}
+    v["rqNoidCostLo"] = f"{min(x['cost']['lightgbm_noid'] for x in r):.3f}"
+    v["rqNoidCostHi"] = f"{max(x['cost']['lightgbm_noid'] for x in r):.3f}"
+    v["rqNoidFaLo"] = f"{100 * min(x['fa']['lightgbm_noid'] for x in r):.0f}"
+    v["rqNoidFaHi"] = f"{100 * max(x['fa']['lightgbm_noid'] for x in r):.0f}"
+    v["rqWmBeatsNoid"] = _w(sum(x["clear"] == "World model" for x in r))
+    v["rqNoidBeatsWm"] = _w(sum(x["clear"] == "LightGBM" for x in r))
+    v["rqWmNoidLevel"] = _w(sum(x["clear"] == "Neither" for x in r))
+    v["rqWmLowerNoid"] = _w(sum(x["ko"]["world_model"] < x["ko"]["lightgbm_noid"] for x in r))
+    v["rqNoidSeenWorse"] = _w(sum(x["al"]["lightgbm_noid"] > x["al"]["lightgbm"] for x in r))
+    v["rqNoidLower"] = ", ".join(KEYS[k] for k, x in f.items() if x["ko"]["lightgbm_noid"] < x["ko"]["world_model"]) or "none"
+    return v
+
+
 def main() -> None:
     OUT.mkdir(exist_ok=True)
     t1, wins = grain()
     t2, _ = lines()
     t3, tr = transfer()
     t4, rv = retailer()
+    t5, nf = noid()
+    (OUT / "rq_tab_noid.tex").write_text(t5)
     for name, t in (("rq_tab_grain", t1), ("rq_tab_lines", t2), ("rq_tab_transfer", t3), ("rq_tab_retailer", t4)):
         (OUT / f"{name}.tex").write_text(t)
     vals = {f"rqAvgBest{g.capitalize()}": n for g, n in wins.items()}
     vals.update({f"rqAvgBest{g.capitalize()}Word": _w(n) for g, n in wins.items()})
     vals.update(text_values(tr))
     vals.update(retailer_values(rv))
+    vals.update(noid_values(nf))
     (OUT / "rq_values.tex").write_text("".join(f"\\newcommand{{\\{k}}}{{{v}}}\n" for k, v in vals.items()))
     print(len(vals), "values")
 
