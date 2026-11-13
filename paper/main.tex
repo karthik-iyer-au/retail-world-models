@@ -86,6 +86,7 @@
 % its column where it is written (float, H); a full-width one stays a float at the top of a page, written in the
 % source just before the text it belongs with.
 \ifsupplement
+  \raggedbottom% columns end where their text ends; flush bottoms stretched the space between paragraphs
   \usepackage{float}
   \makeatletter
   \let\suporigfigure\figure\let\endsuporigfigure\endfigure
