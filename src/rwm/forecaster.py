@@ -52,6 +52,7 @@ def build_model(name: str, **params) -> Forecaster:
     import rwm.pooled  # noqa: F401  (registers the pooled fit)
     import rwm.blocks  # noqa: F401  (registers forecasting in blocks)
     import rwm.roll_on  # noqa: F401  (registers rolling the state on)
+    import rwm.by_block  # noqa: F401  (registers one model per block)
 
     if name not in _MODELS:
         raise KeyError(f"unknown model '{name}'. Known: {sorted(_MODELS)}")

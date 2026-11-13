@@ -1376,3 +1376,15 @@ forecasts back into sales. Added, fixed before it runs and run once:
 - Compared with LightGBM forecasting directly (no forecast taken in either), and their average.
 Scored and tested as the planned test. The planned result is reported as it ran; this is reported beside it as added
 after seeing it. A second fix, taking in sampled sales paths instead of averages, is held back unless this one fails.
+
+**14 November 2026, added before it runs: like for like for LightGBM, and the other models (Karthik, 07:02: "Does that
+mean light Gbm also gets this treatment so it's apples to apples? What about the other models for 52 weeks?").**
+- LightGBM has no state to roll on. Its counterpart, with no forecast taken in, is one LightGBM per block of 13 weeks
+  (`rwm.by_block`): model k fitted to forecast 13k weeks ahead (91k days on M5) forecasts block k, from the freshest
+  sales a model that far ahead can use. Same tuned settings otherwise. The average beside it is the world model rolled
+  on with LightGBM by block.
+- The other models paper 1 compares, each forecasting all 52 weeks (364 days) at once its own way, with paper 1's
+  settings, on the final runs' data and windows: same week last year (seasonal naive, 52 weeks; 364 days on M5),
+  Chronos-Bolt, TimesFM with and without the plan, and the Temporal Fusion Transformer (its horizon set to 52).
+  Chronos-Bolt and the Temporal Fusion Transformer were not run on M5 in paper 1 and are not run here.
+Scored with the rest of the 52-week test; reported as added after seeing the planned result.

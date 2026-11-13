@@ -38,6 +38,9 @@ def make(base: dict, key: str, which: str, setup: str, window: int) -> dict:
     if setup == "blocks":
         cfg["model"] = {"name": "blocks", "params": {"model": cfg["model"]["name"], "block": block,
                                                      "params": cfg["model"]["params"]}}
+    elif setup == "byblock":  # added 14 November 2026: one LightGBM per block of 13 weeks (rwm.by_block)
+        cfg["model"] = {"name": "by_block", "params": {"model": cfg["model"]["name"], "block": block, "blocks": 4,
+                                                       "params": cfg["model"]["params"]}}
     elif setup == "rollon":  # added 14 November 2026: fitted for 13 weeks, the state rolled on for 52 (rwm.roll_on)
         cfg["model"] = {"name": "roll_on", "params": {"model": cfg["model"]["name"], "params": cfg["model"]["params"]}}
     ev = cfg["evaluation"]
@@ -48,14 +51,58 @@ def make(base: dict, key: str, which: str, setup: str, window: int) -> dict:
     return cfg
 
 
+OTHERS = {  # added 14 November 2026: the other models paper 1 compares, each forecasting all 52 weeks its own way
+    "seasonal_naive": lambda key: {"name": "seasonal_naive", "params": {"season": 364 if key == "m5" else 52}},
+    "chronos": lambda key: None if key == "m5" else _model_of(f"cleanrev_{key}_rolling_chronos"),
+    "timesfm_mean": lambda key: _model_of("m5_confirm_apr_timesfm_mean" if key == "m5" else f"cleanrev_{key}_rolling_timesfm_mean"),
+    "timesfm_plan": lambda key: _model_of("m5_confirm_apr_timesfm_plan" if key == "m5" else f"cleanrev_{key}_rolling_timesfm_plan"),
+    "tft": lambda key: None if key == "m5" else _model_of(f"cleanrev_{key}_rolling_tft"),
+}
+
+
+def _model_of(name: str) -> dict:
+    return yaml.safe_load((ROOT / f"configs/experiments/{name}.yaml").read_text())["model"]
+
+
+def others() -> int:
+    """Each model as paper 1 ran it, on the final runs' data and windows, forecasting 52 weeks (364 days) at once.
+    Chronos-Bolt and the Temporal Fusion Transformer were not run on M5 in paper 1 and are not here."""
+    n = 0
+    for key in KEYS:
+        base = yaml.safe_load((ROOT / f"configs/experiments/final_{key}_lightgbm.yaml").read_text())
+        long, gap = (364, 182) if key == "m5" else (52, 26)
+        for which, get in OTHERS.items():
+            model = get(key)
+            if model is None:
+                continue
+            model = copy.deepcopy(model)
+            if "horizon" in model["params"]:
+                model["params"]["horizon"] = long
+            for window in (0, 1):
+                cfg = copy.deepcopy(base)
+                cfg["model"] = model
+                ev = cfg["evaluation"]
+                ev["horizon"], ev["n_origins"] = long, 1
+                ev.pop("step", None)
+                ev["holdout_periods"] = ev.get("holdout_periods", 0) + (gap if window == 0 else 0)
+                cfg["name"] = f"h52_{key}_{which}_direct_w{window}"
+                head = ("# 52-week test, other models (plan entry of 14 November 2026): the model as paper 1 ran it, "
+                        "forecasting all 52 weeks at once; written by scripts/make_long_horizon_configs.py.\n")
+                (ROOT / f"configs/experiments/{cfg['name']}.yaml").write_text(head + yaml.safe_dump(cfg, sort_keys=False))
+                n += 1
+    return n
+
+
 def main():
     n = 0
     for key in KEYS:
         for which in ("world_model", "lightgbm"):
             src = ROOT / f"configs/experiments/final_{key}_{which}.yaml"
             base = yaml.safe_load(src.read_text())
-            for setup in ("blocks", "direct", "rollon"):
+            for setup in ("blocks", "direct", "rollon", "byblock"):
                 if setup == "rollon" and which != "world_model":
+                    continue
+                if setup == "byblock" and which != "lightgbm":
                     continue
                 if key == "m5" and which == "world_model" and setup == "direct":
                     continue
@@ -65,6 +112,7 @@ def main():
                             f"changed ({setup}, window {window}); written by scripts/make_long_horizon_configs.py.\n")
                     (ROOT / f"configs/experiments/{cfg['name']}.yaml").write_text(head + yaml.safe_dump(cfg, sort_keys=False))
                     n += 1
+    n += others()
     print(n, "configs")
 
 

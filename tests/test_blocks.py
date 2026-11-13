@@ -80,3 +80,17 @@ def test_roll_on_matches_the_model_within_its_horizon_and_runs_past_it():
     assert np.allclose(f[first], own, rtol=1e-4, atol=1e-6)
     # and back to the trained horizon again
     assert np.allclose(m.predict(future[first]), own, rtol=1e-4, atol=1e-6)
+
+
+def test_by_block_uses_model_k_for_block_k():
+    pytest.importorskip("lightgbm")
+    train, test = _split(21)
+    future = test.drop(columns=[UNITS])
+    dates = np.sort(test[DATE].unique())
+    f = build_model("by_block", model="lightgbm_direct", block=7, blocks=3, params=LGB).fit(train).predict(future)
+    assert np.all(np.isfinite(f))
+    for k in range(3):
+        reach = future[DATE].isin(dates[:7 * (k + 1)]).to_numpy()
+        own = build_model("lightgbm_direct", **{**LGB, "horizon": 7 * (k + 1)}).fit(train).predict(future[reach])
+        mine = future[reach][DATE].isin(dates[7 * k:7 * (k + 1)]).to_numpy()
+        assert np.allclose(f[np.flatnonzero(reach)[mine]], own[mine])

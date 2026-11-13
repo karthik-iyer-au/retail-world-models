@@ -1,0 +1,27 @@
+# 52-week test, other models (plan entry of 14 November 2026): the model as paper 1 ran it, forecasting all 52 weeks at once; written by scripts/make_long_horizon_configs.py.
+name: h52_dominicks_che_timesfm_mean_direct_w0
+seed: 0
+dataset:
+  name: dominicks
+  params:
+    categories:
+    - che
+    clean_prices: 5
+model:
+  name: timesfm
+  params:
+    context: 512
+    batch_size: 256
+    point: mean
+evaluation:
+  horizon: 52
+  n_origins: 1
+  holdout_periods: 50
+  scale_lag: 1
+  weight_window: 13
+  conditions:
+  - promo
+  after_promo:
+    levers:
+    - promo
+    periods: 2

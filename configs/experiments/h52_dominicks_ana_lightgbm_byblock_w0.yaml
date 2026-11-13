@@ -1,0 +1,58 @@
+# 52-week test (plan entry of 13 November 2026): final_dominicks_ana_lightgbm.yaml with only the distance ahead changed (byblock, window 0); written by scripts/make_long_horizon_configs.py.
+name: h52_dominicks_ana_lightgbm_byblock_w0
+seed: 0
+dataset:
+  name: dominicks
+  params:
+    categories:
+    - ana
+    clean_prices: 5
+model:
+  name: by_block
+  params:
+    model: seed_average
+    block: 13
+    blocks: 4
+    params:
+      model: lightgbm_direct
+      members: 5
+      seed: 0
+      params:
+        horizon: 52
+        train_periods: 156
+        categorical:
+        - item_id
+        - store_id
+        extra:
+        - promo
+        - cost
+        lags:
+        - 0
+        - 1
+        - 2
+        - 4
+        windows:
+        - 4
+        - 8
+        - 13
+        - 26
+        spread_window: 13
+        price_window: 12
+        price_lag: 1
+        rounds: 500
+        threads: 16
+        params:
+          num_leaves: 15
+          min_data_in_leaf: 50
+evaluation:
+  horizon: 52
+  n_origins: 1
+  holdout_periods: 50
+  scale_lag: 1
+  weight_window: 13
+  conditions:
+  - promo
+  after_promo:
+    levers:
+    - promo
+    periods: 2

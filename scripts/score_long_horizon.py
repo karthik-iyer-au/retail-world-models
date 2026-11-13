@@ -20,7 +20,7 @@ import pandas as pd
 from rwm.evaluation import compare as C
 from rwm.evaluation.splits import Split
 
-NAME = re.compile(r"h52_(dominicks_\w{3}|m5)_(world_model|lightgbm)_(blocks|direct|rollon)_w(\d)")
+NAME = re.compile(r"h52_(dominicks_\w{3}|m5)_(world_model|lightgbm|seasonal_naive|chronos|timesfm_mean|timesfm_plan|tft)_(blocks|direct|rollon|byblock)_w(\d)")
 
 
 def index(results: Path) -> pd.DataFrame:
@@ -72,6 +72,8 @@ def main(argv=None):
         # takes in its own forecasts)
         if "world_model_rollon" in mats and "lightgbm_direct" in mats:
             mats["average_rollon"] = (mats["world_model_rollon"] + mats["lightgbm_direct"]) / 2
+        if "world_model_rollon" in mats and "lightgbm_byblock" in mats:
+            mats["average_byblock"] = (mats["world_model_rollon"] + mats["lightgbm_byblock"]) / 2
         t0, t1, _ = fr.cut(0)
         h = t1 - t0
         q = h // 4
@@ -96,7 +98,13 @@ def main(argv=None):
                                          ("world_model_rollon", "lightgbm_direct"),
                                          ("world_model_rollon", "world_model_blocks"),
                                          ("average_rollon", "lightgbm_direct"),
-                                         ("average_rollon", "world_model_rollon")] if x in sub and y in sub]
+                                         ("average_rollon", "world_model_rollon"),
+                                         ("world_model_rollon", "lightgbm_byblock"),
+                                         ("average_byblock", "lightgbm_byblock"),
+                                         ("average_byblock", "world_model_rollon"),
+                                         ("average_byblock", "seasonal_naive_direct"),
+                                         ("world_model_rollon", "seasonal_naive_direct"),
+                                         ("lightgbm_byblock", "seasonal_naive_direct")] if x in sub and y in sub]
             bs = C.Bootstrap(view, 0, n=a.boot, seed=window)
             boot = bs.scores({m: sub[m] for m in {m for pr in pairs for m in pr}})
             for r in C.paired(boot, point, bs.level_names, pairs).to_dict("records"):
