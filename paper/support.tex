@@ -234,20 +234,12 @@ uses the five-copy average and three seeds where a change is tried.
 
 
 \secbarrier
-\section{Decision costs and reconciliation}
+\section{\ifjournal Reconciliation\else Decision costs and reconciliation\fi}
 \label{sec:sup-decisions}
 
-\paragraph{Decision costs}
-The average gives the lowest category-plan cost on \supCatPlanAvgLowest{} of
-\supCatPlanSets{} data sets and LightGBM on the other \supCatPlanLgbLowest{}
-(frozen entrees and snacks); the world model alone is lowest on none
-(Table~\ref{tab:sup-decisions}). Ordering each forecast's 0.8 quantile for every
-item and store costs less with the average than with LightGBM on
-\supOrderAvgBelowLgb{} data sets and less than with the world model on
-\supOrderAvgBelowWm{}. Both are simulations under stated costs, not business
-results.
-
-\input{generated/sup_tab_decisions}
+\ifjournal\else
+\input{moved_decisions}
+\fi
 
 \paragraph{Reconciliation}
 Summing the average upward is more accurate over all levels than the best

@@ -1,0 +1,15 @@
+% Decision costs: among the supporting analyses for arXiv, in the Results for the journal (IJPE leads with decisions).
+\ifjournal\textbf{Store orders and category plans cost least with the average on most data
+sets.} Accuracy and inventory cost can rank forecasts differently~\cite{kourentzes2020}, so each
+model is also scored by the decisions made from it. \else\paragraph{Decision costs}\fi
+The average gives the lowest category-plan cost on \supCatPlanAvgLowest{} of
+\supCatPlanSets{} data sets and LightGBM on the other \supCatPlanLgbLowest{}
+(frozen entrees and snacks); the world model alone is lowest on none
+(Table~\ref{tab:sup-decisions}). Ordering each forecast's 0.8 quantile for every
+item and store, with each unit over costing 1 and each unit short 4
+\ifjournal (Section~\ref{sec:sup-method})\else (Section~\ref{sec:setup})\fi, costs less with the average than with LightGBM on
+\supOrderAvgBelowLgb{} data sets and less than with the world model on
+\supOrderAvgBelowWm{}. Both are simulations under stated costs, not business
+results.
+
+\input{generated/sup_tab_decisions}

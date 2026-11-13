@@ -45,7 +45,10 @@ newest of the four, learn a state for each item and carry it forward one period
 at a time under the price and promotion plan; ours is shown in
 Figure~\ref{fig:overview}. The world model and LightGBM were each tuned by the
 same search on every data set, and the average of forecasts is tested
-alongside them. The data are four public data sets: M5, six categories of
+alongside them.\ifjournal{} Because retailers order stock and plan categories from the
+forecast, each model is also scored by what those decisions cost: store orders
+set at a quantile of the forecast, and the dollar error of the category plan
+(Section~\ref{sec:rq-decisions}).\fi The data are four public data sets: M5, six categories of
 Dominick's, Breakfast at the Frat, and Corporaci\'on Favorita.
 
 The study covers the short end of the planning cycle. Forecasts run 8 weeks
@@ -191,7 +194,10 @@ practice and note that most studies forecast and evaluate at one level of
 aggregation, usually the item, although retail decisions are spread across
 levels. Sales of a single item in a single store are intermittent, which led to
 dedicated methods for intermittent demand~\cite{croston,syntetos2005} and to
-evaluating forecasts as count distributions~\cite{kolassa2016}. The Tweedie
+evaluating forecasts as count distributions~\cite{kolassa2016}. Studies of intermittent
+items score forecasting methods both by their error and by the stock they lead
+to~\cite{babai2014,babai2019}, and Kourentzes, Trapero and Barrow~\cite{kourentzes2020}
+propose choosing a forecasting model for its inventory cost rather than its accuracy. The Tweedie
 family~\cite{jorgensen1987}, a compound Poisson--gamma distribution with a point
 mass at zero, is the loss many M5 entries used, and the loss we use.
 
@@ -201,7 +207,11 @@ past response~\cite{promocast}. Van Heerde, Leeflang and
 Wittink~\cite{vanheerde2000} and Mac\'e and Neslin~\cite{mace2004} measured
 the dips in sales before and after a promotion, when shoppers stock up and then
 buy less. Ma, Fildes and Huang~\cite{ma2016} showed that promotional information
-from within and across categories improves item-level forecasts.
+from within and across categories improves item-level forecasts. For perishable
+supermarket items, van Donselaar and colleagues~\cite{vandonselaar2016} found that
+promotion lifts come more from substitution within the category than from
+stockpiling, and that forecasts improve when routine and non-routine categories
+are modelled apart.
 Gupta~\cite{gupta1988} split the promotion bump into brand switching, purchase
 timing and quantity, and van Heerde, Gupta and Wittink~\cite{vanheerde2003}
 showed that in units only about a third of the bump is switching from other

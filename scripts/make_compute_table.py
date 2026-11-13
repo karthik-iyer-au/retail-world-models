@@ -68,6 +68,8 @@ def table() -> None:
         lines.append(f"{label} & {len(g):,} & {g.hours.sum():,.0f} & {devs} \\\\")
         total_h += g.hours.sum()
         total_n += len(g)
+        if label.startswith("Searches"):
+            vals["computeSearchHours"] = f"{g.hours.sum():,.0f}"
     sp = pd.read_csv(A / "spend_summary.csv")
     vast = sp[sp.provider == "Vast"].usd.sum()
     modal = sp[sp.provider == "Modal"].usd.sum()
