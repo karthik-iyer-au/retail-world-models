@@ -11,7 +11,7 @@ configs/experiments/h52_<key>_<model>_<setup>_w<window>.yaml, changing only the 
 
 Each window is its own config so that each runs in one job: w1 ends where the final runs' data end, w0 starts 26 weeks
 (182 days) earlier. The held-out final periods stay out. A world model's `validation_periods` is raised to the
-horizon where it is shorter, as the model requires. M5's direct world model is not written (see the plan).
+horizon where it is shorter, as the model requires. M5's direct world model was added on 15 November 2026.
 """
 import copy
 from pathlib import Path
@@ -58,7 +58,7 @@ OTHERS = {  # added 14 November 2026: the other models of paper 1's model table,
     "timesfm_mean": lambda key: _model_of(f"rev_{key}_rolling_timesfm_mean"),
     "timesfm_plan": lambda key: _model_of(f"rev_{key}_rolling_timesfm_plan"),
     "timestral_plan": lambda key: _model_of(f"rev_{key}_rolling_timestral_plan"),
-    "tft": lambda key: None if key == "m5" else _model_of(f"rev_{key}_rolling_tft"),
+    "tft": lambda key: _model_of(f"rev_{key}_rolling_tft"),  # M5 added 15 November 2026 (Karthik)
 }
 
 
@@ -68,7 +68,7 @@ def _model_of(name: str) -> dict:
 
 def others() -> int:
     """Each model as paper 1 ran it, on the final runs' data and windows, forecasting 52 weeks (364 days) at once.
-    The Temporal Fusion Transformer was not run on M5 in paper 1 and is not here."""
+    The Temporal Fusion Transformer on M5 was added on 15 November 2026."""
     n = 0
     for key in KEYS:
         base = yaml.safe_load((ROOT / f"configs/experiments/final_{key}_lightgbm.yaml").read_text())
@@ -108,8 +108,8 @@ def main():
                     continue
                 if setup == "byblock" and which != "lightgbm":
                     continue
-                if key == "m5" and which == "world_model" and setup == "direct":
-                    continue
+                # M5's world model forecasting all 364 days at once: left out on 13 November, added 15 November 2026
+                # (Karthik, 09:30: "I told u to keep going")
                 for window in (0, 1):
                     cfg = make(base, key, which, setup, window)
                     head = (f"# 52-week test (plan entry of 13 November 2026): {src.name} with only the distance ahead "
