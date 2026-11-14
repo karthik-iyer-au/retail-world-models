@@ -1423,3 +1423,12 @@ test_overlapping_windows_score_every_period); the search reruns unchanged in eve
 Karthik, 17:54: "Okay do for 2 rounds". The rerun is limited to two rounds for both models (instead of at most
 three), with the spending cap raised to US$600 in all.
 Karthik, 23:25: cap raised to US$700 in all.
+
+### 52-week rerun with tuned settings: started 15 November 2026, 06:30 (plan entry of 14 November)
+Eleven of the twelve searches have ended (LightGBM bottled juice still running, restarted 06:25). Kept: world model
+snacks volume_weight_0.25, the other five world models none; LightGBM analgesics objective_poisson, frozen entrees
+num_leaves_quarter and objective_poisson, soft drinks rounds_double, snacks num_leaves_quarter, cheese none
+(results/long_horizon/search_kept.json). Where a search kept no change its tuned config equals the untuned one, so it
+is not run again and its untuned run is scored as the tuned one. Run now: 16 LightGBM configs (four categories,
+direct and by block, two windows) and the world model on snacks (two windows); bottled juice's LightGBM when its search
+ends. Scored with the rest by scripts/score_long_horizon.py; nothing in the scoring or the paper's rule changes.

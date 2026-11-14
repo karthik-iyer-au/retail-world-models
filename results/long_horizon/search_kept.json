@@ -1,0 +1,68 @@
+{
+  "h52s2_world_model_dominicks_ana": {
+    "kept": [],
+    "score": 0.9046708045079249,
+    "held_out": 0.794460954983518
+  },
+  "h52s2_lightgbm_dominicks_ana": {
+    "kept": [
+      "objective_poisson"
+    ],
+    "score": 0.7506569673472541,
+    "held_out": 0.7356116082825266
+  },
+  "h52s2_world_model_dominicks_bjc": {
+    "kept": [],
+    "score": 0.816595678405491,
+    "held_out": 1.0105053984408103
+  },
+  "h52s2_world_model_dominicks_che": {
+    "kept": [],
+    "score": 0.7726567839277129,
+    "held_out": 0.6962264526855435
+  },
+  "h52s2_lightgbm_dominicks_che": {
+    "kept": [],
+    "score": 0.7191405734443167,
+    "held_out": 0.6596458649511984
+  },
+  "h52s2_world_model_dominicks_fre": {
+    "kept": [],
+    "score": 0.45761486917121746,
+    "held_out": 0.3970163318512301
+  },
+  "h52s2_lightgbm_dominicks_fre": {
+    "kept": [
+      "num_leaves_quarter",
+      "objective_poisson"
+    ],
+    "score": 0.4360222135747985,
+    "held_out": 0.39742796667934566
+  },
+  "h52s2_world_model_dominicks_sdr": {
+    "kept": [],
+    "score": 0.7126759542636253,
+    "held_out": 0.8720796975600829
+  },
+  "h52s2_lightgbm_dominicks_sdr": {
+    "kept": [
+      "rounds_double"
+    ],
+    "score": 0.6427161788414537,
+    "held_out": 0.8316684265770474
+  },
+  "h52s2_world_model_dominicks_sna": {
+    "kept": [
+      "volume_weight_0.25"
+    ],
+    "score": 0.7083719052041055,
+    "held_out": 0.6872777788037872
+  },
+  "h52s2_lightgbm_dominicks_sna": {
+    "kept": [
+      "num_leaves_quarter"
+    ],
+    "score": 0.5667154684763892,
+    "held_out": 0.6367510495352063
+  }
+}

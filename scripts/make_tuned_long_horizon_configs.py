@@ -6,7 +6,9 @@ For each Dominick's category and model, reads the search's 'end' row (the change
 the search's starting settings (configs/research/h52s2_<model>_<key>.yaml: base config plus menu changes, as
 src/rwm/research/loop.py does), and writes configs/experiments/h52t_<key>_<model>_<setup>_w<window>.yaml from the
 untuned 52-week configs (h52_<key>_<model>_<setup>_w<window>.yaml) with only the copy's settings replaced: five copies,
-as there. The world model forecasting all 52 weeks at once; LightGBM directly and by block.
+as there. The world model forecasting all 52 weeks at once; LightGBM directly and by block. Where a search kept no
+change the config would equal the untuned one: none is written, and scripts/score_long_horizon.py scores the untuned
+run as the tuned one (search_kept.json).
 """
 import argparse
 import copy
@@ -35,6 +37,7 @@ def tuned_inner(spec: dict, kept: list[str]) -> dict:
 def main(argv=None):
     p = argparse.ArgumentParser()
     p.add_argument("--logs", required=True)
+    p.add_argument("--finished-only", action="store_true", help="skip searches that have not ended (written later)")
     a = p.parse_args(argv)
     summary = {}
     for c in CATS:
@@ -45,6 +48,9 @@ def main(argv=None):
             rows = [json.loads(x) for x in (Path(a.logs) / name / "log.jsonl").read_text().splitlines() if x.strip()]
             end = [r for r in rows if r.get("kind") == "end"]
             if not end:
+                if a.finished_only:
+                    print(f"{name} has not finished: skipped", flush=True)
+                    continue
                 raise SystemExit(f"{name} has not finished")
             kept = end[-1]["kept"]
             inner = tuned_inner(spec, kept)
@@ -56,17 +62,24 @@ def main(argv=None):
                     holder = cfg["model"]["params"] if setup == "direct" else cfg["model"]["params"]["params"]
                     old = holder["params"]
                     new = copy.deepcopy(inner)
-                    if setup == "byblock":
-                        new.pop("horizon", None)  # set per block by rwm.by_block
-                    elif "horizon" in old:
+                    if "horizon" in old:  # by block: set per block by rwm.by_block, kept as in the untuned config
                         new["horizon"] = old["horizon"]
                     holder["params"] = new
                     cfg["name"] = f"h52t_{key}_{which}_{setup}_w{w}"
                     head = (f"# 52-week test with settings tuned for 52 weeks (plan entry of 14 November 2026): {src.name} "
                             f"with the copy's settings from the search {name} (kept: {', '.join(kept) or 'none'}); "
                             "written by scripts/make_tuned_long_horizon_configs.py.\n")
-                    (ROOT / f"configs/experiments/{cfg['name']}.yaml").write_text(head + yaml.safe_dump(cfg, sort_keys=False))
+                    dest = ROOT / f"configs/experiments/{cfg['name']}.yaml"
+                    base = yaml.safe_load(src.read_text())
+                    base["name"] = cfg["name"]
+                    if base == cfg:  # nothing kept: the untuned run is the tuned one, scored as such, not run again
+                        dest.unlink(missing_ok=True)
+                        continue
+                    dest.write_text(head + yaml.safe_dump(cfg, sort_keys=False))
     (ROOT / "results" / "long_horizon").mkdir(parents=True, exist_ok=True)
+    old = ROOT / "results" / "long_horizon" / "search_kept.json"
+    if old.exists():
+        summary = {**json.loads(old.read_text()), **summary}
     (ROOT / "results" / "long_horizon" / "search_kept.json").write_text(json.dumps(summary, indent=2) + "\n")
     print(json.dumps(summary, indent=1))
 

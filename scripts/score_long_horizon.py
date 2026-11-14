@@ -76,6 +76,14 @@ def main(argv=None):
             mats["average_rollon"] = (mats["world_model_rollon"] + mats["lightgbm_direct"]) / 2
         if "world_model_rollon" in mats and "lightgbm_byblock" in mats:
             mats["average_byblock"] = (mats["world_model_rollon"] + mats["lightgbm_byblock"]) / 2
+        # a search that kept no change: its untuned run is the tuned one (scripts/make_tuned_long_horizon_configs.py)
+        kept = Path(__file__).resolve().parents[1] / "results" / "long_horizon" / "search_kept.json"
+        kept = json.loads(kept.read_text()) if kept.exists() else {}
+        for m, setups in (("world_model", ("direct",)), ("lightgbm", ("direct", "byblock"))):
+            k = kept.get(f"h52s2_{m}_{key}")
+            for st in setups:
+                if k is not None and not k["kept"] and f"{m}_t{st}" not in mats and f"{m}_{st}" in mats:
+                    mats[f"{m}_t{st}"] = mats[f"{m}_{st}"]
         # added 14 November 2026: the average of the two models with settings tuned for 52 weeks
         if "world_model_tdirect" in mats and "lightgbm_tdirect" in mats:
             mats["average_tdirect"] = (mats["world_model_tdirect"] + mats["lightgbm_tdirect"]) / 2
