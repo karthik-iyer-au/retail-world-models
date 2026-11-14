@@ -1391,3 +1391,22 @@ mean light Gbm also gets this treatment so it's apples to apples? What about the
   pointed out that Chronos-Bolt and Timestral had been run on every data set: Timestral added, Chronos-Bolt added on
   M5.)
 Scored with the rest of the 52-week test; reported as added after seeing the planned result.
+
+**14 November 2026, before it runs: tuning both models for 52 weeks (Karthik, 11:05: "I am sure they will come back
+on 52 weeks as that's stock standard grocery retail"; 11:15: "Let's rent many and finish today on vast").** The
+52-week test used settings tuned for 8 weeks. Both models are now tuned for 52 weeks by the same procedure as the
+paper's searches, on the six Dominick's categories (M5's world model forecasting 364 days at once is beyond the
+budget, so M5 keeps its untuned 52-week result):
+- Start: each model's final tuned settings, fitted to forecast all 52 weeks at once (the world model's setup that did
+  not drift; LightGBM forecasting directly), one copy instead of five during the search.
+- Search: the research loop with the same menus as the paper's searches (scripts/make_research_specs.py; 20 changes
+  for each model), each change alone on top of the best, seed 1 first, seeds 2 and 3 for changes that beat the best,
+  kept if the three-seed mean beats the best by the starting settings' seed spread. At most three rounds, the same for
+  both models (configs/research/h52s_*.yaml, scripts/make_long_horizon_specs.py).
+- Windows: three of 52 weeks, 13 weeks apart, all ending before the 52-week test's windows begin; the latest is held
+  out, scored but never used to decide.
+- Then: the 52-week test rerun with each model's tuned settings, five copies, on the test's two windows (the world
+  model forecasting all 52 weeks at once; LightGBM directly and by block; their average), scored as before. The
+  untuned results stay reported beside them.
+Run on rented RTX 4090s on Vast (world model) and rented processor machines (LightGBM), with a spending cap of
+US$350 for the search and the rerun (Karthik approved renting many machines to finish today).
