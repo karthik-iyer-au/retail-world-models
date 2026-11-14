@@ -94,3 +94,17 @@ def test_by_block_uses_model_k_for_block_k():
         own = build_model("lightgbm_direct", **{**LGB, "horizon": 7 * (k + 1)}).fit(train).predict(future[reach])
         mine = future[reach][DATE].isin(dates[7 * k:7 * (k + 1)]).to_numpy()
         assert np.allclose(f[np.flatnonzero(reach)[mine]], own[mine])
+
+
+def test_overlapping_windows_score_every_period(tmp_path):
+    """Windows whose step is shorter than the horizon: every window keeps all its test rows (bug of 14 Nov 2026,
+    when an earlier window lost the periods after a later window's start)."""
+    pytest.importorskip("lightgbm")
+    cfg = {"name": "overlap", "seed": 0,
+           "dataset": {"name": "synthetic", "params": {"n_stores": 2, "n_items": 4, "n_periods": 220, "seed": 4}},
+           "model": {"name": "lightgbm_direct", "params": {**LGB, "horizon": 21}},
+           "evaluation": {"horizon": 21, "n_origins": 3, "step": 7}}
+    out = run(cfg, out_root=tmp_path)
+    m = json.loads((out / "metrics.json").read_text())
+    for s in m["splits"]:
+        assert len(s["by_horizon"]) == 21 and np.all(np.isfinite(s["by_horizon"]))

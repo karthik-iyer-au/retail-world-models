@@ -1411,3 +1411,12 @@ budget, so M5 keeps its untuned 52-week result):
 Run on rented RTX 4090s on Vast (world model) and rented processor machines (LightGBM), with a spending cap of
 US$350 for the search and the rerun (Karthik approved renting many machines to finish today), raised to US$500 by
 Karthik at 11:25.
+
+**14 November 2026, 18:10: the 52-week search restarted after a bug.** The first search (configs/research/h52s_*)
+scored nothing usable: its windows overlap (13 weeks apart, 52 long), and the runner cut the data back to each later
+window's start before taking an earlier window's test rows, so weeks 14 to 52 of the two deciding windows had no
+forecasts and were scored as zero for every model alike (both models scored 2.5 to 4.5 there against 0.7 on the
+held-out window, and no change could be told apart). No other run is affected: every other config's windows are
+`step` = `horizon` apart or a single window. Fixed in src/rwm/experiments/run.py (tests/test_blocks.py,
+test_overlapping_windows_score_every_period); the search reruns unchanged in every other respect under new names
+(configs/research/h52s2_*), and the first search's results are not used.

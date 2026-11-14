@@ -52,11 +52,11 @@ def main():
             items = menu(pseudo, True) if which == "world_model" else lightgbm_menu(pseudo, True)
             # the changes apply to the copy's settings, inside the average
             items = [{"name": m["name"], "change": {"params": m["change"]}} for m in items]
-            spec = {"name": f"h52s_{which}_{key}", "base": base_path, "evaluation": copy.deepcopy(EVALUATION),
+            spec = {"name": f"h52s2_{which}_{key}", "base": base_path, "evaluation": copy.deepcopy(EVALUATION),
                     "seeds": [1, 2, 3], "rung_fraction": 1.0, "promote": "beats_best", "menu": items}
             if which == "lightgbm":
                 spec["base_overrides"] = {"params": {"threads": 16}}
-            (ROOT / f"configs/research/h52s_{which}_{key}.yaml").write_text(HEADER + yaml.safe_dump(spec, sort_keys=False))
+            (ROOT / f"configs/research/h52s2_{which}_{key}.yaml").write_text(HEADER + yaml.safe_dump(spec, sort_keys=False))
     print("written")
 
 

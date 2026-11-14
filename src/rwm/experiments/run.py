@@ -153,8 +153,13 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS, partial: P
         partial = out_root / "_partial" / f"{config['name']}_{manifest['config_sha256'][:8]}_{code[:8]}"
     if piece is not None and partial is None:
         raise RuntimeError("a split run's piece needs partway saves: committed code, or a save folder")
+    # windows that overlap (step shorter than the horizon) take their test rows from all the data; otherwise the
+    # data are cut back window by window, which keeps memory down on the large data sets
+    overlap = len(splits) > 1 and (ev.get("step") or ev["horizon"]) < ev["horizon"]
+    full = panel if overlap else None
     for sp in reversed(splits):
-        test = panel[panel[DATE].isin(sp.test_dates)].reset_index(drop=True)
+        src = full if overlap else panel
+        test = src[src[DATE].isin(sp.test_dates)].reset_index(drop=True)
         panel = train = panel[panel[DATE] <= sp.train_end]
         if piece is not None and sp.origin != piece[0]:
             continue
