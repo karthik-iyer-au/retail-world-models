@@ -181,7 +181,7 @@ def every(s: pd.DataFrame, pr: pd.DataFrame, keys: list[str]) -> dict:
 \caption{Every forecast 52 weeks ahead (364 days on M5): WRMSSE over the 52 weeks, mean over levels and two windows.
 Each forecasts all 52 weeks at once except the world model rolled on (its state rolled 13 weeks at a time on the plan,
 without taking in its own forecasts) and LightGBM by block (one model per block of 13 weeks). Averages: the world
-model with LightGBM directly (Avg; with the world model rolled on, the M5 average) or by block. Tuned: settings searched again for 52 weeks on Dominick's. Bold: lowest
+model with LightGBM directly (Avg; with the world model rolled on, the M5 average) or by block.""" + (" Tuned: settings searched again for 52 weeks on Dominick's." if any("_t" in m for m, _ in cols) else "") + r""" Bold: lowest
 of each row, leaving out Timestral with the plan, which could not forecast 52 weeks. Of these, only WM, LGB and Avg
 were in the planned test; the rest were added after it ran.}
 \label{tab:long-horizon-all}
