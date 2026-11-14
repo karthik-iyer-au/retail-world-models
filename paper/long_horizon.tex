@@ -1,0 +1,56 @@
+% 52 weeks ahead (planned 13 November 2026, docs/PAPER1_REVISION_PLAN.md). A subsection of the results in the
+% arXiv version, a section of the supplement in the journal version. Every number from
+% scripts/make_long_horizon_tables.py (generated/lh_values.tex, lh_tab.tex, lh_tab_all.tex).
+\ifsupplement\section{Forecasting 52 weeks ahead}\else\subsection{Forecasting 52 weeks ahead}\fi
+\label{sec:long-horizon}
+
+\textbf{Over 52 weeks the world model alone is not the most accurate forecast on
+any data set. The average of the two models, each forecasting all 52 weeks at
+once, is the most accurate on \lhLowestAvgDirect{} of \lhSets{} data sets, and
+LightGBM on the others.} Grocery retailers plan the year ahead, so the test asks
+whether the rule of Section~\ref{sec:rq-broad} carries from 8 weeks to 52. It
+was written down before it ran: the six Dominick's categories and M5, two
+windows of 52 weeks each (364 days on M5), the final tuned settings with only the
+distance ahead changed, scored at every level as in the rest of the paper
+(Table~\ref{tab:long-horizon}, Figure~\ref{fig:long-horizon}).
+
+\paragraph{The planned comparison, in blocks}
+Each model forecasts 13 weeks, takes its forecast in as the sales of those weeks,
+and forecasts the next 13, four times. Here the world model is clearly less
+accurate than LightGBM in \lhPWmWorse{} of \lhPN{} paired comparisons and clearly
+more accurate in \lhPWmBetter{}; against the better of LightGBM's two setups it
+is behind on \lhLgbBestBeatsWm{} of \lhSets{} data sets. The average in blocks is
+clearly more accurate than the world model alone in \lhPAvgWmBetter{} comparisons
+(clearly less in \lhPAvgWmWorse{}), and than LightGBM in \lhPAvgLgbBetter{}
+(clearly less in \lhPAvgLgbWorse{}).
+
+\paragraph{Taking in its own forecasts costs the world model most}
+Forecasting all 52 weeks at once, the world model is more accurate than in blocks
+on \lhDirectBeatsBlocksWm{} of \lhDirectSetsWm{} data sets, LightGBM on
+\lhDirectBeatsBlocksLgb{} of \lhDirectSetsLgb{}. In blocks, the world model's item
+by store error changes by \lhGrowWmLo{} to \lhGrowWmHi{} from the first 13 weeks
+to the last, LightGBM's by \lhGrowLgbLo{} to \lhGrowLgbHi{}. The world model rolls
+its state forward from the sales it takes in; when those are its own forecasts,
+its errors are carried into the state and grow with each block.
+
+\paragraph{The rule carries to 52 weeks}
+The average of the two models, each forecasting the whole year at once, is
+clearly more accurate than LightGBM forecasting directly in \lhPAvgDirBetter{} of
+\lhPAvgDirN{} paired comparisons and clearly less in \lhPAvgDirWorse{}; against
+the world model forecasting directly it is clearly more accurate in
+\lhPAvgDirWmBetter{} and clearly less in \lhPAvgDirWmWorse{}. These two
+comparisons were added after the planned ones.
+
+%LH-ADDED%
+
+\input{generated/lh_tab}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/fig_long_horizon.pdf}
+\caption{\textbf{Taking in its own forecasts, the world model's error grows from
+block to block.} WRMSSE, mean over levels and two windows, in each block of 13
+weeks (91 days on M5), for the world model, LightGBM and their average
+forecasting in blocks.}
+\label{fig:long-horizon}
+\end{figure*}
