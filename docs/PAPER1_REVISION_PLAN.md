@@ -1409,4 +1409,5 @@ budget, so M5 keeps its untuned 52-week result):
   model forecasting all 52 weeks at once; LightGBM directly and by block; their average), scored as before. The
   untuned results stay reported beside them.
 Run on rented RTX 4090s on Vast (world model) and rented processor machines (LightGBM), with a spending cap of
-US$350 for the search and the rerun (Karthik approved renting many machines to finish today).
+US$350 for the search and the rerun (Karthik approved renting many machines to finish today), raised to US$500 by
+Karthik at 11:25.
