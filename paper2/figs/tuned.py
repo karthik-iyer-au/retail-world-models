@@ -55,7 +55,7 @@ def final_scores() -> pd.DataFrame:
     d["C2_v"] = d["c2_lift_readout"]
     d["C2"] = d["C2_v"] < 0.5
     d["C3_v"] = d["c3_copy_lift"]
-    d["C3"] = d["C3_v"] >= 0.7
+    d["C3"] = np.where(d["C3_v"].notna(), d["C3_v"] >= 0.7, np.nan)  # M5's final model is one copy
     d["C4_v"] = d["c4_share_lower_after_deeper_cut"]
     d["C4"] = d["C4_v"] < 0.01
     d["C5"] = d["c5_any_plan_bias"].between(0.8, 1.25) & (d["c5_any_plan_rank"] >= 0.3)
@@ -228,10 +228,14 @@ def write(t, rb, tests, c7rows, nversions):
     W = "none one two three four five six seven eight nine".split()
     n = len(t)
     v["tSets"] = W[n] if n < 10 else str(n)
+    word = {"C1": "COne", "C1own": "COneOwn", "C2": "CTwo", "C3": "CThree", "C4": "CFour", "C5": "CFive",
+            "C6": "CSix"}
     for c in CHECKS:
         full = int((t[c] == 1).sum())
-        v[f"t{c}Full"] = W[full] if full < 10 else str(full)
-        v[f"t{c}Mean"] = pct(t[c].mean())
+        none = int((t[c] == 0).sum())
+        v[f"t{word[c]}Full"] = W[full] if full < 10 else str(full)
+        v[f"t{word[c]}None"] = W[none] if none < 10 else str(none)
+        v[f"t{word[c]}Mean"] = pct(t[c].mean())
     v["tCThreeLo"], v["tCThreeHi"] = f"{t['C3_v'].min():.2f}", f"{t['C3_v'].max():.2f}"
     v["tCSixLo"], v["tCSixHi"] = f"{t['C6_v'].min():.2f}", f"{t['C6_v'].max():.2f}"
     if len(rb):
@@ -262,7 +266,17 @@ def make(out: Path):
     tests, sd = search_test()
     fig_checks(t, rb, out)
     fig_c7(z, c7rows, out)
-    return write(t, rb, tests, c7rows, len(sd))
+    v = write(t, rb, tests, c7rows, len(sd))
+    c4 = d.groupby("key")["C4_v"].mean()
+    dom = c4[[k for k in c4.index if k.startswith("dominicks")]]
+    extra = {"tCFourDomLo": f"{100 * dom.min():.0f}", "tCFourDomHi": f"{100 * dom.max():.0f}",
+             "tCFourMfive": f"{100 * c4.get('m5', np.nan):.0f}", "tCFourFav": f"{100 * c4.get('favorita', np.nan):.0f}",
+             "tCFourFrat": f"{100 * c4.get('frat', np.nan):.2f}",
+             "tCFiveRankMfive": f"{t.set_index('key').loc['m5', 'C5_rank']:.2f}",
+             "tWindows": str(int(t["windows"].sum()))}
+    with open(GEN / "tuned_macros.tex", "a") as f:
+        f.write("".join(f"\\newcommand{{\\{k}}}{{{x}}}\n" for k, x in extra.items()))
+    return {**v, **extra}
 
 
 if __name__ == "__main__":
