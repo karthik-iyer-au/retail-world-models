@@ -1,0 +1,155 @@
+{
+  "config": "final_dominicks_sdr_world_model",
+  "run": "20261110T171053_final_dominicks_sdr_world_model_cf96417d",
+  "items": 6000,
+  "rolled_state": true,
+  "rows": [
+    {
+      "plan input": "price / usual price",
+      "periods back": 0,
+      "from state before window": 0.33278910289645236,
+      "from rolled state": 0.9762750431643504,
+      "gain": 0.6434859402678981
+    },
+    {
+      "plan input": "price / usual price",
+      "periods back": 1,
+      "from state before window": 0.33306247653365173,
+      "from rolled state": 0.9635016128274947,
+      "gain": 0.630439136293843
+    },
+    {
+      "plan input": "price / usual price",
+      "periods back": 7,
+      "from state before window": 0.3832341454955781,
+      "from rolled state": 0.9323568406537579,
+      "gain": 0.5491226951581798
+    },
+    {
+      "plan input": "price known",
+      "periods back": 0,
+      "from state before window": 0.7038517096132559,
+      "from rolled state": 0.9881962905175647,
+      "gain": 0.2843445809043088
+    },
+    {
+      "plan input": "price known",
+      "periods back": 1,
+      "from state before window": 0.713976685479754,
+      "from rolled state": 0.9740054030959078,
+      "gain": 0.26002871761615376
+    },
+    {
+      "plan input": "price known",
+      "periods back": 7,
+      "from state before window": 0.7874880119972496,
+      "from rolled state": 0.971025911564536,
+      "gain": 0.1835378995672864
+    },
+    {
+      "plan input": "promo",
+      "periods back": 0,
+      "from state before window": 0.18782715668997207,
+      "from rolled state": 0.9106199000894204,
+      "gain": 0.7227927433994483
+    },
+    {
+      "plan input": "promo",
+      "periods back": 1,
+      "from state before window": 0.19643222424839435,
+      "from rolled state": 0.6151529492356751,
+      "gain": 0.41872072498728075
+    },
+    {
+      "plan input": "promo",
+      "periods back": 7,
+      "from state before window": 0.3267963914615709,
+      "from rolled state": 0.43815223695563477,
+      "gain": 0.11135584549406385
+    },
+    {
+      "plan input": "promo known",
+      "periods back": 0,
+      "from state before window": 0.7023394436125032,
+      "from rolled state": 0.9878054421482414,
+      "gain": 0.2854659985357382
+    },
+    {
+      "plan input": "promo known",
+      "periods back": 1,
+      "from state before window": 0.712521222660637,
+      "from rolled state": 0.973240371405341,
+      "gain": 0.26071914874470403
+    },
+    {
+      "plan input": "promo known",
+      "periods back": 7,
+      "from state before window": 0.7868067898702826,
+      "from rolled state": 0.9671143063090651,
+      "gain": 0.1803075164387825
+    },
+    {
+      "plan input": "cost",
+      "periods back": 0,
+      "from state before window": 0.8248985681041904,
+      "from rolled state": 0.9929683260006058,
+      "gain": 0.16806975789641543
+    },
+    {
+      "plan input": "cost",
+      "periods back": 1,
+      "from state before window": 0.8346554992513632,
+      "from rolled state": 0.9828901800333363,
+      "gain": 0.1482346807819731
+    },
+    {
+      "plan input": "cost",
+      "periods back": 7,
+      "from state before window": 0.8820380431357995,
+      "from rolled state": 0.980746868595044,
+      "gain": 0.09870882545924453
+    },
+    {
+      "plan input": "cost known",
+      "periods back": 0,
+      "from state before window": 0.7038517096132559,
+      "from rolled state": 0.9881962905175647,
+      "gain": 0.2843445809043088
+    },
+    {
+      "plan input": "cost known",
+      "periods back": 1,
+      "from state before window": 0.713976685479754,
+      "from rolled state": 0.9740054030959078,
+      "gain": 0.26002871761615376
+    },
+    {
+      "plan input": "cost known",
+      "periods back": 7,
+      "from state before window": 0.7874880119972496,
+      "from rolled state": 0.971025911564536,
+      "gain": 0.1835378995672864
+    },
+    {
+      "plan input": "price / regular price",
+      "periods back": 0,
+      "from state before window": 0.29159488166752623,
+      "from rolled state": 0.973908623675562,
+      "gain": 0.6823137420080357
+    },
+    {
+      "plan input": "price / regular price",
+      "periods back": 1,
+      "from state before window": 0.29318195818984216,
+      "from rolled state": 0.9601921311436572,
+      "gain": 0.667010172953815
+    },
+    {
+      "plan input": "price / regular price",
+      "periods back": 7,
+      "from state before window": 0.3446590809415434,
+      "from rolled state": 0.9341224550797039,
+      "gain": 0.5894633741381605
+    }
+  ]
+}

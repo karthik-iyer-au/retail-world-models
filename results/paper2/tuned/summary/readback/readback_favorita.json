@@ -1,0 +1,64 @@
+{
+  "config": "final_favorita_world_model",
+  "run": "20261111T175613_final_favorita_world_model_e8591f98",
+  "items": 6000,
+  "rolled_state": true,
+  "rows": [
+    {
+      "plan input": "promo",
+      "periods back": 0,
+      "from state before window": 0.05295564173299461,
+      "from rolled state": 0.9523814882841921,
+      "gain": 0.8994258465511975
+    },
+    {
+      "plan input": "promo",
+      "periods back": 1,
+      "from state before window": 0.054638245785467054,
+      "from rolled state": 0.8051429854815885,
+      "gain": 0.7505047396961214
+    },
+    {
+      "plan input": "promo",
+      "periods back": 7,
+      "from state before window": 0.05586084563381122,
+      "from rolled state": 0.6684130356823024,
+      "gain": 0.6125521900484912
+    },
+    {
+      "plan input": "event",
+      "periods back": 0,
+      "from state before window": 1.207996398466804e-07,
+      "from rolled state": 0.8827633147251791,
+      "gain": 0.8827631939255393
+    },
+    {
+      "plan input": "event",
+      "periods back": 1,
+      "from state before window": 7.526489020914795e-08,
+      "from rolled state": 0.6577226735082766,
+      "gain": 0.6577225982433864
+    },
+    {
+      "plan input": "payday",
+      "periods back": 0,
+      "from state before window": -1.0037184416944456e-07,
+      "from rolled state": 0.939828536259223,
+      "gain": 0.9398286366310672
+    },
+    {
+      "plan input": "payday",
+      "periods back": 1,
+      "from state before window": 7.526489020914795e-08,
+      "from rolled state": 0.588718180027325,
+      "gain": 0.5887181047624348
+    },
+    {
+      "plan input": "payday",
+      "periods back": 7,
+      "from state before window": 2.2015429557153965e-07,
+      "from rolled state": 0.5652554701813374,
+      "gain": 0.5652552500270418
+    }
+  ]
+}

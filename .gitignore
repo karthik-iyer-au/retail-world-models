@@ -22,6 +22,7 @@ results/*
 # (paper/Makefile; plan entry of 12 November 2026). Forecasts and checkpoints stay on the results volume.
 !results/analysis_tuned/
 !results/long_horizon/
+!results/paper2/
 !results/final/
 results/final/*/*
 !results/final/*/metrics.json
