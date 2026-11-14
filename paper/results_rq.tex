@@ -183,3 +183,20 @@ results do not settle their order on data with other levers, other lines and
 other history; the
 code to do so is released with the paper. Section~\ref{sec:limits} sets out what
 the study does not cover, including forecasts longer than 8 weeks or 28 days.
+
+\ifjournal
+\paragraph{Fifty-two weeks ahead}
+The rule holds a year ahead when each model forecasts the whole year at once. In
+a test planned before it ran (six Dominick's categories and M5, two windows of 52
+weeks), the world model alone is not the most accurate on any data set; the
+average of the two models forecasting all 52 weeks at once is the most accurate
+on \lhLowestAvgDirect{} of \lhSets{} and clearly more accurate than LightGBM in
+\lhPAvgDirBetter{} of \lhPAvgDirN{} paired comparisons (clearly less in
+\lhPAvgDirWorse). When the world model takes in its own forecasts 13 weeks at a
+time, its errors carry into its state, and it is clearly less accurate than
+LightGBM in \lhPWmWorse{} of \lhPN{} comparisons. Designs and models added after
+the test are in Section~\ref{sec:long-horizon} of the supplement.
+\else
+\input{long_horizon}
+\fi
+

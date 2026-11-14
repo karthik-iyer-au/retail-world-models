@@ -41,7 +41,32 @@ the world model forecasting directly it is clearly more accurate in
 \lhPAvgDirWmBetter{} and clearly less in \lhPAvgDirWmWorse{}. These two
 comparisons were added after the planned ones.
 
-%LH-ADDED%
+\paragraph{Added after the planned test: other designs and other models}
+After seeing the planned result we added two designs in which no model takes in
+its own forecasts, and ran the other models of the paper over 52 weeks
+(Table~\ref{tab:long-horizon-all}). In the first, the world model rolls its
+state forward 13 weeks at a time on the plan; in the second, LightGBM fits one
+model per block of 13 weeks. Rolling on helps on M5 and fails on Dominick's. On M5
+the world model rolled on scores \lhMfiveWmRollon{} against \lhMfiveWmBlocks{} in
+blocks, and its average with LightGBM, \lhMfiveAvgRollon, is the most accurate
+forecast on M5 and clearly more accurate than LightGBM forecasting directly
+(\lhMfiveLgbDirect) in \lhMfiveAvgRollonLgbBetter{} of
+\lhMfiveAvgRollonLgbN{} paired comparisons, clearly less in none. On the
+Dominick's categories the rolled-on state drifts: on cheese the forecast is
+\lhRollonCheeseFa{} times what sold and the WRMSSE \lhRollonCheese. LightGBM by
+block is close to LightGBM forecasting directly. Of all the forecasts, the
+average with each model forecasting directly is the most accurate on
+\lhAllLowestAvgDirect{} data sets, LightGBM directly or by block on two, and the
+average with the world model rolled on on M5; no other model is the most
+accurate anywhere. TFT, TimesFM, Chronos and the seasonal naive forecast are
+behind LightGBM and the average on every data set; TimesFM given the plan is
+ahead of the world model alone on analgesics. Timestral given the plan cannot
+forecast 52 weeks: its forecast is \lhTimestralFaOneLo{} to \lhTimestralFaOneHi{}
+times what sold in the first 13 weeks and \lhTimestralFaLo{} to
+\lhTimestralFaHi{} times over the year. M5's world model forecasting all 52 weeks
+at once and TFT on M5 were not run.
+
+\input{generated/lh_tab_all}
 
 \input{generated/lh_tab}
 

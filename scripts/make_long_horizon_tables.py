@@ -152,7 +152,8 @@ Data set & WM & LGB & Avg & WM & LGB & Avg & WM vs LGB, blocks & Avg vs LGB, dir
 # added 14 November 2026: every forecast over 52 weeks, the designs added after the pre-registered test, the other
 # models, and (when run) each model's settings tuned for 52 weeks
 ALL = [("world_model_direct", "WM"), ("world_model_rollon", "WM rolled on"), ("lightgbm_direct", "LGB"),
-       ("lightgbm_byblock", "LGB by block"), ("average_direct", "Avg"), ("average_byblock", "Avg by block"),
+       ("lightgbm_byblock", "LGB by block"), ("average_direct", "Avg"), ("average_rollon", "Avg, WM rolled on"),
+       ("average_byblock", "Avg by block"),
        ("world_model_tdirect", "WM tuned"), ("lightgbm_tdirect", "LGB tuned"), ("lightgbm_tbyblock", "LGB tuned by block"),
        ("average_tdirect", "Avg tuned"), ("average_tbyblock", "Avg tuned by block"),
        ("seasonal_naive_direct", "Seasonal naive"), ("chronos_direct", "Chronos"), ("timesfm_mean_direct", "TimesFM"),
@@ -180,7 +181,7 @@ def every(s: pd.DataFrame, pr: pd.DataFrame, keys: list[str]) -> dict:
 \caption{Every forecast 52 weeks ahead (364 days on M5): WRMSSE over the 52 weeks, mean over levels and two windows.
 Each forecasts all 52 weeks at once except the world model rolled on (its state rolled 13 weeks at a time on the plan,
 without taking in its own forecasts) and LightGBM by block (one model per block of 13 weeks). Averages: the world
-model with LightGBM directly (Avg) or by block. Tuned: settings searched again for 52 weeks on Dominick's. Bold: lowest
+model with LightGBM directly (Avg; with the world model rolled on, the M5 average) or by block. Tuned: settings searched again for 52 weeks on Dominick's. Bold: lowest
 of each row, leaving out Timestral with the plan, which could not forecast 52 weeks. Of these, only WM, LGB and Avg
 were in the planned test; the rest were added after it ran.}
 \label{tab:long-horizon-all}
@@ -200,7 +201,9 @@ Data set & """ + head + r"""\\
     for m, _ in cols:
         v[f"lhAllLowest{tag[m]}"] = _w(lowest.get(m, 0))
     if "timestral_plan_direct" in dict(cols):
-        r = [fa1.get((k, "timestral_plan_direct"), np.nan) for k in keys] + [fa.get((k, "timestral_plan_direct"), np.nan) for k in keys]
+        r = [fa1.get((k, "timestral_plan_direct"), np.nan) for k in keys]
+        v["lhTimestralFaOneLo"], v["lhTimestralFaOneHi"] = f"{np.nanmin(r):.1f}", f"{np.nanmax(r):.1f}"
+        r = [fa.get((k, "timestral_plan_direct"), np.nan) for k in keys]
         v["lhTimestralFaLo"], v["lhTimestralFaHi"] = f"{np.nanmin(r):.1f}", f"{np.nanmax(r):.1f}"
     if "world_model_rollon" in dict(cols):
         r = [fa.get((k, "world_model_rollon"), np.nan) for k in keys]
@@ -211,12 +214,24 @@ Data set & """ + head + r"""\\
         return int((q.hi < 0).sum()), int((q.lo > 0).sum()), len(q)
 
     for x, y, nm in [("average_byblock", "lightgbm_byblock", "AvgBbLgbBb"), ("world_model_rollon", "lightgbm_direct", "RollonLgb"),
+                     ("average_rollon", "lightgbm_direct", "AvgRollonLgb"), ("world_model_rollon", "world_model_blocks", "RollonBlocks"),
                      ("world_model_tdirect", "world_model_direct", "TunedWm"), ("lightgbm_tdirect", "lightgbm_direct", "TunedLgb"),
                      ("average_tdirect", "lightgbm_tdirect", "TunedAvgLgb"), ("average_tdirect", "world_model_tdirect", "TunedAvgWm"),
                      ("world_model_tdirect", "lightgbm_tdirect", "TunedWmLgb")]:
         b, w, n = clear(x, y)
         if n:
             v[f"lhP{nm}Better"], v[f"lhP{nm}Worse"], v[f"lhP{nm}N"] = str(b), str(w), str(n)
+    for x, y, nm in [("average_rollon", "lightgbm_direct", "AvgRollonLgb"), ("world_model_rollon", "world_model_blocks", "RollonBlocks")]:
+        q = pr[(pr.span == "all") & (pr.key == "m5") & (pr.a == x) & (pr.b == y)]
+        if len(q):
+            v[f"lhMfive{nm}Better"], v[f"lhMfive{nm}Worse"], v[f"lhMfive{nm}N"] = \
+                str(int((q.hi < 0).sum())), str(int((q.lo > 0).sum())), str(len(q))
+    for m, nm in [("average_rollon", "AvgRollon"), ("lightgbm_direct", "LgbDirect"), ("world_model_rollon", "WmRollon"),
+                  ("world_model_blocks", "WmBlocks")]:
+        if ("m5", m) in over.index:
+            v[f"lhMfive{nm}"] = f"{over[('m5', m)]:.3f}"
+    v["lhRollonCheese"] = f"{over.get(('dominicks_che', 'world_model_rollon'), np.nan):.2f}"
+    v["lhRollonCheeseFa"] = f"{fa.get(('dominicks_che', 'world_model_rollon'), np.nan):.2f}"
     return v
 
 

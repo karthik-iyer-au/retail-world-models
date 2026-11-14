@@ -113,12 +113,13 @@ here, since data with other levers, lines and lengths of history can change the
 order. The code and settings for every comparison are released for that purpose.
 
 \paragraph{Forecast horizon}
-Every forecast in the study runs 8 weeks ahead on the weekly data and 28 days
-ahead on the daily data. Whether the models' accuracy, and the order between
-them, holds over the 26- and 52-week horizons of range, space and supplier
-reviews was not tested, nor whether accuracy falls with the horizon at the same
-rate for each model. Testing it needs a retailer's own plans and range
-decisions to score against and is left for separate work.
+The main comparisons run 8 weeks ahead on the weekly data and 28 days ahead on
+the daily data. The 52-week test (Section~\ref{sec:long-horizon}) covers six
+Dominick's categories and M5 with two windows each, with the settings tuned for
+the shorter horizon; Frat and Favorita were not tested a year ahead, and M5's
+world model was not run forecasting all 52 weeks at once. Whether the order holds
+on a retailer's own year-ahead plans, which are revised as the year runs, was not
+tested.
 
 \paragraph{New items}
 The kept-out items are existing items held out of training, not new products. Each

@@ -3,21 +3,21 @@
 \caption{Every forecast 52 weeks ahead (364 days on M5): WRMSSE over the 52 weeks, mean over levels and two windows.
 Each forecasts all 52 weeks at once except the world model rolled on (its state rolled 13 weeks at a time on the plan,
 without taking in its own forecasts) and LightGBM by block (one model per block of 13 weeks). Averages: the world
-model with LightGBM directly (Avg) or by block. Tuned: settings searched again for 52 weeks on Dominick's. Bold: lowest
+model with LightGBM directly (Avg; with the world model rolled on, the M5 average) or by block. Tuned: settings searched again for 52 weeks on Dominick's. Bold: lowest
 of each row, leaving out Timestral with the plan, which could not forecast 52 weeks. Of these, only WM, LGB and Avg
 were in the planned test; the rest were added after it ran.}
 \label{tab:long-horizon-all}
-\begin{adjustbox}{max width=\textwidth}\begin{tabular}{lccc}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{lccccccccccccc}
 \toprule
-Data set & \rotatebox{90}{WM} & \rotatebox{90}{LGB} & \rotatebox{90}{Avg}\\
+Data set & \rotatebox{90}{WM} & \rotatebox{90}{WM rolled on} & \rotatebox{90}{LGB} & \rotatebox{90}{LGB by block} & \rotatebox{90}{Avg} & \rotatebox{90}{Avg, WM rolled on} & \rotatebox{90}{Avg by block} & \rotatebox{90}{Seasonal naive} & \rotatebox{90}{Chronos} & \rotatebox{90}{TimesFM} & \rotatebox{90}{TimesFM with plan} & \rotatebox{90}{Timestral with plan} & \rotatebox{90}{TFT}\\
 \midrule
-Analgesics & 0.964 & \textbf{0.867} & 0.868 \\
-Bottled juice & 0.764 & 0.769 & \textbf{0.726} \\
-Cheese & 0.773 & 0.707 & \textbf{0.677} \\
-Frozen entrees & 0.412 & 0.393 & \textbf{0.387} \\
-Soft drinks & 0.851 & \textbf{0.754} & 0.767 \\
-Snacks & 0.866 & 0.882 & \textbf{0.843} \\
-M5 & n/a & \textbf{0.839} & n/a \\
+Analgesics & 0.964 & 1.062 & 0.867 & \textbf{0.846} & 0.868 & 0.892 & 0.888 & 1.909 & 1.065 & 0.988 & 0.909 & 89.128 & 0.987 \\
+Bottled juice & 0.764 & 1.174 & 0.769 & 0.765 & \textbf{0.726} & 0.886 & 0.889 & 1.493 & 0.936 & 0.911 & 0.858 & 33.123 & 0.821 \\
+Cheese & 0.773 & 5.027 & 0.707 & 0.680 & \textbf{0.677} & 2.703 & 2.696 & 1.395 & 0.942 & 0.903 & 0.798 & 18.044 & 0.810 \\
+Frozen entrees & 0.412 & 0.888 & 0.393 & 0.399 & \textbf{0.387} & 0.581 & 0.586 & 0.803 & 0.628 & 0.594 & 0.547 & 4.591 & 0.498 \\
+Soft drinks & 0.851 & 1.024 & \textbf{0.754} & 0.754 & 0.767 & 0.824 & 0.825 & 1.230 & 0.987 & 0.951 & 0.847 & 11.052 & 0.878 \\
+Snacks & 0.866 & 0.932 & 0.882 & 0.866 & \textbf{0.843} & 0.865 & 0.859 & 1.747 & 1.040 & 0.958 & 0.896 & 18.321 & 1.102 \\
+M5 & n/a & 0.880 & 0.839 & 0.849 & n/a & \textbf{0.764} & 0.771 & 1.064 & 1.843 & 1.708 & 1.813 & 2.972 & n/a \\
 \bottomrule
 \end{tabular}\end{adjustbox}
 \end{table*}
