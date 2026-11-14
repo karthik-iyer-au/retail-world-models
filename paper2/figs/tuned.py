@@ -19,7 +19,7 @@ import pandas as pd
 import yaml
 
 import real
-from style import ACCENT, FULL, GRID, INK, MUTED, despine, panel_label, save
+from style import ACCENT, FULL, GRID, INK, MUTED, despine, panel_label, save, use_style
 
 ROOT = Path(__file__).resolve().parents[2]
 SUM = ROOT / "results" / "paper2" / "tuned" / "summary"
@@ -259,6 +259,7 @@ def write(t, rb, tests, c7rows, nversions):
 
 
 def make(out: Path):
+    use_style()
     d = final_scores()
     t = pass_table(d)
     rb = readback()
