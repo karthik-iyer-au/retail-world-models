@@ -1420,3 +1420,5 @@ held-out window, and no change could be told apart). No other run is affected: e
 `step` = `horizon` apart or a single window. Fixed in src/rwm/experiments/run.py (tests/test_blocks.py,
 test_overlapping_windows_score_every_period); the search reruns unchanged in every other respect under new names
 (configs/research/h52s2_*), and the first search's results are not used.
+Karthik, 17:54: "Okay do for 2 rounds". The rerun is limited to two rounds for both models (instead of at most
+three), with the spending cap raised to US$600 in all.
