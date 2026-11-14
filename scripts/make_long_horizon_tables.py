@@ -120,6 +120,7 @@ Data set & WM & LGB & Avg & WM & LGB & Avg & WM vs LGB, blocks & Avg vs LGB, dir
         v[f"lhGrow{tag}Lo"], v[f"lhGrow{tag}Hi"] = f"{np.nanmin(g):+.3f}".replace("-", "\u2212"), f"{np.nanmax(g):+.3f}".replace("-", "\u2212")
         r = [fa.get((k, "all", m), np.nan) for k in keys]
         v[f"lhFa{tag}Lo"], v[f"lhFa{tag}Hi"] = f"{100 * np.nanmin(r):.0f}", f"{100 * np.nanmax(r):.0f}"
+    v.update(every(s, pr, keys))
     (OUT / "generated" / "lh_values.tex").write_text("".join(f"\\newcommand{{\\{k}}}{{{x}}}\n" for k, x in v.items()))
 
     import matplotlib.pyplot as plt
@@ -146,6 +147,77 @@ Data set & WM & LGB & Avg & WM & LGB & Avg & WM vs LGB, blocks & Avg vs LGB, dir
     fig.tight_layout()
     style.save(fig, OUT / "fig_long_horizon.pdf")
     print(v)
+
+
+# added 14 November 2026: every forecast over 52 weeks, the designs added after the pre-registered test, the other
+# models, and (when run) each model's settings tuned for 52 weeks
+ALL = [("world_model_direct", "WM"), ("world_model_rollon", "WM rolled on"), ("lightgbm_direct", "LGB"),
+       ("lightgbm_byblock", "LGB by block"), ("average_direct", "Avg"), ("average_byblock", "Avg by block"),
+       ("world_model_tdirect", "WM tuned"), ("lightgbm_tdirect", "LGB tuned"), ("lightgbm_tbyblock", "LGB tuned by block"),
+       ("average_tdirect", "Avg tuned"), ("average_tbyblock", "Avg tuned by block"),
+       ("seasonal_naive_direct", "Seasonal naive"), ("chronos_direct", "Chronos"), ("timesfm_mean_direct", "TimesFM"),
+       ("timesfm_plan_direct", "TimesFM with plan"), ("timestral_plan_direct", "Timestral with plan"),
+       ("tft_direct", "TFT")]
+UNABLE = {"timestral_plan_direct"}  # forecasts 1.5 to 9.5 times actual from the first 13 weeks: left out of 'lowest'
+
+
+def every(s: pd.DataFrame, pr: pd.DataFrame, keys: list[str]) -> dict:
+    over = s[s.span == "all"].groupby(["key", "model", "window"]).wrmsse.mean().groupby(["key", "model"]).mean()
+    fa = s[s.span == "all"].groupby(["key", "model"]).forecast_to_actual.mean()
+    fa1 = s[s.span == "1"].groupby(["key", "model"]).forecast_to_actual.mean()
+    cols = [(m, lab) for m, lab in ALL if m in set(over.index.get_level_values(1))]
+    rows, lowest, v = [], {}, {}
+    for k in keys:
+        vals = {m: over.get((k, m), np.nan) for m, _ in cols}
+        able = {m: x for m, x in vals.items() if m not in UNABLE and not np.isnan(x)}
+        best = min(able, key=able.get)
+        lowest[best] = lowest.get(best, 0) + 1
+        cells = ["n/a" if np.isnan(x) else (f"\\textbf{{{x:.3f}}}" if m == best else f"{x:.3f}") for m, x in vals.items()]
+        rows.append(f"{KEYS[k]} & " + " & ".join(cells) + r" \\")
+    head = " & ".join(f"\\rotatebox{{90}}{{{lab}}}" for _, lab in cols)
+    tab = (r"""\begin{table*}[t]
+\centering\footnotesize\setlength{\tabcolsep}{3pt}
+\caption{Every forecast 52 weeks ahead (364 days on M5): WRMSSE over the 52 weeks, mean over levels and two windows.
+Each forecasts all 52 weeks at once except the world model rolled on (its state rolled 13 weeks at a time on the plan,
+without taking in its own forecasts) and LightGBM by block (one model per block of 13 weeks). Averages: the world
+model with LightGBM directly (Avg) or by block. Tuned: settings searched again for 52 weeks on Dominick's. Bold: lowest
+of each row, leaving out Timestral with the plan, which could not forecast 52 weeks. Of these, only WM, LGB and Avg
+were in the planned test; the rest were added after it ran.}
+\label{tab:long-horizon-all}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{l""" + "c" * len(cols) + r"""}
+\toprule
+Data set & """ + head + r"""\\
+\midrule
+""" + "\n".join(rows) + "\n" + r"""\bottomrule
+\end{tabular}\end{adjustbox}
+\end{table*}
+""")
+    (OUT / "generated" / "lh_tab_all.tex").write_text(tab)
+    tag = {m: "".join(w.capitalize() for w in m.replace("world_model", "wm").replace("lightgbm", "lgb")
+                      .replace("average", "avg").replace("seasonal_naive", "snaive").replace("timesfm_mean", "timesfm")
+                      .replace("timesfm_plan", "timesfmplan").replace("timestral_plan", "timestral").split("_"))
+           for m, _ in cols}
+    for m, _ in cols:
+        v[f"lhAllLowest{tag[m]}"] = _w(lowest.get(m, 0))
+    if "timestral_plan_direct" in dict(cols):
+        r = [fa1.get((k, "timestral_plan_direct"), np.nan) for k in keys] + [fa.get((k, "timestral_plan_direct"), np.nan) for k in keys]
+        v["lhTimestralFaLo"], v["lhTimestralFaHi"] = f"{np.nanmin(r):.1f}", f"{np.nanmax(r):.1f}"
+    if "world_model_rollon" in dict(cols):
+        r = [fa.get((k, "world_model_rollon"), np.nan) for k in keys]
+        v["lhRollonFaLo"], v["lhRollonFaHi"] = f"{np.nanmin(r):.2f}", f"{np.nanmax(r):.2f}"
+
+    def clear(x, y):
+        q = pr[(pr.span == "all") & (pr.a == x) & (pr.b == y)]
+        return int((q.hi < 0).sum()), int((q.lo > 0).sum()), len(q)
+
+    for x, y, nm in [("average_byblock", "lightgbm_byblock", "AvgBbLgbBb"), ("world_model_rollon", "lightgbm_direct", "RollonLgb"),
+                     ("world_model_tdirect", "world_model_direct", "TunedWm"), ("lightgbm_tdirect", "lightgbm_direct", "TunedLgb"),
+                     ("average_tdirect", "lightgbm_tdirect", "TunedAvgLgb"), ("average_tdirect", "world_model_tdirect", "TunedAvgWm"),
+                     ("world_model_tdirect", "lightgbm_tdirect", "TunedWmLgb")]:
+        b, w, n = clear(x, y)
+        if n:
+            v[f"lhP{nm}Better"], v[f"lhP{nm}Worse"], v[f"lhP{nm}N"] = str(b), str(w), str(n)
+    return v
 
 
 if __name__ == "__main__":
