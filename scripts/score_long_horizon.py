@@ -20,7 +20,7 @@ import pandas as pd
 from rwm.evaluation import compare as C
 from rwm.evaluation.splits import Split
 
-NAME = re.compile(r"h52_(dominicks_\w{3}|m5)_(world_model|lightgbm|seasonal_naive|chronos|timesfm_mean|timesfm_plan|timestral_plan|tft)_(blocks|direct|rollon|byblock)_w(\d)")
+NAME = re.compile(r"h52(t?)_(dominicks_\w{3}|m5)_(world_model|lightgbm|seasonal_naive|chronos|timesfm_mean|timesfm_plan|timestral_plan|tft)_(blocks|direct|rollon|byblock)_w(\d)")
 
 
 def index(results: Path) -> pd.DataFrame:
@@ -31,7 +31,9 @@ def index(results: Path) -> pd.DataFrame:
         name = json.loads((d / "manifest.json").read_text())["config"]["name"]
         m = NAME.fullmatch(name)
         if m:
-            rows.append(dict(key=m.group(1), model=m.group(2), setup=m.group(3), window=int(m.group(4)), run=d.name))
+            # h52t_*: settings tuned for 52 weeks (plan entry of 14 November 2026), scored as setups tdirect, tbyblock
+            rows.append(dict(key=m.group(2), model=m.group(3), setup=m.group(1) + m.group(4), window=int(m.group(5)),
+                             run=d.name))
     idx = pd.DataFrame(rows).sort_values("run")
     return idx.groupby(["key", "model", "setup", "window"]).tail(1).reset_index(drop=True)
 
@@ -74,6 +76,11 @@ def main(argv=None):
             mats["average_rollon"] = (mats["world_model_rollon"] + mats["lightgbm_direct"]) / 2
         if "world_model_rollon" in mats and "lightgbm_byblock" in mats:
             mats["average_byblock"] = (mats["world_model_rollon"] + mats["lightgbm_byblock"]) / 2
+        # added 14 November 2026: the average of the two models with settings tuned for 52 weeks
+        if "world_model_tdirect" in mats and "lightgbm_tdirect" in mats:
+            mats["average_tdirect"] = (mats["world_model_tdirect"] + mats["lightgbm_tdirect"]) / 2
+        if "world_model_tdirect" in mats and "lightgbm_tbyblock" in mats:
+            mats["average_tbyblock"] = (mats["world_model_tdirect"] + mats["lightgbm_tbyblock"]) / 2
         t0, t1, _ = fr.cut(0)
         h = t1 - t0
         q = h // 4
@@ -104,7 +111,17 @@ def main(argv=None):
                                          ("average_byblock", "world_model_rollon"),
                                          ("average_byblock", "seasonal_naive_direct"),
                                          ("world_model_rollon", "seasonal_naive_direct"),
-                                         ("lightgbm_byblock", "seasonal_naive_direct")] if x in sub and y in sub]
+                                         ("lightgbm_byblock", "seasonal_naive_direct"),
+                                         ("world_model_tdirect", "world_model_direct"),
+                                         ("lightgbm_tdirect", "lightgbm_direct"),
+                                         ("lightgbm_tbyblock", "lightgbm_byblock"),
+                                         ("world_model_tdirect", "lightgbm_tdirect"),
+                                         ("world_model_tdirect", "lightgbm_tbyblock"),
+                                         ("average_tdirect", "lightgbm_tdirect"),
+                                         ("average_tdirect", "world_model_tdirect"),
+                                         ("average_tbyblock", "lightgbm_tbyblock"),
+                                         ("average_tbyblock", "world_model_tdirect"),
+                                         ("average_tdirect", "average_direct")] if x in sub and y in sub]
             bs = C.Bootstrap(view, 0, n=a.boot, seed=window)
             boot = bs.scores({m: sub[m] for m in {m for pr in pairs for m in pr}})
             for r in C.paired(boot, point, bs.level_names, pairs).to_dict("records"):
