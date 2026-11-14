@@ -312,7 +312,10 @@ def _bad() -> set:
     return set(json.loads(BAD.read_text())) if BAD.exists() else set()
 
 
-CODE_FAULTS = ("ModuleNotFoundError", "ImportError", "Failed to find C compiler")  # the image's fault, not the host's
+CODE_FAULTS = ("ModuleNotFoundError", "ImportError", "Failed to find C compiler",  # the image's fault, not the host's
+               # a failed download of the code from GitHub (14 November 2026: such failures had excluded all 780 of
+               # the 4090 and 5090 offers, so no machine could be rented)
+               "RPC failed", "early EOF", "fetch-pack", "Could not resolve host")
 
 
 def _host_fault(log: Path) -> bool:
