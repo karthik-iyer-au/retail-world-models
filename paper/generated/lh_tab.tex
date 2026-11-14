@@ -1,0 +1,25 @@
+\begin{table*}[t]
+\centering\footnotesize\setlength{\tabcolsep}{3pt}
+\caption{Forecasts 52 weeks ahead (364 days on M5). WRMSSE over the 52 weeks, mean over levels and two windows, for
+the world model (WM), LightGBM (LGB) and their average (Avg). In blocks: each model forecasts four blocks of 13 weeks,
+each block's forecast taken in as sales before the next. Direct: each model forecasts all 52 weeks at once (not run for
+M5's world model). Paired item bootstrap over levels and windows: comparisons clearly lower / clearly higher, of all.
+Last four columns: WRMSSE item by store in the first and last block of 13 weeks, in blocks. Shading marks the lowest
+of the six: \colorbox{wmcell}{world model}, \colorbox{lgbcell}{LightGBM}, \colorbox{avgcell}{average}.}
+\label{tab:long-horizon}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{l ccc ccc cc cc cc}
+\toprule
+ & \multicolumn{3}{c}{In blocks} & \multicolumn{3}{c}{Direct} & \multicolumn{2}{c}{Paired} & \multicolumn{2}{c}{WM, item by store} & \multicolumn{2}{c}{LGB, item by store}\\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-9}\cmidrule(lr){10-11}\cmidrule(lr){12-13}
+Data set & WM & LGB & Avg & WM & LGB & Avg & WM vs LGB, blocks & Avg vs LGB, direct & Weeks 1 to 13 & 40 to 52 & Weeks 1 to 13 & 40 to 52\\
+\midrule
+Analgesics & 1.062 & \cellcolor{lgbcell}\textbf{0.865} & 0.907 & 0.964 & 0.867 & 0.868 & 0 / 3 of 8 & 1 / 0 of 8 & 0.697 & 0.686 & 0.696 & 0.683 \\
+Bottled juice & 0.903 & 0.797 & 0.817 & 0.764 & 0.769 & \cellcolor{avgcell}\textbf{0.726} & 0 / 2 of 8 & 4 / 0 of 8 & 0.738 & 0.742 & 0.705 & 0.689 \\
+Cheese & 1.086 & 0.689 & 0.820 & 0.773 & 0.707 & \cellcolor{avgcell}\textbf{0.677} & 0 / 8 of 8 & 2 / 0 of 8 & 0.701 & 0.938 & 0.692 & 0.738 \\
+Frozen entrees & 0.424 & 0.397 & 0.393 & 0.412 & 0.393 & \cellcolor{avgcell}\textbf{0.387} & 0 / 5 of 8 & 2 / 0 of 8 & 0.469 & 0.404 & 0.450 & 0.370 \\
+Soft drinks & 0.872 & 0.862 & 0.819 & 0.851 & \cellcolor{lgbcell}\textbf{0.754} & 0.767 & 1 / 0 of 8 & 0 / 2 of 8 & 0.618 & 0.767 & 0.631 & 0.781 \\
+Snacks & 1.013 & 0.877 & 0.920 & 0.866 & 0.882 & \cellcolor{avgcell}\textbf{0.843} & 0 / 6 of 8 & 6 / 0 of 8 & 0.691 & 0.890 & 0.622 & 0.683 \\
+M5 & 1.016 & 0.931 & 0.874 & n/a & \cellcolor{lgbcell}\textbf{0.839} & n/a & 4 / 14 of 24 & n/a & 0.823 & 1.000 & 0.849 & 0.908 \\
+\bottomrule
+\end{tabular}\end{adjustbox}
+\end{table*}

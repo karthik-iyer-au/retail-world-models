@@ -3,7 +3,7 @@
   python scripts/make_long_horizon_tables.py [--scores results/long_horizon]
 
 Reads scores.csv and paired.csv written by scripts/score_long_horizon.py and writes
-paper/drafts/generated/{lh_tab.tex, lh_values.tex} and paper/drafts/fig_long_horizon.pdf.
+paper/generated/{lh_tab.tex, lh_tab_all.tex, lh_values.tex} and paper/figs/fig_long_horizon.pdf.
 Overall scores are the mean over levels (Dominick's duplicate levels counted once) and over the two windows.
 """
 import argparse
@@ -15,7 +15,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "paper" / "figs"))
-OUT = ROOT / "paper" / "drafts"
+OUT = ROOT / "paper"  # generated/ and figs/ of paper 1 (the draft in paper/drafts reads the same files)
 KEYS = {"dominicks_ana": "Analgesics", "dominicks_bjc": "Bottled juice", "dominicks_che": "Cheese",
         "dominicks_fre": "Frozen entrees", "dominicks_sdr": "Soft drinks", "dominicks_sna": "Snacks", "m5": "M5"}
 DUP = {"cat_id", "cat_idxstore_id"}
@@ -145,7 +145,7 @@ Data set & WM & LGB & Avg & WM & LGB & Avg & WM vs LGB, blocks & Avg vs LGB, dir
     fig.supxlabel("Weeks ahead (blocks of 13 weeks; 91 days on M5)", fontsize=8)
     fig.supylabel("WRMSSE, mean over levels", fontsize=8)
     fig.tight_layout()
-    style.save(fig, OUT / "fig_long_horizon.pdf")
+    style.save(fig, OUT / "figs" / "fig_long_horizon.pdf")
     print(v)
 
 

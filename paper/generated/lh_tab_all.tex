@@ -1,0 +1,23 @@
+\begin{table*}[t]
+\centering\footnotesize\setlength{\tabcolsep}{3pt}
+\caption{Every forecast 52 weeks ahead (364 days on M5): WRMSSE over the 52 weeks, mean over levels and two windows.
+Each forecasts all 52 weeks at once except the world model rolled on (its state rolled 13 weeks at a time on the plan,
+without taking in its own forecasts) and LightGBM by block (one model per block of 13 weeks). Averages: the world
+model with LightGBM directly (Avg) or by block. Tuned: settings searched again for 52 weeks on Dominick's. Bold: lowest
+of each row, leaving out Timestral with the plan, which could not forecast 52 weeks. Of these, only WM, LGB and Avg
+were in the planned test; the rest were added after it ran.}
+\label{tab:long-horizon-all}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{lccc}
+\toprule
+Data set & \rotatebox{90}{WM} & \rotatebox{90}{LGB} & \rotatebox{90}{Avg}\\
+\midrule
+Analgesics & 0.964 & \textbf{0.867} & 0.868 \\
+Bottled juice & 0.764 & 0.769 & \textbf{0.726} \\
+Cheese & 0.773 & 0.707 & \textbf{0.677} \\
+Frozen entrees & 0.412 & 0.393 & \textbf{0.387} \\
+Soft drinks & 0.851 & \textbf{0.754} & 0.767 \\
+Snacks & 0.866 & 0.882 & \textbf{0.843} \\
+M5 & n/a & \textbf{0.839} & n/a \\
+\bottomrule
+\end{tabular}\end{adjustbox}
+\end{table*}
