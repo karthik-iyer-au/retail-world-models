@@ -38,7 +38,8 @@ for one kind of line needs to know which.
 
 We test four kinds of model. Gradient-boosted trees are the proven method:
 LightGBM was behind the leading entries of the M5 competition
-\cite{m5accuracy}. Pretrained foundation models (TimesFM, Chronos-Bolt and
+\cite{m5accuracy}, and it forecasts demand in PepsiCo's deployed promotion
+planning, which plans 8 to 52 weeks ahead~\cite{pepsico2026}. Pretrained foundation models (TimesFM, Chronos-Bolt and
 Timestral) forecast without training on the retailer's data. The Temporal
 Fusion Transformer is an attention-based model trained on it. World models, the
 newest of the four, learn a state for each item and carry it forward one period
@@ -196,7 +197,8 @@ practice and note that most studies forecast and evaluate at one level of
 aggregation, usually the item, although retail decisions are spread across
 levels. Sales of a single item in a single store are intermittent, which led to
 dedicated methods for intermittent demand~\cite{croston,syntetos2005} and to
-evaluating forecasts as count distributions~\cite{kolassa2016}. Studies of intermittent
+evaluating forecasts as count distributions~\cite{kolassa2016}; Ma et al.~\cite{ma2025}
+match forecasting methods to SKU demand patterns in a beverage manufacturer's data. Studies of intermittent
 items score forecasting methods both by their error and by the stock they lead
 to~\cite{babai2014,babai2019}, and Kourentzes, Trapero and Barrow~\cite{kourentzes2020}
 propose choosing a forecasting model for its inventory cost rather than its accuracy. The Tweedie
