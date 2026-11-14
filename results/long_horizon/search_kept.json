@@ -64,5 +64,13 @@
     ],
     "score": 0.5667154684763892,
     "held_out": 0.6367510495352063
+  },
+  "h52s2_lightgbm_dominicks_bjc": {
+    "kept": [
+      "learning_rate_half",
+      "more_lags"
+    ],
+    "score": 0.6988939285035042,
+    "held_out": 0.7855355118009942
   }
 }
