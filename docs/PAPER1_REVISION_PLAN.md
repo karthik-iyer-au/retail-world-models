@@ -1422,3 +1422,4 @@ test_overlapping_windows_score_every_period); the search reruns unchanged in eve
 (configs/research/h52s2_*), and the first search's results are not used.
 Karthik, 17:54: "Okay do for 2 rounds". The rerun is limited to two rounds for both models (instead of at most
 three), with the spending cap raised to US$600 in all.
+Karthik, 23:25: cap raised to US$700 in all.
