@@ -133,7 +133,11 @@ Data set & WM & LGB & Avg & WM & LGB & Avg & WM vs LGB, blocks & Avg vs LGB, dir
     for ax, k in zip(axes.flat, keys):
         for m, c, lab in show:
             y = [over.get((k, str(b), m), np.nan) for b in (1, 2, 3, 4)]
-            ax.plot([1, 2, 3, 4], y, color=style.COLOR[c], marker=style.MARKER.get(c, "D"), ms=3.5, lw=1.2, label=lab)
+            # a monotone cubic through the four block scores (no overshoot between them); markers on the scores
+            from scipy.interpolate import PchipInterpolator
+            xs = np.linspace(1, 4, 61)
+            ax.plot(xs, PchipInterpolator([1, 2, 3, 4], y)(xs), color=style.COLOR[c], lw=1.2, label=lab,
+                    marker=style.MARKER.get(c, "D"), ms=3.5, markevery=[0, 20, 40, 60])
         ax.set_title(KEYS[k], fontsize=8)
         ax.set_xticks([1, 2, 3, 4], ["1-13", "14-26", "27-39", "40-52"], fontsize=6.5)
         ax.tick_params(axis="y", labelsize=6.5)
