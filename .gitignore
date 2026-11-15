@@ -37,3 +37,4 @@ results/pooled/*/*
 !results/pooled/*/manifest.json
 !results/data_spans/
 !results/kinds/
+!results/audit/

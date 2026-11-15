@@ -66,7 +66,7 @@ T = text fix, no compute. C = needs compute (Karthik decides). D = done.
 
 ## Outside code review (GPT, 15 November)
 1. D. Missing, NaN or duplicate forecasts read as zero: scoring now fails on incomplete forecasts where the data has
-   a row (commits 9ec1cce and after; 1,488 tests pass, 8 new); audit of every scored run running.
+   a row (commits 9ec1cce and after; 1,488 tests pass, 8 new); audit of every scored run: all 346 clean (results/audit/).
 2. D. A level with no valid scale scored 0.0: now undefined, with the excluded weight reported.
 3. D. Finished-run check ignored forecasts (written last): forecasts first, COMPLETE marker last, check needs
    forecasts.csv.
