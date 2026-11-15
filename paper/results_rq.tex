@@ -94,6 +94,28 @@ should be taken on trust (the companion paper~\cite{paper2} tests that response 
 
 \input{generated/rq_tab_kinds}
 
+\paragraph{More history (added in \thisrev{})}
+\textbf{Training on more history does not close the world model's gap to
+LightGBM in any consistent way; the average stays the most accurate.} Each
+model was trained on one to five years of history before each window, with every
+other setting kept (Table~\ref{tab:history}). The rule for reading it was fixed
+before the runs: years of history help the world model if its gap to LightGBM
+shrinks with length on Dominick's, and observations per series help if it shrinks
+only on the daily data. On Dominick's the gap shrinks with more years on
+\histDomShrinks{} of \histDomSets{} categories and grows on the rest. On the two
+daily data sets it moves in opposite directions: on M5 the world model is ahead
+of LightGBM with \histMfiveYearsShort{} year of history (gap \histMfiveGapShort) and
+behind with \histMfiveYearsLong{} (\histMfiveGapLong), while on Favorita it is behind
+with \histFavYearsShort{} (\histFavGapShort) and ahead with \histFavYearsLong{}
+(\histFavGapLong). The world model is ahead with the least history on
+\histAheadShort{} of \histSets{} data sets and with the most on \histAheadLong. Neither
+years of history nor the number of observations per series decides which model
+is ahead; both models gain from more history, and the average of the two is the
+most accurate in \histAvgBest{} of the \histCells{} combinations of data set and
+length.
+
+\input{generated/hist_tab}
+
 \subsection{RQ3: seen and unseen data}
 \label{sec:rq-unseen}
 
