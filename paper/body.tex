@@ -380,8 +380,15 @@ stores across three states from 2011 to 2016, with prices by week, event days
 and the days on which SNAP food assistance is paid~\cite{m5accuracy}.
 \emph{Dominick's Finer Foods} holds weekly scanner data by store for a Chicago
 chain from 1989 to 1997, with price, a promotion code and cost~\cite{dominicks}.
-We use six categories chosen before any final run (cheese, snack crackers, soft
-drinks, bottled juice, analgesics, frozen entrees). Every model sees cleaned
+We use six of its \domCatN{} categories (cheese, snack crackers, soft
+drinks, bottled juice, analgesics, frozen entrees), chosen deliberately to test the world model
+where it was weakest. A first run of all \domCatN{} with untuned settings, before any setting was
+searched, put snacks, cheese, bottled juice and soft drinks \domCatRankSna{}, \domCatRankChe{},
+\domCatRankBjc{} and \domCatRankSdr{} of \domCatN{} for how far the world model trailed LightGBM; these four
+were taken with two categories where it was ahead (analgesics, on which the models were first set,
+and frozen entrees). The six hold \domCatDollarShare\% of the chain's dollar sales across the
+\domCatN{} categories and run from one of the least promoted (analgesics) to the most promoted
+(soft drinks; Table~\ref{tab:domcats}). Every model sees cleaned
 prices: a recorded price more than five times above, or below a fifth of, the
 same item's median price that week across the stores that recorded one (at least
 three) is treated as not recorded, and the store's last good price is used. \emph{Breakfast at the Frat}

@@ -58,3 +58,13 @@ tenth of nodes forecast to grow most that are in the actual top tenth (0.10 by
 chance); the Spearman correlation across promoted periods between forecast and
 actual units over the series' unpromoted level; and bias, forecast over actual.
 These were written down before they ran and have no pass rule.
+
+\paragraph{Dominick's categories}
+Table~\ref{tab:domcats} places the six categories used among all \domCatN{}. In the first, untuned run
+LightGBM was the most accurate of the three models then built on \domCatEarlyLgbWins{} categories and the world
+model on \domCatEarlyWmWins{}. The six sell more per week than the median category, and a median of
+\domCatDealSix\% of their units sell on a deal against \domCatDealRest\% for the other \domCatRest{}. Tuning
+closed most of the gap on the four chosen as hard: the world model trailed LightGBM by \domCatEarlyGapHardLo{} to
+\domCatEarlyGapHardHi{} on them in the first run, and after tuning its gap on the six runs from
+\domCatTunedGapLo{} to \domCatTunedGapHi{} (behind on \domCatTunedBehind{}).
+\input{generated/tab_dom_categories}
