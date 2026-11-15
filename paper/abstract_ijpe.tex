@@ -4,15 +4,13 @@ Retailers plan orders, promotions, category reviews and supplier terms from
 one demand at different grains. It asks whether one item-by-store forecast, summed to each coarser grain, can serve
 them all, and which model does it best. It compares gradient-boosted trees (LightGBM),
 foundation models, the Temporal Fusion Transformer and a world model that carries each item's state
-under the price and promotion plan, on four public data sets (M5, six
-Dominick's categories, Breakfast at the Frat and Corporaci\'on Favorita). The
-world model and LightGBM are tuned by a common search procedure and scored on
-windows they never saw. On items and stores seen in training,
+under the price and promotion plan, on four public data sets (M5, Dominick's,
+Breakfast at the Frat, Favorita), the world model and LightGBM tuned by one
+search procedure. On items and stores seen in training,
 the two are close and their average is the most accurate of the three: it has the lowest error in \rqAvgBestCells{} of \rqCells{}
 grain and data set cases and wins paired item tests against either model far
-more often than it loses; its simulated ordering loss is below LightGBM's on
-\supOrderAvgBelowLgb{} of nine data sets, and its category plans carry the
-least dollar error on \supCatPlanAvgLowest{}. On items kept out of training, the
+more often than it loses; on the final periods held out of every run it is never the least accurate, though most accurate on only \hoAvgBest{} of \hoSets{}; its category plans carry the
+least dollar error on \supCatPlanAvgLowest{} data sets. On items kept out of training, the
 world model loses at most \rqCostWmItemHi{} in scaled error, against up to
 \rqCostLgbItemHi{} for LightGBM; without the item label LightGBM loses less but is
 still less accurate on \rqWmBeatsNoid{} of \rqNoidSets{} data sets. M5's settings did worse on Favorita than Favorita's own,

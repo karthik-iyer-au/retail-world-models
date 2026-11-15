@@ -196,7 +196,8 @@ these data no single model was the most accurate at every grain. One forecast
 made item by store and summed upward, as the equal-weight average of a tuned
 world model and tuned gradient-boosted trees, was the most accurate of the two
 models and their average at store grain and above on \rqAvgBestCoarseWord{} of \rqNineWord{} data sets and at the item levels on all
-\rqAvgBestItemWord{}, on the fast lines and on the slow tail. The combination held across grains, but the choice of model changed for items
+\rqAvgBestItemWord{}, on the fast lines and on the slow tail. On the periods every final run held out it was the most
+accurate on \hoAvgBest{} of \hoSets{} data sets and never the least accurate: the safe choice. The combination held across grains, but the choice of model changed for items
 absent from training: there the world model alone was more accurate than the
 average on every data set tested, because LightGBM with the item label
 under-forecast them; without the label LightGBM came closer but was still less

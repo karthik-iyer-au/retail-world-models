@@ -54,6 +54,10 @@ def main():
         rows.append(f"{name} & {cells} & {rc} & {int((al.hi < 0).sum())} / {int((al.lo > 0).sum())} & "
                     f"{int((aw.hi < 0).sum())} / {int((aw.lo > 0).sum())} \\\\")
     n = len(rows)
+    lgb_best = sum(held.loc[k].idxmin() == "lightgbm" for k in NAMES if k in held.index)
+    wm_best = sum(held.loc[k].idxmin() == "world_model" for k in NAMES if k in held.index)
+    avg_worst = sum(held.loc[k].idxmax() == "average" for k in NAMES if k in held.index)
+    v.update(hoLgbBest=WORDS[lgb_best], hoWmBest=WORDS[wm_best], hoAvgWorst=WORDS[avg_worst])
     v.update(hoSets=WORDS[n], hoAvgBest=WORDS[avg_best], hoAvgBeatsLgb=WORDS[avg_beats_lgb],
              hoAvgBeatsWm=WORDS[avg_beats_wm], hoOrderSame=WORDS[order_same])
     if "m5" in comp.index:

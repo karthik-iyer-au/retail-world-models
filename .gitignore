@@ -39,3 +39,4 @@ results/pooled/*/*
 !results/kinds/
 !results/audit/
 !results/history/
+!results/heldout/

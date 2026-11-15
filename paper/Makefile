@@ -47,6 +47,7 @@ tables:
 	cd .. && $(PY) scripts/make_kinds_table.py
 	cd .. && $(PY) scripts/make_partner_values.py
 	cd .. && $(PY) scripts/make_history_table.py
+	cd .. && $(PY) scripts/make_heldout_table.py
 
 # Three passes: the second resolves labels and reflows floats, the third
 # settles references that moved.

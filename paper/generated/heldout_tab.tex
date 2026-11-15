@@ -1,0 +1,26 @@
+\begin{table*}[t]
+\centering
+\caption{\textbf{The periods every final run held out.} WRMSSE, mean over
+levels and the held-out windows (three of 8 weeks on Dominick's and Frat, three of 28 days on M5), each window trained on
+the history before it, beside the same models on the paper's rolling windows. Avg against LGB, Avg against WM:
+comparisons (levels and windows) where the average is clearly more / less accurate (paired item bootstrap). Bold: lowest
+on the held-out windows. Favorita held nothing out. Planned 15 November 2026, after the other results.}
+\label{tab:heldout}
+\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccccccrr}
+\toprule
+ & \multicolumn{3}{c}{Held-out periods} & \multicolumn{3}{c}{Rolling windows} & & \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+Data set & WM & LGB & Avg & WM & LGB & Avg & Avg vs LGB & Avg vs WM \\
+\midrule
+Analgesics & \textbf{0.714} & 0.768 & 0.726 & 0.699 & 0.702 & 0.687 & 7 / 0 & 2 / 0 \\
+Bottled juice & 0.983 & \textbf{0.934} & 0.943 & 0.575 & 0.581 & 0.551 & 4 / 0 & 6 / 1 \\
+Cheese & 0.840 & \textbf{0.726} & 0.761 & 0.502 & 0.532 & 0.477 & 2 / 2 & 10 / 0 \\
+Frozen entrees & 0.460 & 0.460 & \textbf{0.447} & 0.357 & 0.338 & 0.332 & 6 / 2 & 7 / 0 \\
+Soft drinks & \textbf{0.698} & 0.776 & 0.718 & 0.705 & 0.680 & 0.650 & 8 / 0 & 4 / 2 \\
+Snack crackers & 0.713 & \textbf{0.557} & 0.593 & 0.893 & 0.778 & 0.790 & 0 / 4 & 10 / 0 \\
+Frat & 0.487 & 0.460 & \textbf{0.444} & 0.490 & 0.494 & 0.469 & 3 / 0 & 10 / 0 \\
+M5 & 0.595 & 0.618 & \textbf{0.587} & 0.709 & 0.697 & 0.658 & 28 / 0 & 10 / 6 \\
+\bottomrule
+\end{tabular}
+\end{table*}

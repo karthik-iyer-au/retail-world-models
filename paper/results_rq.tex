@@ -44,6 +44,26 @@ for the average.
 
 \input{generated/rq_tab_grain}
 
+\paragraph{The held-out periods (added in \thisrev{})}
+\textbf{On the periods every final run held out, the average is the safe choice
+rather than the most accurate one: it is never the least accurate of the three,
+but it is the most accurate on only \hoAvgBest{} of \hoSets{} data sets.} Each
+final model was scored once more, after every other result, on the last 24 weeks
+of each Dominick's category and of Frat and the last 84 days of M5, which no
+search, setting or result had touched (Table~\ref{tab:heldout}). LightGBM is the
+most accurate on \hoLgbBest{} data sets and the world model on \hoWmBest{}; the
+order of the three matches the rolling windows on \hoOrderSame{}. In paired
+comparisons the average is clearly more accurate than LightGBM more often than
+clearly less on \hoAvgBeatsLgb{} data sets, and than the world model on
+\hoAvgBeatsWm. Errors are higher in the held-out periods on most Dominick's
+categories than on the rolling windows. On M5's final 28 days, the competition's
+evaluation period, LightGBM scores \hoMfiveFinalLGB{}, the average
+\hoMfiveFinalAvg{} and the world model \hoMfiveFinalWM. A retailer choosing one
+forecast for periods it has not seen gains most from the average's never losing
+badly, not from its being best.
+
+\input{generated/heldout_tab}
+
 \subsection{RQ2: nature of the line}
 \label{sec:rq-lines}
 
@@ -209,7 +229,9 @@ gradient-boosted trees, and sum it to every grain; for an item the models have
 not been trained on, use the world model alone until they are retrained with
 it.} On the data sets studied, the average is the most accurate of the two tuned
 models and their average at store grain and above on \rqAvgBestCoarseWord{} of \rqNineWord{} data sets, at the item levels on all \rqAvgBestItemWord{}, and
-on the fast lines and the slow tail on \rqAvgBestFast{} of \rqNineWord{}. The two models on their own
+on the fast lines and the slow tail on \rqAvgBestFast{} of \rqNineWord{}. On the periods every final run held out it is
+the most accurate on only \hoAvgBest{} of \hoSets{} data sets but never the least accurate, so it is the safe choice
+rather than the best one everywhere. The two models on their own
 are close on items they were trained on; they part company on items they were
 not, where LightGBM under-forecasts and the world model does not. The trigger
 for the exception is one a merchant always knows: whether the item is new to the
