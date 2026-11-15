@@ -40,7 +40,7 @@ Choosing for another retailer & Any & Rerun the comparison & The order of models
 \end{tabular}
 \end{table*}
 
-\paragraph{Why the average works}
+\paragraph{Why the average is more accurate}
 The two tuned models are close in accuracy and wrong in different places. Across
 the nine data sets, each is clearly more accurate than the other in a similar
 number of paired comparisons (\rqPWmLgbBetter{} for the world model, \rqPWmLgbWorse{} for LightGBM), and the
@@ -65,7 +65,7 @@ still behind the world model on the kept-out items on \rqWmBeatsNoid{} of \rqNoi
 promotion block closer to actual sales than LightGBM's on M5, Favorita and soft
 drinks.
 
-\paragraph{What the trees bring}
+\paragraph{What LightGBM adds to the average}
 LightGBM is the more accurate of the two on frozen entrees and snacks at every
 grain, and its block totals are closer than the world model's on every
 Dominick's category but soft drinks.
@@ -88,8 +88,7 @@ level above the item.
 The searches behind the tuned settings took \computeSearchHours{} hours of run time
 across the nine data sets (Section~\ref{sec:repro}), a one-off cost. In the one transfer
 between retailers tested, settings tuned on M5 were less accurate on Favorita than Favorita's own
-(Section~\ref{sec:rq-transfer}), so a retailer may not need to repeat the search; one transfer
-does not establish that, and a retailer should check it on its own data.
+(Section~\ref{sec:rq-transfer}), so a retailer should run the search on its own data.
 
 % =====================================================================
 \section{Limitations and threats to validity}

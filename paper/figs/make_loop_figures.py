@@ -260,6 +260,20 @@ def main():
 
 
 
+# plain names for the changes a search kept, from what each does (scripts/make_research_specs.py, make_loss_round.py,
+# make_hybrid_round.py); fresh reader, 15 November 2026: no code names in tables
+PLAIN = {
+    "batch_half": "half the batch", "feature_fraction_0.8": "80% of features per tree", "feedback": "each period's sales fed into the next",
+    "hurdle_nb_item_spread": "hurdle negative binomial, spread by item", "jepa_hybrid_long": "long JEPA pretraining",
+    "latent_overshooting": "latent check over seven steps", "learning_rate_double": "double the learning rate",
+    "learning_rate_half": "half the learning rate", "longer_windows": "a longer rolling window",
+    "lr_double": "double the learning rate", "max_bin_255": "255 bins per feature",
+    "min_data_in_leaf_4x": "four times the data per leaf", "negative_binomial_item_spread": "negative binomial, spread by item",
+    "num_leaves_4x": "four times the leaves", "num_leaves_quarter": "a quarter of the leaves",
+    "objective_poisson": "Poisson objective", "rounds_double": "double the rounds", "total_weight_0.1": "loss on the summed total, weight 0.1",
+    "more_lags": "two more lags", "volume_weight_0.25": "loss weighted by item level to the power 0.25",
+}
+
 def final_end(names):
     """The 'end' row of the final settings: the last round that kept a change (Favorita's last round ran in parallel
     from earlier settings and kept nothing; fresh reader, 15 November 2026), else the last round."""
@@ -290,7 +304,7 @@ def write_table():
             fin = (f"{end['score']:.3f} & {end['held_out']:.3f}" if end else r"\multicolumn{2}{c}{running}")
             lines.append(f"{TITLE[d] if model == 'World model' else ''} & {model} & {tries} & {st['keep_bar']:.3f} & "
                          f"{st['score']:.3f} & {st['held_out']:.3f} & {fin} & "
-                         + (", ".join(k.replace('_', ' ') for k in kept) or "nothing") + r" \\")
+                         + (", ".join(PLAIN.get(k, k.replace('_', ' ')) for k in kept) or "nothing") + r" \\")
         lines.append(r"\addlinespace[2pt]")
     lines += [r"\bottomrule", r"\end{tabular}", r"\end{table*}"]
     out = ROOT / "paper" / "generated" / "tab_loop.tex"

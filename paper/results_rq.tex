@@ -118,7 +118,7 @@ unchanged (Table~\ref{tab:rq-noid}). Its cost of not training on the items falls
 kept-out items the world model is still clearly more accurate on \rqWmBeatsNoid{} of
 \rqNoidSets{} data sets and level on \rqWmNoidLevelSets{}; LightGBM without the label is clearly more
 accurate on \rqNoidBeatsWm{}. Without the label, LightGBM is less accurate on the same items
-when it is trained on them, on \rqNoidSeenWorse{} of \rqNoidSets{} data sets. So LightGBM has to choose: with
+when it is trained on them, on \rqNoidSeenWorse{} of \rqNoidSets{} data sets. LightGBM therefore serves one set of items or the other: with
 the label it serves the items it was trained on, without it the items it was not.
 The world model also takes the item label, but it reads each item's recent sales
 into its state, so a label it never saw costs it little and one model serves both.
@@ -171,8 +171,8 @@ data sets and LightGBM on \supPertPlanHelpsLgb{}; on the Dominick's categories
 and Frat, price and the promotion flag carry it, and events, SNAP days and
 paydays change the error by at most \sfCalendarMax{}
 (Section~\ref{sec:sup-plan}). The forecast ranges, built from each model's
-errors in earlier windows, hold about what they state item by store and are too
-narrow at the store; on the continuous ranked probability score the average is
+errors in earlier windows, hold their stated coverage item by store on average over
+the data sets and are too narrow at the store; on the continuous ranked probability score the average is
 the most accurate item by store on \sfCrpsAvgBestIxs{} of \rqNineWord{} data
 sets. None of the models forecasts the chance of selling nothing better than
 each series' own past share of zero-sale periods, except on
@@ -193,8 +193,8 @@ not, where LightGBM under-forecasts and the world model does not. The trigger
 for the exception is one a merchant always knows: whether the item is new to the
 range. In the one transfer between retailers tested, M5's settings were
 less accurate on Favorita than Favorita's own, and training on other data sets did not help. Where the forecast is used only for store
-orders, adding TimesFM given the plan as a third member makes item-by-store
-forecasts a little more accurate (Section~\ref{sec:sup-ablation}), at the cost of
+orders, adding TimesFM given the plan as a third member lowers the item-by-store
+error on \ptThreeBelowAvg{} of the nine data sets (Section~\ref{sec:sup-ablation}), at the cost of
 a third model to run.
 
 Two parts of this rule were reached differently, and the difference matters to

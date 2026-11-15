@@ -142,8 +142,8 @@ next on \supPersistRiseSets{} of the \supPersistSets{} data sets where it can be
 period runs from \supPersistTwoLo\% to +\supPersistTwoHi\% of the forecast
 without them), where shoppers who stocked up would buy less; the dip
 after a promotion is not in the forecast, as in the \firstver{}. The state
-rolled through the window predicts sales after it only a little better than the
-state before it (an $R^2$ gain of \supProbeGainMin{} to \supProbeGainMax{}).
+rolled through the window predicts sales after it with an $R^2$ only
+\supProbeGainMin{} to \supProbeGainMax{} higher than the state before it.
 
 \input{generated/sup_tab_mechanism}
 
@@ -211,7 +211,7 @@ curve is read at the midpoint of the shares strictly below and at or below each
 quantile. At the total, \sfRelTenTotWm\% of actuals fall below the world model's
 10th percentile and \sfRelNinetyTotWm\% below its 90th; for LightGBM the shares
 are \sfRelTenTotLgb\% and \sfRelNinetyTotLgb\%. The ranges at the total lie
-close to the diagonal with the upper tail a little short; item by store the
+close to the diagonal with the upper tail short; item by store the
 upper tail is shorter, with \sfRelNinetyAvg\% of actuals below the 90th
 percentile.
 On the continuous ranked probability score (CRPS), which scores the whole

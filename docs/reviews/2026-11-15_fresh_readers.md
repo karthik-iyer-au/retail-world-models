@@ -35,7 +35,7 @@ T = text fix, no compute. C = needs compute (Karthik decides). D = done.
 22. T. "First version / this revision" framing; references to GitHub instead of papers.
 23. T. Licence: PolyForm Noncommercial for code and CC BY-NC text conflict with the paper's advice and with Elsevier.
 24. Part done (references ragged-right, no letter-spaced URLs; code paths break only at / and _; code URL wraps); open: floats far from their text, Figure 5 label size. Layout: URL breaks, letter-spaced URLs, orphan reference, split path, floats far from text, tiny labels.
-25. T. Style: hedges, clever headings, code names in tables, inconsistent terms, unexplained jargon.
+25. Part done (clever headings and hedges replaced; plain names for kept changes in the search table); open: Figure 5 labels, inconsistent terms, jargon in the abstract. Style: hedges, clever headings, code names in tables, inconsistent terms, unexplained jargon.
 
 ## Paper 2 (25 items)
 1. T. Contradiction: audits "the companion paper's final models" vs "Dominick's final world models are refits".
