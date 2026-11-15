@@ -63,6 +63,12 @@ def main():
             v[f"hist{t}YearsShort"], v[f"hist{t}YearsLong"] = str(years(lens[0])), str(years(lens[-1]))
     v["histDomTrendLo"] = f"{min(trend[k] for k in dom):+.3f}".replace("-", "$-$")
     v["histDomTrendHi"] = f"{max(trend[k] for k in dom):+.3f}".replace("-", "$-$")
+    # data sets where the world model is ahead of LightGBM with the least and with the most history
+    short = [over.loc[k].loc[min(over.loc[k].index, key=years)] for k in NAMES if k in trend]
+    long_ = [over.loc[k].loc[max(over.loc[k].index, key=years)] for k in NAMES if k in trend]
+    v["histAheadShort"] = WORDS[int(sum(r.world_model < r.lightgbm for r in short))]
+    v["histAheadLong"] = WORDS[int(sum(r.world_model < r.lightgbm for r in long_))]
+    v["histSets"] = WORDS[len(short)]
     # where the average stands: lowest of the three at each data set and length
     av = (over.idxmin(axis=1) == "average")
     v["histAvgBest"], v["histCells"] = str(int(av.sum())), str(len(av))
