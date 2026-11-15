@@ -1441,3 +1441,16 @@ and on Dominick's also by deal code: item-by-store RMSSE weighted by revenue ove
 intervals of each model's difference to LightGBM forecasting directly from 1,000 resamples of items
 (scripts/score_long_horizon_promo.py). Reading: if the world model's gap on Dominick's is clearly larger on price-cut
 weeks than on regular weeks, the price response explains it; if not, it does not.
+
+### History-length test: 15 November 2026, 14:40, before it runs (Karthik, 14:26, "okay lets do it")
+Question: does the world model close its gap to LightGBM when it trains on more history? Each data set's final world
+model and final LightGBM, with only the training length changed (scripts/make_history_configs.py): Dominick's six
+categories at 1, 2 and 5 years (52, 104, 260 weeks; the final runs give 3 years), M5 at 1 and 4 years (365, 1,460 days;
+the final runs give 2), Favorita at 1, 2 and 4 years on data loaded from 1 January 2013 (its promotion flag is missing
+before April 2014 and is set to off, as the loader already does). Windows, settings and copies as in the final runs:
+Dominick's six 8-week windows, M5 and Favorita four 28-day windows. Where a category's data starts too late for the full
+length, the model uses what there is; the length used is reported. 46 runs.
+Scored as the paper scores (WRMSSE at every level, paired item bootstrap), world model against LightGBM at each length.
+Reading, fixed now: years of history help the world model if its gap to LightGBM shrinks as the length grows on
+Dominick's; observations per series help if the gap shrinks with length only on the daily data sets (M5, Favorita); if
+the gap does not shrink anywhere, neither does. Cost estimate US$30 to US$60; stop and tell Karthik at US$60.
