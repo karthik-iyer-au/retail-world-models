@@ -38,31 +38,55 @@ T = text fix, no compute. C = needs compute (Karthik decides). D = done.
 25. Part done (clever headings and hedges replaced; plain names for kept changes in the search table); open: Figure 5 labels, inconsistent terms, jargon in the abstract. Style: hedges, clever headings, code names in tables, inconsistent terms, unexplained jargon.
 
 ## Paper 2 (25 items)
-1. T. Contradiction: audits "the companion paper's final models" vs "Dominick's final world models are refits".
-2. T. Two definitions of the regular price; this drives every C1 failure.
-3. C/T. C1 under the model's own plan is inferred for the earlier audit, not rescored.
-4. T. C2 dismissed as evidence, then used as evidence.
-5. T. C7 pooled-slope rule was added after results but labelled as fixed in advance.
-6. T. C7 and C8 have no rule fixed in advance; Table 1 lists only C1 to C6.
-7. T. Known-answer analogy does not hold for LightGBM.
-8. T. C1 "as amended" refers to no amendment.
-9. T. Post-hoc analyses unlabelled (703-configuration test, 14-model analysis, pooled slope in Table 3).
-10. T. Mixed aggregation (data-set means vs window shares) all called "% of windows".
-11. T. Ranges that cannot match the pass rates (C3, C6): level not stated.
-12. T. Sign counts disagree (24 vs 25 of 38).
-13. T. Table 7 caption wrong for four rows; zero-width intervals unexplained.
-14. T. Interval width: "wide" vs "far too narrow".
-15. T. Headlines and captions overclaim (including "causal validity" in the title).
-16. T. Ratios quoted that are in no table.
-17. T. Per-lever numbers hard to trace.
-18. T. Inconsistent definitions (additive vs multiplicative lift, "model version", C4 per item vs per item-week).
-19. T. Three vs five copies.
-20. T. The October audit takes three pages despite "stays in the record"; two near-identical figures disagree.
-21. T. Terms undefined for outside readers.
-22. T. Missing and inconsistent references.
-23. T. Layout (URL overrun, double periods, hyphen minus, legend overlap).
-24. T. Hedges.
-25. T. Clever headings; abstract about 450 words.
+Commits for all Paper 2 items: 0491e42, 2f47003, f50d681, 743afde (PDF 22 pages, abstract 249 words).
+1. D. C1 to C6 and C8 read the saved final runs paper 1 reports (results/analysis_tuned/runs.csv lists the same run
+   folders); C6 uses a refitted tuned LightGBM and C7 refits the final settings up to each episode. Abstract, 5, 7 and
+   11 say this; the stale "refits, measured by C3" paragraph (13 October) is replaced.
+2. D. One regular price for the audit (highest of the last 12 training periods, else the planned price; rwm.audit.lifts);
+   the model's own rule (state_model: recorded or held price, else the 12-period highest, else mean price, else 1.0)
+   is stated in 8 and 11 as different, and as the cause of C1 failures under the audit's plan.
+3. D (text). Coordinator's change applied: the earlier audit's own-plan pass counts (6 of 540, 272 of 362) are removed
+   from abstract, introduction, Table 5 caption and conclusion; 8 says once that own-plan C1 was measured only for the
+   tuned models (7) and not rescored for the earlier versions, and that "all 796 failures have a difference" is weak
+   evidence when plans differ in 896 of 933. No rescoring run (C, Karthik decides).
+4. D. C2 reported but not used as evidence everywhere (3.2, 7, 8, Table 4 caption); removed from abstract; stays in the
+   main-test count as fixed in advance (said in 3.2).
+5. D. Pooled C7 slope labelled exploratory and added after the robustness results (3.2, 6.2, 7, 8, Figure 3, 10, 12
+   captions, abstract); Table 3 caption says the pooled slope itself was in the plan of 13 October.
+6. D. Table 1 now lists C7 and C8 without a pass rule; caption, abstract and Contribution 1 say six checks have one.
+7. D. Analogy removed (8); 7 and 9 say the known-answer pattern (only the world model overstated) is not reproduced.
+8. D. Appendix B lists all eight dated plan entries, with 17 and 18 October marked as after the results; Table 4
+   says own-plan C1 was defined 18 October after the earlier results and fixed for the tuned audit 13 November.
+9. D. 703-configuration test (abstract, 7), 14-model analysis (4) labelled; Table 3 caption explains.
+10. D. 7 now gives pooled window counts and shares from new macros (C1 5 of 48, C2 39 of 48, C3 41 of 44, C5 36 of
+    48, C6 18 of 48; paper2/figs/tuned.py); C4 stated as a mean over windows; table gives per-data-set shares.
+11. D. C3 and C6 ranges stated as ranges of per-data-set means.
+12. D. 6.3 says 63% of the 38 episodes; 8 explains the 25 (re-estimated over the model's forecast weeks, which start up
+    to three weeks before the detected start; results/paper2/summary/zones.csv).
+13. D. Table 7 caption gives both reasons for not scoring and explains zero-width intervals (one control, or no
+    comparison weeks).
+14. D. "wide by construction" and "wide and approximately calibrated" replaced by "too narrow".
+15. D. Headings and captions corrected (4.2 heading, Figure 5, abstract, C8 wording, 7 causal sentence). Title left;
+    LaTeX comment in main.tex proposes "... Faithfulness, Accuracy and Price Response" for Karthik.
+16. D. Table 8 gains promotion and display ratio columns (paper2/figs/known.py), so every quoted ratio is in a table.
+17. D. 0.80 named as seed 1's promotion agreement; C6 0.67 and 0.54 assigned to their worlds; "narrowly" removed.
+18. D. 3.1 states the network multiplies baseline and lift factor and the explanation reports units (b + Lambda);
+    Figure 1 shows "+ lift"; C5 uses "lift factor"; model version defined once (3.3); C4 defined on item-week steps.
+19. D. 4.1 no longer says "average of three"; 5 says five copies except M5 (one).
+20. D. 8 shortened (Figure 13 dropped, text cut), headed as the record; Figures 10, 11, 12 and Tables 5, 6 captions name
+    their audit; 8 says the two audits order the models differently and neither orders them.
+21. D. Encoder, transition, readouts, rolled, held and recorded price defined in 3.1 and 8; store switching and
+    new-item versions removed; Figure 11f lever names in words; known-answer "true lift not zero" defined; C4 rerun
+    sample and its 73% against 49% explained up front.
+22. D. Favorita in data availability; "paper 1" replaced by the companion paper citation; Snack crackers throughout;
+    Appendix B gives dates.
+23. D. xurl added (no overfull box over 1pt); double periods and hyphen minus fixed; equations shortened; repro list
+    uses itemize; Figure 11f legend moved outside the axes.
+24. D. Hedges removed (9, 6.3, 8).
+25. D. Plain headings ("What the known-answer study shows", "Limits of the benchmark", "Single-episode intervals are
+    too narrow", Figure 1 "Explanation of a forecast"); abstract 249 words, findings first.
+Also found: Favorita's C4 (49%) is scored on a price held at 1 in the data, so it does not measure a price response;
+7 now says so.
 
 ## Outside code review (GPT, 15 November)
 1. D. Missing, NaN or duplicate forecasts read as zero: scoring now fails on incomplete forecasts where the data has
