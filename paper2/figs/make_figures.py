@@ -31,9 +31,9 @@ def fig_audit():
     # the explanation in the middle
     ax.add_patch(FancyBboxPatch((7.2, 3.6), 5.6, 2.8, boxstyle="round,pad=0.02,rounding_size=0.25",
                                 facecolor=ACCENT, edgecolor="none"))
-    ax.text(10, 5.75, "One forecast, explained", ha="center", fontsize=8, weight="bold", color="white")
+    ax.text(10, 5.75, "Explanation of a forecast", ha="center", fontsize=8, weight="bold", color="white")
     ax.text(10, 4.9, "baseline (nothing planned)", ha="center", fontsize=6.6, color="white")
-    ax.text(10, 4.35, "× lift: promotion, price, display, ...", ha="center", fontsize=6.6, color="white")
+    ax.text(10, 4.35, "+ lift: promotion, price, display, ...", ha="center", fontsize=6.6, color="white")
     groups = [
         (0.2, 6.3, "Against the model itself", ["C1  holds by construction", "C2  changes when weights are randomised",
                                                  "C3  same across seeds", "C8  plan readable from the state"]),

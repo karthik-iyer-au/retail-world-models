@@ -1,80 +1,75 @@
 \section{Discussion}
 \label{sec:discussion}
 
-\paragraph{The explanation was faithful but wrong in size and in kind}
+\paragraph{What the known-answer study shows}
 The world model's explanation is faithful by construction: the baseline does not
 move with the plan, the lift is zero when nothing is planned, and the two add up
 to the forecast. In the known-answer study that explanation was right about what
 each lever adds when plans were made at random, and wrong in two ways that no
 check against the model could see. When merchants plan into strong weeks, the
-lifts are a third too large, because the data tie the plan to demand the model
-cannot see. And asked about a change in the regular price, the model answers
-with the response to a temporary cut, about five to six and a half times the
-truth. Molecular
-attributions in MolSanity~\cite{molsanity} came apart from the truth for a
-similar reason: a model can be faithful to what it learned and what it learned
-can be wrong.
+lifts are \kaCoWmBiasLo{} to \kaCoWmBiasHi{} times the truth, because the data
+tie the plan to demand the model cannot see. And asked about a change in the
+regular price, the model states a response near the temporary-cut elasticity,
+\kaClWmTimesLo{} to \kaCoWmTimesHi{} times the truth. Molecular attributions in
+MolSanity~\cite{molsanity} came apart from the truth for a similar reason: a
+model can be faithful to what it learned and what it learned can be wrong.
 
 \paragraph{What this means for a merchant reading a lift}
 In the known-answer study, a lift read from a model fitted to the store's own
-history inherited its planning habits. If promotions go into weeks that would sell well
-anyway, the model's promotion lift overstates what the promotion adds, and an
-accurate forecast is no protection: in the known-answer study the correct
-world-model seeds and LightGBM forecast better when plans followed demand than
-when they were made at random. The check against what sold, the
-one most often run in practice, agrees with the overstated lift for the same
-reason. Two things help. Agreement between models fitted to the same data
-should not be read as confirmation. And a model's answer to a question it was
-not trained on, here a lasting change in the regular price from a model that
-mostly saw temporary cuts, should be checked against a measured response before
-it is used to set prices.
+history inherited its planning habits. If promotions go into weeks that would
+sell well anyway, the model's promotion lift overstates what the promotion adds,
+and an accurate forecast is no protection: the correct world-model seeds and
+LightGBM forecast better when plans followed demand than when they were made at
+random. The check against what sold, the one most often run in practice, agrees
+with the overstated lift for the same reason. Two things follow. Agreement
+between models fitted to the same data is not confirmation. And a model's
+answer to a question it was not trained on, here a lasting change in the
+regular price from a model that mostly saw temporary cuts, needs checking
+against a measured response before it is used to set prices.
 
 \paragraph{Which checks to run}
 The known-answer study ranks the checks. The price-direction check (C4) is cheap
 and caught every model blind to price, though it also flags LightGBM, whose
-response to price comes in steps. Per-lever agreement with a second model,
-an exploratory comparison, caught lifts given to the wrong lever, which every
-check on the total lift missed. Construction (C1) and seed stability (C3) are worth confirming once.
-The check against what sold (C5) and agreement with LightGBM on the total lift
-(C6) confirm agreement, not correctness. Randomisation (C2), the standard sanity
-check for attributions~\cite{adebayo2018}, does not test an explanation built
-into the model: re-initialising every part left the lifts' ranking largely in
-place. A version on the lift as a share of the baseline, or within planned weeks
-only, may work; we did not test it. A measured cause (C7) is the only check that
-found the regular-price error, though with six spells it could not tell a
-missing price response from a correct one. We expect that a measured promotion
-effect would be needed to find the bias from planning into strong weeks; we did
-not test this, and public retail data offer none.
+response to price comes in steps. Per-lever agreement with a second model, an
+exploratory comparison, caught lifts given to the wrong lever, which every
+check on the total lift missed. Construction (C1) and seed stability (C3) are
+worth confirming once. The check against what sold (C5) and agreement with
+LightGBM on the total lift (C6) confirm agreement, not correctness.
+Randomisation (C2), the standard sanity check for
+attributions~\cite{adebayo2018}, does not test an explanation built into the
+model: re-initialising every part left the lifts' ranking largely in place.
+Versions of C2 on the lift as a share of the baseline, or within planned weeks
+only, were not tested. A measured cause (C7) is the only check that found the
+regular-price error, though with six spells it could not tell a missing price
+response from a correct one. No check in this study finds the bias from
+planning into strong weeks; a measured promotion effect, which public retail
+data do not offer, was not tested.
 
 \paragraph{Measured causes on public data are scarce and noisy}
 Dominick's zone price deviations give a pooled 8-week response close to a
-placebo at false dates and a full-spell response in line with the chain's own
-experiments; single episodes are noise, intervals
-clustered by a handful of stores are far too narrow, and prices start moving
-before the detector sees them. A retailer running its own tests would do better
-with the design under its control: stores assigned at random, a known start
-date, and enough stores per arm for honest intervals.
+placebo at false dates and a full-episode response in line with the chain's
+own experiments; intervals clustered by a handful of stores are far too narrow,
+and prices start moving before the detector sees them. A retailer running its
+own tests would do better with the design under its control: stores assigned at
+random, a known start date, and enough stores per arm for honest intervals.
 
-\paragraph{The audit of the saved versions}
-The real versions behaved like the known-answer models in the two ways that
-matter most. Checks against the model and against another model were not
-shown to track whether the lift is right, and the one comparison with a
-measured cause found both models stating a larger price response than the
-measured one, as the known-answer world model did, though the measured interval
-is wide. The real versions also showed two things the generated data did not.
-First, the lift was not zero when the audit planned nothing on most Dominick's
-and Frat versions. Every such violation traces to series and periods where the
-audit's plan differs from the model's own; under the model's own plan the lift
-is zero. Part of the difference is the regular-price rule a configuration
-chose; the rest is a fault in the baseline: for an item with no recent price the
-model computes its baseline at the item's mean price, or at a price of 1.0,
-which no merchant would call nothing planned. An audit has to read the model's
-own definition of nothing planned, and check it, before C1 means anything.
-Second, the price-direction check failed on most Dominick's and M5 versions
-because their forecasts fall after a deeper cut in about half the item-weeks or
-more, a fault no accuracy score revealed and one a merchant setting prices from
-the model would meet directly. Across versions, passing more checks did not
-clearly go with forecasting better. For a retailer this means two separate
+\paragraph{The audits of the companion paper's models}
+On the final tuned world models, the explanations add up under each model's own
+plan for nothing planned on every window, the copies agree, and the state
+carries the plan. Two results matter to a merchant. First, on Dominick's
+and M5 a deeper cut can lower the forecast, a fault no accuracy score
+revealed and one a merchant setting prices from the model would meet directly;
+the earlier audit found the same on Dominick's and M5. Second, both the world
+model and LightGBM state about twice the measured response to the zone price
+deviations. In the known-answer study only the world model overstated this
+response, so the real data do not reproduce that pattern, and the measured
+interval is too wide to say which model is closer. The earlier audit also showed
+that C1 under the audit's plan measures the distance between two definitions of
+nothing planned, and that for an item with no recent price the model computes
+its baseline at its mean price or at 1.0, which no merchant would call nothing
+planned. An audit has to read the model's own definition of nothing planned,
+and check it, before C1 means anything. Across the searches' versions, passing
+more checks was not related to accuracy. For a retailer this means two separate
 tests: an accuracy comparison to choose the forecast, and checks of the
 explanation, with a price-direction test and a measured cause among them,
 before its lifts are used to plan.
@@ -87,17 +82,17 @@ and in agreement with sales and with another model, and still be wrong about
 what a plan causes. In generated store data with known effects, the checks that
 compare an explanation with the model, the data or another model caught a model
 blind to price and, compared lever by lever, lifts given to the wrong lever.
-They did not catch lifts inflated by planning into strong weeks, or a model that
-answers a question about the regular price with the response to a temporary
+They did not catch lifts inflated by planning into strong weeks, or a model
+whose response to a regular price change is near its response to a temporary
 cut. Only a measured cause found the second. On public retail data the one such
-cause we could measure, Dominick's zone price deviations, gives a pooled response
-near the chain's experiments over the full spell, but imprecise, and its 8-week estimate is close to a placebo at false dates, so on public data the comparison is descriptive.
-In the audit of \rVersions{} saved versions on public data, no version passed
-every check on M5, and on Dominick's only \cIfAllOwnD{} of \cIfWinD{}
-version-windows did once C1 failures of the audit's interface were set aside, both the world model and LightGBM stated about
-twice the measured response to a regular price change (the measured interval is
-wide and overlaps both), and, among configurations compared on the same data
-and window, the number of checks passed was not clearly related to how well
-they forecast. On these
-models and data sets, an accurate forecast was not evidence of a correct
-explanation, and the explanation has to be tested on its own.
+cause we could measure, Dominick's zone price deviations, gives a pooled
+response near the chain's experiments over the full episode, but its 8-week
+estimate is close to a placebo at false dates, so on public data the comparison
+is descriptive. The final tuned world models of the companion paper add up
+under their own plan for nothing planned on every window, but on most data sets
+a deeper cut can lower their forecast, and both they and LightGBM state about
+twice the measured response to a regular price change. Across the
+configurations the settings searches tried, the number of checks passed was not
+related to how well they forecast. On these models and data sets, an accurate
+forecast was not evidence of a correct explanation, and the explanation has to
+be tested on its own.

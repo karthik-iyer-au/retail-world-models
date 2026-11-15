@@ -197,10 +197,12 @@ def fig_real_checks(d, st, ag, out: Path):
                     g.scatter(x, k + off + rng.uniform(-0.06, 0.06, len(x)), s=8, marker=mk,
                               color=ACCENT if kind == "onoff" else MUTED, alpha=0.8, lw=0)
         g.set_yticks(range(len(levers)))
-        g.set_yticklabels(levers, fontsize=6.4)
+        names = {"promo": "promotion", "price": "price", "display": "display", "feature": "feature",
+                 "tpr_only": "tag-only price cut", "event": "event day", "snap": "SNAP day"}
+        g.set_yticklabels([names.get(lv, lv) for lv in levers], fontsize=6.4)
         g.scatter([], [], marker="o", color=ACCENT, s=8, label="on/off")
         g.scatter([], [], marker="s", color=MUTED, s=8, label="TreeSHAP")
-        g.legend(fontsize=5.8, loc="lower left")
+        g.legend(fontsize=5.8, loc="upper left", bbox_to_anchor=(1.0, 1.0), frameon=False, handletextpad=0.2)
     g.axvline(0.5, color=INK, lw=0.7, ls=(0, (3, 2)))
     g.set_xlabel("Rank agreement with LightGBM")
     g.set_title("C6 Against LightGBM")

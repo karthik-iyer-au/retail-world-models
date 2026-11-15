@@ -9,13 +9,13 @@ a correct one is shown in the known-answer study, where the truth is known. On
 Dominick's the benchmark is too noisy to establish even that, and comparing the
 models with it is descriptive. It measures the response
 of a store's category units to a sustained change in its regular prices. It says nothing directly about promotions,
-displays or temporary cuts, or about M5 and Frat, where no such variation is used. A model can be right about regular prices and wrong about
+displays or temporary cuts, or about M5, Frat and Favorita, where no such variation is used. A model can be right about regular prices and wrong about
 promotions; the known-answer study shows how far the other checks go in
 covering the rest.
 
 \paragraph{The deviations are inferred}
 The public files do not mark the experimental stores or weeks. Some deviations
-may be zone moves made for other reasons, and a store moved for a reason that
+can be zone moves made for other reasons, and a store moved for a reason that
 also moves its sales would bias $\tau_e$. The event study and the placebo
 address this for trends that start before the price moves; they cannot rule out
 a shock that starts in the same week.
@@ -23,14 +23,15 @@ a shock that starts in the same week.
 \paragraph{Few control stores}
 Zones have few stores, so each scored episode has \zControlsLo{} to
 \zControlsHi{} controls. Intervals clustered
-by store with so few clusters are wide and only approximately calibrated; the
-pooled slope across episodes carries the comparison.
+by store with so few clusters are too narrow (\S\ref{sec:zones}); the pooled
+slope across episodes carries the comparison.
 
 \paragraph{The baseline is a choice}
-Every lift is measured against nothing planned, with the regular price taken
-as the highest of the last 12 periods. A different rule gives different
-baselines and lifts. The rule is the models' own and is applied the same way to
-every model and to the truth in the known-answer study.
+Every lift is measured against nothing planned, with the audit's regular price
+taken as the highest of the last 12 training periods. A different rule gives
+different baselines and lifts. The audit applies its rule the same way to every
+model and to the truth in the known-answer study; each model's own regular
+price can differ from it.
 
 \paragraph{The versions are not a designed sample}
 The audited versions are what the companion paper saved. They share data and
@@ -44,16 +45,21 @@ or versions are the unit. Both are reported.
 The audit builds ``nothing planned'' from the data: levers off, the price at
 the series' highest price over the last 12 training periods, and the planned
 price where the series has no price in those periods. The models build their
-own from their history window and fall back to the series' mean price over that
-window, or to 1.0 where it records no price. C1 under the audit's plan therefore
-measures the distance between two definitions as much as the model; under the
-model's own plan it holds by construction (\S\ref{sec:results}). Neither
+own from their history window: a recorded or held regular price where the
+configuration says so, otherwise the highest price over the last 12 periods,
+falling back to the series' mean price over the window, or to 1.0 where it
+records no price. C1 under the audit's plan therefore measures the distance
+between two definitions as much as the model; under the model's own plan it
+passes on every window of the final tuned models (\S\ref{sec:tuned}) and was not
+scored for the earlier versions (\S\ref{sec:results}). Neither
 definition is the retailer's regular price, which these data do not record.
 
-\paragraph{Refitted versions}
-The Dominick's final world models are refits with unchanged settings, not the
-runs whose scores the companion paper reports; seed-to-seed differences between
-the two are expected and are measured by C3.
+\paragraph{Refits for C6 and C7}
+C1 to C5 and C8 read the saved final models. C6 compares them with LightGBM
+refitted on the same windows, and C7 uses world models and LightGBM fitted
+again with the final settings up to the week before each episode. These refits
+are not the runs whose scores the companion paper reports, and the difference
+between them and those runs was not measured.
 
 \paragraph{The generated world is simpler than retail}
 The known-answer data are multiplicative in the plan, with one shock process

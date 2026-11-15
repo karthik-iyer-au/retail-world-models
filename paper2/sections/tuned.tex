@@ -1,97 +1,123 @@
 \section{The audit of the final tuned world models}
 \label{sec:tuned}
 
-The audit read the world model the companion paper~\cite{rwm} reports for each
-of its \tSets{} data sets: six Dominick's categories, Frat, M5 and Favorita, each
-the average of five copies fitted with different seeds (one copy on M5), with
-one saved model per rolling window, \tWindows{} windows in all. No model was
-refitted or tuned for the audit, and no audit result changed a setting. The
-checks and their thresholds are those fixed before the first audit
-(Table~\ref{tab:thresholds}); Table~\ref{tab:tunedpass} and
-Figure~\ref{fig:tunedchecks} give the results.
+\textbf{The tuned models' explanations add up under each model's own plan for
+nothing planned and carry the plan in their state, but on most data sets a
+deeper price cut can lower the forecast, and both the world model and LightGBM
+state a larger price response than the one measured.}
 
-\textbf{The tuned models' explanations add up, depend on what was learned and
-carry the plan in their state, but on most data sets a deeper price cut can lower
-the forecast, and both models state a larger price response than the one
-measured.}
+The audit read the world model the companion paper~\cite{rwm} reports for each
+of its \tSets{} data sets (six Dominick's categories, Frat, M5 and Favorita),
+with one saved model per rolling window, \tWindows{} windows in all
+(\S\ref{sec:versions}). The checks and their thresholds are those fixed before
+the first audit (Table~\ref{tab:thresholds}); Table~\ref{tab:tunedpass} and
+Figure~\ref{fig:tunedchecks} give the results. Pass rates below are shares of
+all \tWindows{} windows pooled across data sets, with the count; the table
+gives them by data set.
 
 \begin{table*}[t]\centering
 \caption{\textbf{The explanations add up under the model's own plan on every
-window; C4 fails on every data set but Frat.} Share of windows passing each
-check, \%, for the final tuned world model of each data set. C1 is scored under
-the audit's plan for nothing planned (as fixed) and under the model's own (as
-amended); C3 is the rank agreement of lifts between the model's five copies (n/a
-on M5, whose final model is one copy); C6 the rank agreement of total lift with
-the data set's final tuned LightGBM. Thresholds in Table~\ref{tab:thresholds}.}
+window; C4 fails on every data set but Frat.} Share of each data set's windows
+passing each check, \%, for its final tuned world model. C1 is scored under
+the audit's plan for nothing planned (fixed in advance) and under the model's
+own; scoring under the model's own plan was defined on 18 October, after the
+earlier audit's results, and fixed for this audit on 13 November, before it
+ran (Appendix~\ref{app:plan}). C2 is reported but not used as evidence
+(\S\ref{sec:known}). C3 is the rank agreement of lifts between the model's five
+copies (n/a on M5, whose final model is one copy); C6 the rank agreement of
+total lift with the data set's tuned LightGBM. Thresholds in
+Table~\ref{tab:thresholds}.}
 \label{tab:tunedpass}
 \footnotesize\setlength{\tabcolsep}{6pt}\input{generated/tab_tuned_pass}\end{table*}
 
 \begin{figure*}[t]\centering
 \includegraphics[width=\textwidth]{figs/fig_tuned_checks.pdf}
-\caption{\textbf{The state rolled under the plan carries the plan on every data
-set.} \textbf{(a)} Share of windows passing each check (Table~\ref{tab:tunedpass}).
-\textbf{(b)} C8: how well the plan inputs of each period can be read back from
-the world model's state, from the state before the window and from the state
-rolled forward under the plan (the gain is what the rolled state adds).}
+\caption{\textbf{Final tuned world models: the state rolled through the plan
+carries the plan on every data set.} \textbf{(a)} Share of each data set's
+windows passing each check (Table~\ref{tab:tunedpass}). \textbf{(b)} C8 on
+each model's first window: $R^2$ of a ridge probe reading the plan inputs of a
+period back from the state before the window and from the state rolled through
+the plan, averaged over the inputs (on Favorita, which has no prices, the
+promotion, event and payday flags).}
 \label{fig:tunedchecks}
 \end{figure*}
 
 \paragraph{C1: the parts add up under the model's own plan}
 Under the model's own plan for nothing planned, every window of all \tSets{}
-data sets passes C1. Under the audit's plan, \tCOneMean\% of windows pass; as in
-the earlier audit (Section~\ref{sec:results}), every failure sits where the
-audit's plan differs from the model's own regular price, not in how the parts
-add up.
+data sets passes C1. Under the audit's plan, \tCOneWin{} windows pass
+(\tCOneWinPct\%). The two scorings differ only in the plan for nothing
+planned, so the failures come from the difference between the audit's regular
+price and the model's own, not from how the parts add up. Which series differ
+was not traced for these models; for the earlier versions it was
+(\S\ref{sec:results}).
 
-\paragraph{C2 and C3: the lifts depend on what was learned, and the copies agree}
-Randomising the learned lift readout changes the lifts on \tCTwoMean\% of
-windows (C2). The five copies of each model rank item lifts alike: the rank
-agreement between copies is \tCThreeLo{} to \tCThreeHi{}, and \tCThreeMean\% of
-windows pass C3.
+\paragraph{C2 and C3: randomisation and agreement between copies}
+After the lift readout is re-initialised, the lifts' rank agreement with the
+original falls below 0.5 on \tCTwoWin{} windows (\tCTwoWinPct\%); as the
+known-answer study showed, this does not test a lift built into the model and
+is not used as evidence. The five copies of each model rank item lifts alike:
+the mean rank agreement between copies, averaged over each data set's windows,
+ranges from \tCThreeLo{} to \tCThreeHi{} across data sets, and \tCThreeWin{}
+windows pass C3 (\tCThreeWinPct\%).
 
 \paragraph{C4: on most data sets a deeper cut can lower the forecast}
-C4 fails on every data set but Frat. A deeper price cut lowers the forecast for
-\tCFourDomLo{} to \tCFourDomHi\% of items on the Dominick's categories,
-\tCFourFav\% on Favorita and \tCFourMfive\% on M5, against \tCFourFrat\% on Frat.
-The forecast is accurate on these data sets (paper~1), so this is a fault in how
-the model responds to price depth, not in its forecasts of the plans it saw.
+C4 fails on every data set but Frat. A deeper price cut lowers the forecast in
+\tCFourDomLo\% to \tCFourDomHi\% of item-week steps on the Dominick's
+categories, \tCFourFav\% on Favorita and \tCFourMfive\% on M5, against
+\tCFourFrat\% on Frat (each a mean over the data set's windows). Favorita records no prices and its price
+input is held at 1, so a cut there is a value the model never saw in training,
+and its C4 score does not measure a learned price response. The forecasts
+are accurate on these data sets~\cite{rwm}, so this is a fault in how the model
+responds to the depth of a cut, not in its forecasts of the plans it saw.
 
 \paragraph{C5 and C6: agreement with sales and with LightGBM}
-The forecasts in planned weeks match sales in level and order on \tCFiveMean\%
-of windows (C5); M5 fails, ranking planned weeks with a correlation of
-\tCFiveRankMfive{} against the 0.3 required. The world model and the tuned
-LightGBM agree on which items gain most from the plan with a rank correlation of
-\tCSixLo{} to \tCSixHi{}; \tCSixMean\% of windows reach the 0.5 required (C6).
+The forecasts in planned weeks match sales in level and order on \tCFiveWin{}
+windows (\tCFiveWinPct\%, C5); M5 fails, ranking planned weeks with a
+correlation of \tCFiveRankMfive{} against the 0.3 required. The world model and
+the tuned LightGBM agree on which items gain most from the plan with a mean
+rank correlation, by data set, of \tCSixLo{} to \tCSixHi{}; \tCSixWin{}
+windows reach the 0.5 required (\tCSixWinPct\%, C6).
 
 \paragraph{C7: both models state a larger price response than the one measured}
-On the 38 scored zone episodes (Section~\ref{sec:zones}), the measured pooled
-slope of category units on price is \tSlopeMeas{} (95\% interval \tSlopeMeasLo{}
-to \tSlopeMeasHi{}). The world model states \tSlopeWm{} (\tSlopeWmLo{} to
-\tSlopeWmHi{}) and LightGBM \tSlopeLgb{} (\tSlopeLgbLo{} to \tSlopeLgbHi{})
-(Figure~\ref{fig:tunedc7}). Both state a response about twice the measured one,
-the world model slightly more than LightGBM.
+On the \zScored{} scored zone episodes (\S\ref{sec:zones}), the measured pooled
+slope of category units on price is $\tSlopeMeas$ (95\% interval
+$\tSlopeMeasLo$ to $\tSlopeMeasHi$). The world model states $\tSlopeWm$
+($\tSlopeWmLo$ to $\tSlopeWmHi$) and LightGBM $\tSlopeLgb$ ($\tSlopeLgbLo$ to
+$\tSlopeLgbHi$) (Figure~\ref{fig:tunedc7}), each about twice the measured
+response. This comparison on pooled slopes is exploratory
+(\S\ref{sec:checks}, C7). The two models' intervals overlap each other and the
+measured one, and the measured interval includes zero, so these episodes
+exclude neither model's slope. In the known-answer study only the world model
+overstated the regular-price response; LightGBM stated $\kaClLgbCsevenSlope$
+and $\kaCoLgbCsevenSlope$ against a true $-0.5$. On Dominick's both overstate
+it, and the measured response is too imprecise to say why.
 
 \begin{figure*}[t]\centering
 \includegraphics[width=\textwidth]{figs/fig_tuned_c7.pdf}
-\caption{\textbf{Both tuned models state a larger price response than the one
-measured.} \textbf{(a)} For each scored zone episode, the change in category
-units the world model and LightGBM state for the price deviation, and the change
-measured. \textbf{(b)} Pooled slopes with 95\% intervals.}
+\caption{\textbf{Final tuned models (this section): both state a larger price
+response than the one measured.} \textbf{(a)} For each scored zone episode,
+the change in category units the final tuned world model and LightGBM state for
+the price deviation, and the change measured. \textbf{(b)} Pooled slopes with
+95\% intervals (exploratory). The earlier audit's version of this comparison is
+Figure~\ref{fig:realc7}.}
 \label{fig:tunedc7}
 \end{figure*}
 
 \paragraph{C8: the state carries the plan}
-The plan inputs of each period can be read back from the state rolled forward
-under the plan with $R^2$ of \tReadRolledLo{} to \tReadRolledHi{}, and rolling the
-state forward adds \tReadGainLo{} to \tReadGainHi{} to what the state before the
-window holds (Figure~\ref{fig:tunedchecks}b). The model's state is where it
-keeps the plan, as a world model should.
+On each model's first window, the plan inputs of a period can be read back from
+the state rolled through the plan with a mean $R^2$, by data set, of
+\tReadRolledLo{} to \tReadRolledHi{}, and rolling the state through the plan
+adds \tReadGainLo{} to \tReadGainHi{} to what the state before the window holds
+(Figure~\ref{fig:tunedchecks}b). The state keeps the plan it was given, and
+the forecast and its lift are read from that state.
 
-\paragraph{Checks against accuracy: no link across the searches' versions}
-Across the \tSearchVersions{} model versions the settings searches saved
+\paragraph{Checks against accuracy: no relation across the searches' versions}
+The test was designed on 18 October, after the earlier audit's results, and
+fixed for these versions on 13 November, before they were audited. Across the
+\tSearchVersions{} model versions the settings searches saved
 (\tConfigsAll{} configurations, each scored on the same data and windows as the
 others of its search), the number of checks a configuration passed was not
-related to its accuracy: the pooled rank correlation with item-by-store error is
-\tRhoAll{} (95\% interval \tRhoAllLo{} to \tRhoAllHi{}, $p=\tPAll$), and
-\tRhoNoOneFive{} ($p=\tPNoOneFive$) leaving out C1 and C5. Tuning for accuracy
-did not make the explanations better or worse.
+related to its accuracy: the pooled rank correlation with item-by-store error
+is $\tRhoAll$ (95\% interval $\tRhoAllLo$ to $\tRhoAllHi$, $p=\tPAll$), and
+$\tRhoNoOneFive$ ($p=\tPNoOneFive$) leaving out C1 and C5. The interval
+excludes all but a very weak relation in either direction.

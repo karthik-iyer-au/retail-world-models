@@ -34,61 +34,53 @@ whose explanations pass more checks also forecast better?
 \begin{enumerate}\setlength{\itemsep}{1pt}
 \item A definition of the plan-lift explanation of a forecast that applies to
 any model that reads the plan, and eight checks on it
-(Figure~\ref{fig:audit}), each with a pass rule fixed in advance.
+(Figure~\ref{fig:audit}), six of them (C1 to C6) with a pass rule fixed before
+any result.
 \item A known-answer study: generated store data in which the effect of every
 part of the plan is known, with failures planted on purpose, to measure which
 checks catch which failure before they are trusted on real data.
-\item A noisy observational benchmark on public retail data: \zEpisodes{} spells
-in six Dominick's categories where one store's regular prices sat apart from
-its zone peers, \zScored{} of them scored, with their effect on sales measured
-by difference in differences, an event study, a placebo and a sensitivity
-analysis. Which stores were treated is inferred, prices move before the
-detected start, and a placebo at false dates gives a slope close to the
-estimate, so it is not a ground truth; the causal failure is established in the
-known-answer study.
+\item A noisy observational benchmark on public retail data: \zEpisodes{}
+episodes in six Dominick's categories in which one store's regular prices sat
+apart from its zone peers, \zScored{} of them scored, with their effect on
+sales measured by difference in differences, an event study, a placebo and a
+sensitivity analysis. Which stores were treated is inferred, prices move before
+the detected start, and a placebo at false dates gives a slope close to the
+estimate, so it is not a ground truth.
 \item An audit of the final tuned world model the companion paper reports for
-each of its \tSets{} data sets, against the tuned LightGBM, with the earlier
-audit of every saved development version kept as the record, and the test of
-whether faithful explanations go with accurate forecasts.
+each of its \tSets{} data sets, against the tuned LightGBM, and a test of
+whether explanations that pass more checks go with more accurate forecasts. An
+earlier audit of the companion paper's development versions, made in October
+2026, is kept as a record (\S\ref{sec:results}).
 \end{enumerate}
 
 \paragraph{Findings}
-In generated data with known effects, explanations that pass every check
-against the model, the data and another model can still be wrong in size, when
+In generated data with known effects, explanations that pass the checks against
+the model, the data and another model can still be wrong in size, when
 merchants plan into strong weeks, and wrong in kind, when a model answers a
-question about the regular price with what it learned from temporary cuts.
-The cheap price-direction check and a lever-by-lever comparison with a second
-model catch the cruder failures; the randomisation check does not test an
-explanation built into the model; and only a measured cause finds the error in
-kind (\S\ref{sec:known}). On Dominick's, zone price deviations give a pooled 8-week response close to a
-placebo at false dates, a larger full-spell response whose interval excludes
-zero, and single episodes that are noise: a noisy benchmark, not a ground truth
-(\S\ref{sec:zones}). The final tuned world models (\S\ref{sec:tuned}) pass C1
-under their own plan on every window and carry the plan in their state ($R^2$
-\tReadRolledLo{} to \tReadRolledHi{} read back), but a deeper cut lowers the
-forecast for \tCFourDomLo\% to \tCFourDomHi\% of items on Dominick's, and both they
-and LightGBM state about twice the measured response to the zone price
-deviations. In the earlier audit of the companion paper's \rVersions{} saved
-development versions (\S\ref{sec:results}), no version passed every check on M5, and
-on Dominick's none did with C1 scored as fixed in advance and \cIfAllOwnD{} of
-\cIfWinD{} version-windows did with C1 read against the model's own plan for
-nothing planned; on those data sets a deeper price cut lowered the forecast in about
-half the item-weeks or more; both the world model and LightGBM stated about
-twice the measured response to a regular price change, though the measured
-interval is wide; every failure of the lift to be zero with nothing planned
-sits where the audit's plan for nothing planned differs from the model's own,
-including items whose baseline the models compute at a price no merchant would
-call regular; and, among configurations compared on
-the same data and window, the number of checks passed was not clearly related to
-accuracy; the intervals exclude a strong relation, not a weak one. These are findings
-for these models on these public data sets.
+question about the regular price with a response close to what it learned from
+temporary cuts. The price-direction check and a lever-by-lever comparison with
+a second model catch the cruder failures; the randomisation check does not test
+an explanation built into the model; and only a measured cause finds the error
+in kind (\S\ref{sec:known}). On Dominick's, zone price deviations give a pooled
+8-week response close to a placebo at false dates and a larger full-episode
+response whose interval excludes zero; single episodes carry no usable
+information (\S\ref{sec:zones}). The final tuned world models
+(\S\ref{sec:tuned}) pass C1 under their own plan for nothing planned on every
+window, but a deeper cut lowers the forecast in \tCFourDomLo\% to
+\tCFourDomHi\% of item-week steps on Dominick's, and both they and LightGBM
+state about twice the measured response to the zone price deviations. Across
+the configurations the settings searches tried, the number of checks passed
+was not related to accuracy. These are findings for these models on these
+public data sets.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figs/fig_audit.pdf}
 \caption{\textbf{Each forecast's explanation is checked against the model
-itself, common sense, what sold, another model and a measured cause.} The eight
-checks are fixed in \texttt{docs/PAPER2\_PLAN.md} before any result; every
-model version and every check is reported.}
+itself, common sense, what sold, another model and a measured cause.} The
+explanation is reported in units, baseline plus lift. Pass rules for C1 to C6
+are fixed in \texttt{docs/PAPER2\_PLAN.md} before any result; C7 and C8 are
+reported per model (Table~\ref{tab:thresholds}). Every model version and every
+check is reported.}
 \label{fig:audit}
 \end{figure*}

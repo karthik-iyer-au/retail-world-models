@@ -1,49 +1,31 @@
 \small
 \textbf{Abstract.}
-Retail forecasting models that see the price and promotion plan can explain
-each forecast as a baseline, what would sell with nothing planned, plus the
-lift each part of the plan adds. Merchants read that split as fact and plan on
-it. We set out eight checks on such explanations, fixed in advance: properties
-that hold by construction, sensitivity to randomised weights, stability across
-seeds, price direction, agreement with what sold, agreement with LightGBM, a
-plan read-back, and agreement with a measured cause. In generated store data
-with known effects, a world model whose explanation is built in passes C1 and
-C3 to C6, and its lifts match the truth
-(rank agreement \kaClWmTruth) when plans are made at random. When merchants plan
-into high-demand weeks, it still passes them, forecasts more accurately,
-and overstates the total lift by a third (\kaCoWmBiasLo{} to \kaCoWmBiasHi{}
-times) and the display's by \kaCoWmDispLo{} to \kaCoWmDispHi{} times; LightGBM
-overstates them too, and the two agree. Asked about a lasting change in the
-regular price, the world model answers with the temporary-cut response,
-$\kaClWmCsevenLo$ to $\kaClWmCsevenHi$ against a true $-0.5$, and only the
-measured cause finds it. The price-direction check catches every model blind to
-price but also flags LightGBM; an exploratory lever-by-lever comparison catches
-lifts given to the wrong lever; the randomisation check separates nothing. On
-Dominick's we find \zEpisodes{} spells in which a store's regular prices sat
-apart from its zone peers, most between April 1993 and April 1994. Over the
-\zScored{} scored spells, prices \zSizeLo\% to \zSizeHi\% off their peers, the
-pooled effect on category units is $\zSlope$ over eight weeks (95\% interval
-$\zSlopeLo$ to $\zSlopeHi$) and $\zFullSlope$ over the full spell ($\zFullLo$ to
-$\zFullHi$), in line with the elasticity near $-0.3$ the chain's experiments
-implied. This is a noisy observational benchmark, not a ground truth: the
-treated stores are inferred, prices move before the detected start, and a
-placebo at false start dates gives $\zPlaceboSlope$ ($\zPlaceboLo$ to
-$\zPlaceboHi$), close to the 8-week estimate.
-We then audited the final tuned world model our companion paper reports for each
-of its \tSets{} data sets (six Dominick's categories, Breakfast at the Frat, M5
-and Favorita), \tWindows{} windows in all. Under the model's own plan for nothing
-planned, the baseline and lift add up and the lift is zero on every window; the
-lifts depend on what was learned (\tCTwoMean\% of windows) and the copies agree
-(\tCThreeMean\%); and the plan can be read back from the state rolled under it
-($R^2$ \tReadRolledLo{} to \tReadRolledHi). Price direction fails on every data set but
-Frat: a deeper cut lowers the forecast for \tCFourDomLo\% to \tCFourDomHi\% of items on
-Dominick's. Both the world model and LightGBM state about twice the measured
-response to the zone price deviations (pooled slopes $\tSlopeWm$ and $\tSlopeLgb$
-against $\tSlopeMeas$). Across the \tConfigsAll{} configurations the settings
-searches tried, comparing those scored on the same data and windows, the number
-of checks passed was not related to accuracy (pooled Spearman $\tRhoAll$, 95\%
-interval $\tRhoAllLo$ to $\tRhoAllHi$). These
-results hold for these models and data sets.
+Explanations that pass checks against the model, the sales and a second model
+can still be wrong about what a plan causes. Forecasting models that read the
+price and promotion plan explain each forecast as a baseline, what would sell
+with nothing planned, plus the lift the plan adds, and merchants plan on that
+split. We test such explanations with eight checks, six with a pass rule fixed
+before any result. In generated store data with known effects, a world model
+whose explanation is built in passes the checks of construction, seed stability, price direction, agreement
+with sales and agreement with LightGBM, yet its lifts are \kaCoWmBiasLo{}
+to \kaCoWmBiasHi{} times the truth when merchants plan into high-demand weeks,
+and LightGBM, fitted to the same data, agrees with it. Its stated response to a
+lasting regular-price change, $\kaClWmCsevenHi$ to $\kaCoWmCsevenLo$, is
+\kaClWmTimesLo{} to \kaCoWmTimesHi{} times the true $-0.5$; only a measured
+cause finds this. On Dominick's, \zScored{} episodes in which a store's regular
+prices sat apart from its zone peers give a noisy observational benchmark: a
+pooled 8-week response of $\zSlope$ (95\% interval $\zSlopeLo$ to
+$\zSlopeHi$), close to a placebo at false start dates ($\zPlaceboSlope$). For
+the final tuned world models of our companion paper on \tSets{} data sets
+(\tWindows{} windows), baseline and lift add up under each model's own plan
+for nothing planned on every window, but a deeper price cut lowers the forecast
+in \tCFourDomLo\% to \tCFourDomHi\% of item-week steps on Dominick's. Both the
+world model and LightGBM state about twice the measured response (pooled
+slopes $\tSlopeWm$ and $\tSlopeLgb$ against $\tSlopeMeas$, an exploratory
+comparison). Across \tConfigsAll{} configurations from the settings searches,
+in a test designed after the earlier audit's results, the number of checks
+passed was not related to accuracy (Spearman $\tRhoAll$, 95\% interval
+$\tRhoAllLo$ to $\tRhoAllHi$).
 
 \vspace{4pt}
 \textbf{Keywords:} retail forecasting; explanation; faithfulness; promotions;

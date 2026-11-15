@@ -324,15 +324,16 @@ def write_tables(sc: pd.DataFrame, rec, worlds, gen: Path):
     M["kaRows"] = f"{worlds['clean']['rows']:,}"
     lines = [f"\\newcommand{{\\{k}}}{{{v}}}".replace("{-", "{−") for k, v in M.items()]
     (gen / "known_macros.tex").write_text("\n".join(lines) + "\n")
-    rows = ["\\begin{tabular}{@{}lrrrrrrr@{}}", "\\toprule",
-            " & \\multicolumn{3}{c}{Lift against truth} & & & & \\\\",
-            "\\cmidrule(lr){2-4}",
-            "Model & rank & sum & price & C4 & C5 & Passed & RMSSE \\\\", "\\midrule"]
+    rows = ["\\begin{tabular}{@{}lrrrrrrrrr@{}}", "\\toprule",
+            " & \\multicolumn{5}{c}{Lift against truth} & & & & \\\\",
+            "\\cmidrule(lr){2-6}",
+            "Model & rank & sum & price & promotion & display & C4 & C5 & Passed & RMSSE \\\\", "\\midrule"]
     for w in WORLDS:
-        rows.append(f"\\multicolumn{{8}}{{@{{}}l}}{{\\emph{{{'Plans at random' if w == 'clean' else 'Plans in high-demand weeks'}}}}} \\\\")
+        rows.append(f"\\multicolumn{{10}}{{@{{}}l}}{{\\emph{{{'Plans at random' if w == 'clean' else 'Plans in high-demand weeks'}}}}} \\\\")
         for m in MODELS:
             r = sc[(sc["world"] == w) & (sc["model"] == m)].iloc[0]
             rows.append(f"{LABEL[m]} & {r['truth_rank']:.2f} & {r['truth_bias']:.2f} & {r['truth_price_bias']:.2f} & "
+                        f"{r['truth_promo_bias']:.2f} & {r['truth_display_bias']:.2f} & "
                         f"{r['C4'] * 100:.1f}\\% & {r['C5_bias']:.2f} & {int(r['passed'])}/{int(r['applicable'])} & "
                         f"{r['rmsse']:.3f} \\\\")
     rows += ["\\bottomrule", "\\end{tabular}"]

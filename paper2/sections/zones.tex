@@ -35,10 +35,12 @@ over the 26 weeks before the episode and its first eight weeks, where $Y_{jw}$
 is store $j$'s category units in week $w$ and $D_{jw}$ marks the treated store
 in the episode weeks. Standard errors are clustered by
 store~\cite{bertrand2004,cameron2015} with the CR1 correction and $t$ critical
-values on stores minus one degrees of freedom; with \zStoresLo{} to \zStoresHi{} stores per episode, single intervals are wide by construction. The plan scores each episode by its
-own interval; after the placebo showed those intervals to be too narrow, the
-pooled slope of $\tau_e$ on $\delta_e$ across episodes, with an interval robust to
-unequal variances, was added as the summary used for C7. The estimate over
+values on stores minus one degrees of freedom, with \zStoresLo{} to
+\zStoresHi{} stores per episode. The plan scores each episode by its own
+interval and reports the pooled slope of $\tau_e$ on $\delta_e$ across
+episodes. After the placebo showed the per-episode intervals to be too narrow,
+an interval for the pooled slope robust to unequal variances was added, and the
+pooled slope became the summary used for C7; both additions are exploratory. The estimate over
 the full episode is kept in the list as well. The models forecast at most eight
 weeks ahead, so each model is fitted on the data up to the week before an
 episode and scored on its first eight weeks, the same weeks as $\tau_e$.
@@ -67,8 +69,8 @@ weeks 190 and 240, April 1993 to April 1994. Hoch, Dr\`eze and Purk published
 their experiments in 1994, and the public files do not date them, so whether
 these spells are those experiments cannot be checked. The scored stores' prices
 sit \zSizeLo\% to \zSizeHi\% off their zone peers.
-Over the first eight weeks of each scored episode, category units move against
-price in \zSignShare\% of episodes. The pooled slope of the measured response on
+Over the first eight weeks, category units move against price in
+\zSignShare\% of the \zScored{} scored episodes. The pooled slope of the measured response on
 the price change is $\zSlope$, with a 95\% interval of $\zSlopeLo$ to
 $\zSlopeHi$ (heteroskedasticity-robust across episodes), and over the full
 episode $\zFullSlope$ ($\zFullLo$ to $\zFullHi$). Both are in line with the
@@ -79,8 +81,9 @@ episodes were added after the placebo was seen (below).
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figs/fig_zone_checks.pdf}
-\caption{\textbf{Prices start moving before the detected start, single
-episodes are mostly noise, and only the pooled response carries information.}
+\caption{\textbf{Prices start moving before the detected start, and
+single-episode intervals are too narrow, so the pooled response is the one
+compared with the models.}
 \textbf{(a)} The store's regular prices against its zone peers, signed by the
 episode's direction: median and interquartile band across the \zScored{} scored
 episodes; shaded, the 26 comparison weeks of the difference in differences.
@@ -108,7 +111,7 @@ study as a gradual decline in signed sales over the weeks before the start
 (panel b). The full-episode estimate, which compares the whole spell, is
 larger, $\zFullSlope$ against $\zSlope$.
 
-\paragraph{Single episodes are noise}
+\paragraph{Single-episode intervals are too narrow}
 Moved 26 weeks earlier, to weeks where prices had not moved, the same estimator
 gives a pooled slope of $\zPlaceboSlope$ ($\zPlaceboLo$ to $\zPlaceboHi$), and
 \zPlaceboSig\% of the \zPlaceboN{} placebo intervals exclude zero, where 5\%
@@ -126,14 +129,15 @@ slope and its interval.
 Over the nine detector settings (Table~\ref{tab:sensitivity}) the number of
 scored episodes ranges from \zSensLo{} to \zSensHi{} and the pooled slope from
 $\zSensSlopeLo$ to $\zSensSlopeHi$. By category, the slope is negative in
-\zCatNeg{} of the \zCatN{} categories with at least five episodes, and every
+each of the \zCatN{} categories with at least five episodes, and every
 category's interval is wide (panel d).
 
 \begin{table}[t]
 \centering
 \caption{\textbf{The pooled response keeps its sign under every detector
 setting.} Episodes found and scored, and the pooled 8-week slope, for each
-weekly size and episode median; the plan's setting in bold.}
+weekly size and episode median; the plan's setting in bold. The settings and
+the pooled slope were fixed in advance.}
 \label{tab:sensitivity}
 \footnotesize
 \input{generated/tab_sensitivity}
@@ -149,15 +153,15 @@ cut, an elasticity several times larger, from one that does not; the
 known-answer study establishes that (\S\ref{sec:known}). On public data the
 comparison with the models is descriptive.
 
-\paragraph{What this benchmark is, and is not}
+\paragraph{Limits of the benchmark}
 It is not a ground truth. Which stores and weeks were treated is inferred from
 prices, not recorded; prices move before the detected start; and the placebo at
 false start dates gives a pooled slope ($\zPlaceboSlope$) close to the 8-week
 estimate ($\zSlope$), so the 8-week estimate cannot be told from what the
 estimator finds where nothing happened. The full-spell estimate
 ($\zFullSlope$, $\zFullLo$ to $\zFullHi$) has an interval that excludes zero,
-but it too overlaps the placebo's ($\zPlaceboLo$ to $\zPlaceboHi$). These deviations may include zone moves that
-were not experiments, and the models were trained on data that include earlier
+but it too overlaps the placebo's ($\zPlaceboLo$ to $\zPlaceboHi$). Some deviations can be zone moves that were not
+experiments, and the models were trained on data that include earlier
 deviations. What the benchmark measures, noisily, is the response of a store's category units to a sustained change in its
 regular prices relative to its zone, over eight weeks. It is not the response
 to a temporary cut, which the companion paper's models mostly learn from, and a

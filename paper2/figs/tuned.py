@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SUM = ROOT / "results" / "paper2" / "tuned" / "summary"
 GEN = ROOT / "paper2" / "generated"
 KEYS = {"dominicks_ana": "Analgesics", "dominicks_bjc": "Bottled juice", "dominicks_che": "Cheese",
-        "dominicks_fre": "Frozen entrees", "dominicks_sdr": "Soft drinks", "dominicks_sna": "Snacks",
+        "dominicks_fre": "Frozen entrees", "dominicks_sdr": "Soft drinks", "dominicks_sna": "Snack crackers",
         "frat": "Frat", "m5": "M5", "favorita": "Favorita"}
 CHECKS = ["C1", "C1own", "C2", "C3", "C4", "C5", "C6"]
 CHECK_LABEL = {"C1": "C1 (audit plan)", "C1own": "C1 (own plan)", "C2": "C2", "C3": "C3", "C4": "C4", "C5": "C5",
@@ -275,6 +275,14 @@ def make(out: Path):
              "tCFourFrat": f"{100 * c4.get('frat', np.nan):.2f}",
              "tCFiveRankMfive": f"{t.set_index('key').loc['m5', 'C5_rank']:.2f}",
              "tWindows": str(int(t["windows"].sum()))}
+    # pass counts over windows, pooled across data sets (the share of windows), beside the data-set means above
+    word = {"C1": "COne", "C1own": "COneOwn", "C2": "CTwo", "C3": "CThree", "C4": "CFour", "C5": "CFive",
+            "C6": "CSix"}
+    for c in CHECKS:
+        x = d[c].astype(float)
+        n, k = int(x.notna().sum()), int(x.sum())
+        extra[f"t{word[c]}Win"] = f"{k} of {n}"
+        extra[f"t{word[c]}WinPct"] = f"{100 * k / n:.0f}" if n else "n/a"
     with open(GEN / "tuned_macros.tex", "a") as f:
         f.write("".join(f"\\newcommand{{\\{k}}}{{{x}}}\n" for k, x in extra.items()))
     return {**v, **extra}

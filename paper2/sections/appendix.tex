@@ -9,7 +9,11 @@ median log price against its zone peers over the episode, \%. Controls: same-zon
 stores within 1\% of their zone. 8 weeks: difference-in-differences estimate on
 log category units over the first eight weeks, \%, with its interval clustered
 by store (too narrow, \S\ref{sec:zones}); Full: over the whole episode.
-\textsuperscript{*} Fewer than three controls: listed, not scored.}
+\textsuperscript{*} Listed, not scored: fewer than three controls, or
+fewer than the 26 comparison weeks before the start (the four episodes starting
+before week 27). An interval of zero width comes from an episode with one
+control store, where the clustered standard error is zero, or, for soft drinks
+store 105, from an episode with no comparison weeks.}
 \label{tab:episodes}
 \scriptsize\renewcommand{\arraystretch}{0.86}
 \input{generated/tab_episodes}
@@ -19,19 +23,37 @@ by store (too narrow, \S\ref{sec:zones}); Full: over the whole episode.
 \label{app:plan}
 
 The plan (\texttt{docs/PAPER2\_PLAN.md}) was committed before any audit result
-on 13 October 2026. Four dated amendments followed, each made before the results
-it affects were read:
+on 13 October 2026. It fixed the eight checks, the C7 detector, estimator and
+per-episode score, and the rule that no audit result changes a model setting.
+Eight dated entries followed. Entries 1 to 5 and 8 were made before the results
+they affect were read; entries 6 and 7 were made after the earlier audit's
+results, and everything they add is reported as added after the results.
 \begin{enumerate}\setlength{\itemsep}{1pt}
-\item Before any model lift: the episode detector measures each store against
-its zone peers rather than the zone's most common price.
-\item After the episode list, before any model lift: at least three controls to
-score an episode; models scored on an episode's first eight weeks, against an
-8-week difference in differences.
-\item Before any audit result: the known-answer study, the C7 robustness
-analyses, the pass thresholds and the main test.
-\item After the C7 robustness results, before any model lift for C7: the price
-path and the pooled slope intervals, labelled exploratory, and the comparison of
-models with the measured response made on the pooled slope.
+\item 13 October, before any model lift: the episode detector measures each
+store against its zone peers rather than the zone's most common price.
+\item 13 October, after the episode list, before any model lift: at least three
+controls to score an episode; models scored on an episode's first eight weeks,
+against an 8-week difference in differences.
+\item 13 October, before any audit result: the known-answer study, the C7
+robustness analyses (event study, placebo, detector settings, pooled slope by
+category), the pass thresholds for C1 to C6 and the main test.
+\item 13 October, after the C7 robustness results, before any model lift for
+C7: the price path and the pooled-slope intervals, labelled exploratory, and
+the comparison of models with the measured response made on the pooled slope.
+\item 13 October, correction, before any model lift for C7: an episode is
+scored only if its 26 comparison weeks exist, leaving \zScored{} scored.
+\item 17 October, after the audit results: the diagnosis of C1 and C4 on
+fourteen saved runs; the main test also over versions; pass counts without C5,
+and without C1 and C5, as exploratory.
+\item 18 October, after the audit results: C1 under the model's own plan for
+nothing planned; the comparison of the two plans for every configuration and
+window; the benchmark described as observational; the main test rerun holding
+the data and window fixed.
+\item 13 November, before any audit of the tuned models: the audit moves to
+each data set's final tuned world model; C1 scored under both plans; C3
+between a model's copies; C6 against the tuned LightGBM; C7 and C8 with the
+final settings; and the test of 18 October applied to the versions the
+settings searches saved.
 \end{enumerate}
 
 \section{Every known-answer model}
@@ -41,8 +63,8 @@ models with the measured response made on the pooled slope.
 \centering
 \caption{\textbf{Every model in the known-answer study, with its explanation
 scored against the truth.} Lift against truth: rank agreement and ratio of
-summed lifts on item-weeks with something planned, overall, and the ratio for
-the price part. C4: item-weeks lower after a deeper cut. C5: summed forecast over
+summed lifts on item-weeks whose true lift is not zero, overall and for the
+price, promotion and display parts. C4: item-weeks lower after a deeper cut. C5: summed forecast over
 summed sales on planned weeks. Passed: checks passed of those that apply (C1 to
 C6). RMSSE: item by store, weeks 253 to 260.}
 \label{tab:known}
