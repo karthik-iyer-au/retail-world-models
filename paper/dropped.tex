@@ -54,20 +54,23 @@ the plain loss stayed everywhere else.} After each search, the world model had a
 round of count likelihoods and a round of JEPA pretraining
 (Section~\ref{sec:loop}). The likelihood round screened \sfLossTried{}
 likelihoods on each of \sfLossSets{} data sets with one seed each, \sfLossScreens{}
-screens in all, of which \sfLossScreenBetter{} came in below the starting score;
-the best went on to three seeds, and a change was kept only where it beat the
+screens in all, of which \sfLossScreenBetter{} came in below the starting
+settings' three-seed mean; a screen went on to three seeds when it beat the
+starting settings on the same first seed, and a change was kept only where it beat the
 start by more than the keep bar (Figure~\ref{fig:sup-explore}a and
 Table~\ref{tab:sup-explore}). It was kept on \sfLossKeptSets{}: \sfLossKeptNames{}.
 The JEPA round pretrained the encoder on the latent term alone
 (Section~\ref{sec:losses}), for a short and a long run, then fitted the forecast
 at a lower rate. Of its \sfJepaScreens{}
-screens, \sfJepaScreenBetter{} came in below the start, and it was kept on
+screens, \sfJepaScreenBetter{} came in below the starting three-seed mean (three
+beat the first seed and went on to three seeds), and it was kept on
 \sfJepaKeptNames{} only (Figure~\ref{fig:sup-explore}b).
 
 The \firstver{} tried \sfDevChanges{} changes to the world model's loss in
 \sfDevRuns{} runs on the development windows, \sfDevScored{} of them scored
-against the settings they changed (Figure~\ref{fig:sup-devlosses}); the other
-\sfDevNotRun{} were not run on the full data. \sfDevBetter{} of the
+against the settings they changed (Figure~\ref{fig:sup-devlosses}); \sfDevNotRun{}
+were not run on the full data and \sfDevNoRef{} had no run of the unchanged
+settings to compare with. \sfDevBetter{} of the
 \sfDevScored{} lowered the error. Latent pretraining and the latent term, in
 every form tried, moved the score by at most \sfDevLatentMax{} either way. Extra
 weight on the periods after a promotion and the combined peak, dollar and

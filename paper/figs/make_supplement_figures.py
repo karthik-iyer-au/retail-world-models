@@ -599,6 +599,7 @@ def fig_devlosses(v: dict):
     v["sfDevBetter"] = f"{int((s['diff'] < 0).sum())}"
     v["sfDevLatentMax"] = f"{s[s.change.str.startswith('Latent')]['diff'].abs().max():.3f}"
     v["sfDevNotRun"] = f"{int((d.status == 'not run on full data').sum())}"
+    v["sfDevNoRef"] = f"{int((d.status == 'no matched reference').sum())}"  # fresh reader: 44 + 13 is not 60
 
 
 def main():

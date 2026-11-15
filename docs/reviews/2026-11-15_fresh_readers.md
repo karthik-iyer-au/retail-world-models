@@ -15,7 +15,7 @@ T = text fix, no compute. C = needs compute (Karthik decides). D = done.
 6. D (within-data-set contrasts, retailer counts, slow lines reported). Steady-price vs frequent-cut finding is largely a data-set effect; show the contrast within each data set; the
    five-of-nine rule can be met by Dominick's alone; report by retailer; the slow-lines result is not reported.
 7. D (the rule was kept: the likelihood round measured its own bar, 0.007, and the gain was 0.015; Table 6 now shows the final settings' score, 0.468, and the caption says each round measures its own bar). Favorita search: hurdle NB kept on a gain below its keep bar; latent check names inconsistent.
-8. T. Counts in 15.1 disagree with Table 24 and with themselves.
+8. D (the confirmation rule is first-seed against first-seed, now stated; the 3 loss runs with no matched reference are counted). Counts in 15.1 disagree with Table 24 and with themselves.
 9. D (table used the largest window; now the mean at the shortest cut, 8.158). Favorita history cut: 8.2 in text, 12.887 in Table 17.
 10. C. Test windows are not clean out of sample; the held-out final 24 weeks are never scored; M5's official test
     period is not scored (offered to Karthik 17:40).
