@@ -36,3 +36,4 @@ results/pooled/*/*
 !results/pooled/*/metrics.json
 !results/pooled/*/manifest.json
 !results/data_spans/
+!results/kinds/
