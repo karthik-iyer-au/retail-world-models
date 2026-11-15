@@ -76,7 +76,7 @@
 \newcommand{\thisrev}{\ifjournal this study\else this revision\fi}
 \newcommand{\revn}{\ifjournal study\else revision\fi}
 % a path in the code: shown in full for arXiv, named generically under anonymised review
-\newcommand{\cpath}[2]{\ifjournal #2\else\nolinkurl{#1}\fi}
+\newcommand{\cpath}[2]{\ifjournal #2\else{\def\UrlBreaks{\do\/\do\_}\def\UrlBigBreaks{\do\/}\nolinkurl{#1}}\fi}  % code paths break only at / and _
 \newcommand{\secbarrier}{}
 % topfigure: a full-width figure that floats to the top of the next page in every build
 \makeatletter
