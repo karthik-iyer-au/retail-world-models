@@ -55,12 +55,15 @@ def wrmsse(
         w = w / w.sum()
         score = np.sqrt(((a - f) ** 2).mean(axis=1) / series_scale(h, lag))
         ok = np.isfinite(score) & (w > 0)
+        # 15 November 2026 (outside code review): a level with no node that can be scored is undefined, not 0, and
+        # the revenue share of the nodes left out (no sales change before the window, or no revenue) is reported
         by_level.append(
             {
                 "level": "x".join(cols) if cols else "total",
                 "series": g,
-                "wrmsse": float((score[ok] * w[ok]).sum()),
-                "mean_rmsse": float(np.nanmean(score)),
+                "wrmsse": float((score[ok] * w[ok]).sum()) if ok.any() else float("nan"),
+                "mean_rmsse": float(np.nanmean(score)) if np.isfinite(score).any() else float("nan"),
+                "excluded_weight": float(w[~ok].sum()),
             }
         )
     return {
@@ -93,10 +96,15 @@ def rmsse_where(
 
 
 def to_matrix(
-    panel: pd.DataFrame, series: str, date: str, value: str, dates, names: pd.Index | None = None
+    panel: pd.DataFrame, series: str, date: str, value: str, dates, names: pd.Index | None = None,
+    complete: bool = False,
 ) -> np.ndarray:
-    """Series-by-date array of `value`. Missing rows and missing values are 0.
-    Rows follow `names` (default: the series present, sorted); columns follow `dates`."""
+    """Series-by-date array of `value`. Missing rows and missing values are 0 (right for sales: no row is no sale).
+    Rows follow `names` (default: the series present, sorted); columns follow `dates`.
+
+    With `complete` (forecasts; 15 November 2026, after an outside code review): every series and date must have
+    exactly one finite value, and no row may fall outside them; anything else raises ValueError, so a broken forecast
+    cannot be scored as if its gaps were zeros."""
     s = panel[series]
     if names is None:
         names = pd.Index(s.astype(str).unique()).sort_values()
@@ -107,5 +115,16 @@ def to_matrix(
     cols = pd.Index(dates).get_indexer(panel[date])
     out = np.zeros((len(names), len(dates)), dtype=np.float32)
     keep = (cols >= 0) & (rows >= 0)
+    if complete:
+        vals = panel[value].to_numpy(dtype=np.float64)
+        flat = rows.astype(np.int64) * len(dates) + cols
+        problems = {
+            "rows outside the expected series and dates": int((~keep).sum()),
+            "duplicate series and date": int(len(flat[keep]) - len(np.unique(flat[keep]))),
+            "missing series and date": int(len(names) * len(dates) - len(np.unique(flat[keep]))),
+            "non-finite values": int((~np.isfinite(vals)).sum()),
+        }
+        if any(problems.values()):
+            raise ValueError(f"incomplete {value}: " + ", ".join(f"{k} {v}" for k, v in problems.items() if v))
     out[rows[keep], cols[keep]] = np.nan_to_num(panel[value].to_numpy(dtype=np.float32)[keep])
     return out

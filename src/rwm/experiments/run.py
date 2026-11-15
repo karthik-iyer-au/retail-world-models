@@ -225,7 +225,7 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS, partial: P
         score = wrmsse(
             units[:, :t0],
             units[:, t0:t1],
-            to_matrix(out, SERIES, DATE, "forecast", dates[t0:t1], names),
+            to_matrix(out, SERIES, DATE, "forecast", dates[t0:t1], names, complete=True),
             revenue,
             attrs,
             levels,
@@ -361,9 +361,12 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS, partial: P
     manifest["finished_utc"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
     manifest["wall_seconds"] = round(time.time() - started, 1)
     manifest["timing"] = sorted(timing, key=lambda w: w["origin"])
-    (run_dir / "manifest.json").write_text(json.dumps(manifest, indent=2, default=str) + "\n")
-    (run_dir / "metrics.json").write_text(json.dumps(metrics, indent=2) + "\n")
+    # forecasts first and a completion marker last (15 November 2026, outside code review): an interrupted run never
+    # looks finished to rwm.experiments.job.finished_run
     pd.concat(forecasts).to_csv(run_dir / "forecasts.csv", index=False)
+    (run_dir / "metrics.json").write_text(json.dumps(metrics, indent=2) + "\n")
+    (run_dir / "manifest.json").write_text(json.dumps(manifest, indent=2, default=str) + "\n")
+    (run_dir / "COMPLETE").write_text(datetime.now(timezone.utc).isoformat(timespec="seconds") + "\n")
     if partial is not None:
         shutil.rmtree(partial, ignore_errors=True)
     return run_dir

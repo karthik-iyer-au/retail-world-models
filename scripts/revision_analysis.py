@@ -135,7 +135,7 @@ def kept_out_scores(results: Path, rows: pd.DataFrame, key: str, wset: str) -> l
     is_out = fr.attrs[tr["by"]].astype(str).isin(kept).to_numpy()
     out = []
     for o in sorted({o for f in fcs.values() for o in f["origin"].unique()}):
-        mats = {m: C.forecast_matrix(f, fr, o) for m, f in fcs.items() if o in set(f["origin"])}
+        mats = {m: C.forecast_matrix(f, fr, o, complete=False) for m, f in fcs.items() if o in set(f["origin"])}
         if {"world_model", "lightgbm"} <= set(mats):
             mats["ensemble_2"] = (mats["world_model"] + mats["lightgbm"]) / 2
             mats["by_history"] = mats["world_model"]

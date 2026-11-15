@@ -68,10 +68,14 @@ def frame(config: dict) -> Frame:
                  promo)
 
 
-def forecast_matrix(forecasts: pd.DataFrame, fr: Frame, origin: int, col: str = "forecast") -> np.ndarray:
+def forecast_matrix(forecasts: pd.DataFrame, fr: Frame, origin: int, col: str = "forecast",
+                    complete: bool = True) -> np.ndarray:
+    """Series-by-date forecasts of one window. By default every series and date must have exactly one finite
+    forecast (rwm.evaluation.hierarchy.to_matrix); `complete=False` only where a subset is scored on purpose."""
     sp = next(s for s in fr.splits if s.origin == origin)
     f = forecasts[forecasts["origin"] == origin]
-    return to_matrix(f.assign(**{DATE: pd.to_datetime(f[DATE])}), SERIES, DATE, col, list(sp.test_dates), fr.names)
+    return to_matrix(f.assign(**{DATE: pd.to_datetime(f[DATE])}), SERIES, DATE, col, list(sp.test_dates), fr.names,
+                     complete=complete)
 
 
 def level_scores(fr: Frame, origin: int, fc: np.ndarray, weights: np.ndarray | None = None) -> dict:
@@ -490,7 +494,7 @@ def native_scores(fr: Frame, origin: int, forecasts: pd.DataFrame) -> dict:
     losses = []
     for c in qcols:
         qv = float(c[1:])
-        q = forecast_matrix(forecasts, fr, origin, c)
+        q = forecast_matrix(forecasts, fr, origin, c, complete=False)
         losses.append(np.where(a >= q, qv * (a - q), (1 - qv) * (q - a)).mean(axis=1))
     spl = np.mean(losses, axis=0) / abs_scale
     ok = np.isfinite(spl) & (w > 0) & (abs_scale > 0)

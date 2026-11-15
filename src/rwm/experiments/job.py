@@ -41,7 +41,9 @@ def finished_run(out: Path, config: dict) -> Path | None:
     """The folder of an earlier strict run of exactly this config in `out`, if any."""
     tag = f"_{config['name']}_{sha256_obj(config)[:8]}"
     for folder in sorted(out.glob(f"*{tag}")):
-        if (folder / "metrics.json").exists() and (folder / "manifest.json").exists():
+        # a run counts as finished only with its forecasts and, for runs saved from 15 November 2026 on, the
+        # completion marker written last (outside code review: metrics used to be written before forecasts)
+        if all((folder / f).exists() for f in ("metrics.json", "manifest.json", "forecasts.csv")):
             return folder
     return None
 
