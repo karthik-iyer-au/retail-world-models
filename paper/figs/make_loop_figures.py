@@ -263,7 +263,7 @@ def main():
 # plain names for the changes a search kept, from what each does (scripts/make_research_specs.py, make_loss_round.py,
 # make_hybrid_round.py); fresh reader, 15 November 2026: no code names in tables
 PLAIN = {
-    "batch_half": "half the batch", "feature_fraction_0.8": "80% of features per tree", "feedback": "each period's sales fed into the next",
+    "batch_half": "half the batch", "feature_fraction_0.8": r"80\% of features per tree", "feedback": "each period's sales fed into the next",
     "hurdle_nb_item_spread": "hurdle negative binomial, spread by item", "jepa_hybrid_long": "long JEPA pretraining",
     "latent_overshooting": "latent check over seven steps", "learning_rate_double": "double the learning rate",
     "learning_rate_half": "half the learning rate", "longer_windows": "a longer rolling window",
