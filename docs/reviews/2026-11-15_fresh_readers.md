@@ -5,9 +5,9 @@ GPT reviewed the code and the design. Each item: what was found, and what is don
 T = text fix, no compute. C = needs compute (Karthik decides). D = done.
 
 ## Paper 1 (25 items)
-1. T. Abstract and introduction still say 26- and 52-week forecasts are not tested; 52-week section heading rests on
+1. D (e3d43ef). Abstract and introduction still say 26- and 52-week forecasts are not tested; 52-week section heading rests on
    comparisons added after the planned test; the tuned 52-week search is not described in 8.7; 52-week windows undated.
-2. T. Count of most accurate 52-week forecasts leaves cheese out and counts re-tuned LightGBM as plain LightGBM.
+2. D (e3d43ef). Count of most accurate 52-week forecasts leaves cheese out and counts re-tuned LightGBM as plain LightGBM.
 3. T. "Most accurate choice" ignores the three-model ensemble, lower than the average at item by store on six data sets.
 4. T. LightGBM averaged with TimesFM (no world model) ties or beats the average of the two tuned models at item by store
    on four data sets; the paper must say a second model is needed, and where the world model is that second model.
@@ -27,7 +27,7 @@ T = text fix, no compute. C = needs compute (Karthik decides). D = done.
 15. T. Not every analysis added after the results is listed in Section 17 and the abstract.
 16. T. Table 25 "new items" overstates kept-out existing items; RQ3 runs on five of nine data sets with no reason.
 17. T. Calibration heading contradicts its numbers; M5 is one fit, not five copies.
-18. T. "LightGBM drifts in total" has no direct measure; Figure 9 caption overclaims (error falls on some categories).
+18. Part done (Figure 9 caption, e3d43ef); open: "LightGBM drifts in total" has no direct measure; Figure 9 caption overclaims (error falls on some categories).
 19. C/T. Promotion-regret simulation promised, no results; MinT on the tuned forecasts not tested; Dominick's category
     choice and Favorita top-10 selection need a reason.
 20. T. Counts reached by counting rounding ties as wins.
