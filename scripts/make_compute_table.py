@@ -18,11 +18,14 @@ ROOT = Path(__file__).resolve().parents[1]
 A = ROOT / "results" / "analysis_tuned"
 GEN = ROOT / "paper" / "generated"
 STUDY = [  # (label, test on the top folder and run name)
-    ("Searches of both models' settings", lambda top, run: top == "research"),
+    ("Searches of both models' settings", lambda top, run: top == "research" and "h52s" not in run),
     ("Final runs on the rolling windows", lambda top, run: top == "final"),
     ("Transfer and new-retailer tests", lambda top, run: top == "ftransfer"),
     ("Training on other retailers' data", lambda top, run: top == "pooled"),
     ("Comparison models on cleaned prices", lambda top, run: top == "cleanrev"),
+    ("Forecasts 52 weeks ahead and their settings searches", lambda top, run: top == "h52"
+     or (top == "research" and "h52s" in run)),
+    ("History-length test", lambda top, run: top == "hist"),
 ]
 
 
