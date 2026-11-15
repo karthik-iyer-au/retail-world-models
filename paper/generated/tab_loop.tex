@@ -1,6 +1,6 @@
 \begin{table*}[t]
 \centering\footnotesize
-\caption{Every search, from starting to final settings. Scores are WRMSSE (lower is better), the mean of three seeds on the search windows and one score on the held-out window, which never decided anything. The keep bar is the seed spread of the starting settings; a change was kept only when its three-seed mean beat the best so far by at least the bar. Tries counts every run, first-seed screens and three-seed confirmations.}
+\caption{Every search, from starting to final settings. Scores are WRMSSE (lower is better), the mean of three seeds on the search windows and one score on the held-out window, which never decided anything. The keep bar is the seed spread of the starting settings of the first round; each later round (likelihoods, pretraining) measures its own bar from its own starting settings, and a change was kept only when its three-seed mean beat the best so far by at least that bar. Tries counts every run, first-seed screens and three-seed confirmations.}
 \label{tab:loop}
 \begin{tabular}{llrrrrrrp{5.2cm}}
 \toprule
@@ -10,10 +10,10 @@ Data & Model & Tries & Keep bar & \multicolumn{2}{c}{Starting} & \multicolumn{2}
 M5 & World model & 59 & 0.013 & 0.570 & 0.550 & 0.533 & 0.534 & feedback, hurdle nb item spread \\
  & LightGBM & 51 & 0.003 & 0.603 & 0.553 & 0.556 & 0.522 & num leaves quarter \\
 \addlinespace[2pt]
-Favorita & World model & 60 & 0.028 & 0.547 & 0.600 & 0.483 & 0.560 & latent overshooting, hurdle nb item spread \\
+Favorita & World model & 60 & 0.028 & 0.547 & 0.600 & 0.468 & 0.550 & latent overshooting, hurdle nb item spread \\
  & LightGBM & 99 & 0.009 & 0.922 & 0.576 & 0.580 & 0.573 & min data in leaf 4x, objective poisson, learning rate half \\
 \addlinespace[2pt]
-Frat & World model & 53 & 0.028 & 0.588 & 0.591 & 0.547 & 0.608 & batch half \\
+Frat & World model & 53 & 0.028 & 0.588 & 0.591 & 0.546 & 0.607 & batch half \\
  & LightGBM & 52 & 0.003 & 0.501 & 0.546 & 0.489 & 0.546 & learning rate double \\
 \addlinespace[2pt]
 Analgesics & World model & 35 & 0.004 & 0.509 & 0.619 & 0.509 & 0.619 & nothing \\

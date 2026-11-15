@@ -223,7 +223,7 @@ def fig_slopes():
                 if not names:
                     continue
                 st = first_start(names[0])
-                end = next((r for r in reversed(rows(names[-1])) if r["kind"] == "end"), None)
+                end = final_end(names)
                 if not st or not end or end.get(field) is None:
                     continue
                 y0, y1 = st[field], end[field]
@@ -259,12 +259,20 @@ def main():
     write_values()
 
 
+
+def final_end(names):
+    """The 'end' row of the final settings: the last round that kept a change (Favorita's last round ran in parallel
+    from earlier settings and kept nothing; fresh reader, 15 November 2026), else the last round."""
+    last = next((n for n in reversed(names) if any(r["kind"] == "kept" for r in rows(n))), names[-1])
+    return next((r for r in reversed(rows(last)) if r["kind"] == "end"), None)
+
 def write_table():
     """paper/generated/tab_loop.tex: each search, from starting to final settings."""
     lines = [r"\begin{table*}[t]", r"\centering\footnotesize",
              r"\caption{Every search, from starting to final settings. Scores are WRMSSE (lower is better), the mean of three seeds on the "
              r"search windows and one score on the held-out window, which never decided anything. The keep bar is the seed spread of "
-             r"the starting settings; a change was kept only when its three-seed mean beat the best so far by at least the bar. "
+             r"the starting settings of the first round; each later round (likelihoods, pretraining) measures its own bar from its own "
+             r"starting settings, and a change was kept only when its three-seed mean beat the best so far by at least that bar. "
              r"Tries counts every run, first-seed screens and three-seed confirmations.}",
              r"\label{tab:loop}",
              r"\begin{tabular}{llrrrrrrp{5.2cm}}", r"\toprule",
@@ -276,7 +284,7 @@ def write_table():
             if not names:
                 continue
             st = first_start(names[0])
-            end = next((r for r in reversed(rows(names[-1])) if r["kind"] == "end"), None)
+            end = final_end(names)
             tries = sum(1 for n in names for r in rows(n) if r["kind"] in ("rung", "try"))
             kept = [r["change"] for n in names for r in rows(n) if r["kind"] == "kept"]
             fin = (f"{end['score']:.3f} & {end['held_out']:.3f}" if end else r"\multicolumn{2}{c}{running}")
@@ -305,7 +313,7 @@ def write_values():
             if not names:
                 continue
             st = first_start(names[0])
-            end = next((r for r in reversed(rows(names[-1])) if r["kind"] == "end"), None)
+            end = final_end(names)
             tries += sum(1 for n in names for r in rows(n) if r["kind"] in ("rung", "try"))
             kept += sum(1 for n in names for r in rows(n) if r["kind"] == "kept")
             if d.startswith("dominicks") or tag == "Lgb":
