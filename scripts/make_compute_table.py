@@ -26,6 +26,7 @@ STUDY = [  # (label, test on the top folder and run name)
     ("Forecasts 52 weeks ahead and their settings searches", lambda top, run: top == "h52"
      or (top == "research" and "h52s" in run)),
     ("History-length test", lambda top, run: top == "hist"),
+    ("Held-out periods", lambda top, run: top == "heldout"),
 ]
 
 
