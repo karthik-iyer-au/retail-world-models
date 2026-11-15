@@ -97,14 +97,16 @@ def rmsse_where(
 
 def to_matrix(
     panel: pd.DataFrame, series: str, date: str, value: str, dates, names: pd.Index | None = None,
-    complete: bool = False,
+    complete: bool = False, required: np.ndarray | None = None,
 ) -> np.ndarray:
     """Series-by-date array of `value`. Missing rows and missing values are 0 (right for sales: no row is no sale).
     Rows follow `names` (default: the series present, sorted); columns follow `dates`.
 
-    With `complete` (forecasts; 15 November 2026, after an outside code review): every series and date must have
-    exactly one finite value, and no row may fall outside them; anything else raises ValueError, so a broken forecast
-    cannot be scored as if its gaps were zeros."""
+    With `complete` (forecasts; 15 November 2026, after an outside code review): every series and date marked in
+    `required` (default: all) must have exactly one finite value, no value may be duplicated, and no row may fall
+    outside the series and dates; anything else raises ValueError, so a broken forecast cannot be scored as if its gaps
+    were zeros. A series and date with no row in the data (an item not stocked that week) is not required: its sales are
+    0 and so is its forecast."""
     s = panel[series]
     if names is None:
         names = pd.Index(s.astype(str).unique()).sort_values()
@@ -121,7 +123,9 @@ def to_matrix(
         problems = {
             "rows outside the expected series and dates": int((~keep).sum()),
             "duplicate series and date": int(len(flat[keep]) - len(np.unique(flat[keep]))),
-            "missing series and date": int(len(names) * len(dates) - len(np.unique(flat[keep]))),
+            "missing series and date": int((need := (np.ones((len(names), len(dates)), bool) if required is None
+                                                    else required.astype(bool))).sum()
+                                           - np.isin(np.flatnonzero(need), flat[keep]).sum()),
             "non-finite values": int((~np.isfinite(vals)).sum()),
         }
         if any(problems.values()):

@@ -46,7 +46,9 @@ def block_view(fr: C.Frame, a: int, b: int) -> C.Frame:
     dates = fr.dates[keep]
     sp = Split(origin=0, train_end=pd.Timestamp(fr.dates[t0 - 1]), test_dates=tuple(pd.Timestamp(x) for x in dates[t0:]))
     promo = None if fr.promo is None else fr.promo[:, keep]
-    return replace(fr, units=fr.units[:, keep], price=fr.price[:, keep], dates=dates, splits=[sp], promo=promo)
+    present = None if fr.present is None else fr.present[:, keep]
+    return replace(fr, units=fr.units[:, keep], price=fr.price[:, keep], dates=dates, splits=[sp], promo=promo,
+                   present=present)
 
 
 def main(argv=None):

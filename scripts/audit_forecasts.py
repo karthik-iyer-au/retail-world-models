@@ -5,7 +5,7 @@ let a duplicate overwrite).
   python scripts/audit_forecasts.py --root /vol/results --tops final h52 hist cleanrev rev ftransfer pooled --out <folder>
 
 For each run folder with forecasts.csv: the data frame of its config (loaded once per data set and settings), and per
-window the expected keys (every series of the frame, every test date). Reports missing keys, extra keys (series or
+window the expected keys (every series and test date where the data has a row). Reports missing keys, extra keys (series or
 dates not expected), duplicate keys and non-finite forecasts, and whether metrics.json was written without
 forecasts.csv. Writes audit.csv, one row per run.
 """
@@ -55,13 +55,19 @@ def main(argv=None):
                 miss = extra = dup = bad = 0
                 for sp in fr.splits:
                     g = f[f["origin"] == sp.origin]
-                    want = len(names) * len(sp.test_dates)
+                    t0 = int(np.searchsorted(fr.dates, np.datetime64(sp.train_end))) + 1
+                    need = fr.present[:, t0:t0 + len(sp.test_dates)]  # rows the data has: each needs a forecast
+                    want = int(need.sum())
                     k = g[[SERIES, DATE]]
                     dup += int(k.duplicated().sum())
                     got = k.drop_duplicates()
                     ok = got[SERIES].isin(names) & got[DATE].isin(pd.DatetimeIndex(sp.test_dates))
                     extra += int((~ok).sum())
-                    miss += want - int(ok.sum())
+                    r = fr.names.get_indexer(got.loc[ok, SERIES])
+                    c = pd.DatetimeIndex(sp.test_dates).get_indexer(got.loc[ok, DATE])
+                    have = np.zeros_like(need)
+                    have[r, c] = True
+                    miss += int((need & ~have).sum())
                     bad += int((~np.isfinite(g["forecast"].to_numpy(dtype=float))).sum())
                 other = int((~f["origin"].isin([s.origin for s in fr.splits])).sum())
                 row.update(config=cfg["name"], missing=miss, extra=extra + other, duplicate=dup, nonfinite=bad,

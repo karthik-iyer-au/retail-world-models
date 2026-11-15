@@ -35,6 +35,7 @@ class Frame:
     window: int
     lag: int
     promo: np.ndarray | None = None  # series x dates, where the data records promotions
+    present: np.ndarray | None = None  # series x dates, where the data has a row (15 November 2026)
 
     def cut(self, origin: int):
         sp = next(s for s in self.splits if s.origin == origin)
@@ -63,9 +64,10 @@ def frame(config: dict) -> Frame:
     units = to_matrix(panel, SERIES, DATE, UNITS, dates, names)
     price = to_matrix(panel, SERIES, DATE, PRICE, dates, names) if PRICE in panel else np.ones_like(units)
     promo = to_matrix(panel, SERIES, DATE, "promo", dates, names) if "promo" in panel else None
+    present = to_matrix(panel.assign(_row=1.0), SERIES, DATE, "_row", dates, names) > 0
     splits = rolling_origins(dates, ev["horizon"], ev["n_origins"], ev.get("step"))
     return Frame(attrs, names, units, price, dates, levels, splits, ev.get("weight_window", 28), ev.get("scale_lag", 1),
-                 promo)
+                 promo, present)
 
 
 def forecast_matrix(forecasts: pd.DataFrame, fr: Frame, origin: int, col: str = "forecast",
@@ -74,8 +76,10 @@ def forecast_matrix(forecasts: pd.DataFrame, fr: Frame, origin: int, col: str = 
     forecast (rwm.evaluation.hierarchy.to_matrix); `complete=False` only where a subset is scored on purpose."""
     sp = next(s for s in fr.splits if s.origin == origin)
     f = forecasts[forecasts["origin"] == origin]
+    t0 = int(np.searchsorted(fr.dates, np.datetime64(sp.train_end))) + 1
+    need = None if fr.present is None else fr.present[:, t0:t0 + len(sp.test_dates)]
     return to_matrix(f.assign(**{DATE: pd.to_datetime(f[DATE])}), SERIES, DATE, col, list(sp.test_dates), fr.names,
-                     complete=complete)
+                     complete=complete, required=need)
 
 
 def level_scores(fr: Frame, origin: int, fc: np.ndarray, weights: np.ndarray | None = None) -> dict:

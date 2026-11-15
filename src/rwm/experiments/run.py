@@ -225,7 +225,8 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS, partial: P
         score = wrmsse(
             units[:, :t0],
             units[:, t0:t1],
-            to_matrix(out, SERIES, DATE, "forecast", dates[t0:t1], names, complete=True),
+            to_matrix(out, SERIES, DATE, "forecast", dates[t0:t1], names, complete=True,
+                      required=to_matrix(out.assign(_row=1.0), SERIES, DATE, "_row", dates[t0:t1], names) > 0),
             revenue,
             attrs,
             levels,
