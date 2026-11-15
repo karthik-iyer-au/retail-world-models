@@ -142,17 +142,29 @@ that the searches measured (Section~\ref{sec:loopnoise}), but both models on M5
 are single fits.
 
 \paragraph{Analyses added after the first results}
-The analyses by line type, the whole-block view, the forecast by history and the
-supporting reruns were added after the first scores of the tuned models were
-read. Each was written down before it ran, but which to run was chosen knowing
-the first results, and the new-item part of the recommended rule was drawn from
-the results (Section~\ref{sec:rq-broad}).
+These were added after the first scores of the tuned models were read; each was
+written down before it ran, but which to run was chosen knowing earlier results:
+the analyses by line type, the whole-block view, the forecast by history and the
+supporting reruns; the new-item part of the recommended rule, drawn from the
+results (Section~\ref{sec:rq-broad}); in the 52-week test, everything beyond the
+planned comparison in blocks and direct (the world model rolled on, LightGBM by
+block, the other models, the settings searched again for 52 weeks, and the
+price-cut and regular weeks); the scoring by kind of line and week, with its
+within-data-set contrasts; the comparison of the average with other second
+models (Section~\ref{sec:sup-ablation}); and the history-length test.
 
 \paragraph{Comparison models}
 Only the world model and LightGBM were tuned; the Temporal Fusion Transformer
 runs with the settings of the \firstver{}, and the pretrained models as
 published. The comparison between the two tuned models is therefore the fair one,
-and the others are reference points. Every model was run on every data set.
+and the others are reference points: a tuned Temporal Fusion Transformer could do
+better than the one reported. Hierarchical reconciliation was tested only against
+exponential-smoothing base forecasts; reconciling the tuned models' own forecasts
+(for example with MinT) needs their forecasts at every level, which the study does
+not make. The tests on items and stores kept out of training (RQ3) ran on five of
+the nine data sets (cheese, snack crackers, Frat, M5 and Favorita), fixed when the
+test was written down, before it ran; the other four Dominick's categories were
+not tested. Every model was run on every data set.
 TimesFM with the
 plan fits its linear plan model within groups of 2,048 series. The pretrained
 models' point forecast was fixed in advance as the mean of their output, which

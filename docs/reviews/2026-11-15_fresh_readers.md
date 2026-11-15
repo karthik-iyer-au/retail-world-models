@@ -21,14 +21,14 @@ T = text fix, no compute. C = needs compute (Karthik decides). D = done.
     period is not scored (offered to Karthik 17:40).
 11. T. "Other retailers' data" is mostly the same retailer (Dominick's pooled with Dominick's); rounding mismatches.
 12. T. "M5's settings carried to Favorita" overclaims (0.447 vs 0.428, no paired test, one transfer).
-13. C/T. Only two model classes tuned; TFT is cheap to tune; "cleaned prices" undefined.
+13. Part done (stated limitation: TFT untuned could do better); open: cleaned prices definition. Only two model classes tuned; TFT is cheap to tune; "cleaned prices" undefined.
 14. T. 3.6 and 5.1 contradict on what the carried-state tests show; RQ3 uses a window bootstrap the paper calls
     overconfident.
-15. T. Not every analysis added after the results is listed in Section 17 and the abstract.
-16. T. Table 25 "new items" overstates kept-out existing items; RQ3 runs on five of nine data sets with no reason.
+15. D (Section 17 lists every added analysis; intro points there). Not every analysis added after the results is listed in Section 17 and the abstract.
+16. Part done (RQ3 data sets and why stated); open: Table 25 new-item wording, new stores row. Table 25 "new items" overstates kept-out existing items; RQ3 runs on five of nine data sets with no reason.
 17. T. Calibration heading contradicts its numbers; M5 is one fit, not five copies.
 18. Part done (Figure 9 caption, e3d43ef); open: "LightGBM drifts in total" has no direct measure; Figure 9 caption overclaims (error falls on some categories).
-19. C/T. Promotion-regret simulation promised, no results; MinT on the tuned forecasts not tested; Dominick's category
+19. Part done (MinT stated as a limitation); open: regret simulation results, category and store selection reasons. Promotion-regret simulation promised, no results; MinT on the tuned forecasts not tested; Dominick's category
     choice and Favorita top-10 selection need a reason.
 20. D (ablation counted on the decimals shown; CRPS ties reported as ties; next-period count over the data sets where it can be read). Counts reached by counting rounding ties as wins.
 21. Part done (arithmetic, Table 2 start explained); open: search run counts, undefined models. Data paragraph arithmetic (daily vs weekly points), Table 2 training start, search run counts, undefined models.
