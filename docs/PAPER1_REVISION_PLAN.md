@@ -1466,3 +1466,14 @@ weighted as WRMSSE, differences to LightGBM with 95% intervals from 1,000 resamp
 (scripts/score_kinds.py). Reading, fixed now: the world model works on a kind where it is clearly more accurate than
 LightGBM on at least five of the nine data sets, and does not where it is clearly less accurate on at least five.
 Scoring only; no new runs.
+
+### Held-out periods scored: 15 November 2026, 23:05, before it runs (Karthik, 23:01, "850 is okay")
+The periods every final run held out, never used by any search or result: the last 24 weeks of each Dominick's
+category and Frat, the last 84 days of M5, and M5's final 28 days from the organisers' test file. Each data set's
+final world model and final LightGBM, settings and copies unchanged, scored on rolling windows of the paper's length
+over those periods (three of 8 weeks; on M5 three of 28 days plus the final 28), each window trained on the history
+before it (scripts/make_heldout_configs.py, 16 configs). Favorita held nothing out and is not part of it. Scored as the
+paper scores: WRMSSE at every level, Dominick's duplicate levels once, paired item bootstrap; world model, LightGBM and
+their average. Reported as the out-of-sample check of the paper's rule, whatever it shows. On M5 the final 28 days are
+also scored on their own, so they can be set beside the M5 competition's evaluation period. Cap for everything running:
+US$850.
