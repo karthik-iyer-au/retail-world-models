@@ -78,7 +78,9 @@ def fig_ablation(v: dict):
     worse = {m: 0 for m, *_ in ABL}
     for j, (m, lab, mk, c) in enumerate(ABL):
         d = [sc.get((k, m), np.nan) - sc.get((k, "ensemble"), np.nan) for k in KEYS]
-        worse[m] = int(np.nansum(np.array(d) > 0))
+        # counted on the three decimals the table shows, so a tie in the table is not counted as a loss
+        shown = [round(sc.get((k, m), np.nan), 3) - round(sc.get((k, "ensemble"), np.nan), 3) for k in KEYS]
+        worse[m] = int(np.nansum(np.array(shown) > 0))
         a.scatter(d, y + (j - 1.5) * 0.15, marker=mk, s=18, color=c, edgecolor="white", linewidth=0.5, label=lab,
                   zorder=3)
     a.axvline(0, color=INK, lw=0.6)
@@ -385,8 +387,14 @@ def fig_probabilistic(v: dict):
     # numbers and table
     br = bot.groupby(["key", "model"])[["brier", "brier_clim", "zero_share"]].mean()
     v["sfProbSets"] = _w(c_ixs.shape[0])
-    best_ixs = c_ixs[["world_model", "lightgbm", "ensemble_2"]].idxmin(axis=1)
-    best_tot = c_tot[["world_model", "lightgbm", "ensemble_2"]].idxmin(axis=1)
+    def best(c):  # lowest at the three decimals the tables show; a tie at that precision is no one's win
+        r = c[["world_model", "lightgbm", "ensemble_2"]].round(3)
+        top = r.eq(r.min(axis=1), axis=0)
+        return top.idxmax(axis=1).where(top.sum(axis=1) == 1, "tie")
+
+    best_ixs, best_tot = best(c_ixs), best(c_tot)
+    v["sfCrpsTieIxs"] = _w(int((best_ixs == "tie").sum()))
+    v["sfCrpsTieTot"] = _w(int((best_tot == "tie").sum()))
     v["sfCrpsAvgBestIxs"] = _w(int((best_ixs == "ensemble_2").sum()))
     v["sfCrpsLgbBestIxs"] = _w(int((best_ixs == "lightgbm").sum()))
     v["sfCrpsWmBestIxs"] = _w(int((best_ixs == "world_model").sum()))

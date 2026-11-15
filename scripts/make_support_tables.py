@@ -254,7 +254,9 @@ def mechanism(v: dict) -> str:
     v["supTimingLo"], v["supTimingHi"] = f"{d2.groupby('data').timing.mean().min():.0f}", f"{d2.groupby('data').timing.mean().max():.0f}"
     v["supPersistTwoLo"] = f"{100 * d2.groupby('data').persist_h2.mean().min():.0f}"
     v["supPersistTwoHi"] = f"{100 * d2.groupby('data').persist_h2.mean().max():.0f}"
-    v["supPersistRiseSets"] = _w(int((d2.groupby('data').persist_h2.mean() > 0).sum()))
+    p2 = d2.groupby('data').persist_h2.mean()
+    v["supPersistRiseSets"] = _w(int((p2 > 0).sum()))
+    v["supPersistSets"] = _w(int(p2.notna().sum()))  # data sets with a next period to read (fresh reader: M5 is n/a)
     v["supProbeGainMax"] = f"{max(probe_gain):.2f}" if probe_gain else "n/a"
     v["supProbeGainMin"] = f"{min(probe_gain):.2f}" if probe_gain else "n/a"
     return r"""\begin{table}[t]

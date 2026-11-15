@@ -138,7 +138,7 @@ within each series makes its item-by-store error worse on all \supMechSets{}
 data sets, by \supTimingLo\% to \supTimingHi\% (Table~\ref{tab:sup-mechanism}):
 the forecast reads when a promotion runs, not only that one runs. A promotion and
 a price cut added in one period raise that period's forecast and still raise the
-next on \supPersistRiseSets{} of \supMechSets{} data sets (the change in the next
+next on \supPersistRiseSets{} of the \supPersistSets{} data sets where it can be read (the change in the next
 period runs from \supPersistTwoLo\% to +\supPersistTwoHi\% of the forecast
 without them), where shoppers who stocked up would buy less; the dip
 after a promotion is not in the forecast, as in the \firstver{}. The state
@@ -216,8 +216,9 @@ percentile.
 On the continuous ranked probability score (CRPS), which scores the whole
 distribution, the average is lowest item by store on \sfCrpsAvgBestIxs{} of
 \sfProbSets{} data sets, LightGBM on \sfCrpsLgbBestIxs{} and the world model on
-\sfCrpsWmBestIxs{}; at the total the average is lowest on \sfCrpsAvgBestTot{},
-LightGBM on \sfCrpsLgbBestTot{} and the world model on \sfCrpsWmBestTot{}.
+\sfCrpsWmBestIxs{}, with \sfCrpsTieIxs{} level at three decimals; at the total the
+average is lowest on \sfCrpsAvgBestTot{}, LightGBM on \sfCrpsLgbBestTot{} and the
+world model on \sfCrpsWmBestTot{}, with \sfCrpsTieTot{} level.
 
 \paragraph{The chance of selling nothing} The ranges do not forecast whether an
 item sells at all. Built from errors scaled to each series, they put the chance

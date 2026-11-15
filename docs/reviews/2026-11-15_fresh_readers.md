@@ -30,7 +30,7 @@ T = text fix, no compute. C = needs compute (Karthik decides). D = done.
 18. Part done (Figure 9 caption, e3d43ef); open: "LightGBM drifts in total" has no direct measure; Figure 9 caption overclaims (error falls on some categories).
 19. C/T. Promotion-regret simulation promised, no results; MinT on the tuned forecasts not tested; Dominick's category
     choice and Favorita top-10 selection need a reason.
-20. T. Counts reached by counting rounding ties as wins.
+20. D (ablation counted on the decimals shown; CRPS ties reported as ties; next-period count over the data sets where it can be read). Counts reached by counting rounding ties as wins.
 21. Part done (arithmetic, Table 2 start explained); open: search run counts, undefined models. Data paragraph arithmetic (daily vs weekly points), Table 2 training start, search run counts, undefined models.
 22. T. "First version / this revision" framing; references to GitHub instead of papers.
 23. T. Licence: PolyForm Noncommercial for code and CC BY-NC text conflict with the paper's advice and with Elsevier.
