@@ -15,8 +15,8 @@ Breakfast at the Frat and Corporaci\'on Favorita), with the world model and
 LightGBM tuned by a common search procedure. Results are read by grain, by the nature of
 the line, on seen and unseen data, and across retailers. On lines and stores the
 models were trained on, the tuned world model and LightGBM are close, each ahead
-on different data sets and grains, and their average is the most accurate
-choice across grains: it has the lowest error in \rqAvgBestCells{} of \rqCells{} grain and data set
+on different data sets and grains, and on the rolling test windows their average is
+the most accurate across grains: it has the lowest error in \rqAvgBestCells{} of \rqCells{} grain and data set
 cases, and in paired item tests it is clearly more accurate than the world model
 in \rqPAvgWmBetter{} of \rqPAvgWmN{} comparisons (clearly less in \rqPAvgWmWorse{}) and than LightGBM in
 \rqPAvgLgbBetter{} (clearly less in \rqPAvgLgbWorse{}). It is also the most accurate on the fast

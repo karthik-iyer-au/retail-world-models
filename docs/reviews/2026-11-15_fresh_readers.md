@@ -17,25 +17,25 @@ T = text fix, no compute. C = needs compute (Karthik decides). D = done.
 7. D (the rule was kept: the likelihood round measured its own bar, 0.007, and the gain was 0.015; Table 6 now shows the final settings' score, 0.468, and the caption says each round measures its own bar). Favorita search: hurdle NB kept on a gain below its keep bar; latent check names inconsistent.
 8. D (the confirmation rule is first-seed against first-seed, now stated; the 3 loss runs with no matched reference are counted). Counts in 15.1 disagree with Table 24 and with themselves.
 9. D (table used the largest window; now the mean at the shortest cut, 8.158). Favorita history cut: 8.2 in text, 12.887 in Table 17.
-10. C. Test windows are not clean out of sample; the held-out final 24 weeks are never scored; M5's official test
+10. D (16 Nov: held-out final periods scored on eight data sets and M5's organisers' final 28 days; Table and paragraph in RQ results; Favorita held nothing out). Test windows are not clean out of sample; the held-out final 24 weeks are never scored; M5's official test
     period is not scored (offered to Karthik 17:40).
 11. D (RQ4 question and text say other data sets; revisit row corrected). "Other retailers' data" is mostly the same retailer (Dominick's pooled with Dominick's); rounding mismatches.
 12. D (says M5's settings were less accurate on Favorita than Favorita's own). "M5's settings carried to Favorita" overclaims (0.447 vs 0.428, no paired test, one transfer).
-13. Part done (stated limitation: TFT untuned could do better); open: cleaned prices definition. Only two model classes tuned; TFT is cheap to tune; "cleaned prices" undefined.
-14. Part done (5.1 agrees with 3.6); open: RQ3 window bootstrap note. 3.6 and 5.1 contradict on what the carried-state tests show; RQ3 uses a window bootstrap the paper calls
+13. D (TFT limitation stated; cleaned prices defined in the data section). Only two model classes tuned; TFT is cheap to tune; "cleaned prices" undefined.
+14. D (5.1 agrees with 3.6; Limits says RQ3's kept-out counts rest on the window bootstrap). 3.6 and 5.1 contradict on what the carried-state tests show; RQ3 uses a window bootstrap the paper calls
     overconfident.
 15. D (Section 17 lists every added analysis; intro points there). Not every analysis added after the results is listed in Section 17 and the abstract.
-16. Part done (RQ3 data sets and why stated); open: Table 25 new-item wording, new stores row. Table 25 "new items" overstates kept-out existing items; RQ3 runs on five of nine data sets with no reason.
-17. Part done (heading matches the numbers); open: M5 one fit wording. Calibration heading contradicts its numbers; M5 is one fit, not five copies.
+16. D (decision table says existing items held out of training, and has a stores row). Table 25 "new items" overstates kept-out existing items; RQ3 runs on five of nine data sets with no reason.
+17. D (heading matches the numbers; Limits says both models on M5 are single fits). Calibration heading contradicts its numbers; M5 is one fit, not five copies.
 18. D (block claims restated from block scores; Figure 9 caption). "LightGBM drifts in total" has no direct measure; Figure 9 caption overclaims (error falls on some categories).
 19. Part done (MinT stated as a limitation); open: regret simulation results, category and store selection reasons. Promotion-regret simulation promised, no results; MinT on the tuned forecasts not tested; Dominick's category
     choice and Favorita top-10 selection need a reason.
 20. D (ablation counted on the decimals shown; CRPS ties reported as ties; next-period count over the data sets where it can be read). Counts reached by counting rounding ties as wins.
 21. Part done (arithmetic, Table 2 start explained); open: search run counts, undefined models. Data paragraph arithmetic (daily vs weekly points), Table 2 training start, search run counts, undefined models.
 22. T. "First version / this revision" framing; references to GitHub instead of papers.
-23. T. Licence: PolyForm Noncommercial for code and CC BY-NC text conflict with the paper's advice and with Elsevier.
-24. Part done (references ragged-right, no letter-spaced URLs; code paths break only at / and _; code URL wraps); open: floats far from their text, Figure 5 label size. Layout: URL breaks, letter-spaced URLs, orphan reference, split path, floats far from text, tiny labels.
-25. Part done (clever headings and hedges replaced; plain names for kept changes in the search table); open: Figure 5 labels, inconsistent terms, jargon in the abstract. Style: hedges, clever headings, code names in tables, inconsistent terms, unexplained jargon.
+23. D (Karthik 16 Nov: licence kept as it is). Licence: PolyForm Noncommercial for code and CC BY-NC text conflict with the paper's advice and with Elsevier.
+24. Part done (references ragged-right, no letter-spaced URLs; code paths break only at / and _; code URL wraps; Figure 5 labels enlarged, 16 Nov); open: floats two to four pages after their first mention (27 full-width tables in two columns; most first mentions are forward references in the overview). Layout: URL breaks, letter-spaced URLs, orphan reference, split path, floats far from text, tiny labels.
+25. Part done (clever headings and hedges replaced; plain names in the search table and in Figure 5; abstract says the average is most accurate on the rolling windows and the safe choice on the held-out periods, 16 Nov); open: inconsistent terms. Style: hedges, clever headings, code names in tables, inconsistent terms, unexplained jargon.
 
 ## Paper 2 (25 items)
 Commits for all Paper 2 items: 0491e42, 2f47003, f50d681, 743afde (PDF 22 pages, abstract 249 words).
@@ -94,9 +94,8 @@ Also found: Favorita's C4 (49%) is scored on a price held at 1 in the data, so i
 2. D. A level with no valid scale scored 0.0: now undefined, with the excluded weight reported.
 3. D. Finished-run check ignored forecasts (written last): forecasts first, COMPLETE marker last, check needs
    forecasts.csv.
-4. Open. Cache keys without data fingerprint (checkpoint resume; Favorita panel cache).
-5. Open. revision_analysis says "latest run if repeated" but takes the earliest: check duplicates in the audit, then
-   make code and comment agree.
+4. D (16 Nov). Partway saves keyed by a fingerprint of the data as loaded (also in the manifest); Favorita cache keyed by the raw files' sizes; tests/test_cache_keys.py.
+5. D (16 Nov). No configuration was repeated in the folders analysed (final, cleanrev, ftransfer), so no result changes; the code now takes the latest repeat, as its comment says; tests/test_run_selection.py.
 6. Declined before submission: state_model refactor (risk of changing results); recorded for after.
 7. Open. Coverage measurement and a lockfile.
 

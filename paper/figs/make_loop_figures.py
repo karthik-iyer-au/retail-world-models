@@ -141,15 +141,17 @@ def fig_heat():
     changes = sorted({c for c, _ in vals}, key=lambda c: np.nanmedian([vals.get((c, d), np.nan) for d in DATA]))
     M = np.array([[vals.get((c, d), np.nan) for d in DATA] for c in changes])
     lim = float(np.nanpercentile(np.abs(M), 95))
-    fig, ax = plt.subplots(figsize=(FULL * 0.62, 0.17 * len(changes) + 0.9))
+    fig, ax = plt.subplots(figsize=(FULL * 0.62, 0.2 * len(changes) + 1.0))
     im = ax.imshow(M, aspect="auto", cmap="RdBu_r", norm=TwoSlopeNorm(0, -lim, lim))
     ax.set_xticks(range(len(DATA)), [TITLE[d] for d in DATA], rotation=40, ha="right")
-    ax.set_yticks(range(len(changes)), [c.replace("_", " ") for c in changes], fontsize=6.4)
+    ax.set_yticks(range(len(changes)), [PLAIN.get(c, c.replace("_", " ")).replace(r"\%", "%") for c in changes], fontsize=7.6)
+    ax.tick_params(axis="x", labelsize=7.6)
     for s in ax.spines.values():
         s.set_visible(False)
     ax.tick_params(length=0)
     cb = fig.colorbar(im, ax=ax, fraction=0.04, pad=0.02)
-    cb.set_label("Change in WRMSSE, first seed (%)", fontsize=6.6)
+    cb.set_label("Change in WRMSSE, first seed (%)", fontsize=7.6)
+    cb.ax.tick_params(labelsize=7)
     cb.outline.set_visible(False)
     ax.set_title("Each change tried alone on the world model (round 1)")
     save(fig, OUT / "fig_loop_heat.pdf")
@@ -272,6 +274,13 @@ PLAIN = {
     "num_leaves_4x": "four times the leaves", "num_leaves_quarter": "a quarter of the leaves",
     "objective_poisson": "Poisson objective", "rounds_double": "double the rounds", "total_weight_0.1": "loss on the summed total, weight 0.1",
     "more_lags": "two more lags", "volume_weight_0.25": "loss weighted by item level to the power 0.25",
+    "volume_weight_0.5": "loss weighted by item level to the power 0.5", "peak_weight_0.5": "more weight on peaks and dips",
+    "after_promo_weight_0.5": "more weight on weeks after a promotion", "plan_split": "plan part of the state kept apart",
+    "level_views": "recent levels shown beside the usual one", "latent_check": "latent check one step ahead",
+    "state_spread": "state kept from collapsing", "lr_half": "half the learning rate", "steps_1.5x": "1.5 times the steps",
+    "weight_average_0.999": "average of the weights over training", "width_1.5x": "1.5 times the width",
+    "adajepa_1": "one adaptation step at the plan date", "adajepa_3": "three adaptation steps at the plan date",
+    "level_from_all_history": "level from all history",
 }
 
 def final_end(names):
