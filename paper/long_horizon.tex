@@ -12,7 +12,12 @@ whether the rule of Section~\ref{sec:rq-broad} carries from 8 weeks to 52. It
 was written down before it ran: the six Dominick's categories and M5, two
 windows of 52 weeks each (364 days on M5), the final tuned settings with only the
 distance ahead changed, scored at every level as in the rest of the paper
-(Table~\ref{tab:long-horizon}, Figure~\ref{fig:long-horizon}).
+(Table~\ref{tab:long-horizon}, Figure~\ref{fig:long-horizon}). The later window
+ends where the final runs' data end (November 1996 on Dominick's, February 2016
+on M5) and the earlier starts 26 weeks (182 days) before it; both overlap the
+8-week test windows and the weeks the settings searches were scored on, so the
+test asks how the models hold over a longer distance, not how they do on unseen
+weeks.
 
 \paragraph{The planned comparison, in blocks}
 Each model forecasts 13 weeks, takes its forecast in as the sales of those weeks,
@@ -33,7 +38,7 @@ to the last, LightGBM's by \lhGrowLgbLo{} to \lhGrowLgbHi{}. The world model rol
 its state forward from the sales it takes in; when those are its own forecasts,
 its errors are carried into the state and grow with each block.
 
-\paragraph{The rule carries to 52 weeks}
+\paragraph{The average stays the most accurate forecast at 52 weeks}
 The average of the two models, each forecasting the whole year at once, is
 clearly more accurate than LightGBM forecasting directly in \lhPAvgDirBetter{} of
 \lhPAvgDirN{} paired comparisons and clearly less in \lhPAvgDirWorse{}; against
@@ -54,17 +59,31 @@ forecast on M5 and clearly more accurate than LightGBM forecasting directly
 \lhMfiveAvgRollonLgbN{} paired comparisons, clearly less in none. On the
 Dominick's categories the rolled-on state drifts: on cheese the forecast is
 \lhRollonCheeseFa{} times what sold and the WRMSSE \lhRollonCheese. LightGBM by
-block is close to LightGBM forecasting directly. Of all the forecasts, the
-average with each model forecasting directly is the most accurate on
-\lhAllLowestAvgDirect{} data sets, LightGBM directly or by block on two, and the
-average with the world model rolled on on M5; no other model is the most
-accurate anywhere. TFT, TimesFM, Chronos and the seasonal naive forecast are
+block is close to LightGBM forecasting directly. Of all the forecasts in Table~\ref{tab:long-horizon-all}, the average of the
+two models forecasting directly is the most accurate on \lhAllLowestAvgDirect{}
+data sets, and the average with the world model rolled on on M5. On analgesics
+and soft drinks the most accurate is LightGBM fitted per block with settings
+searched again for 52 weeks, and on cheese the average of that LightGBM with the
+world model; both were added after the planned test. TFT, TimesFM, Chronos and the seasonal naive forecast are
 behind LightGBM and the average on every data set; TimesFM given the plan is
 ahead of the world model alone on analgesics. Timestral given the plan cannot
 forecast 52 weeks: its forecast is \lhTimestralFaOneLo{} to \lhTimestralFaOneHi{}
 times what sold in the first 13 weeks and \lhTimestralFaLo{} to
 \lhTimestralFaHi{} times over the year. M5's world model forecasting all 52 weeks
 at once and TFT on M5 were not run.
+
+\paragraph{Settings searched again for 52 weeks (added after the planned test)}
+Each model's settings were searched again for 52 weeks on the six Dominick's
+categories, with the paper's search (Section~\ref{sec:loop}) on three 52-week
+windows 13 weeks apart. The world model's searches kept one change, on snacks;
+LightGBM's kept changes on five categories,
+none on cheese. Retuned, the world model is clearly less accurate than LightGBM
+in \lhPTunedWmLgbWorse{} of \lhPTunedWmLgbN{} paired comparisons and clearly more
+in \lhPTunedWmLgbBetter; the average of the two is clearly more accurate than
+LightGBM in \lhPTunedAvgLgbBetter{} and clearly less in \lhPTunedAvgLgbWorse.
+Retuning did not help LightGBM on balance: its retuned forecast is clearly more
+accurate than the first in \lhPTunedLgbBetter{} comparisons and clearly less in
+\lhPTunedLgbWorse.
 
 \input{generated/lh_tab_all}
 
@@ -73,8 +92,8 @@ at once and TFT on M5 were not run.
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figs/fig_long_horizon.pdf}
-\caption{\textbf{Taking in its own forecasts, the world model's error grows from
-block to block.} WRMSSE, mean over levels and two windows, in each block of 13
+\caption{\textbf{Taking in its own forecasts 13 weeks at a time, the world model is
+the least accurate of the three in most blocks.} WRMSSE, mean over levels and two windows, in each block of 13
 weeks (91 days on M5), for the world model, LightGBM and their average
 forecasting in blocks.}
 \label{fig:long-horizon}
