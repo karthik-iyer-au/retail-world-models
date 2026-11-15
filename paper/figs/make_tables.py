@@ -434,7 +434,7 @@ def tab_compute():
 \\caption{{\\textbf{{Run times of the final and comparison runs, from their manifests.}} Wall-clock minutes per
 run (data loading, training, forecasting and scoring) and hours in total, on one Google Colab machine with an NVIDIA Tesla T4 (LightGBM uses its CPU). Dominick's:
 six categories together; a Dominick's world-model run averages three fits. Two M5 runs resumed after the
-Colab runtime dropped record only the resumed part (the shortest values in their rows). Not counted: runs saved before
+Colab runtime dropped record only the resumed part (the shortest values in their rows). The lift model and the graph model are models of the earlier version of this study, not compared in this paper. Not counted: runs saved before
 run times were recorded, the development study, and TimesFM on Dominick's and Frat.}}
 \\label{{tab:compute}}
 \\footnotesize
