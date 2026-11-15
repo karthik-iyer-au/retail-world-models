@@ -10,14 +10,15 @@ Section~\ref{sec:results}; none of its numbers comes from the settings of the
 \firstver{}.
 
 
-\textbf{The tuned pair and their average are more accurate than every model not
-tuned on the data, on every data set but one.} Table~\ref{tab:sup-comparison}
+\textbf{The average of the tuned pair is more accurate than every model not
+tuned on the data, on every data set; TimesFM given the plan beats the world
+model alone on snacks and Frat, and LightGBM alone on Frat.} Table~\ref{tab:sup-comparison}
 adds the pretrained models, the Temporal Fusion Transformer and seasonal naive.
 TimesFM given the plan is the most accurate of the models not trained on the
 data on \supTfmPlanBestUntrained{} data sets. On Frat it is more accurate than
 either tuned model alone (\supFratTfmPlan{} against \supFratWm{} for the world
 model and \supFratLgb{} for LightGBM) but not than their average
-(\supFratAvg{}). Timestral given the plan forecasts far above sales on the
+(\supFratAvg{}); on snacks it is more accurate than the world model alone. Timestral given the plan forecasts far above sales on the
 weekly data, where a few extreme upper quantiles dominate the mean of its
 output: \supAnaTstPlan{} on analgesics against \supAnaTfmPlan{} for TimesFM given
 the plan.

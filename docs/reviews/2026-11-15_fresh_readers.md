@@ -11,12 +11,12 @@ T = text fix, no compute. C = needs compute (Karthik decides). D = done.
 3. T. "Most accurate choice" ignores the three-model ensemble, lower than the average at item by store on six data sets.
 4. T. LightGBM averaged with TimesFM (no world model) ties or beats the average of the two tuned models at item by store
    on four data sets; the paper must say a second model is needed, and where the world model is that second model.
-5. T. "Beats every untrained model on every data set but one" is wrong for snacks (TimesFM with plan 0.855 vs 0.893).
+5. D. "Beats every untrained model on every data set but one" is wrong for snacks (TimesFM with plan 0.855 vs 0.893).
 6. T. Steady-price vs frequent-cut finding is largely a data-set effect; show the contrast within each data set; the
    five-of-nine rule can be met by Dominick's alone; report by retailer; the slow-lines result is not reported.
 7. T. Favorita search: hurdle NB kept on a gain below its keep bar; latent check names inconsistent.
 8. T. Counts in 15.1 disagree with Table 24 and with themselves.
-9. T. Favorita history cut: 8.2 in text, 12.887 in Table 17.
+9. D (table used the largest window; now the mean at the shortest cut, 8.158). Favorita history cut: 8.2 in text, 12.887 in Table 17.
 10. C. Test windows are not clean out of sample; the held-out final 24 weeks are never scored; M5's official test
     period is not scored (offered to Karthik 17:40).
 11. T. "Other retailers' data" is mostly the same retailer (Dominick's pooled with Dominick's); rounding mismatches.
@@ -31,7 +31,7 @@ T = text fix, no compute. C = needs compute (Karthik decides). D = done.
 19. C/T. Promotion-regret simulation promised, no results; MinT on the tuned forecasts not tested; Dominick's category
     choice and Favorita top-10 selection need a reason.
 20. T. Counts reached by counting rounding ties as wins.
-21. T. Data paragraph arithmetic (daily vs weekly points), Table 2 training start, search run counts, undefined models.
+21. Part done (arithmetic, Table 2 start explained); open: search run counts, undefined models. Data paragraph arithmetic (daily vs weekly points), Table 2 training start, search run counts, undefined models.
 22. T. "First version / this revision" framing; references to GitHub instead of papers.
 23. T. Licence: PolyForm Noncommercial for code and CC BY-NC text conflict with the paper's advice and with Elsevier.
 24. T. Layout: URL breaks, letter-spaced URLs, orphan reference, split path, floats far from text, tiny labels.

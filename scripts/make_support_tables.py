@@ -200,7 +200,13 @@ def perturbation(v: dict) -> str:
             units = g[(g.input == "whole_plan") & (g.operation == "occlude")].units_change_on.mean() if len(g) else np.nan
             cells += [price, plan, 100 * units if np.isfinite(units) else np.nan]
         hist = d[(d.key == k) & (d.model == "world_model") & d.input.str.startswith("history_last")]
-        hmax = hist.dbottom.max() if len(hist) else np.nan
+        # the shortest cut, mean over windows, as the caption, the text and the occlusion figure (fresh reader,
+        # 15 November 2026: this was the largest single window)
+        if len(hist):
+            hm = hist.assign(kept=hist.input.str.extract(r"(\d+)$")[0].astype(int)).groupby("kept").dbottom.mean()
+            hmax = hm.loc[hm.index.min()]
+        else:
+            hmax = np.nan
         cells.append(hmax)
         fmt = lambda x, pct=False: "n/a" if not np.isfinite(x) else (f"{x:+.0f}\\%" if pct else f"{x:+.3f}")  # noqa: E731
         rows.append(f"{name} & {fmt(cells[0])} & {fmt(cells[1])} & {fmt(cells[2], True)} & {fmt(cells[3])} & "
