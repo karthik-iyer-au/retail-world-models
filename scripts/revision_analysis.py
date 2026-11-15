@@ -92,8 +92,10 @@ def index(results: Path) -> pd.DataFrame:
         rows.append({"key": lab[0], "set": lab[1], "model": lab[2], "seed": int(seed.group(1)) if seed else 0,
                      "run": d.name, "config": cfg["name"]})
     idx = pd.DataFrame(rows)
-    # one run per model: the lowest seed (seed 1 where seeds were run), the latest run if repeated
-    idx = idx.sort_values(["key", "set", "model", "seed", "run"]).groupby(["key", "set", "model"]).head(1)
+    # one run per model: the lowest seed (seed 1 where seeds were run), the latest run if repeated (run folders start
+    # with their UTC start time). No configuration was repeated in the folders analysed (checked 16 November 2026).
+    idx = idx.sort_values(["key", "set", "model", "seed", "run"], ascending=[True, True, True, True, False])
+    idx = idx.groupby(["key", "set", "model"]).head(1)
     return idx.reset_index(drop=True)
 
 

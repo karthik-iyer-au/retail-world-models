@@ -13,6 +13,7 @@ raw data matches its registered checksums. Reported numbers come from strict
 runs only.
 """
 import argparse
+import hashlib
 import json
 import shutil
 import time
@@ -63,6 +64,13 @@ def piece_of(env=None) -> tuple[int, int] | None:
         return None
     o, m = (int(x) for x in v.split(","))
     return o, m
+
+
+def data_fingerprint(panel: pd.DataFrame) -> str:
+    """SHA-256 over every row and column of the panel, in its column order."""
+    h = hashlib.sha256(",".join(map(str, panel.columns)).encode())
+    h.update(pd.util.hash_pandas_object(panel, index=False).to_numpy().tobytes())
+    return h.hexdigest()
 
 
 def run(config: dict, strict: bool = False, out_root: Path = RESULTS, partial: Path | None = None) -> Path:
@@ -148,9 +156,13 @@ def run(config: dict, strict: bool = False, out_root: Path = RESULTS, partial: P
     # started again. Kept per config and per version of the code folder (not
     # the whole commit, so a results-only commit does not lose them); removed once the run is saved.
     # Runs from uncommitted code save nothing partway, since their code cannot be matched later.
+    # The save folder is also keyed by the data as loaded, so a save is never reused on changed data (outside
+    # review, 15 November 2026); the fingerprint is recorded in the manifest.
+    manifest["data_fingerprint"] = data_fingerprint(panel)
     if partial is None and manifest["git"]["commit"] and not manifest["git"]["dirty"]:
         code = _git("rev-parse", "HEAD:src")
-        partial = out_root / "_partial" / f"{config['name']}_{manifest['config_sha256'][:8]}_{code[:8]}"
+        partial = (out_root / "_partial" /
+                   f"{config['name']}_{manifest['config_sha256'][:8]}_{code[:8]}_{manifest['data_fingerprint'][:8]}")
     if piece is not None and partial is None:
         raise RuntimeError("a split run's piece needs partway saves: committed code, or a save folder")
     # windows that overlap (step shorter than the horizon) take their test rows from all the data; otherwise the

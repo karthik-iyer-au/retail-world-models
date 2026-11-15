@@ -21,7 +21,7 @@ The series are the `n_stores` stores with the most units sold in
 `select_year`, crossed with the items sold in every one of those stores in
 that year (the rule of the study, fixed before the data were read). The
 first load writes the panel to a cache file next to the raw files, keyed by
-the settings, so later loads skip the 4.7 GB CSV.
+the settings and the raw files' sizes, so later loads skip the 4.7 GB CSV.
 """
 from __future__ import annotations
 
@@ -74,7 +74,9 @@ def load_favorita(root: str | None = None, start: str = "2015-01-01", n_stores: 
         import pyarrow  # noqa: F401
     except ImportError:
         cache = False
-    settings = {"start": start, "n_stores": n_stores, "select_year": select_year, "version": 1}
+    # keyed by the settings and by the raw files' sizes, so a changed download is never read from an old cache
+    settings = {"start": start, "n_stores": n_stores, "select_year": select_year, "version": 1,
+                "files": {p.name: p.stat().st_size for p in paths}}
     key = hashlib.sha256(json.dumps(settings, sort_keys=True).encode()).hexdigest()[:12]
     cached = root_path / f"panel_{key}.parquet"
     if cache and cached.exists():
