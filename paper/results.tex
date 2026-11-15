@@ -30,7 +30,7 @@ the tuned models did at each on the nine data sets studied.}
 \textbf{Decision} & \textbf{Grain} & \textbf{Forecast to use} & \textbf{What the tuned models did} \\
 \midrule
 Store orders and inventory & Item by store, by day or week & The average & Lowest error at the item levels on all \rqAvgBestItemWord{} data sets; clearly less accurate than either model in at most \rqAvgItemWorseMax{} of \rqPAvgWmItemn{} paired comparisons; simulated order cost below LightGBM's on \supOrderAvgBelowLgb{} of \supOrderSets{} \\
-Promotion and supplier funding & Item across stores, by week and over the promotion block & The average & Lowest at the item levels on all \rqAvgBestItemWord{}; over the whole block lowest on \rqAvgBestBlockWord{} and second on the other four; LightGBM alone drifts in total on Frat, M5, Favorita and soft drinks \\
+Promotion and supplier funding & Item across stores, by week and over the promotion block & The average & Lowest at the item levels on all \rqAvgBestItemWord{}; over the whole block lowest on \rqAvgBestBlockWord{} and second on the other four; LightGBM alone is less accurate over the block on Frat, M5, Favorita and soft drinks \\
 Category performance & Category by store and category, by week & The average & Lowest at store grain and above on \rqAvgBestCoarseWord{} of \rqNineWord{}; LightGBM lowest on snacks; lowest category-plan cost on \supCatPlanAvgLowest{} of \supCatPlanSets{} \\
 Financial plan & Chain total & The average & As for category performance; the total is the sum of the same item-by-store forecast, so it agrees with every plan below it \\
 New items and range changes & Item by store, items not yet trained on & The world model alone & Clearly more accurate than the average on all \rqKeptSets{} data sets tested, and than LightGBM without the item label on \rqWmBeatsNoid{} of \rqNoidSets{}; LightGBM with the label forecast \rqFaLgbItemLo{} to \rqFaLgbItemHi{}\% of actual sales on these items \\
@@ -77,15 +77,17 @@ stays close to LightGBM at \rqSnaAvg{}.
 \paragraph{Why run both}
 Running both models means a second pipeline, a GPU-trained network beside trees
 that train in minutes, and on lines with history the average gains little over
-the better single model. The case for it rests on totals: over the promotion block LightGBM alone drifts
-in total on M5, Frat, Favorita and soft drinks, where the world model does not.
+the better single model. The case for it rests on totals: over the promotion block LightGBM alone is less
+accurate than the world model on M5, Frat, Favorita and soft drinks, most at the
+chain total, while the world model alone is less accurate than LightGBM on the
+other five Dominick's categories.
 On M5 its block error is \rqBlockMfiveLgb{}, against \rqBlockMfiveWm{} for the world
 model and \rqBlockMfiveAvg{} for the average (Section~\ref{sec:rq-grain}). A retailer
-whose plans are summed to the category and the chain pays for that drift at every
+whose plans are summed to the category and the chain pays for that error at every
 level above the item.
 The searches behind the tuned settings took \computeSearchHours{} hours of run time
 across the nine data sets (Section~\ref{sec:repro}), a one-off cost. In the one transfer
-between retailers tested, settings tuned on M5 carried to Favorita
+between retailers tested, settings tuned on M5 were less accurate on Favorita than Favorita's own
 (Section~\ref{sec:rq-transfer}), so a retailer may not need to repeat the search; one transfer
 does not establish that, and a retailer should check it on its own data.
 
@@ -198,7 +200,7 @@ absent from training: there the world model alone was more accurate than the
 average on every data set tested, because LightGBM with the item label
 under-forecast them; without the label LightGBM came closer but was still less
 accurate on \rqWmBeatsNoid{} of \rqNoidSets{}. In the one transfer between
-retailers tested, settings tuned on M5 carried to Favorita, and training on other retailers' data did not
+retailers tested, settings tuned on M5 were less accurate on Favorita than Favorita's own, and training on other data sets did not
 help. The rule that follows, the average everywhere and the world model alone
 for items not trained on, is a finding on these data for forecasts of 8 weeks and 28 days
 under price and promotion plans. The comparison behind it, run over several

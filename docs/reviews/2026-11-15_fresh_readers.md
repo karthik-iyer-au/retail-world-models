@@ -19,15 +19,15 @@ T = text fix, no compute. C = needs compute (Karthik decides). D = done.
 9. D (table used the largest window; now the mean at the shortest cut, 8.158). Favorita history cut: 8.2 in text, 12.887 in Table 17.
 10. C. Test windows are not clean out of sample; the held-out final 24 weeks are never scored; M5's official test
     period is not scored (offered to Karthik 17:40).
-11. T. "Other retailers' data" is mostly the same retailer (Dominick's pooled with Dominick's); rounding mismatches.
-12. T. "M5's settings carried to Favorita" overclaims (0.447 vs 0.428, no paired test, one transfer).
+11. D (RQ4 question and text say other data sets; revisit row corrected). "Other retailers' data" is mostly the same retailer (Dominick's pooled with Dominick's); rounding mismatches.
+12. D (says M5's settings were less accurate on Favorita than Favorita's own). "M5's settings carried to Favorita" overclaims (0.447 vs 0.428, no paired test, one transfer).
 13. Part done (stated limitation: TFT untuned could do better); open: cleaned prices definition. Only two model classes tuned; TFT is cheap to tune; "cleaned prices" undefined.
-14. T. 3.6 and 5.1 contradict on what the carried-state tests show; RQ3 uses a window bootstrap the paper calls
+14. Part done (5.1 agrees with 3.6); open: RQ3 window bootstrap note. 3.6 and 5.1 contradict on what the carried-state tests show; RQ3 uses a window bootstrap the paper calls
     overconfident.
 15. D (Section 17 lists every added analysis; intro points there). Not every analysis added after the results is listed in Section 17 and the abstract.
 16. Part done (RQ3 data sets and why stated); open: Table 25 new-item wording, new stores row. Table 25 "new items" overstates kept-out existing items; RQ3 runs on five of nine data sets with no reason.
-17. T. Calibration heading contradicts its numbers; M5 is one fit, not five copies.
-18. Part done (Figure 9 caption, e3d43ef); open: "LightGBM drifts in total" has no direct measure; Figure 9 caption overclaims (error falls on some categories).
+17. Part done (heading matches the numbers); open: M5 one fit wording. Calibration heading contradicts its numbers; M5 is one fit, not five copies.
+18. D (block claims restated from block scores; Figure 9 caption). "LightGBM drifts in total" has no direct measure; Figure 9 caption overclaims (error falls on some categories).
 19. Part done (MinT stated as a limitation); open: regret simulation results, category and store selection reasons. Promotion-regret simulation promised, no results; MinT on the tuned forecasts not tested; Dominick's category
     choice and Favorita top-10 selection need a reason.
 20. D (ablation counted on the decimals shown; CRPS ties reported as ties; next-period count over the data sets where it can be read). Counts reached by counting rounding ties as wins.

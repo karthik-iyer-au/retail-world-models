@@ -139,7 +139,7 @@ retailer meets them:
 \item[RQ3, seen and unseen data.] How much accuracy does each model lose on
   items and stores it was not trained on?
 \item[RQ4, transferability.] Do a model's settings carry to another retailer,
-  and does training on other retailers' data make it more accurate?
+  and does training on other data sets (other categories of the same retailer and other retailers) make it more accurate?
 \end{description}
 
 \noindent These are the questions retailers ask of a forecast in practice\ifjournal\else{}
@@ -187,7 +187,7 @@ not having trained on them is the accuracy lost on that fifth against a model
 trained on everything.
 
 \paragraph{RQ4, transferability} Do the settings carry to another retailer, and does
-training on other retailers' data help? Settings tuned on M5 are carried
+training on other data sets help? Settings tuned on M5 are carried
 unchanged to Favorita and compared with settings tuned on Favorita itself. Each
 model is also trained on its data set together with the other data sets, and
 compared with the same model trained on its own data alone.
@@ -496,9 +496,10 @@ merchant asks of it. It is trained end to end on sales. The objective that
 trains the state to predict its own later values, the latent term of
 Section~\ref{sec:losses} and JEPA pretraining, was tried on every data set and
 kept on two of the nine, Favorita and snacks (Section~\ref{sec:loop}). The case
-for the model therefore rests on what the carried state adds to the forecast,
-which the carried-state tests measure (Section~\ref{sec:sup-mechanism}), and not
-on that objective.
+for the model therefore rests on its accuracy and on how its carried state
+responds to a plan, which the carried-state tests describe
+(Section~\ref{sec:sup-mechanism}), not on that objective; how much accuracy the
+state adds over the same network without it was not measured.
 
 \paragraph{Encoder and state}
 For item $i$ in one store, an encoder (a transformer over the last $L$

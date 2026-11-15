@@ -36,10 +36,11 @@ removes that choice.
 
 \textbf{On the whole promotion block, the average is again the safe choice.} It
 is lowest on \rqAvgBestBlockWord{} of \rqNineWord{} data sets and second on the other four. LightGBM is
-lowest on analgesics, bottled juice and snacks, but drifts in total where the
-world model does not: its block error on M5 is \rqBlockMfiveLgb{}, against \rqBlockMfiveWm{} for the world
-model and \rqBlockMfiveAvg{} for the average, and the same pattern shows on Frat, Favorita and
-soft drinks.
+lowest on analgesics, bottled juice and snacks, and the world model is behind it
+on five of the six Dominick's categories; on M5, Frat, Favorita and soft drinks
+the order turns, most at the chain total. On M5 LightGBM's block error is
+\rqBlockMfiveLgb{}, against \rqBlockMfiveWm{} for the world model and \rqBlockMfiveAvg{}
+for the average.
 
 \input{generated/rq_tab_grain}
 
@@ -136,8 +137,9 @@ and Favorita.
 \subsection{RQ4: transferability}
 \label{sec:rq-transfer}
 
-\textbf{In the one transfer between retailers tested, M5's settings carried to
-Favorita, and training on other retailers' data did not help either model.} M5's tuned settings carried unchanged to
+\textbf{In the one transfer between retailers tested, M5's settings were
+less accurate on Favorita than Favorita's own, and training on other data sets did not help
+either model.} M5's tuned settings carried unchanged to
 Favorita give \rqCarriedWm{} overall for the world model, against \rqOwnWm{} with Favorita's own
 settings, and \rqCarriedLgb{} for LightGBM, against \rqOwnLgb{} (Table~\ref{tab:rq-retailer});
 at item by store the difference is \rqCarriedWmIxs{} for the world model and \rqCarriedLgbIxs{} for
@@ -189,8 +191,8 @@ on the fast lines and the slow tail on \rqAvgBestFast{} of \rqNineWord{}. The tw
 are close on items they were trained on; they part company on items they were
 not, where LightGBM under-forecasts and the world model does not. The trigger
 for the exception is one a merchant always knows: whether the item is new to the
-range. In the one transfer between retailers tested, M5's settings carried to
-Favorita, and training on other retailers' data did not help. Where the forecast is used only for store
+range. In the one transfer between retailers tested, M5's settings were
+less accurate on Favorita than Favorita's own, and training on other data sets did not help. Where the forecast is used only for store
 orders, adding TimesFM given the plan as a third member makes item-by-store
 forecasts a little more accurate (Section~\ref{sec:sup-ablation}), at the cost of
 a third model to run.
