@@ -138,6 +138,8 @@ little power, and a model kept in it has not been shown to be as good as the
 best. Adjacent windows share training history and season, so they carry less
 information than their number suggests; the item bootstrap within a window
 treats the items as the sample and does not cover variation between windows.
+The kept-out comparisons of RQ3 rest on the bootstrap over windows, so their
+counts of clear differences carry this caveat.
 Averaging five fits with different seeds removes much of the noise between runs
 that the searches measured (Section~\ref{sec:loopnoise}), but both models on M5
 are single fits.
