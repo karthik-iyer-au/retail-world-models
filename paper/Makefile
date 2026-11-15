@@ -43,6 +43,7 @@ tables:
 	cd .. && $(PY) scripts/make_compute_table.py
 	cd .. && $(PY) scripts/make_support_tables.py
 	cd .. && $(PY) scripts/make_long_horizon_tables.py
+	cd .. && $(PY) scripts/make_data_spans_table.py
 
 # Three passes: the second resolves labels and reflows floats, the third
 # settles references that moved.

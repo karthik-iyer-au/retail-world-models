@@ -1,0 +1,20 @@
+\begin{table*}[t]
+\centering
+\caption{\textbf{What each data set holds and what the runs use.} The source data, the part the paper loads, the
+training length of the final runs and the earliest period it reaches, the rolling test windows, and the final periods
+held out of every run. Dominick's: the six categories share their dates; training starts in the earliest of them.
+M5's last 28 days are in the organisers' test file and are not loaded. Everything loaded before the training
+start is not trained on by the final runs.}
+\label{tab:data-spans}
+\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{adjustbox}{max width=\textwidth}\begin{tabular}{llllll}
+\toprule
+Data & Source holds & Loaded & Training (final runs) & Test windows & Held out \\
+\midrule
+M5 & Jan 2011 to Jun 2016 & Jan 2011 to May 2016 & 730 days, from Nov 2013 & 4 of 28 days, Nov 2015 to Feb 2016 & 84 days from Feb 2016 \\
+Dominick's & Sep 1989 to May 1997 & Sep 1989 to May 1997 & 156 weeks, from Sep 1992 & 6 of 8 weeks, Dec 1995 to Nov 1996 & 24 weeks from Nov 1996 \\
+Frat & Jan 2009 to Jan 2012 & Jan 2009 to Jan 2012 & 90 weeks, from Mar 2009 & 4 of 8 weeks, Dec 2010 to Jul 2011 & 24 weeks from Jul 2011 \\
+Favorita & Jan 2013 to Aug 2017 & Jan 2015 to Aug 2017 & 730 days, from Apr 2015 & 4 of 28 days, Apr 2017 to Aug 2017 & none \\
+\bottomrule
+\end{tabular}\end{adjustbox}
+\end{table*}

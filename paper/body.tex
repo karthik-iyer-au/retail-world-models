@@ -401,6 +401,20 @@ Favorita (daily) & Top 10 stores & Promotion, holidays and events, paydays & Fou
 \end{tabular}
 \end{table}
 
+\paragraph{What each data set holds and what the runs use}
+Every run trains on a fixed length of the most recent history before each test
+window, not on all the data loaded (Table~\ref{tab:data-spans}): 156 weeks on
+Dominick's, 90 on Frat and 730 days on M5 and Favorita. Each data set therefore
+holds history no final run trains on: Dominick's from September 1989 to the
+start of training in September 1992, M5 from January 2011 to November 2013, and
+Favorita two years before 1 January 2015, the start set when Favorita was added
+in \thisrev{}. The final 24 weeks (84 days on M5) of each data set but Favorita are
+held out of every run. Daily data gives a series nearly five times the points of weekly
+data over the same span: 730 against 156 for M5 and Dominick's, though M5's
+training covers fewer years.
+
+\input{generated/tab_data_spans}
+
 \paragraph{Measure}
 We use the weighted root mean squared scaled error (WRMSSE) of
 M5~\cite{m5accuracy} at each level of the hierarchy: 12 levels on M5
