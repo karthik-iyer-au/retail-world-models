@@ -12,7 +12,7 @@ T = text fix, no compute. C = needs compute (Karthik decides). D = done.
 4. D (paragraph and counts, scripts/make_partner_values.py). LightGBM averaged with TimesFM (no world model) ties or beats the average of the two tuned models at item by store
    on four data sets; the paper must say a second model is needed, and where the world model is that second model.
 5. D. "Beats every untrained model on every data set but one" is wrong for snacks (TimesFM with plan 0.855 vs 0.893).
-6. T. Steady-price vs frequent-cut finding is largely a data-set effect; show the contrast within each data set; the
+6. D (within-data-set contrasts, retailer counts, slow lines reported). Steady-price vs frequent-cut finding is largely a data-set effect; show the contrast within each data set; the
    five-of-nine rule can be met by Dominick's alone; report by retailer; the slow-lines result is not reported.
 7. T. Favorita search: hurdle NB kept on a gain below its keep bar; latent check names inconsistent.
 8. T. Counts in 15.1 disagree with Table 24 and with themselves.

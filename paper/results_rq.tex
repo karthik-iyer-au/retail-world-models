@@ -65,28 +65,31 @@ on M5, Frat and Favorita.
 \input{generated/rq_tab_lines}
 
 \paragraph{Steady prices and frequent cuts (added in \thisrev{})}
-\textbf{The world model is ahead of LightGBM on new lines and on lines sold at a
-steady price, and behind on lines driven by frequent price cuts; the average is
-ahead of LightGBM on every kind of line.} The world model is clearly more
-accurate than LightGBM on lines with short history on \kWmBetterShortHistory{} of
-the nine data sets (clearly less on \kWmWorseShortHistory), and on lines whose
-price was never cut on \kWmBetterNoPromotion{} (less on
-\kWmWorseNoPromotion). It is clearly less accurate on lines cut in a quarter of
-the periods or more on \kWmWorseHeavyPromotion{} data sets, on the fast lines and
-on lines that sell in nine periods of ten on \kWmWorseFast{} and
-\kWmWorseSteady{}, and in price-cut periods on \kWmWorsePriceCutPeriods{}
-(Table~\ref{tab:rq-kinds}). How a data set is priced follows the same line. On M5,
-where \kShareNoPromotionMfive\% of series had no price cut in the year before and
-\kShareHeavyPromotionMfive\% were cut often, and on Favorita, the world model is
-ahead on \kAheadMfive{} and \kAheadFav{} of the \kKinds{} kinds and behind on none;
-on Frat, where \kShareHeavyPromotionFrat\% were cut often, it is behind on
-\kBehindFrat{} and ahead on none; on the Dominick's categories, with
-\kShareHeavyPromotionDomLo{} to \kShareHeavyPromotionDomHi\% cut often, it is behind
-on most kinds, bottled juice the exception (ahead on \kAheadBjc{}, behind on none).
-The average is clearly more accurate than LightGBM on every kind on at least six of
-the nine data sets. For a planner: the world model's own forecast suits new lines
-and lines sold at a steady price, LightGBM's suits lines run on frequent deals, and
-the average serves both.
+\textbf{Within each data set, the world model's clearest edge is on lines with
+short history; its weakness in price-cut weeks is a finding of Dominick's. The
+average is ahead of LightGBM on every kind of line.} Inside a data set, the world
+model does relatively better against LightGBM on lines with short history than
+on the rest on \kShortBetterAll{} of the nine data sets, at three of the four
+retailers (Frat the exception). On every Dominick's category it does relatively
+worse in price-cut weeks than in other weeks (\kCutWorseDom{} of six), and worse
+on lines cut often than on lines never cut on \kHeavyWorseDom{} of six. The other
+retailers do not show this: on M5 its difference to LightGBM is \kDMfivePriceCutPeriods{}
+in price-cut periods against \kDMfiveOtherPeriods{} in the others, on Frat
+\kDFratPriceCutPeriods{} against \kDFratOtherPeriods{}, and on Favorita, which
+records no prices and is split by its promotion flag, \kDFavPriceCutPeriods{}
+against \kDFavOtherPeriods{} (point estimates; negative means the world model is
+more accurate). Across data sets the world model is ahead of LightGBM on
+\kAheadMfive{} and \kAheadFav{} of the \kKinds{} kinds on M5 and Favorita and behind
+on most on Frat and five of the six Dominick's categories (Table~\ref{tab:rq-kinds});
+with four retailers, that difference cannot be traced to how each is priced.
+Counted by data set, the world model is clearly more accurate than LightGBM on
+short-history lines on \kWmBetterShortHistory{} of nine and less on
+\kWmWorseShortHistory; on slow lines the count is \kWmBetterSlow{} against
+\kWmWorseSlow. The average is clearly more accurate than LightGBM on every kind on
+at least six of the nine data sets. For a planner: the world model's own forecast
+is worth most on lines with little history, the average serves every kind of line,
+and on a high-low chain like Dominick's neither model's response to deep cuts
+should be taken on trust (the companion paper~\cite{paper2} tests that response directly).
 
 \input{generated/rq_tab_kinds}
 

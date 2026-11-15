@@ -54,11 +54,28 @@ def main():
     v["kKinds"] = WORDS[len(KINDS)] if len(KINDS) < 10 else str(len(KINDS))
     for k in KEYS:
         v[f"kAhead{TAG[k]}"], v[f"kBehind{TAG[k]}"] = str(ahead[k]), str(behind[k])
+    # within each data set (fresh reader, 15 November 2026): the world model's difference to LightGBM on one kind
+    # against the other kind of the same data set, point estimates
+    dom = [k for k in KEYS if k.startswith("dominicks")]
+
+    def contrast(a, b, keys):  # data sets where the world model does relatively worse on kind a than on kind b
+        return sum(wm.loc[(a, k)].diff_to_lgb > wm.loc[(b, k)].diff_to_lgb for k in keys)
+
+    v["kCutWorseDom"] = WORDS[contrast("price_cut_periods", "other_periods", dom)]
+    v["kHeavyWorseDom"] = WORDS[contrast("heavy_promotion", "no_promotion", dom)]
+    v["kShortBetterDom"] = WORDS[contrast("long_history", "short_history", dom)]
+    v["kShortBetterAll"] = WORDS[contrast("long_history", "short_history", KEYS)]
+    for k in ("m5", "favorita", "frat"):
+        t = TAG[k]
+        for kind in ("price_cut_periods", "other_periods", "heavy_promotion", "no_promotion", "short_history",
+                     "long_history"):
+            tagk = "".join(x.capitalize() for x in kind.split("_"))
+            v[f"kD{t}{tagk}"] = f"{wm.loc[(kind, k)].diff_to_lgb:+.3f}".replace("-", "$-$")
     head = " & ".join(SHORT[k] for k in KEYS)
     tab = (r"""\begin{table*}[t]
 \centering
-\caption{\textbf{The world model is ahead of LightGBM on new lines and lines sold at a steady price, and behind on lines
-driven by frequent price cuts.} Each mark compares the world model with LightGBM on the item-by-store series (or periods)
+\caption{\textbf{The world model is ahead of LightGBM on most kinds of line on M5 and Favorita and behind on most on
+Frat and Dominick's; the average is ahead almost everywhere.} Each mark compares the world model with LightGBM on the item-by-store series (or periods)
 of one kind, over the rolling windows of the final runs: $+$ clearly more accurate, $-$ clearly less, $\cdot$ not
 clearly different (95\% interval of the difference in revenue-weighted RMSSE, 1,000 resamples of series). Every kind is
 fixed from the year before each window; a price cut is a price at most 95\% of the line's most common price that year
