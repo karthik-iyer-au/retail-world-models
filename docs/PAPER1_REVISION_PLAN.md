@@ -1454,3 +1454,15 @@ Scored as the paper scores (WRMSSE at every level, paired item bootstrap), world
 Reading, fixed now: years of history help the world model if its gap to LightGBM shrinks as the length grows on
 Dominick's; observations per series help if the gap shrinks with length only on the daily data sets (M5, Favorita); if
 the gap does not shrink anywhere, neither does. Cost estimate US$30 to US$60; stop and tell Karthik at US$60.
+
+### When the world model works: scoring by kind of item and week, 15 November 2026, 14:55, before it runs
+Karthik, 14:40: "yes i want to add that too". The final tuned world model, LightGBM and their average on every data
+set's rolling windows, scored on item-by-store series of each kind, fixed from the year before each window: fast and
+slow lines and short and long history (as RQ2), intermittent (no sales in more than half the periods) and steady (no
+sales in at most a tenth), and no, light (price cut in under a quarter of periods) and heavy (a quarter or more)
+promotion; and on price-cut periods inside the window against the others. A price cut is a price at most 95% of the
+series' most common price that year; Favorita has no prices, so its promotion flag stands in. Item-by-store RMSSE
+weighted as WRMSSE, differences to LightGBM with 95% intervals from 1,000 resamples of series, windows pooled
+(scripts/score_kinds.py). Reading, fixed now: the world model works on a kind where it is clearly more accurate than
+LightGBM on at least five of the nine data sets, and does not where it is clearly less accurate on at least five.
+Scoring only; no new runs.
