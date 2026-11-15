@@ -19,7 +19,7 @@ that give quantiles of their own (Chronos-Bolt, TFT) are also scored on them,
 over every window.
 
 \paragraph{Decisions}
-Three simulations turn forecasts into costs. \emph{Store orders}: for each
+Two simulations turn forecasts into costs. \emph{Store orders}: for each
 item-store-period, order the model's interval quantile at a critical ratio $r$
 of 0.5, 0.8 or 0.95; each unit over costs 1 and each unit short $r/(1-r)$.
 \emph{Category plan}: for category-by-store nodes $n$ with sales $y_{n,t}$,
@@ -27,11 +27,7 @@ forecast $\hat y_{n,t}$ and average price $\bar\pi_n$ before the window,
 \begin{equation}
 C = \frac{\sum_n \bar\pi_n \sum_{t} |y_{n,t} - \hat y_{n,t}|}{\sum_n \bar\pi_n \sum_t y_{n,t}},
 \end{equation}
-the absolute error in dollars over sales in dollars. \emph{Promotion decisions}: in the generated
-store worlds of \ifjournal an audit of these models\else the companion paper\fi~\cite{paper2}, where each promotion's true
-lift is known, promote when the predicted lift times margin exceeds a fixed
-cost; regret is the value lost against deciding with the true lift. The first
-two are reported against seasonal naive. All are simulations under stated
+the absolute error in dollars over sales in dollars.Both are reported against seasonal naive. Both are simulations under stated
 costs, not business results.
 
 \paragraph{Reconciliation}
