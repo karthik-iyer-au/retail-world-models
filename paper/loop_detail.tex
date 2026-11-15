@@ -12,7 +12,7 @@ runs on into its likelihood and JEPA rounds after its own loop ends.}
 
 \subsection{What the searches kept}
 
-The searches made \loopTries{} runs (a run split across machines counts once here; the run-time table counts each piece and every round), \loopTriesWm{} of the world model and \loopTriesLgb{} of LightGBM, and kept \loopKept{} changes, \loopKeptWm{} for the world model and \loopKeptLgb{} for LightGBM.
+The searches made \loopTries{} runs (a run split across machines counts once here; the run-time table counts each piece of a split run as a run), \loopTriesWm{} of the world model and \loopTriesLgb{} of LightGBM, and kept \loopKept{} changes, \loopKeptWm{} for the world model and \loopKeptLgb{} for LightGBM.
 LightGBM kept at least one change on every data set and the world model kept nothing on three of
 the six Dominick's categories. No single change helped the world model everywhere
 (Figure~\ref{fig:loopheat}). Weighting the loss toward high-volume series made the first seed worse on most data sets. The seven-step latent
