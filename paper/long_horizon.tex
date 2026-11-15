@@ -69,8 +69,10 @@ behind LightGBM and the average on every data set; TimesFM given the plan is
 ahead of the world model alone on analgesics. Timestral given the plan cannot
 forecast 52 weeks: its forecast is \lhTimestralFaOneLo{} to \lhTimestralFaOneHi{}
 times what sold in the first 13 weeks and \lhTimestralFaLo{} to
-\lhTimestralFaHi{} times over the year. M5's world model forecasting all 52 weeks
-at once and TFT on M5 were not run.
+\lhTimestralFaHi{} times over the year. TFT on M5 is behind LightGBM over the year
+(Table~\ref{tab:long-horizon-all}). M5's world model forecasting all 364 days at
+once did not finish within 12 hours on one GPU per window and is not reported; on
+M5 the world model is compared in blocks and rolled on.
 
 \paragraph{Settings searched again for 52 weeks (added after the planned test)}
 Each model's settings were searched again for 52 weeks on the six Dominick's

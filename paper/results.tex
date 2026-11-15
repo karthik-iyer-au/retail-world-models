@@ -116,8 +116,9 @@ order. The code and settings for every comparison are released for that purpose.
 The main comparisons run 8 weeks ahead on the weekly data and 28 days ahead on
 the daily data. The 52-week test (Section~\ref{sec:long-horizon}) covers six
 Dominick's categories and M5 with two windows each, with the settings tuned for
-the shorter horizon; Frat and Favorita were not tested a year ahead, and M5's
-world model was not run forecasting all 52 weeks at once. Whether the order holds
+the shorter horizon (searched again for 52 weeks on Dominick's only); Frat and
+Favorita were not tested a year ahead, and M5's world model forecasting all 364
+days at once did not finish within 12 hours on one GPU per window. Whether the order holds
 on a retailer's own year-ahead plans, which are revised as the year runs, was not
 tested.
 
