@@ -8,8 +8,8 @@ T = text fix, no compute. C = needs compute (Karthik decides). D = done.
 1. D (e3d43ef). Abstract and introduction still say 26- and 52-week forecasts are not tested; 52-week section heading rests on
    comparisons added after the planned test; the tuned 52-week search is not described in 8.7; 52-week windows undated.
 2. D (e3d43ef). Count of most accurate 52-week forecasts leaves cheese out and counts re-tuned LightGBM as plain LightGBM.
-3. T. "Most accurate choice" ignores the three-model ensemble, lower than the average at item by store on six data sets.
-4. T. LightGBM averaged with TimesFM (no world model) ties or beats the average of the two tuned models at item by store
+3. D. "Most accurate choice" ignores the three-model ensemble, lower than the average at item by store on six data sets.
+4. D (paragraph and counts, scripts/make_partner_values.py). LightGBM averaged with TimesFM (no world model) ties or beats the average of the two tuned models at item by store
    on four data sets; the paper must say a second model is needed, and where the world model is that second model.
 5. D. "Beats every untrained model on every data set but one" is wrong for snacks (TimesFM with plan 0.855 vs 0.893).
 6. T. Steady-price vs frequent-cut finding is largely a data-set effect; show the contrast within each data set; the

@@ -180,8 +180,8 @@ Brought together, the four answers give one rule. \textbf{Forecast every item in
 every store as the equal-weight average of a tuned world model and tuned
 gradient-boosted trees, and sum it to every grain; for an item the models have
 not been trained on, use the world model alone until they are retrained with
-it.} On the data sets studied, the average is the most accurate choice at store
-grain and above on \rqAvgBestCoarseWord{} of \rqNineWord{} data sets, at the item levels on all \rqAvgBestItemWord{}, and
+it.} On the data sets studied, the average is the most accurate of the two tuned
+models and their average at store grain and above on \rqAvgBestCoarseWord{} of \rqNineWord{} data sets, at the item levels on all \rqAvgBestItemWord{}, and
 on the fast lines and the slow tail on \rqAvgBestFast{} of \rqNineWord{}. The two models on their own
 are close on items they were trained on; they part company on items they were
 not, where LightGBM under-forecasts and the world model does not. The trigger

@@ -45,6 +45,7 @@ tables:
 	cd .. && $(PY) scripts/make_long_horizon_tables.py
 	cd .. && $(PY) scripts/make_data_spans_table.py
 	cd .. && $(PY) scripts/make_kinds_table.py
+	cd .. && $(PY) scripts/make_partner_values.py
 
 # Three passes: the second resolves labels and reflows floats, the third
 # settles references that moved.

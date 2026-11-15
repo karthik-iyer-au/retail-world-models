@@ -47,6 +47,16 @@ the item-by-store error beat equal weights in \supPFitBottomBetter{} of
 the error over all levels beat them in \supPFitAllBetter{} and lost in
 \supPFitAllWorse{}.
 
+What the average needs is a second model unlike LightGBM, and the world model is
+not the only one. Item by store, the three-model ensemble is lower than the
+average of the two tuned models on \ptThreeBelowAvg{} of \ptSets{} data sets and
+higher on \ptThreeAboveAvg; LightGBM averaged with TimesFM given the plan, with no
+world model, is level with or lower than that average on \ptNoWmAtOrBelowAvg{} and
+higher on \ptNoWmAboveAvg. The world model's own case rests where no other partner
+was tested to stand in for it: items the models were not trained on
+(Section~\ref{sec:rq-unseen}) and lines sold at a steady price
+(Section~\ref{sec:rq-lines}).
+
 Figure~\ref{fig:sup-ablation}a shows the same comparison data set by data set.
 Dropping the world model raises the item-by-store error on \sfAblNoWmWorse{}
 data sets, dropping LightGBM on \sfAblNoLgbWorse{} and dropping TimesFM on

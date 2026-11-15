@@ -179,8 +179,8 @@ dynamic inventory system, and they do not establish savings in a deployed retail
 A retailer makes decisions from the same demand at different grains, and on
 these data no single model was the most accurate at every grain. One forecast
 made item by store and summed upward, as the equal-weight average of a tuned
-world model and tuned gradient-boosted trees, was the most accurate choice at
-store grain and above on \rqAvgBestCoarseWord{} of \rqNineWord{} data sets and at the item levels on all
+world model and tuned gradient-boosted trees, was the most accurate of the two
+models and their average at store grain and above on \rqAvgBestCoarseWord{} of \rqNineWord{} data sets and at the item levels on all
 \rqAvgBestItemWord{}, on the fast lines and on the slow tail. The combination held across grains, but the choice of model changed for items
 absent from training: there the world model alone was more accurate than the
 average on every data set tested, because LightGBM with the item label
