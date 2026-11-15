@@ -97,7 +97,7 @@ Also found: Favorita's C4 (49%) is scored on a price held at 1 in the data, so i
 4. D (16 Nov). Partway saves keyed by a fingerprint of the data as loaded (also in the manifest); Favorita cache keyed by the raw files' sizes; tests/test_cache_keys.py.
 5. D (16 Nov). No configuration was repeated in the folders analysed (final, cleanrev, ftransfer), so no result changes; the code now takes the latest repeat, as its comment says; tests/test_run_selection.py.
 6. Declined before submission: state_model refactor (risk of changing results); recorded for after.
-7. Open. Coverage measurement and a lockfile.
+7. D (16 Nov). Coverage measured: 88% of 4,250 statements in src/rwm (1,506 tests); lowest are the optional comparison-model wrappers (TFT 25%, Chronos 41%, Timestral 73%), reconciliation (31%) and the download command (50%), which need packages or network the test machine lacks. Lockfile: requirements-lock.txt, frozen from the cloud image the runs use (scripts/freeze_env.py).
 
 ## Outside design review (GPT, 15 November)
 Dominick's is six of nine data sets: report by retailer too (T). Settings informed by later windows: stated

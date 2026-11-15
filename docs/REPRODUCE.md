@@ -75,3 +75,9 @@ tries to other machines, so it runs on the deployed app rather than from a
 python cloud/start_research.py configs/research/dominicks_che_world_model.yaml
 modal volume get rwm-results research/dominicks_che_world_model/log.jsonl results/research/dominicks_che_world_model/log.jsonl
 ```
+
+## Tests, coverage and exact versions
+
+`python -m pytest -q` runs the 1,506 tests (about 15 minutes on one CPU); `python -m pytest -q --cov=rwm` adds
+coverage (88% of src/rwm on 16 November 2026). `requirements-lock.txt` lists the exact packages of the cloud image
+the runs used (Python 3.12), written by `scripts/freeze_env.py` inside that image.
