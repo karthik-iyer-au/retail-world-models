@@ -1432,3 +1432,12 @@ num_leaves_quarter and objective_poisson, soft drinks rounds_double, snacks num_
 is not run again and its untuned run is scored as the tuned one. Run now: 16 LightGBM configs (four categories,
 direct and by block, two windows) and the world model on snacks (two windows); bottled juice's LightGBM when its search
 ends. Scored with the rest by scripts/score_long_horizon.py; nothing in the scoring or the paper's rule changes.
+
+### 52-week forecasts on price-cut and regular weeks: 15 November 2026, 12:30 (fixed before it ran)
+Karthik asked whether the world model's 52-week gap to LightGBM on Dominick's sits in promotion weeks. Each 52-week
+forecast already run is scored on price-cut weeks (price at most 95% of the item's most common price in its store over
+the year before the window; the same rule on Dominick's and M5, which records no promotions) and on the other weeks,
+and on Dominick's also by deal code: item-by-store RMSSE weighted by revenue over the year before the window, with 95%
+intervals of each model's difference to LightGBM forecasting directly from 1,000 resamples of items
+(scripts/score_long_horizon_promo.py). Reading: if the world model's gap on Dominick's is clearly larger on price-cut
+weeks than on regular weeks, the price response explains it; if not, it does not.
