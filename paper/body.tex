@@ -381,7 +381,10 @@ and the days on which SNAP food assistance is paid~\cite{m5accuracy}.
 \emph{Dominick's Finer Foods} holds weekly scanner data by store for a Chicago
 chain from 1989 to 1997, with price, a promotion code and cost~\cite{dominicks}.
 We use six categories chosen before any final run (cheese, snack crackers, soft
-drinks, bottled juice, analgesics, frozen entrees). \emph{Breakfast at the Frat}
+drinks, bottled juice, analgesics, frozen entrees). Every model sees cleaned
+prices: a recorded price more than five times above, or below a fifth of, the
+same item's median price that week across the stores that recorded one (at least
+three) is treated as not recorded, and the store's last good price is used. \emph{Breakfast at the Frat}
 holds weekly sales of 55 breakfast items in 77 stores from 2009 to 2012, with
 the shelf price, base price, and whether the item was on display, in the weekly
 circular (feature) or on a tag-only price reduction~\cite{frat}.
