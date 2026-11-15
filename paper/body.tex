@@ -34,7 +34,9 @@ to \rqFastShareDomHi{}\% of the items make 80\% of unit sales. Ranges also
 change: items are added and delisted and stores open, so part of every forecast
 is for a line or a store with little or no history. A forecast that serves the
 fast lines well can fail on the tail or on a new item, and a planner deciding
-for one kind of line needs to know which.
+for one kind of line needs to know which. Lines also differ in how they are
+priced: some sell at a steady price all year, others are cut often, and a
+chain's pricing, every day low prices or regular deals, sets the mix.
 
 We test four kinds of model. Gradient-boosted trees are the proven method:
 LightGBM was behind the leading entries of the M5 competition
@@ -130,8 +132,9 @@ retailer meets them:
   forecast best, period by period and over a whole promotion block, when every
   grain is summed from the same item-by-store forecast?
 \item[RQ2, nature of the line.] How does each model do on the fast lines that
-  carry most of the sales, on the long tail of slow lines, and on lines with
-  short history?
+  carry most of the sales, on the long tail of slow lines, on lines with
+  short history, and (added in \thisrev{}) on lines sold at a steady price
+  against lines on frequent price cuts?
 \item[RQ3, seen and unseen data.] How much accuracy does each model lose on
   items and stores it was not trained on?
 \item[RQ4, transferability.] Do a model's settings carry to another retailer,
@@ -163,6 +166,16 @@ sale falls less than 26 weeks before the forecast. Each part is scored on its
 own series at every grain, so that the total of the fast lines, the slow lines
 of each store, and so on, are each judged as a planner would judge them. The
 share of items that makes 80\% of sales is reported for each data set.
+Added in \thisrev{}, after the 52-week test: each item-by-store series is also
+classed, from the year before each window, by how often it sells (in under half
+the periods, or in nine of ten or more) and by how often its price is cut (never,
+in under a quarter of the periods, or in a quarter or more; a cut is a price at
+most 95\% of the line's most common price that year, and on Favorita, which
+records no prices, the promotion flag), and the periods of each window are split
+into price-cut periods and the rest. Each kind is scored on its own series, and
+the world model is said to be ahead on a kind when it is clearly more accurate
+than LightGBM on at least five of the nine data sets, a rule fixed before the
+scoring ran.
 
 \paragraph{RQ3, seen and unseen data} Does the forecast hold up on items and stores
 the model was not trained on? Ranges change and stores open, so part of every

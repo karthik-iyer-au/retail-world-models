@@ -64,6 +64,32 @@ on M5, Frat and Favorita.
 
 \input{generated/rq_tab_lines}
 
+\paragraph{Steady prices and frequent cuts (added in \thisrev{})}
+\textbf{The world model is ahead of LightGBM on new lines and on lines sold at a
+steady price, and behind on lines driven by frequent price cuts; the average is
+ahead of LightGBM on every kind of line.} The world model is clearly more
+accurate than LightGBM on lines with short history on \kWmBetterShortHistory{} of
+the nine data sets (clearly less on \kWmWorseShortHistory), and on lines whose
+price was never cut on \kWmBetterNoPromotion{} (less on
+\kWmWorseNoPromotion). It is clearly less accurate on lines cut in a quarter of
+the periods or more on \kWmWorseHeavyPromotion{} data sets, on the fast lines and
+on lines that sell in nine periods of ten on \kWmWorseFast{} and
+\kWmWorseSteady{}, and in price-cut periods on \kWmWorsePriceCutPeriods{}
+(Table~\ref{tab:rq-kinds}). How a data set is priced follows the same line. On M5,
+where \kShareNoPromotionMfive\% of series had no price cut in the year before and
+\kShareHeavyPromotionMfive\% were cut often, and on Favorita, the world model is
+ahead on \kAheadMfive{} and \kAheadFav{} of the \kKinds{} kinds and behind on none;
+on Frat, where \kShareHeavyPromotionFrat\% were cut often, it is behind on
+\kBehindFrat{} and ahead on none; on the Dominick's categories, with
+\kShareHeavyPromotionDomLo{} to \kShareHeavyPromotionDomHi\% cut often, it is behind
+on most kinds, bottled juice the exception (ahead on \kAheadBjc{}, behind on none).
+The average is clearly more accurate than LightGBM on every kind on at least six of
+the nine data sets. For a planner: the world model's own forecast suits new lines
+and lines sold at a steady price, LightGBM's suits lines run on frequent deals, and
+the average serves both.
+
+\input{generated/rq_tab_kinds}
+
 \subsection{RQ3: seen and unseen data}
 \label{sec:rq-unseen}
 

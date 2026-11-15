@@ -1,0 +1,32 @@
+\begin{table*}[t]
+\centering
+\caption{\textbf{The world model is ahead of LightGBM on new lines and lines sold at a steady price, and behind on lines
+driven by frequent price cuts.} Each mark compares the world model with LightGBM on the item-by-store series (or periods)
+of one kind, over the rolling windows of the final runs: $+$ clearly more accurate, $-$ clearly less, $\cdot$ not
+clearly different (95\% interval of the difference in revenue-weighted RMSSE, 1,000 resamples of series). Every kind is
+fixed from the year before each window; a price cut is a price at most 95\% of the line's most common price that year
+(Favorita, which records no prices: its promotion flag). The last columns count data sets where the world model, and
+the average of the two models, are clearly more or less accurate than LightGBM. Added in \thisrev{} after the 52-week
+test.}
+\label{tab:rq-kinds}
+\footnotesize\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lccccccccccccc}
+\toprule
+ & \multicolumn{9}{c}{World model against LightGBM} & \multicolumn{2}{c}{WM} & \multicolumn{2}{c}{Avg} \\
+\cmidrule(lr){2-10}\cmidrule(lr){11-12}\cmidrule(lr){13-14}
+Kind of line or period & Ana & Bjc & Che & Fre & Sdr & Sna & Frat & M5 & Fav & ahead & behind & ahead & behind \\
+\midrule
+Short history & $+$ & $+$ & $+$ & $-$ & $\cdot$ & $+$ & $\cdot$ & $+$ & $+$ & 6 & 1 & 8 & 0 \\
+Long history & $-$ & $+$ & $-$ & $-$ & $-$ & $-$ & $-$ & $+$ & $+$ & 3 & 6 & 7 & 0 \\
+Slow lines & $-$ & $+$ & $+$ & $-$ & $+$ & $-$ & $-$ & $+$ & $+$ & 5 & 4 & 9 & 0 \\
+Fast lines & $-$ & $+$ & $-$ & $-$ & $-$ & $-$ & $-$ & $+$ & $+$ & 3 & 6 & 7 & 0 \\
+Sells in under half the periods & $\cdot$ & $+$ & $+$ & $-$ & $\cdot$ & $-$ & $\cdot$ & $+$ & $+$ & 4 & 2 & 9 & 0 \\
+Sells in nine periods of ten or more & $-$ & $\cdot$ & $-$ & $-$ & $-$ & $-$ & $-$ & $\cdot$ & $+$ & 1 & 6 & 7 & 2 \\
+Steady price (no cut) & $-$ & $+$ & $+$ & $-$ & $+$ & $-$ & $\cdot$ & $+$ & $+$ & 5 & 3 & 7 & 1 \\
+Occasional cuts (under a quarter of periods) & $-$ & $+$ & $-$ & $-$ & $\cdot$ & $-$ & $\cdot$ & $+$ & $+$ & 3 & 4 & 8 & 1 \\
+Frequent cuts (a quarter of periods or more) & $-$ & $\cdot$ & $-$ & $-$ & $-$ & $-$ & $-$ & $+$ & $+$ & 2 & 6 & 8 & 0 \\
+Periods at regular price & $-$ & $+$ & $-$ & $+$ & $-$ & $\cdot$ & $-$ & $+$ & $+$ & 4 & 4 & 9 & 0 \\
+Price-cut periods & $-$ & $\cdot$ & $-$ & $-$ & $-$ & $-$ & $\cdot$ & $\cdot$ & $+$ & 1 & 5 & 6 & 1 \\
+\bottomrule
+\end{tabular}
+\end{table*}
