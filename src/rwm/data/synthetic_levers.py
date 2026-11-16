@@ -44,6 +44,23 @@ class Truth:
     display_effect: float = 0.25
     both_effect: float = 0.15
     dip: float = 0.15
+    # "loglinear" (the default, as in paper 2) or "bent" (paper 3, amendment 1): a temporary cut lifts sales by
+    # 1 + 1.015 (1 - exp(-depth / 0.15)) and the regular-price response is linear in the price ratio
+    shape: str = "loglinear"
+
+
+def cut_factor(depth_ratio, t: "Truth"):
+    """Sales multiplier of a price at `depth_ratio` = price / regular."""
+    if t.shape == "bent":
+        return 1 + 1.015 * (1 - np.exp(-(1 - np.asarray(depth_ratio, dtype=float)) / 0.15))
+    return np.asarray(depth_ratio, dtype=float) ** t.cut_elasticity
+
+
+def regular_factor(ratio, t: "Truth"):
+    """Level multiplier of a regular price at `ratio` times the list price."""
+    if t.shape == "bent":
+        return 1 + t.regular_elasticity * (np.asarray(ratio, dtype=float) - 1)
+    return np.asarray(ratio, dtype=float) ** t.regular_elasticity
 
 
 def _logit(p):
@@ -106,7 +123,7 @@ def load_synthetic_levers(
             regular = it["list_price"] * np.where(weeks >= wk, 1 + amt, 1.0) * ep_factor[s]
             price = regular * (1 - depth)
             season = 1 + it["season"] * np.sin(2 * np.pi * weeks / 52 + it["phase"])
-            level = it["size"] * season * np.exp(u) * (regular / it["list_price"]) ** t.regular_elasticity
+            level = it["size"] * season * np.exp(u) * regular_factor(regular / it["list_price"], t)
             frame = pd.DataFrame({
                 SERIES: f"S{s:02d}_I{i:02d}", STORE: f"S{s:02d}", ITEM: f"I{i:02d}", DATE: dates,
                 PRICE: price, "promo": promo.astype(int), "display": display.astype(int),
@@ -139,7 +156,7 @@ def expected_units(frame: pd.DataFrame, t: Truth | dict) -> np.ndarray:
     first = prev.isna()
     prev = prev.astype(object).where(~first, f["true_prev_planned"].astype(bool)).astype(bool)
     dip = prev & ~on
-    m = (f["true_level"] * (f[PRICE] / f["true_regular"]) ** t.cut_elasticity
+    m = (f["true_level"] * cut_factor(f[PRICE] / f["true_regular"], t)
          * (1 + t.promo_effect) ** f["promo"] * (1 + t.display_effect) ** f["display"]
          * (1 + t.both_effect) ** (f["promo"] * f["display"]) * np.where(dip, 1 - t.dip, 1.0))
     return m.reindex(frame.index).to_numpy()
