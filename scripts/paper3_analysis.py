@@ -27,7 +27,8 @@ def load(bench: str) -> pd.DataFrame:
     rows = []
     for f in glob.glob(f"{bench}/**/*.json", recursive=True):
         r = json.loads(Path(f).read_text())
-        row = {"confounding": r["confounding"], "seed": r["seed"], "version": r["version"],
+        row = {"shape": r.get("shape", "loglinear"), "confounding": r["confounding"], "seed": r["seed"],
+               "version": r["version"],
                "model": {"state_model": "world model", "lightgbm_direct": "LightGBM"}.get(r["kind"], "log-linear"),
                "rmsse": r["accuracy"]["item_by_store_rmsse"], "promo_choice": r["promo_choice"],
                "regular_loss": r["regular_choice_loss"], "stock_observed": r["observed"]["stock"]}
@@ -36,7 +37,9 @@ def load(bench: str) -> pd.DataFrame:
             row[f"rank_{p}"] = r[p]["change_rank"]
             row[f"stock_{p}"] = r[p]["stock"]
         rows.append(row)
-    d = pd.DataFrame(rows).drop_duplicates(["confounding", "seed", "version"])
+    d = pd.DataFrame(rows).drop_duplicates(["shape", "confounding", "seed", "version"])
+    amended = ("wm_jepa", "wm_latent", "wm_overshoot", "wm_adajepa", "wm_rr", "lgb_rr", "loglinear_rr")
+    d["grid"] = ~d["version"].isin(amended)  # the 25 versions of the fixed plan
     for p in PLANS:
         ratio = d[f"ratio_{p}"]
         err = np.abs(np.log(ratio.where(ratio > 0)))
@@ -61,7 +64,7 @@ def _spearman_rows(x: np.ndarray, y: np.ndarray) -> np.ndarray:
 def link(d: pd.DataFrame, measures: list[str], draws: int = 2000) -> pd.DataFrame:
     rng = np.random.default_rng(0)
     out = []
-    for conf, g in d.groupby("confounding"):
+    for (shape, conf), g in d.groupby(["shape", "confounding"]):
         worlds = [w.reset_index(drop=True) for _, w in g.groupby("seed")]
         idx = [rng.integers(0, len(w), size=(draws, len(w))) for w in worlds]
         for m in measures:
@@ -69,7 +72,7 @@ def link(d: pd.DataFrame, measures: list[str], draws: int = 2000) -> pd.DataFram
             boot = np.nanmean([_spearman_rows(w["rmsse"].to_numpy()[i], w[m].to_numpy()[i])
                                for w, i in zip(worlds, idx)], axis=0)
             lo, hi = np.nanpercentile(boot, [2.5, 97.5])
-            out.append({"confounding": conf, "measure": m, "spearman": est, "lo": lo, "hi": hi,
+            out.append({"shape": shape, "confounding": conf, "measure": m, "spearman": est, "lo": lo, "hi": hi,
                         "versions": len(g)})
     return pd.DataFrame(out)
 
@@ -82,18 +85,35 @@ def main(argv=None):
     d = load(a.bench)
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
-    d.sort_values(["confounding", "seed", "version"]).to_csv(out / "versions.csv", index=False)
+    d.sort_values(["shape", "confounding", "seed", "version"]).to_csv(out / "versions.csv", index=False)
+    g = d[d["grid"]]
     cols = ["rmsse", "stock_observed", "err_mean", "stock_mean", "promo_loss", "regular_loss"] + \
         [f"err_{p}" for p in PLANS] + [f"ratio_{p}" for p in PLANS]
-    d.groupby(["confounding", "model"])[cols].median().to_csv(out / "by_model.csv")
+    g.groupby(["shape", "confounding", "model"])[cols].median().to_csv(out / "by_model.csv")
     measures = ["err_mean", "stock_mean", "promo_loss", "regular_loss"] + [f"err_{p}" for p in PLANS]
-    L = link(d, measures).assign(versions_of="all")  # the test fixed in the plan
+    L = link(g, measures).assign(versions_of="all")  # the test fixed in the plan
     # added after the plan, labelled as such: the same link within each model class
-    for name, g in d[d.model != "log-linear"].groupby("model"):
-        L = pd.concat([L, link(g, measures).assign(versions_of=name)], ignore_index=True)
+    for name, gg in g[g.model != "log-linear"].groupby("model"):
+        L = pd.concat([L, link(gg, measures).assign(versions_of=name)], ignore_index=True)
     L.to_csv(out / "link.csv", index=False)
+    # amendment 1: each changed version against its unchanged counterpart in the same world (median of the
+    # paired difference over the three seeds; negative is better)
+    pairs = {"wm_jepa": "wm_d32_s2000_h26", "wm_latent": "wm_d32_s2000_h26", "wm_overshoot": "wm_d32_s2000_h26",
+             "wm_adajepa": "wm_d32_s2000_h26", "wm_rr": "wm_d32_s2000_h26", "lgb_rr": "lgb_l31_r500_m20",
+             "loglinear_rr": "loglinear"}
+    rows = []
+    key = ["shape", "confounding", "seed"]
+    for v, base in pairs.items():
+        a_, b_ = d[d.version == v].set_index(key), d[d.version == base].set_index(key)
+        both = a_.index.intersection(b_.index)
+        if not len(both):
+            continue
+        diff = (a_.loc[both, cols] - b_.loc[both, cols]).groupby(level=["shape", "confounding"]).median()
+        rows.append(diff.assign(version=v, against=base).reset_index())
+    if rows:
+        pd.concat(rows).to_csv(out / "amended.csv", index=False)
     pd.set_option("display.width", 200)
-    print(d.groupby(["confounding", "model"])[["rmsse", "err_mean", "stock_mean", "promo_loss", "regular_loss"]]
+    print(g.groupby(["shape", "confounding", "model"])[["rmsse", "err_mean", "stock_mean", "promo_loss", "regular_loss"]]
           .median().round(3))
     print(L[L.measure.isin(["err_mean", "stock_mean", "promo_loss", "regular_loss"])].round(3).to_string(index=False))
 
