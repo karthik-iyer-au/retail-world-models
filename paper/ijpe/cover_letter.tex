@@ -1,0 +1,38 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{hyperref}
+\input{private}
+\setlength{\parindent}{0pt}\setlength{\parskip}{8pt}
+\begin{document}
+To the Editor, \emph{International Journal of Production Economics}
+
+We submit ``Forecasting Retail Sales at Every Grain: Trees, Foundation Models, Transformers and World Models
+Compared on Four Public Data Sets'' for consideration as a research article.
+
+Retailers run store orders, promotion plans, category reviews and supplier terms from the same demand at
+different grains. The paper asks whether one item-by-store forecast, summed to every coarser grain, can serve
+all of these decisions, and which model does it best. It compares gradient-boosted trees, pretrained
+foundation models, the Temporal Fusion Transformer and a world model that carries each item's state under the
+price and promotion plan, on four public data sets (M5, six Dominick's categories, Breakfast at the Frat and
+Corporaci\'on Favorita), with the two main models tuned by the same search procedure.
+
+The findings are stated by decision. The average of the tuned world model and the tuned trees is the safe
+default at every grain: lowest error in 22 of 27 grain and data-set cases, never the least accurate on the
+periods every final run held out, and the least dollar error in category plans on seven of nine data sets. The
+world model alone is the choice for existing items not yet in training, where it loses at most 0.040 in scaled
+error against up to 0.311 for the trees. The trees are stronger on heavily promoted and fast-selling lines.
+Slow lines, longer training history and year-ahead forecasts give mixed evidence, and the paper says so. The
+decision costs of store orders and category plans are reported alongside accuracy, which we believe suits the
+journal's readers in operations and supply chain planning.
+
+The manuscript is prepared for double-anonymised review; author details are on the separate title page. An
+earlier version is available as a preprint on arXiv (2610.25170). The manuscript is not under consideration
+elsewhere. All data are public; the code, configurations and result files are archived on Zenodo
+(doi:10.5281/zenodo.24271672). The use of generative AI tools is declared in the manuscript. The authors have no
+competing interests and received no funding for this work.
+
+Yours sincerely,
+
+Karthik Iyer (corresponding author), on behalf of both authors\\
+\corrEmail
+\end{document}
