@@ -262,3 +262,29 @@ checks-against-accuracy question moves to the versions the settings searches sav
 8. The October audit of the pre-revision versions stays in the record (`results/paper2/summary`) and is not the
    paper's result. Thresholds, the known-answer study and the C7 episode list are unchanged. No audit result changes
    any model setting.
+
+**16 November 2026, before any of these results: three checks added after the outside review of paper 2.**
+Karthik, 16 November ("yes" to the five items offered at 18:03). All three are labelled in the paper as added after
+the results; nothing fixed earlier changes, and every earlier number is reported unchanged beside them.
+
+1. C4 within the observed price range (`scripts/c4_observed.py`). For each of the nine final tuned world models and
+   each window, the C4 steps of 13 October (planned price cut by 5, 10, 20 and 30% in turn) are counted only where
+   the deeper price is no lower than the lowest price that item had in that store in the window's training data.
+   Reported per data set: the share of kept steps where the deeper cut lowers the forecast (same tolerance as C4),
+   the share of steps kept, and C4 on all steps recomputed as a check against the tuned audit. No pass rule is
+   changed; the result is read as whether the C4 failures sit outside the prices the model has seen. Favorita, whose
+   prices are fixed at 1, keeps no step and is reported as such.
+2. What a wrong lift costs, in the known-answer worlds (`scripts/known_answer_decisions.py`, from the saved
+   `*_lifts.csv.gz`; no model is refitted). On the planned item-weeks of each world and model: (a) promotion choice:
+   keep the half of planned item-weeks with the largest stated total lift; report the true lift of that half over
+   the true lift of the half with the largest true lift (1 is as good as knowing the truth; random choice is also
+   reported); (b) stock: the absolute difference between stated and true total lift, summed and divided by the
+   summed true lift (the share of the true lift a planner would over- or under-stock by ordering to the stated lift).
+3. Sensitivity of the known-answer study (`scripts/known_answer.py --variants`). The planned-into-demand world
+   (confounding 1.0, shock persistence 0.7, regular-price elasticity -0.5, temporary-cut elasticity -2.5) is
+   regenerated with one setting changed at a time: confounding 0.5 and 1.5; persistence 0.4 and 0.9; regular-price
+   elasticity -0.25 and -1.0; temporary-cut elasticity -1.5 and -3.5 (eight worlds). In each, the world model
+   (seed 1, settings unchanged) and LightGBM are fitted and audited as in the main study. Reported per world: the
+   summed stated lift over the true lift for each model, the stated regular-price response over the true one, and
+   which checks each passes. The question is whether the world model's explanation stays misleading across
+   settings while passing the checks, not whether the overstatement keeps its size.
