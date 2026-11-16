@@ -129,6 +129,11 @@ Data set & WM & LGB & Avg & WM & LGB & Avg & WM vs LGB, blocks & Avg vs LGB, dir
     words = "none one two three four five six seven eight nine".split()
     v["lhWmDirAheadN"], v["lhWmDirSets"] = words[len(ahead)], words[len(both)]
     v["lhWmDirAheadNames"] = " and ".join(KEYS[k].lower() if k.startswith("dominicks") else KEYS[k] for k in ahead) or "none"
+    if "m5" in both:  # M5 by window: the later window (1) ends where the final runs' data end
+        w = s[(s.key == "m5") & (s.span == "all")].groupby(["model", "window"]).wrmsse.mean()
+        for win, tag in ((0, "Early"), (1, "Late")):
+            v[f"lhMfiveWmDir{tag}"] = f"{w[('world_model_direct', win)]:.3f}"
+            v[f"lhMfiveLgbDir{tag}"] = f"{w[('lightgbm_direct', win)]:.3f}"
     t = [clear(k, "all", "world_model_direct", "lightgbm_direct") for k in both]
     v["lhPWmDirBetter"], v["lhPWmDirWorse"], v["lhPWmDirN"] = (str(sum(x[i] for x in t)) for i in range(3))
     # where the world model's 52-week gap sits on Dominick's: item-by-store RMSSE minus LightGBM's, both forecasting
