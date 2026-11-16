@@ -75,10 +75,15 @@ def _sigmoid(x):
 def load_synthetic_levers(
     n_zones: int = 3, stores_per_zone: int = 4, n_items: int = 20, n_periods: int = 260, seed: int = 0,
     confounding: float = 0.0, shock_sd: float = 0.25, shock_rho: float = 0.7,
-    episode_size: float = 0.10, episode_weeks: int = 16, test_origin: int | None = None, **truth,
+    episode_size: float = 0.10, episode_weeks: int = 16, test_origin: int | None = None, explore: float = 0.0,
+    **truth,
 ) -> Dataset:
+    """`explore`: share of item-weeks before `test_origin` (all weeks without it) given a random test plan drawn
+    apart from demand (a cut of 10% to 60% with probability one half; promotion and display each with probability
+    one half), from a random stream of its own, so the world is otherwise unchanged."""
     t = Truth(**truth)
     rng = np.random.default_rng(seed)
+    test_rng = np.random.default_rng([seed, 7919])
     dates = pd.date_range("2020-01-06", periods=n_periods, freq="7D")
     weeks = np.arange(n_periods)
     items = [dict(list_price=rng.uniform(1.5, 8.0), size=np.exp(rng.uniform(np.log(3), np.log(60))),
@@ -119,6 +124,13 @@ def load_synthetic_levers(
             depth = np.where(cut, rng.uniform(0.10, 0.40, n_periods), 0.0)
             promo = np.where(cut, rng.random(n_periods) < 0.6, rng.random(n_periods) < _sigmoid(_logit(0.03) + z_score))
             display = rng.random(n_periods) < _sigmoid(_logit(base_p["display"]) + z_score)
+            plan0 = (depth, promo, display)
+            if explore:
+                r = test_rng.random((5, n_periods))
+                test = (r[0] < explore) & (weeks < ((test_origin - 1) if test_origin else n_periods))
+                depth = np.where(test, np.where(r[1] < 0.5, 0.10 + 0.50 * r[2], 0.0), depth)
+                promo = np.where(test, r[3] < 0.5, promo)
+                display = np.where(test, r[4] < 0.5, display)
             wk, amt = rises[i]
             regular = it["list_price"] * np.where(weeks >= wk, 1 + amt, 1.0) * ep_factor[s]
             price = regular * (1 - depth)
@@ -131,7 +143,18 @@ def load_synthetic_levers(
             })
             frame["true_prev_planned"] = 0
             mean = expected_units(frame, t)
-            frame[UNITS] = rng.poisson(mean).astype(float)
+            if explore:
+                # the merchants' own plan draws sales from the main stream as in the world without tests (the
+                # Poisson draw uses a varying amount of the stream, so this keeps every other series unchanged);
+                # weeks whose expected sales the tests changed are drawn again from the tests' own stream
+                f0 = frame.assign(**{PRICE: regular * (1 - plan0[0]), "promo": plan0[1].astype(int),
+                                     "display": plan0[2].astype(int)})
+                units = rng.poisson(expected_units(f0, t)).astype(float)
+                moved = ~np.isclose(mean, expected_units(f0, t))
+                units[moved] = test_rng.poisson(mean[moved])
+                frame[UNITS] = units
+            else:
+                frame[UNITS] = rng.poisson(mean).astype(float)
             rows.append(frame)
     panel = pd.concat(rows, ignore_index=True)
     panel.attrs["episodes"] = episodes

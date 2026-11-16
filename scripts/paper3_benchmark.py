@@ -54,14 +54,19 @@ def versions() -> dict:
     lgb = out["lgb_l31_r500_m20"][1]
     out["lgb_rr"] = ("lightgbm_direct", {**lgb, "extra": list(lgb["extra"]) + [RR]})
     out["loglinear_rr"] = ("loglinear", {"recorded_regular": True})
+    # amendment 2 (17 November 2026): the forecaster for the week at the current regular price with nothing planned,
+    # the log-linear model with the recorded regular price for the change the plan makes
+    out["wm_ll"] = ("split", {"forecaster": out["wm_rr"]})
+    out["lgb_ll"] = ("split", {"forecaster": out["lgb_rr"]})
     return out
 
 
 # ---------- the world ----------
 
-def world(confounding: float, seed: int, shape: str = "loglinear"):
+def world(confounding: float, seed: int, shape: str = "loglinear", explore: float = 0.0):
     bent = dict(shape="bent", both_effect=-0.10) if shape == "bent" else {}
-    panel = load_dataset("synthetic_levers", confounding=confounding, seed=seed, **bent, **DATA).panel
+    more = dict(explore=explore) if explore else {}
+    panel = load_dataset("synthetic_levers", confounding=confounding, seed=seed, **bent, **more, **DATA).panel
     panel[RR] = panel["true_regular"]
     dates = np.sort(panel[DATE].unique())
     train = panel[panel[DATE] < dates[ORIGIN - 1]].copy()
@@ -167,6 +172,25 @@ class LogLinear:
         return self.m.predict(X)
 
 
+class Split:
+    """Amendment 2: forecaster(nothing planned, current regular price) x loglinear(plan) / loglinear(same reference)."""
+
+    def __init__(self, forecaster):
+        self.kind, self.settings = forecaster
+
+    def fit(self, train: pd.DataFrame):
+        self.f = build_model(self.kind, **self.settings).fit(train)
+        self.ll = LogLinear(recorded_regular=True).fit(train)
+        last = train[train[DATE] == train[DATE].max()]
+        self.regular = pd.Series(last[RR].to_numpy(), index=last[SERIES].to_numpy())
+        return self
+
+    def predict(self, plan: pd.DataFrame) -> np.ndarray:
+        reg = plan[SERIES].map(self.regular).to_numpy()
+        ref = plan.assign(**{PRICE: reg, RR: reg}, **{c: 0 for c in LEVERS})
+        return np.asarray(self.f.predict(ref)) * self.ll.predict(plan) / self.ll.predict(ref)
+
+
 # ---------- scoring ----------
 
 def promo_choice(model, plan, hidden, t) -> float:
@@ -224,11 +248,12 @@ def main(argv=None):
     p.add_argument("--versions", nargs="*")
     p.add_argument("--steps", type=int, help="override training steps (smoke test only)")
     p.add_argument("--shape", default="loglinear", choices=["loglinear", "bent"])
+    p.add_argument("--explore", type=float, default=0.0, help="amendment 2: share of training weeks with test plans")
     a = p.parse_args(argv)
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
-    panel, train, test = world(a.confounding, a.seed, a.shape)
-    tag = "" if a.shape == "loglinear" else "bent_"
+    panel, train, test = world(a.confounding, a.seed, a.shape, a.explore)
+    tag = ("" if a.shape == "loglinear" else "bent_") + (f"tl{a.explore}_" if a.explore else "")
     t = Truth(**panel.attrs["truth"])
     V = versions()
     for name in a.versions or list(V):
@@ -239,11 +264,15 @@ def main(argv=None):
         if a.steps and kind == "state_model":
             settings["steps"] = a.steps
         t0 = time.time()
-        keep_rr = name.endswith("_rr")
+        keep_rr = name.endswith("_rr") or kind == "split"
         fit_on = train.drop(columns=HIDDEN + ([] if keep_rr else [RR]))
+        if kind == "split" and a.steps and settings["forecaster"][0] == "state_model":
+            settings["forecaster"] = (settings["forecaster"][0], {**settings["forecaster"][1], "steps": a.steps})
         model = (LogLinear(**settings).fit(fit_on) if kind == "loglinear"
+                 else Split(**settings).fit(fit_on) if kind == "split"
                  else build_model(kind, **settings).fit(fit_on))
-        rec = {"confounding": a.confounding, "seed": a.seed, "shape": a.shape, "version": name, "kind": kind,
+        rec = {"confounding": a.confounding, "seed": a.seed, "shape": a.shape, "explore": a.explore, "version": name,
+               "kind": kind if kind != "split" else f"split_{settings['forecaster'][0]}",
                **run(model, train, test, t, keep_rr), "seconds": round(time.time() - t0, 1)}
         f.write_text(json.dumps(rec, indent=1))
         print(name, json.dumps({k: rec[k] for k in ("accuracy", "promo_choice", "regular_choice_loss")}), flush=True)
