@@ -870,6 +870,8 @@ h52,h52/20261114T210519_h52t_dominicks_sna_lightgbm_direct_w0_ec4cd65e,h52t_domi
 h52,h52/20261114T223104_h52_m5_tft_direct_w0_218f599b,h52_m5_tft_direct_w0,784.7,cuda: NVIDIA A10,2026-11-14T22:31:04+00:00,2026-11-14T22:44:00+00:00
 h52,h52/20261114T223105_h52_m5_tft_direct_w1_01ae9baa,h52_m5_tft_direct_w1,830.3,cuda: NVIDIA A10,2026-11-14T22:31:05+00:00,2026-11-14T22:44:47+00:00
 h52,h52/20261114T231532_h52t_dominicks_bjc_lightgbm_byblock_w0_9f1a0795,h52t_dominicks_bjc_lightgbm_byblock_w0,680.8,cpu,2026-11-14T23:15:32+00:00,2026-11-14T23:26:40+00:00
+h52,h52/20261115T104753_h52_m5_world_model_direct_w1_5e0e3a64,h52_m5_world_model_direct_w1,40822.4,cuda: NVIDIA GeForce RTX 4090,2026-11-15T10:47:53+00:00,2026-11-15T22:08:10+00:00
+h52,h52/20261115T105040_h52_m5_world_model_direct_w0_46bcc760,h52_m5_world_model_direct_w0,63840.0,cuda: NVIDIA GeForce RTX 4090,2026-11-15T10:50:40+00:00,2026-11-16T04:34:32+00:00
 heldout,heldout/20261115T120448_heldout_dominicks_ana_world_model_b9ed4b85_piece_o1_m0,heldout_dominicks_ana_world_model,76.5,cuda: NVIDIA GeForce RTX 4090,2026-11-15T12:04:48+00:00,2026-11-15T12:05:59+00:00
 heldout,heldout/20261115T120452_heldout_dominicks_ana_world_model_b9ed4b85_piece_o0_m3,heldout_dominicks_ana_world_model,77.1,cuda: NVIDIA GeForce RTX 4090,2026-11-15T12:04:52+00:00,2026-11-15T12:06:03+00:00
 heldout,heldout/20261115T120503_heldout_dominicks_ana_world_model_b9ed4b85_piece_o0_m2,heldout_dominicks_ana_world_model,129.1,cuda: NVIDIA GeForce RTX 4090,2026-11-15T12:05:03+00:00,2026-11-15T12:07:04+00:00
