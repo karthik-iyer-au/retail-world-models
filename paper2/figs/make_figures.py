@@ -294,6 +294,13 @@ def main():
                  "minutes on the same processor.")
     lines.append("The audit of the saved versions runs on a Colab GPU; its run times are recorded with its results.")
     (OUT.parent / "generated" / "compute.tex").write_text(" ".join(lines) + "\n")
+    # added after the results (plan amendment of 16 November 2026)
+    if (ROOT / "results" / "paper2" / "known_answer_sens" / "decisions.csv").exists():
+        import known_sens
+        known_sens.main()
+    if (ROOT / "results" / "paper2" / "tuned" / "c4_observed.csv").exists():
+        import c4_observed
+        c4_observed.main()
     import real
     if real.available():
         ep = pd.read_csv(EP)

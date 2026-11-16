@@ -69,6 +69,12 @@ input is held at 1, so a cut there is a value the model never saw in training,
 and its C4 score does not measure a learned price response. The forecasts
 are accurate on these data sets~\cite{rwm}, so this is a fault in how the model
 responds to the depth of a cut, not in its forecasts of the plans it saw.
+The failures are not cuts beyond the prices the model was trained on (added after the results,
+Appendix~\ref{app:plan}). Counting only steps whose deeper price is no lower than the lowest
+price the item had in that store in training (\cfoKeptDomLo\% to \cfoKeptDomHi\% of steps on Dominick's,
+\cfoKeptMfive\% on M5), a deeper cut lowers the forecast in \cfoObsDomLo\% to \cfoObsDomHi\% of steps on
+the Dominick's categories, against \cfoAllDomLo\% to \cfoAllDomHi\% on all steps, and \cfoObsMfive\% on
+M5 against \cfoAllMfive\%; on Favorita, whose price is always 1, no step stays inside the range.
 
 \paragraph{C5 and C6: agreement with sales and with LightGBM}
 The forecasts in planned weeks match sales in level and order on \tCFiveWin{}

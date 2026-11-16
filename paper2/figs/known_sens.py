@@ -71,8 +71,8 @@ def main():
                      f"{r.lgb_stock:.2f} \\\\")
     tab = r"""\begin{table*}[t]
 \centering
-\caption{\textbf{The world model's lift stays overstated when the generated world changes (added after the results,
-plan amendment of 16 November 2026).} The world where merchants plan into high-demand weeks, regenerated with one
+\caption{\textbf{The world model's lift stays overstated when the generated world changes (added after the results;
+Appendix~\ref{app:plan}).} The world where merchants plan into high-demand weeks, regenerated with one
 setting changed at a time; world model seed 1 and LightGBM, fitted and audited as in the main study. Lift / truth:
 summed stated lift over the true lift on planned item-weeks. Regular price: stated response to a lasting
 regular-price change over the true one. Checks: C1, C2, C4, C5 and C6 passed of those that apply (C3 needs three

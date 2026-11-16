@@ -195,6 +195,31 @@ spells it can reject a response five times too large, not one that is absent. Ap
 check the world model fails in the first world, and the only one that finds this
 error.
 
+\paragraph{What the wrong lift costs a planner (added after the results)}
+Two uses of the stated lift were scored against the truth in both worlds, from the saved lifts
+(Appendix~\ref{app:plan}). Choosing which half of the planned item-weeks to keep by the
+world model's stated lift captures \kdCoWmChoiceLo{} to \kdCoWmChoiceHi{} of the true lift the best
+half carries when plans follow demand (\kdClWmChoiceLo{} to \kdClWmChoiceHi{} with plans at random;
+LightGBM \kdCoLgbChoice{} and \kdClLgbChoice; a random half \kdCoRandom{} and \kdClRandom). The world
+model ranks the weeks right. Ordering stock to its stated lift is another matter: the stated and true
+lifts differ by \kdCoWmStockLo{} to \kdCoWmStockHi{} of the true lift when plans follow demand, against
+\kdClWmStockLo{} to \kdClWmStockHi{} with plans at random (LightGBM \kdCoLgbStock{} and
+\kdClLgbStock). An overstated lift chooses the right weeks and orders too much for them.
+
+\paragraph{The overstatement holds when the world changes (added after the results)}
+The world where merchants plan into high-demand weeks was regenerated with one setting changed at a
+time: how strongly plans follow demand, how long demand shocks last, and the regular-price and
+temporary-cut elasticities (\ksN{} worlds, Table~\ref{tab:known-sens}). In every one the world
+model's summed lift is \ksWmBiasLo{} to \ksWmBiasHi{} times the truth, its stated regular-price
+response \ksWmRegLo{} to \ksWmRegHi{} times the true one, and it passes \ksWmPassedHi{} of the
+\ksWmApplicable{} checks it can be scored on, as in the main study; its stock error is
+\ksWmStockLo{} to \ksWmStockHi{} of the true lift. LightGBM's summed lift is \ksLgbBiasLo{} to
+\ksLgbBiasHi{} times the truth and its regular-price response \ksLgbRegLo{} to \ksLgbRegHi{} times the
+true one. The size of the overstatement moves with the settings; that the explanation passes the
+checks and overstates the effect does not.
+
+\input{generated/tab_known_sens}
+
 \paragraph{Randomisation does not separate working models from broken ones}
 After the lift readout is re-initialised, the rank agreement of the lifts with
 the original is \kaLiftReadLo{} to \kaLiftReadHi{} across world models, and with
