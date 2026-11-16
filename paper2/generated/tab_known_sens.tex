@@ -1,0 +1,28 @@
+\begin{table*}[t]
+\centering
+\caption{\textbf{The world model's lift stays overstated when the generated world changes (added after the results,
+plan amendment of 16 November 2026).} The world where merchants plan into high-demand weeks, regenerated with one
+setting changed at a time; world model seed 1 and LightGBM, fitted and audited as in the main study. Lift / truth:
+summed stated lift over the true lift on planned item-weeks. Regular price: stated response to a lasting
+regular-price change over the true one. Checks: C1, C2, C4, C5 and C6 passed of those that apply (C3 needs three
+seeds). Stock error: absolute difference between stated and true lift, summed, over the true lift.}
+\label{tab:known-sens}
+\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+ & \multicolumn{4}{c}{World model} & \multicolumn{4}{c}{LightGBM} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+World & Lift / truth & Regular price & Checks & Stock error & Lift / truth & Regular price & Checks & Stock error \\
+\midrule
+As in the main study & 1.33 & 6.4 & 4/5 & 0.44 & 1.26 & 1.4 & 1/2 & 0.50 \\
+Planning into demand, half as strong & 1.23 & 5.7 & 4/5 & 0.41 & 1.23 & 1.4 & 1/2 & 0.57 \\
+Planning into demand, 1.5 times as strong & 1.23 & 6.3 & 4/5 & 0.34 & 1.17 & 1.8 & 1/2 & 0.38 \\
+Demand shocks shorter (persistence 0.4) & 1.28 & 5.8 & 4/5 & 0.40 & 1.26 & 1.7 & 1/2 & 0.46 \\
+Demand shocks longer (persistence 0.9) & 1.26 & 6.1 & 4/5 & 0.41 & 1.22 & 1.5 & 1/2 & 0.48 \\
+Regular-price elasticity $-0.25$ & 1.29 & 12.5 & 4/5 & 0.43 & 1.26 & 3.0 & 1/2 & 0.51 \\
+Regular-price elasticity $-1.0$ & 1.24 & 3.0 & 4/5 & 0.39 & 1.19 & 0.7 & 1/2 & 0.45 \\
+Temporary-cut elasticity $-1.5$ & 1.42 & 4.4 & 4/5 & 0.52 & 1.35 & 0.9 & 1/2 & 0.55 \\
+Temporary-cut elasticity $-3.5$ & 1.24 & 7.9 & 4/5 & 0.37 & 1.16 & 2.0 & 1/2 & 0.44 \\
+\bottomrule
+\end{tabular}
+\end{table*}
