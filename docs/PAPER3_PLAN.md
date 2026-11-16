@@ -88,3 +88,27 @@ week after the plan is fixed; writing in the two weeks after; submission by 22 D
 ## Amendments
 
 (none yet)
+
+**Amendment 1, 16 November 2026, after the first results and before any of these runs.** Karthik, 23:20 ("yes"),
+after asking why the world model does not learn the effect of a new plan when it was meant to carry what it learns
+to new situations, and that any change to the data be given to every model. Added, labelled in the paper as added
+after the first results:
+
+1. World model versions trained to learn the effect of actions, each on the settings of `wm_d32_s2000_h26` with one
+   change: JEPA pretraining (500 steps on the latent loss first, latent weight 0.1); the latent check (latent weight
+   0.1); the latent check seven steps ahead; and adaptation at the plan date (three steps, as in the companion
+   forecasting study's search). Scored on the same held-out plans.
+2. The recorded regular price. Retailers know whether a price change is a temporary cut or a new regular price; the
+   models so far had to infer the regular price from past prices, so a lasting change looks like a cut. In versions
+   marked `_rr` every model is given the planned regular price as an input: the world model `wm_d32_s2000_h26`
+   (as its recorded regular price), LightGBM `lgb_l31_r500_m20` (as a feature) and the log-linear model (in place
+   of the 12-week highest price). The held-out regular-price plans move the recorded regular price with the price.
+3. A world whose effects are not log-linear, so the log-linear model's form does not match the truth by
+   construction: a temporary cut lifts sales by 1 + 1.015(1 - exp(-depth / 0.15)) (equal to the log-linear world at a
+   20% cut, flattening beyond it); the regular-price response is linear in the price ratio, 1 - 0.5(ratio - 1); and a
+   promotion with a display adds less than both alone (joint effect -0.10). Four planning strengths, three seeds,
+   every version above.
+
+The test is unchanged: the link between forecast accuracy and intervention accuracy and decision loss, now also
+for these versions and in the new world, and whether any of the changes in 1 and 2 make the world model's
+intervention accuracy better.
