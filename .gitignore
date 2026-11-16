@@ -42,3 +42,7 @@ results/pooled/*/*
 !results/heldout/
 !results/dominicks_eda/
 ijpe_submission.zip
+paper2/main_tmlr.pdf
+paper2/main_tmlr.aux
+paper2/main_tmlr.log
+paper2/main_tmlr.out

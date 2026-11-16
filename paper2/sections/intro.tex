@@ -6,8 +6,8 @@ promotion, the question is not only how much will sell but how much of it the
 promotion will add, and whether a deeper price cut would add more. Forecasting
 models that see the plan can answer that directly: they forecast the item with
 the plan as made, and again with nothing planned, and the difference is the lift
-the plan adds. The world model and the lift model of our companion
-paper~\cite{rwm} are built this way: each forecast is a baseline under the
+the plan adds. The world model and the lift model of \ourcompanion{}
+~\cite{rwm} are built this way: each forecast is a baseline under the
 nothing-planned plan plus a lift, and the lift is exactly zero when nothing is
 planned. The split is what a merchant reads ("the promotion added 40 units"),
 plans on, and is judged by.
@@ -46,10 +46,10 @@ sales measured by difference in differences, an event study, a placebo and a
 sensitivity analysis. Which stores were treated is inferred, prices move before
 the detected start, and a placebo at false dates gives a slope close to the
 estimate, so it is not a ground truth.
-\item An audit of the final tuned world model the companion paper reports for
+\item An audit of the final tuned world model the \companion{}  reports for
 each of its \tSets{} data sets, against the tuned LightGBM, and a test of
 whether explanations that pass more checks go with more accurate forecasts. An
-earlier audit of the companion paper's development versions, made in October
+earlier audit of the \companion{} 's development versions, made in October
 2026, is kept as a record (\S\ref{sec:results}).
 \end{enumerate}
 

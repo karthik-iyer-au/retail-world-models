@@ -1,5 +1,6 @@
-\small
+\iftmlr\begin{abstract}\else\small
 \textbf{Abstract.}
+\fi
 Forecasting models that read the price and promotion plan explain each forecast
 as a baseline, what would sell with nothing planned, plus the lift the plan
 adds. We test such explanations with eight checks, six with a pass rule fixed
@@ -15,7 +16,7 @@ true $-0.5$, and only a measured cause finds this. On Dominick's, \zScored{}
 episodes in which a store's regular prices sat apart from its zone peers give a
 noisy benchmark: a pooled 8-week response of $\zSlope$ (95\% interval
 $\zSlopeLo$ to $\zSlopeHi$), close to a placebo ($\zPlaceboSlope$). For the
-final tuned world models of our companion paper on \tSets{} data sets,
+final tuned world models of \ourcompanion{} on \tSets{} data sets,
 baseline and lift add up under each model's own plan on every window, but a
 deeper price cut lowers the forecast in \tCFourDomLo\% to \tCFourDomHi\% of
 item-week steps on Dominick's, and in \cfoObsDomLo\% to \cfoObsDomHi\% within prices seen in training, and the world model and LightGBM both state
@@ -26,6 +27,6 @@ checks passed were not related to accuracy (Spearman $\tRhoAll$, 95\% interval
 $\tRhoAllLo$ to $\tRhoAllHi$); these versions have no known answer, so this concerns accuracy, while whether an
 explanation is right is measured only in the generated data.
 
-\vspace{4pt}
+\iftmlr\end{abstract}\else\vspace{4pt}\fi
 \textbf{Keywords:} retail forecasting; explanation; faithfulness; promotions;
 price response; difference in differences; world models.

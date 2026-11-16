@@ -79,6 +79,7 @@ regular-price change over the true one. Checks: C1, C2, C4, C5 and C6 passed of 
 seeds). Stock error: absolute difference between stated and true lift, summed, over the true lift.}
 \label{tab:known-sens}
 \footnotesize\setlength{\tabcolsep}{4pt}
+\begin{adjustbox}{max width=\textwidth}
 \begin{tabular}{lrrrrrrrr}
 \toprule
  & \multicolumn{4}{c}{World model} & \multicolumn{4}{c}{LightGBM} \\
@@ -88,6 +89,7 @@ World & Lift / truth & Regular price & Checks & Stock error & Lift / truth & Reg
 """ + "\n".join(lines) + r"""
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \end{table*}
 """
     (GEN / "tab_known_sens.tex").write_text(tab)

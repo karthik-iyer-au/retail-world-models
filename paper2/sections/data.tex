@@ -2,11 +2,11 @@
 \label{sec:versions}
 
 \paragraph{Data}
-The four public data sets of the companion paper~\cite{rwm}. \emph{M5} holds
+The four public data sets of the \companion{} ~\cite{rwm}. \emph{M5} holds
 daily Walmart sales of 3,049 items in 10 stores from 2011 to 2016, with prices,
 event days and SNAP days~\cite{m5accuracy}. \emph{Dominick's Finer Foods} holds
 weekly scanner data by store for a Chicago chain from 1989 to 1997, with price,
-a promotion code and cost~\cite{dominicks}; the companion paper's six
+a promotion code and cost~\cite{dominicks}; the \companion{} 's six
 categories are audited one by one (cheese, snack crackers, soft drinks, bottled
 juice, analgesics, frozen entrees). \emph{Breakfast at the Frat} holds weekly
 sales of 55 breakfast items in 77 stores from 2009 to 2012, with display,
@@ -17,13 +17,13 @@ items sold in all ten, with the promotion flag, holidays, events and paydays,
 and no prices. That makes nine data sets. No raw data is redistributed.
 
 \paragraph{Models audited}
-The audit reads the final tuned world model the companion paper reports for
+The audit reads the final tuned world model the \companion{}  reports for
 each data set: settings tuned by a search on that data set, fitted on its
 rolling windows (six on each Dominick's category, four on Frat, M5 and
 Favorita), with the fitted model of every window saved. Each is the average of
 five copies fitted with different seeds, except on M5, where the final model
 is one copy. C1 to C6 and C8 read these saved models, the runs whose scores
-the companion paper reports; none was refitted or tuned for the audit. Two
+the \companion{}  reports; none was refitted or tuned for the audit. Two
 checks need other fits with the same settings. C6 compares with each data
 set's tuned LightGBM, refitted on the same windows. C7 needs models whose
 training ends the week before each zone episode, so for it each Dominick's
@@ -32,7 +32,7 @@ week. The question of whether passing the checks goes with accuracy uses the
 versions the settings searches saved: every change tried on every data set,
 one seed when screened and three when confirmed, each with a fitted model per
 search window and its search-window accuracy. An earlier audit of the
-companion paper's development versions, made before its models
+\companion{} 's development versions, made before its models
 were tuned, is reported in \S\ref{sec:results} as a record and is not the
 paper's main result.
 

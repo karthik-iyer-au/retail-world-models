@@ -178,6 +178,10 @@
 \input{generated/c4_observed_macros}
 
 \newcommand{\ixs}{item by store}
+% TMLR build (main_tmlr.tex) sets \tmlrtrue before this file's macros are read: anonymised wording
+\ifdefined\tmlrtrue\else\expandafter\newif\csname iftmlr\endcsname\fi
+\newcommand{\companion}{\iftmlr forecasting study\else companion paper\fi}
+\newcommand{\ourcompanion}{\iftmlr the forecasting study\else our companion paper\fi}
 
 \begin{document}
 

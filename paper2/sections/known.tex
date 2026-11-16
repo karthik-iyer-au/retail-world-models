@@ -39,12 +39,12 @@ each series' prices shuffled across its training weeks, so that it cannot learn
 a price effect (\emph{blind to price}); the world model fitted with promotion
 and display shuffled the same way (\emph{blind to levers}); LightGBM; and
 LightGBM blind to price. The forecast for weeks 253 to 260 is explained and
-every check run as on real data. The world model has the companion paper's
+every check run as on real data. The world model has the \companion{} 's
 Dominick's world-model settings as they stood at the earlier audit, reduced to fit
 on a processor: one fit rather than an average of copies, width 32, 2,000
 training steps, and without the option that rescales item forecasts within a
-store-week for shoppers switching between items. LightGBM has the companion
-paper's Dominick's settings. Each explanation is also scored against the
+store-week for shoppers switching between items. LightGBM has the \companion{}
+'s Dominick's settings. Each explanation is also scored against the
 truth, computed from the expected sales under the same counterfactual plans:
 rank agreement and the ratio of summed lifts, overall and by lever, on the
 \kaPlanned{} of \kaRows{} item-weeks whose true lift is not zero. Besides the
