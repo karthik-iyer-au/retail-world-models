@@ -9,7 +9,7 @@ the world model and LightGBM tuned by one search procedure. The average of the t
 grain, is the safe default: it has the lowest error in \rqAvgBestCells{} of \rqCells{} grain and data
 set cases, wins paired item tests against either model far more often than it loses, and on final
 periods held out of every tuned run is never the least accurate, though the most accurate on only
-\hoAvgBest{} of \hoSets{}. The world model alone is the choice for items not yet trained on, where it
+\hoAvgBest{} of \hoSets{}. The world model alone is the choice for existing items not yet trained on, where it
 loses at most \rqCostWmItemHi{} in scaled error against up to \rqCostLgbItemHi{} for LightGBM, and it
 leads on lines with short history. LightGBM is stronger on heavily promoted lines, fast sellers,
 long histories and price-cut weeks on Dominick's. The evidence is inconclusive for slow and

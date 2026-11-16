@@ -33,7 +33,7 @@ Store orders and inventory & Item by store, by day or week & The average & Lowes
 Promotion and supplier funding & Item across stores, by week and over the promotion block & The average & Lowest at the item levels on all \rqAvgBestItemWord{}; over the whole block lowest on \rqAvgBestBlockWord{} and second on the other four; LightGBM alone is less accurate over the block on Frat, M5, Favorita and soft drinks \\
 Category performance & Category by store and category, by week & The average & Lowest at store grain and above on \rqAvgBestCoarseWord{} of \rqNineWord{}; LightGBM lowest on snacks; lowest category-plan cost on \supCatPlanAvgLowest{} of \supCatPlanSets{} \\
 Financial plan & Chain total & The average & As for category performance; the total is the sum of the same item-by-store forecast, so it agrees with every plan below it \\
-Items not yet in training (range changes) & Item by store, existing items held out of training & The world model alone & Clearly more accurate than the average on all \rqKeptSets{} data sets tested, and than LightGBM without the item label on \rqWmBeatsNoid{} of \rqNoidSets{}; LightGBM with the label forecast \rqFaLgbItemLo{} to \rqFaLgbItemHi{}\% of actual sales on these items \\
+Existing items not yet in training, with recent sales (range changes; not new launches) & Item by store, existing items held out of training & The world model alone & Clearly more accurate than the average on all \rqKeptSets{} data sets tested, and than LightGBM without the item label on \rqWmBeatsNoid{} of \rqNoidSets{}; LightGBM with the label forecast \rqFaLgbItemLo{} to \rqFaLgbItemHi{}\% of actual sales on these items \\
 Stores not yet in training & Item by store, existing stores held out of training & The average or the world model (level) & The average and the world model each clearly ahead on \rqStoreAvgBeatsWm{} data set and level on \rqStoreLevel{}; LightGBM clearly behind the world model on \rqStoreWmBeatsLgb{} of \rqKeptSets{} \\
 Choosing for another retailer & Any & Rerun the comparison & The order of models is a finding on these data; every comparison, including those that lost here, should be rerun on the retailer's own data \\
 \bottomrule
@@ -205,7 +205,7 @@ of the two models and their average at store grain and above on \rqAvgBestCoarse
 final run held out it was the most accurate on only \hoAvgBest{} of \hoSets{} data sets but never the
 least accurate. It is the safe default, not the best choice everywhere.
 
-\textbf{When to use the world model.} For items absent from training the world model alone was more
+\textbf{When to use the world model.} For existing items absent from training, with recent sales, the world model alone was more
 accurate than the average on every data set tested, because LightGBM with the item label
 under-forecast them; without the label LightGBM came closer but was still less accurate on
 \rqWmBeatsNoid{} of \rqNoidSets{}. On lines with short history the world model was clearly more

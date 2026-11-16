@@ -296,7 +296,7 @@ def fig_study():
     bx.scatter([mx + 1.95], [my], marker=MARKER["ensemble"], s=90, color=COLOR["ensemble"], edgecolor="white",
                lw=0.5, zorder=4)
     bx.text(mx + 1.95, my - 0.6, "Average", ha="center", va="top", fontsize=7.0, color=ACCENT)
-    lines = ["every item and store: the average", "an item not yet trained on:", "    the world model alone",
+    lines = ["every item and store: the average", "an existing item not yet trained on:", "    the world model alone",
              "summed to every grain"]
     vb_top = ys[1] - bhh / 2 - 0.55
     vb_h = 0.95 + 0.82 * len(lines)

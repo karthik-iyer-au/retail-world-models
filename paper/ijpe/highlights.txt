@@ -1,5 +1,5 @@
 Averaging a tuned world model and LightGBM is the safe default at every grain
-The world model is the choice for items not yet trained on and short histories
+The world model suits existing items new to training and short histories
 LightGBM is stronger on heavily promoted and fast lines and in price-cut weeks
 Slow lines, longer history and year-ahead forecasts give mixed evidence
 Four public data sets, two tuned models, every losing comparison reported

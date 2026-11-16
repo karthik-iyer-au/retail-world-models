@@ -21,7 +21,8 @@ it is clearly more accurate than the world model in \rqPAvgWmBetter{} of \rqPAvg
 (clearly less in \rqPAvgWmWorse{}) and than LightGBM in \rqPAvgLgbBetter{} (clearly less in
 \rqPAvgLgbWorse{}); and on the final periods every final run held out it is never the least
 accurate, though the most accurate on only \hoAvgBest{} of \hoSets{} data sets.
-\emph{When to use the world model.} On items kept out of training the world model loses at most
+\emph{When to use the world model.} On existing items kept out of training (new launches with no sales were not
+tested) the world model loses at most
 \rqCostWmItemHi{} in scaled error and forecasts within \rqWmFaItemOff\% of actual sales, while
 LightGBM loses up to \rqCostLgbItemHi{} and forecasts as little as \rqLgbFaItemLoFrac{} of actual
 sales; fitted without the item label, LightGBM loses at most \rqNoidCostHi{} but is still less

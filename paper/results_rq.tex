@@ -227,9 +227,9 @@ each series' own past share of zero-sale periods, except on
 
 Brought together, the four answers give one rule. \textbf{Forecast every item in
 every store as the equal-weight average of a tuned world model and tuned
-gradient-boosted trees, and sum it to every grain; for an item the models have
-not been trained on, use the world model alone until they are retrained with
-it.} On the data sets studied, the average is the most accurate of the two tuned
+gradient-boosted trees, and sum it to every grain; for an existing item the models
+have not been trained on, with recent sales, use the world model alone until they are
+retrained with it.} A new product with no sales was not tested. On the data sets studied, the average is the most accurate of the two tuned
 models and their average at store grain and above on \rqAvgBestCoarseWord{} of \rqNineWord{} data sets, at the item levels on all \rqAvgBestItemWord{}, and
 on the fast lines and the slow tail on \rqAvgBestFast{} of \rqNineWord{}. On the periods every final run held out it is
 the most accurate on only \hoAvgBest{} of \hoSets{} data sets but never the least accurate, so it is the safe choice

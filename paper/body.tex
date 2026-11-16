@@ -505,8 +505,9 @@ plays the part of the action, and read out as sales. The same model can be
 rolled forward under a plan that was never made, which is the question a
 merchant asks of it. It is trained end to end on sales. The objective that
 trains the state to predict its own later values, the latent term of
-Section~\ref{sec:losses} and JEPA pretraining, was tried on every data set and
-kept on two of the nine, Favorita and snacks (Section~\ref{sec:loop}). The case
+Section~\ref{sec:losses} and JEPA pretraining, was tried on every data set; the
+latent check, seven steps ahead, was kept on Favorita and JEPA pretraining on snacks, and
+neither on the other seven (Section~\ref{sec:loop}). The case
 for the model therefore rests on its accuracy and on how its carried state
 responds to a plan, which the carried-state tests describe
 (Section~\ref{sec:sup-mechanism}), not on that objective; how much accuracy the
