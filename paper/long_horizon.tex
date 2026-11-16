@@ -5,10 +5,12 @@
 \subsection{Forecasting 52 weeks ahead}
 \label{sec:long-horizon}
 
-\textbf{Over 52 weeks the world model alone is not the most accurate forecast on
-any data set. The average of the two models, each forecasting all 52 weeks at
-once, is the most accurate on \lhLowestAvgDirect{} of \lhSets{} data sets, and
-LightGBM on the others: a year ahead the evidence for the rule is mixed.} Grocery retailers plan the year ahead, so the test asks
+\textbf{Over 52 weeks the average of the two models, each forecasting the whole year
+at once, is the most accurate forecast on \lhLowestAvgDirect{} of \lhSets{} data sets and
+LightGBM on the others. Between the two models alone, the world model is more accurate on
+\lhWmDirAheadNames{} and LightGBM on the other Dominick's categories; in paired comparisons
+LightGBM is clearly more accurate in \lhPWmDirWorse{} of \lhPWmDirN{} and the world model in
+\lhPWmDirBetter{}. A year ahead the evidence for the rule is mixed.} Grocery retailers plan the year ahead, so the test asks
 whether the rule of Section~\ref{sec:rq-broad} carries from 8 weeks to 52. It
 was written down before it ran: the six Dominick's categories and M5, two
 windows of 52 weeks each (364 days on M5), the final tuned settings with only the

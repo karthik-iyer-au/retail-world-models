@@ -121,6 +121,16 @@ Data set & WM & LGB & Avg & WM & LGB & Avg & WM vs LGB, blocks & Avg vs LGB, dir
         r = [fa.get((k, "all", m), np.nan) for k in keys]
         v[f"lhFa{tag}Lo"], v[f"lhFa{tag}Hi"] = f"{100 * np.nanmin(r):.0f}", f"{100 * np.nanmax(r):.0f}"
     v.update(every(s, pr, keys))
+    # head to head, each forecasting all 52 weeks at once: data sets where the world model alone is more accurate
+    # than LightGBM alone, and paired comparisons where it is clearly more / less accurate
+    both = [k for k in keys if not np.isnan(over.loc[k, "all"].get("world_model_direct", np.nan))
+            and not np.isnan(over.loc[k, "all"].get("lightgbm_direct", np.nan))]
+    ahead = [k for k in both if over.loc[k, "all"]["world_model_direct"] < over.loc[k, "all"]["lightgbm_direct"]]
+    words = "none one two three four five six seven eight nine".split()
+    v["lhWmDirAheadN"], v["lhWmDirSets"] = words[len(ahead)], words[len(both)]
+    v["lhWmDirAheadNames"] = " and ".join(KEYS[k].lower() if k.startswith("dominicks") else KEYS[k] for k in ahead) or "none"
+    t = [clear(k, "all", "world_model_direct", "lightgbm_direct") for k in both]
+    v["lhPWmDirBetter"], v["lhPWmDirWorse"], v["lhPWmDirN"] = (str(sum(x[i] for x in t)) for i in range(3))
     # where the world model's 52-week gap sits on Dominick's: item-by-store RMSSE minus LightGBM's, both forecasting
     # directly, in price-cut weeks and in regular weeks (scripts/score_long_horizon_promo.py), mean over the windows
     pw = ROOT / "results" / "long_horizon" / "promo_scores.csv"
