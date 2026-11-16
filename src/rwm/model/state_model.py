@@ -61,6 +61,12 @@ in `levers` set to zero.
 - `regular_hold`: where no regular price is recorded, a price held for this
   many periods in a row becomes the regular price (the latest such price),
   in place of "highest in the last `regular_window` periods".
+- `price_shape` (with `regular_price` and `lift_readout`): the plan's price
+  enters only through a curve of fixed shape whose size is learned per item
+  and store: a1 (1 - exp(-cut / b)) - a2 log(1 - cut) on the log scale, so
+  sales never fall as a cut deepens and the gain is bounded (cuts capped at
+  95%), plus -gamma log(regular / usual price) for a lasting regular price.
+  The rest of the network sees neither price.
 - `regular_column`: a column holding the regular price the retailer recorded
   (for example `base_price`), used in place of the 12-period rule wherever
   it is filled in.
@@ -223,7 +229,7 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
                lift_readout: bool = False, latent: bool = False, readout_dropout: float = 0.0,
                rollout: bool = False, spread: bool = False, plan_split: bool = False,
                feedback: bool = False, teacher_rate: float = 0.5, roll_norm: bool = False,
-               stock: bool = False, aux: int = 0):
+               stock: bool = False, aux: int = 0, price_cols: tuple | None = None):
     import torch
     from torch import nn
 
@@ -283,6 +289,15 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
                 self.effect = nn.GRUCell(n_fut + d_model, d_model, bias=False)
             self.head = readout()
             self.lift = readout() if lift_readout else None
+            # price_shape: the price enters only through a curve with a fixed shape and learned size per item
+            # (and store): sales never fall as the cut deepens, and the gain is bounded (the cut is capped at 95%);
+            # a lasting regular price lowers sales with a learned elasticity. [a1, b, a2, gamma] before softplus.
+            self.price_cols = price_cols
+            if price_cols:
+                self.pshape = nn.Linear(16 * len(cat_sizes), 4)
+                nn.init.zeros_(self.pshape.weight)
+                nn.init.zeros_(self.pshape.bias)
+                self.pbias = nn.Parameter(torch.tensor([0.0, -2.0, -2.0, -0.5]))
             self.stock = stock
             if stock:
                 # shoppers' stock: built by sales above the item's level, decays each
@@ -432,6 +447,23 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
                 if not full:
                     return out
                 return {"log_mu": out, "base": base, "state": state, "weights": w, "rolled": on, "world": None, "effect": None}
+            shape_on = shape_base = 0.0
+            if self.price_cols:
+                i0, ir = self.price_cols
+                pr = self.pbias + self.pshape(torch.cat(labels, dim=1))
+                a1, b = nn.functional.softplus(pr[:, :1]), 0.02 + nn.functional.softplus(pr[:, 1:2])
+                a2, g = nn.functional.softplus(pr[:, 2:3]), nn.functional.softplus(pr[:, 3:4])
+                ratio = fut[..., ir].float()
+                ok = ratio > 0
+                depth = torch.where(ok, 1 - ratio, torch.zeros_like(ratio)).clamp(0, 0.95)
+                shape_on = a1 * (1 - torch.exp(-depth / b)) - a2 * torch.log1p(-depth)
+                rel = torch.where(ok, fut[..., i0].float() / ratio.clamp(min=1e-6), torch.ones_like(ratio))
+                shape_base = -g * torch.log(rel.clamp(min=1e-3))
+                # everything else sees neither the price nor the regular price of the plan
+                fut, fut_off = fut.clone(), fut_off.clone()
+                for x in (fut, fut_off):
+                    x[..., i0] = 1.0
+                    x[..., ir] = 1.0
             if self.plan_split:
                 world, effect = self.roll_split(state, fut, fut_off)
                 on = world + effect
@@ -443,6 +475,9 @@ def _build_net(n_hist: int, n_fut: int, cat_sizes: list[int], history: int, hori
                 off = world if self.plan_split else states(fut_off)
                 base = run(self.head, fut_off, off).clamp(-10, 10)
                 out = (base + run(self.lift, fut, on) - run(self.lift, fut_off, off)).clamp(-10, 10)
+            if self.price_cols:
+                base = (base + shape_base).clamp(-10, 10)
+                out = (out + shape_base + shape_on).clamp(-10, 10)
             if self.stock:
                 out = self.carry_stock(out, base, hist, labels)
             if self.aux is not None:
@@ -487,6 +522,7 @@ class StateModel(Forecaster):
         year_ago: int = 0,
         year_ago_window: int = 1,
         regular_column: str | None = None,
+        price_shape: bool = False,
         pretrain_steps: int = 0,
         pretrain_on: list[dict] | None = None,
         finetune: str = "full",
@@ -552,6 +588,9 @@ class StateModel(Forecaster):
         self.plan_lags = plan_lags
         self.regular_column = regular_column
         self.regular_hold = regular_hold
+        if price_shape and not (regular_price and lift_readout) or price_shape and (plan_split or feedback):
+            raise ValueError("price_shape needs regular_price and lift_readout, without plan_split or feedback")
+        self.price_shape = price_shape
         if validation_periods and validation_periods < horizon:
             raise ValueError("validation_periods must be at least the horizon")
         self.validation_periods, self.total_weight = validation_periods, total_weight
@@ -625,7 +664,8 @@ class StateModel(Forecaster):
                              readout_dropout=readout_dropout, rollout=rollout, plan_split=plan_split,
                              feedback=feedback, teacher_rate=teacher_rate, roll_norm=roll_norm,
                              spread=likelihood != "tweedie", stock=stock,
-                             aux=2 if spread_by_item or likelihood in ("zinb", "hurdle_nb") else 0)
+                             aux=2 if spread_by_item or likelihood in ("zinb", "hurdle_nb") else 0,
+                             price_cols=(0, 2 + 2 * len(self.extra)) if price_shape else None)
         self.steps, self.batch, self.lr = steps, batch, lr
         self.power, self.seed, self.device = tweedie_power, seed, device
         self.mixed_precision = mixed_precision  # faster on a GPU; has no effect on a CPU

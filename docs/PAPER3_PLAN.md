@@ -135,3 +135,17 @@ first results, and given to every model on the same data:
 Reading fixed now: a remedy works if it lowers the intervention error and the regular-price and promotion choice
 losses against the same model without it, in the same worlds, across seeds. Compute: about 240 fits on Modal CPU,
 about US$35 (Karthik, 23:42: "run what u need for paper3 if the charges are small").
+
+**Amendment 2, revised 17 November 2026, 01:00, before any test-and-learn result.** Karthik, 00:56: test and learn
+"should learn the overall shape but still ensure you can't clear the house with a 100% discount depth or for a price
+change"; "there is no experiment and exploit if it's just learning what it did in the past"; the model has "to
+understand the underlying meaning and then transfer to unseen data", as M-JEPA did. Two changes; the test-and-learn
+runs launched at 00:50 were cancelled before any result was read:
+
+1. The test plans stay inside the merchants' own range (cuts of 10% to 40%) and differ only in being placed at random,
+   apart from demand. The deeper cuts of 50% and 60% and the lasting regular-price moves stay unseen, so the
+   held-out plans test whether what the tests teach carries over, not whether the model remembers them.
+2. A world model with the shape of the price response built in (`wm_shape`, on the settings of `wm_rr`): the
+   plan's price enters only through a curve whose shape is fixed and whose size is learned per item and store, so
+   sales never fall as a cut deepens and the gain is bounded; and a lasting regular price lowers sales through a
+   learned elasticity. The rest of the network does not see the price. Run in the worlds with and without tests.

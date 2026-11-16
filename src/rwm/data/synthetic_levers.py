@@ -79,7 +79,7 @@ def load_synthetic_levers(
     **truth,
 ) -> Dataset:
     """`explore`: share of item-weeks before `test_origin` (all weeks without it) given a random test plan drawn
-    apart from demand (a cut of 10% to 60% with probability one half; promotion and display each with probability
+    apart from demand (a cut of 10% to 40%, the merchants' own range, with probability one half; promotion and display each with probability
     one half), from a random stream of its own, so the world is otherwise unchanged."""
     t = Truth(**truth)
     rng = np.random.default_rng(seed)
@@ -128,7 +128,7 @@ def load_synthetic_levers(
             if explore:
                 r = test_rng.random((5, n_periods))
                 test = (r[0] < explore) & (weeks < ((test_origin - 1) if test_origin else n_periods))
-                depth = np.where(test, np.where(r[1] < 0.5, 0.10 + 0.50 * r[2], 0.0), depth)
+                depth = np.where(test, np.where(r[1] < 0.5, 0.10 + 0.30 * r[2], 0.0), depth)
                 promo = np.where(test, r[3] < 0.5, promo)
                 display = np.where(test, r[4] < 0.5, display)
             wk, amt = rises[i]

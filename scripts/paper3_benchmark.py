@@ -57,6 +57,8 @@ def versions() -> dict:
     # amendment 2 (17 November 2026): the forecaster for the week at the current regular price with nothing planned,
     # the log-linear model with the recorded regular price for the change the plan makes
     out["wm_ll"] = ("split", {"forecaster": out["wm_rr"]})
+    # amendment 2 (revised 17 November 2026, 01:00): the world model with the price-response shape built in
+    out["wm_shape"] = ("state_model", {**out["wm_rr"][1], "price_shape": True})
     out["lgb_ll"] = ("split", {"forecaster": out["lgb_rr"]})
     return out
 
@@ -264,7 +266,7 @@ def main(argv=None):
         if a.steps and kind == "state_model":
             settings["steps"] = a.steps
         t0 = time.time()
-        keep_rr = name.endswith("_rr") or kind == "split"
+        keep_rr = name.endswith("_rr") or kind == "split" or name == "wm_shape"
         fit_on = train.drop(columns=HIDDEN + ([] if keep_rr else [RR]))
         if kind == "split" and a.steps and settings["forecaster"][0] == "state_model":
             settings["forecaster"] = (settings["forecaster"][0], {**settings["forecaster"][1], "steps": a.steps})
