@@ -1,0 +1,275 @@
+"""Paper 3 figures, tables and numbers, all read from results/paper3 (scripts/paper3_analysis.py).
+
+  cd paper3/figs && python make_figures.py
+"""
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+from style import EDGE, FULL, GRID, INK, MUTED, SINGLE, despine, panel_label, save, use_style
+
+ROOT = Path(__file__).resolve().parents[2]
+RES, GEN, FIG = ROOT / "results/paper3", ROOT / "paper3/generated", ROOT / "paper3/figs"
+WORDS = "none one two three four five six seven eight nine ten eleven twelve".split()
+
+# the models shown, in order, with one colour each (Okabe-Ito)
+M = {
+    "wm_d32_s2000_h26": ("World model", "#0072B2", "o"),
+    "lgb_l31_r500_m20": ("LightGBM", "#D55E00", "s"),
+    "loglinear": ("Log-linear", "#009E73", "D"),
+    "wm_shape": ("World model with price shape", "#CC79A7", "^"),
+}
+PLAN_LABEL = {"deeper_50": "Cut 50%", "deeper_60": "Cut 60%", "regular_-10": "Regular $-$10%",
+              "regular_-5": "Regular $-$5%", "regular_+5": "Regular +5%", "regular_+10": "Regular +10%",
+              "off_pattern": "Off-pattern", "no_plan": "No plan"}
+SHAPE = {"loglinear": "log-linear world", "bent": "bent world"}
+REMEDY = [  # (version, label, group)
+    ("wm_d32_s2000_h26", "World model", "World model"),
+    ("wm_jepa", "+ JEPA pretraining", "World model"),
+    ("wm_latent", "+ latent check", "World model"),
+    ("wm_overshoot", "+ latent check 7 ahead", "World model"),
+    ("wm_adajepa", "+ adaptation at the plan date", "World model"),
+    ("wm_rr", "+ recorded regular price", "World model"),
+    ("wm_ll", "Split: world model + log-linear", "Split"),
+    ("wm_shape", "World model with price shape", "Shape"),
+    ("lgb_l31_r500_m20", "LightGBM", "LightGBM"),
+    ("lgb_rr", "+ recorded regular price", "LightGBM"),
+    ("lgb_ll", "Split: LightGBM + log-linear", "Split"),
+    ("loglinear", "Log-linear", "Log-linear"),
+    ("loglinear_rr", "+ recorded regular price", "Log-linear"),
+]
+
+
+def med(d, cols, by=("shape", "version")):
+    return d.groupby(list(by))[cols].median()
+
+
+def fig_ratio(d):
+    plans = list(PLAN_LABEL)
+    fig, axes = plt.subplots(1, 2, figsize=(FULL, 2.85), sharey=True)
+    x = np.arange(len(plans))
+    for ax, shape, letter in zip(axes, ("loglinear", "bent"), "ab"):
+        g = med(d[d["shape"] == shape], [f"ratio_{p}" for p in plans], by=("version",))
+        ax.axhline(1, color=INK, lw=0.7)
+        ax.axhspan(0.8, 1.25, color=GRID, alpha=0.5, lw=0)
+        for i, (v, (lab, col, mk)) in enumerate(M.items()):
+            y = g.loc[v].to_numpy().clip(0.03, 40)
+            ax.plot(x + (i - 1.5) * 0.12, y, mk, color=col, ms=4.2, mec="white", mew=0.5, label=lab, ls="none")
+        ax.set_yscale("log")
+        ax.set_yticks([0.1, 0.25, 0.5, 1, 2, 4, 10, 20])
+        ax.set_yticklabels(["0.1", "0.25", "0.5", "1", "2", "4", "10", "20"])
+        ax.set_xticks(x)
+        ax.set_xticklabels([PLAN_LABEL[p] for p in plans], rotation=35, ha="right")
+        ax.set_title(f"In the {SHAPE[shape]}", fontweight="normal")
+        despine(ax)
+        panel_label(ax, letter)
+    axes[0].set_ylabel("Predicted change / true change")
+    h, l = axes[0].get_legend_handles_labels()
+    fig.legend(h, l, loc="lower center", ncol=4, bbox_to_anchor=(0.5, -0.02), handletextpad=0.2)
+    fig.tight_layout(rect=(0, 0.07, 1, 1), w_pad=1.0)
+    save(fig, FIG / "fig_ratio.pdf")
+
+
+def fig_link(d, L):
+    fig, axes = plt.subplots(1, 3, figsize=(FULL, 2.6), gridspec_kw=dict(width_ratios=[1.05, 1, 1]))
+    ax = axes[0]
+    g = d[(d["shape"] == "bent") & (d.confounding == 1.0) & d.grid]
+    for model, col, mk in (("LightGBM", "#D55E00", "s"), ("world model", "#0072B2", "o"), ("log-linear", "#009E73", "D")):
+        h = g[g.model == model]
+        ax.plot(h.rmsse, h.err_mean, mk, color=col, ms=3.4, mec="white", mew=0.4, ls="none",
+                label=model[0].upper() + model[1:])
+    ax.set_xlabel("Forecast error on the merchants' plans\n(item-by-store RMSSE)")
+    ax.set_ylabel("Error on new plans")
+    ax.set_title("Bent world, planning strength 1", fontweight="normal")
+    despine(ax)
+    panel_label(ax, "a")
+    for ax, shape, letter in zip(axes[1:], ("loglinear", "bent"), "bc"):
+        h = L[(L["shape"] == shape) & (L.measure == "err_mean")]
+        for k, (who, col, mk) in enumerate((("all", INK, "D"), ("LightGBM", "#D55E00", "s"),
+                                            ("world model", "#0072B2", "o"))):
+            r = h[h.versions_of == who].sort_values("confounding")
+            xs = r.confounding.to_numpy() + (k - 1) * 0.07
+            ax.errorbar(xs, r.spearman, yerr=[r.spearman - r.lo, r.hi - r.spearman], fmt=mk, color=col, ms=3.6,
+                        mec="white", mew=0.4, elinewidth=0.8, capsize=0,
+                        label={"all": "All 25 versions", "LightGBM": "LightGBM versions",
+                               "world model": "World model versions"}[who])
+        ax.axhline(0, color=EDGE, lw=0.7)
+        ax.set_ylim(-0.9, 1)
+        ax.set_xticks([0, 0.5, 1, 1.5])
+        ax.set_xlabel("Planning strength")
+        ax.set_title(f"In the {SHAPE[shape]}", fontweight="normal")
+        despine(ax)
+        panel_label(ax, letter)
+    axes[1].set_ylabel("Rank correlation, forecast error\nwith error on new plans")
+    h0, l0 = axes[0].get_legend_handles_labels()
+    h1, l1 = axes[1].get_legend_handles_labels()
+    fig.legend(h0 + h1, ["LightGBM version", "World model version", "Log-linear model"] + l1, loc="lower center",
+               ncol=6, bbox_to_anchor=(0.5, -0.02), handletextpad=0.1, columnspacing=0.9)
+    fig.tight_layout(rect=(0, 0.08, 1, 1), w_pad=1.2)
+    save(fig, FIG / "fig_link.pdf")
+
+
+def fig_remedies(d):
+    plain, tl = d[d.explore == 0], d[d.explore > 0]
+    fig, axes = plt.subplots(1, 2, figsize=(FULL, 3.3), sharey=True)
+    y = np.arange(len(REMEDY))[::-1]
+    for ax, shape, letter in zip(axes, ("loglinear", "bent"), "ab"):
+        a = med(plain[plain["shape"] == shape], ["err_mean"], by=("version",))["err_mean"]
+        b = med(tl[tl["shape"] == shape], ["err_mean"], by=("version",))["err_mean"]
+        for yy, (v, lab, grp) in zip(y, REMEDY):
+            col = {"World model": "#0072B2", "Split": "#E69F00", "Shape": "#CC79A7", "LightGBM": "#D55E00",
+                   "Log-linear": "#009E73"}[grp]
+            ax.plot(a[v], yy, "o", color=col, ms=4.4, mec="white", mew=0.5)
+            if v in b.index:
+                ax.plot(b[v], yy, "o", mfc="white", mec=col, ms=4.4, mew=0.9)
+            ax.text(min(a[v], 3.1) + 0.06, yy, f"{a[v]:.2f}", va="center", fontsize=6.4, color=MUTED)
+        ax.set_xlim(0, 3.4)
+        ax.set_yticks(y)
+        ax.set_yticklabels([lab for _, lab, _ in REMEDY])
+        ax.set_xlabel("Error on new plans (0 = right size of change)")
+        ax.set_title(f"In the {SHAPE[shape]}", fontweight="normal")
+        ax.grid(axis="x")
+        despine(ax)
+        panel_label(ax, letter)
+    from matplotlib.lines import Line2D
+    fig.legend(handles=[Line2D([], [], marker="o", color=INK, ls="none", ms=4, label="Trained on the merchants' history"),
+                        Line2D([], [], marker="o", mfc="white", mec=INK, ls="none", ms=4,
+                               label="Trained with 5% random test plans added")], loc="lower center", ncol=2,
+               bbox_to_anchor=(0.5, -0.01))
+    fig.tight_layout(rect=(0, 0.06, 1, 1), w_pad=1.0)
+    save(fig, FIG / "fig_remedies.pdf")
+
+
+def tables(d, L):
+    plain = d[d.explore == 0]
+    cols = ["rmsse", "err_mean", "regular_loss", "promo_loss", "stock_mean"]
+    t = med(plain, cols)
+    lines = []
+    for v, lab, _ in REMEDY:
+        cells = []
+        for shape in ("loglinear", "bent"):
+            r = t.loc[(shape, v)]
+            cells += [f"{r.rmsse:.3f}", f"{r.err_mean:.2f}", f"{100 * r.regular_loss:.1f}",
+                      f"{100 * r.promo_loss:.1f}", f"{r.stock_mean:.2f}"]
+        lines.append(lab.replace("+ ", "\\quad + ") + " & " + " & ".join(cells) + r" \\")
+    tab = r"""\begin{table*}[t]
+\centering
+\caption{\textbf{Every model and remedy in both worlds.} Medians over the 12 worlds of each kind (four planning
+strengths, three seeds). Forecast: item-by-store RMSSE on the merchants' own plan in the held-out weeks. New plans:
+mean over the eight held-out plans of $|\log(\text{predicted change}/\text{true change})|$. Price choice: revenue
+given up by the regular-price move the model picks, \% of the best. Promotion choice: true lift missed by the
+promotions the model picks, \% of the best. Stock: summed absolute error of ordering to the forecast, over expected
+sales. Rows marked + change one thing in the row above them; all rows after the first in each model, and the split
+and shape rows, were added after the first results (Appendix~\ref{app:plan}).}
+\label{tab:remedies}
+\footnotesize\setlength{\tabcolsep}{3.6pt}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrrrrrrr}
+\toprule
+ & \multicolumn{5}{c}{Log-linear world} & \multicolumn{5}{c}{Bent world} \\
+\cmidrule(lr){2-6}\cmidrule(lr){7-11}
+Model & Forecast & New plans & Price choice & Promotion & Stock & Forecast & New plans & Price choice & Promotion & Stock \\
+\midrule
+""" + "\n".join(lines) + r"""
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table*}
+"""
+    (GEN / "tab_remedies.tex").write_text(tab)
+    # the planned test, all measures
+    rows = []
+    for shape in ("loglinear", "bent"):
+        for c in (0.0, 0.5, 1.0, 1.5):
+            cells = []
+            for who in ("all", "world model", "LightGBM"):
+                for m in ("err_mean", "regular_loss", "stock_mean"):
+                    r = L[(L["shape"] == shape) & (L.confounding == c) & (L.versions_of == who) & (L.measure == m)].iloc[0]
+                    s = f"{r.spearman:.2f}" if pd.notna(r.spearman) else "--"
+                    if pd.notna(r.spearman) and (r.lo > 0 or r.hi < 0):
+                        s = r"\textbf{" + s + "}"
+                    cells.append(s)
+            rows.append(f"{SHAPE[shape].capitalize() if c == 0 else ''} & {c:g} & " + " & ".join(cells) + r" \\")
+    tab = r"""\begin{table*}[t]
+\centering
+\caption{\textbf{Does better forecasting go with better simulation?} Rank correlation, within each world, between
+forecast error on the merchants' plans and each measure (higher is worse for every measure, so a positive number
+means better forecasters are also better at it), averaged over three seeds. Bold: the 95\% bootstrap interval excludes
+zero. --: every version made the same choice, so there is nothing to rank. All versions: the test fixed in the plan (12 world model, 12 LightGBM and the log-linear model). Within a model
+class: added after the first results.}
+\label{tab:link}
+\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{llrrrrrrrrr}
+\toprule
+ & & \multicolumn{3}{c}{All 25 versions} & \multicolumn{3}{c}{World model versions} & \multicolumn{3}{c}{LightGBM versions} \\
+\cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}
+World & Planning & New plans & Price choice & Stock & New plans & Price choice & Stock & New plans & Price choice & Stock \\
+\midrule
+""" + "\n".join(rows) + r"""
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table*}
+"""
+    (GEN / "tab_link.tex").write_text(tab)
+
+
+def macros(d, L):
+    plain, tl = d[d.explore == 0], d[d.explore > 0]
+    t = med(plain, ["rmsse", "err_mean", "regular_loss", "stock_mean", "promo_loss"] +
+            [f"ratio_{p}" for p in PLAN_LABEL])
+    e = lambda s, v, c="err_mean", f="{:.2f}": f.format(t.loc[(s, v), c])
+    X = {}
+    for s, k in (("loglinear", "L"), ("bent", "B")):
+        for v, tag in (("wm_d32_s2000_h26", "Wm"), ("lgb_l31_r500_m20", "Lgb"), ("loglinear", "Ll"),
+                       ("loglinear_rr", "LlRr"), ("wm_rr", "WmRr"), ("lgb_rr", "LgbRr"), ("wm_ll", "Split"),
+                       ("lgb_ll", "LgbSplit"), ("wm_shape", "Shape"), ("wm_jepa", "Jepa"), ("wm_latent", "Latent"),
+                       ("wm_overshoot", "Over"), ("wm_adajepa", "Adapt")):
+            X[f"err{k}{tag}"] = e(s, v)
+            X[f"fc{k}{tag}"] = e(s, v, "rmsse", "{:.3f}")
+            X[f"cutsix{k}{tag}"] = e(s, v, "ratio_deeper_60", "{:.1f}")
+            X[f"regdown{k}{tag}"] = e(s, v, "ratio_regular_-10", "{:.1f}")
+            X[f"regup{k}{tag}"] = e(s, v, "ratio_regular_+10", "{:.2f}")
+            X[f"price{k}{tag}"] = f"{100 * t.loc[(s, v), 'regular_loss']:.1f}"
+        w = plain[plain["shape"] == s].pivot_table(index=["confounding", "seed"], columns="version", values="err_mean")
+        X[f"shapeWins{k}"] = WORDS[int((w["wm_shape"] < w.drop(columns="wm_shape").min(axis=1)).sum())]
+        X[f"worlds{k}"] = WORDS[len(w)]
+        tt = tl[tl["shape"] == s].groupby("version")["err_mean"].median()
+        X[f"tlShape{k}"], X[f"tlLgb{k}"], X[f"tlWm{k}"] = (f"{tt['wm_shape']:.2f}", f"{tt['lgb_l31_r500_m20']:.2f}",
+                                                         f"{tt['wm_d32_s2000_h26']:.2f}")
+        a = L[(L["shape"] == s) & (L.measure == "err_mean")]
+        for who, tag in (("all", "All"), ("world model", "Wm"), ("LightGBM", "Lgb")):
+            r = a[a.versions_of == who].set_index("confounding")
+            X[f"link{k}{tag}Lo"], X[f"link{k}{tag}Hi"] = f"{r.spearman.min():.2f}", f"{r.spearman.max():.2f}"
+            for c, ct in ((0.0, "Zero"), (1.0, "One"), (1.5, "OneHalf")):
+                X[f"link{k}{tag}{ct}"] = f"{r.loc[c, 'spearman']:.2f}"
+                X[f"link{k}{tag}{ct}Ci"] = f"{r.loc[c, 'lo']:.2f} to {r.loc[c, 'hi']:.2f}"
+    a = L[(L.measure == "err_mean") & (L.versions_of == "all")]
+    X["linkAllMin"], X["linkAllMax"] = f"{a.spearman.min():.2f}", f"{a.spearman.max():.2f}"
+    X["nFits"] = f"{len(d):,}"
+    jepa_like = ["wm_jepa", "wm_latent", "wm_overshoot", "wm_adajepa"]
+    X["errLActLo"] = f"{t.loc[[('loglinear', v) for v in jepa_like], 'err_mean'].min():.2f}"
+    X["errLActHi"] = f"{t.loc[[('loglinear', v) for v in jepa_like], 'err_mean'].max():.2f}"
+    X["errBActLo"] = f"{t.loc[[('bent', v) for v in jepa_like], 'err_mean'].min():.2f}"
+    X["errBActHi"] = f"{t.loc[[('bent', v) for v in jepa_like], 'err_mean'].max():.2f}"
+    (GEN / "p3_macros.tex").write_text("".join(f"\\newcommand{{\\{k}}}{{{v}}}\n" for k, v in X.items()))
+    return X
+
+
+def main():
+    use_style()
+    d = pd.read_csv(RES / "versions.csv")
+    L = pd.read_csv(RES / "link.csv")
+    fig_ratio(d[d.explore == 0])
+    fig_link(d[d.explore == 0], L)
+    fig_remedies(d)
+    tables(d, L)
+    X = macros(d, L)
+    print({k: X[k] for k in list(X)[:12]})
+
+
+if __name__ == "__main__":
+    main()

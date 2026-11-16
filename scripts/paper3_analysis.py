@@ -10,7 +10,7 @@ Reads every <world>_<version>.json of scripts/paper3_benchmark.py. Writes:
                     then the mean over the three seeds of each planning strength; 95% interval from 2,000 bootstrap
                     draws of versions within worlds.
 Intervention error is |log(predicted change / true change)|: 0 when the predicted change in sales is right, large
-when it is too big, too small or of the wrong sign (a wrong sign counts as the largest error seen).
+when it is too big, too small or of the wrong sign (capped at log 20, a twentyfold miss; a wrong sign counts as the cap).
 """
 import argparse
 import glob
@@ -44,8 +44,10 @@ def load(bench: str) -> pd.DataFrame:
     d["grid"] = ~d["version"].isin(amended) & (d["explore"] == 0)  # the 25 versions of the fixed plan
     for p in PLANS:
         ratio = d[f"ratio_{p}"]
-        err = np.abs(np.log(ratio.where(ratio > 0)))
-        d[f"err_{p}"] = err.fillna(err.max() if err.notna().any() else np.nan)
+        # capped at a twentyfold miss, which a wrong sign also counts as, so the measure does not move as more
+        # versions are added
+        cap = np.log(20)
+        d[f"err_{p}"] = np.abs(np.log(ratio.where(ratio > 0))).clip(upper=cap).fillna(cap)
     d["err_mean"] = d[[f"err_{p}" for p in PLANS]].mean(axis=1)
     d["stock_mean"] = d[[f"stock_{p}" for p in PLANS]].mean(axis=1)
     d["promo_loss"] = 1 - d["promo_choice"]

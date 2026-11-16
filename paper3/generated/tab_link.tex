@@ -1,0 +1,28 @@
+\begin{table*}[t]
+\centering
+\caption{\textbf{Does better forecasting go with better simulation?} Rank correlation, within each world, between
+forecast error on the merchants' plans and each measure (higher is worse for every measure, so a positive number
+means better forecasters are also better at it), averaged over three seeds. Bold: the 95\% bootstrap interval excludes
+zero. --: every version made the same choice, so there is nothing to rank. All versions: the test fixed in the plan (12 world model, 12 LightGBM and the log-linear model). Within a model
+class: added after the first results.}
+\label{tab:link}
+\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{llrrrrrrrrr}
+\toprule
+ & & \multicolumn{3}{c}{All 25 versions} & \multicolumn{3}{c}{World model versions} & \multicolumn{3}{c}{LightGBM versions} \\
+\cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}
+World & Planning & New plans & Price choice & Stock & New plans & Price choice & Stock & New plans & Price choice & Stock \\
+\midrule
+Log-linear world & 0 & \textbf{0.51} & 0.15 & \textbf{0.32} & \textbf{0.64} & -- & \textbf{0.83} & 0.33 & \textbf{-0.44} & \textbf{0.88} \\
+ & 0.5 & \textbf{0.33} & \textbf{0.44} & 0.14 & 0.18 & -- & \textbf{0.79} & 0.38 & -0.33 & \textbf{0.87} \\
+ & 1 & \textbf{0.40} & 0.15 & 0.22 & -0.31 & -- & \textbf{0.67} & 0.23 & \textbf{-0.67} & \textbf{0.75} \\
+ & 1.5 & \textbf{0.34} & 0.14 & \textbf{0.27} & \textbf{-0.35} & -- & \textbf{0.85} & 0.24 & \textbf{-0.74} & \textbf{0.87} \\
+Bent world & 0 & \textbf{0.32} & 0.13 & \textbf{0.69} & \textbf{0.43} & \textbf{0.30} & \textbf{0.86} & 0.40 & \textbf{-0.36} & \textbf{0.84} \\
+ & 0.5 & \textbf{0.54} & \textbf{0.55} & \textbf{0.84} & -0.25 & -- & \textbf{0.92} & 0.23 & -0.29 & \textbf{0.82} \\
+ & 1 & \textbf{0.48} & \textbf{0.56} & \textbf{0.87} & \textbf{-0.69} & -- & \textbf{0.90} & 0.27 & \textbf{-0.44} & \textbf{0.89} \\
+ & 1.5 & \textbf{0.66} & \textbf{0.46} & \textbf{0.89} & -0.05 & -- & \textbf{0.88} & \textbf{0.62} & \textbf{-0.52} & \textbf{0.91} \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table*}

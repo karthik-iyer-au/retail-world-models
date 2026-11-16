@@ -1,0 +1,19 @@
+{\small
+\textbf{Abstract.} A retail world model is meant to answer ``what if'': what sales a plan the merchants have never
+run would bring. We test whether it does, in generated stores where the true effect of every plan is known, and
+what to do when it does not. Models are trained on the plans merchants make and asked to forecast plans held out by
+design: deeper cuts than any in training, lasting regular-price moves, promotions moved to quiet weeks and no plan at
+all. Across \nFits{} fitted models we find four things. First, choosing between kinds of model by forecast accuracy
+is a fair guide: across all versions, better forecasters also simulate new plans better (rank correlation
+\linkAllMin{} to \linkAllMax{}). Second, choosing between versions of one world model by forecast accuracy is not:
+where merchants plan into high-demand weeks the link reverses, down to \linkBWmOne{} (interval \linkBWmOneCi{}).
+Third, training the world model to learn the effect of actions (JEPA pretraining, a latent consistency check,
+adaptation at the plan date) leaves its error on new plans unchanged (\errLActLo{} to \errLActHi{} against
+\errLWm{}). Fourth, building the shape of the price response into the world model works: sales may not fall as a
+cut deepens, the gain from a deeper cut is bounded, and a lasting regular price acts through its own learned
+elasticity. With that structure the world model's error on new plans falls from \errBWm{} to \errBShape{} in a world
+whose price response bends, the lowest of every model in all \worldsB{} such worlds, while a log-linear model
+overstates a 60\% cut \cutsixBLlRr{} times. A small share of random test plans helps every model a little. We
+recommend that retailers give a world model the recorded regular price and a price response with a sensible shape,
+and select versions on held-out plans rather than on forecast accuracy.
+\par}
