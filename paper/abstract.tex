@@ -21,7 +21,7 @@ cases, and in paired item tests it is clearly more accurate than the world model
 in \rqPAvgWmBetter{} of \rqPAvgWmN{} comparisons (clearly less in \rqPAvgWmWorse{}) and than LightGBM in
 \rqPAvgLgbBetter{} (clearly less in \rqPAvgLgbWorse{}). It is also the most accurate on the fast
 lines that carry most sales and on the slow tail on \rqAvgBestFast{} of the nine data sets. On
-the final periods every run held out, scored last, the average is the most accurate on only
+the final periods every final run held out, scored last, the average is the most accurate on only
 \hoAvgBest{} of \hoSets{} data sets but never the least accurate: there it is the safe choice
 rather than the best one. On items kept out of training, the world model loses at most \rqCostWmItemHi{} in
 scaled error and forecasts within \rqWmFaItemOff\% of actual sales, while LightGBM loses up
@@ -37,8 +37,8 @@ models have not been trained on. The rule holds for the data sets studied; anyon
 adopting the framework should rerun every comparison, including those that lost
 here, on their own data. The study covers forecasts of 8 weeks and 28 days and
 the price and promotion levers; a test 52 weeks ahead on Dominick's and M5,
-added in \thisrev{}, finds the same rule when each model forecasts the whole
-year at once.
+added in \thisrev{}, gives mixed evidence: the average forecasting the whole year at once
+is the most accurate on \lhLowestAvgDirect{} of \lhSets{} data sets and the world model alone on none.
 % Numbers from results/analysis_tuned (nine data sets) and the transfer runs.
 
 \vspace{4pt}

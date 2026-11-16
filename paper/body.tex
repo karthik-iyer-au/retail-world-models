@@ -308,8 +308,8 @@ model on them, and Chronos-Bolt is its faster direct-quantile version;
 Lag-Llama~\cite{lagllama}, Moirai~\cite{moirai} and TimeGPT~\cite{timegpt}
 follow similar lines. TimesFM~2.5 adds a covariate method that fits a linear
 model on future inputs and forecasts the remainder with the pretrained
-model~\cite{timesfm25}. Timestral~1.0~\cite{timestral}, released by Mistral on
-15 October 2026, reads known future inputs inside the model itself and returns
+model~\cite{timesfm25}. Timestral~1.0~\cite{timestral}, released by Mistral in
+October 2026, reads known future inputs inside the model itself and returns
 21 quantiles. We test whether any of them, given the plan, matches models
 trained on it.
 
@@ -433,7 +433,8 @@ holds history no final run trains on: Dominick's from September 1989 to the
 start of training in September 1992, M5 from January 2011 to November 2013, and
 Favorita two years before 1 January 2015, the start set when Favorita was added
 in \thisrev{}. The final 24 weeks (84 days on M5) of each data set but Favorita are
-held out of every run. Over the same span a daily series has seven times the points of a weekly one;
+held out of the search and of every final run; the \fvpaper{} scored its earlier models once on
+their last 8 weeks (28 days on M5). Over the same span a daily series has seven times the points of a weekly one;
 over their training lengths an M5 series has 730 points against 156 for
 Dominick's, though M5's training covers two years and Dominick's three.
 
@@ -599,7 +600,7 @@ described and scored in Section~\ref{sec:sup-method} of the online supplement.
 The average is the equal-weight mean of the tuned world model's and the tuned
 LightGBM's forecasts for each item, store and period, with no weights fitted.
 The three-model ensemble adds TimesFM with the plan, also with equal weights; it
-was fixed on 13 October 2026, before any result of the \revn{}, and is reported
+was fixed before any result of the \revn{}, and is reported
 beside the average. The forecast by history of Section~\ref{sec:rq-broad} uses
 the world model alone for series with less than 26 weeks of sales and the
 average for the rest.

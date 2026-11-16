@@ -70,7 +70,7 @@ def main():
 levels and the held-out windows (three of 8 weeks on Dominick's and Frat, three of 28 days on M5), each window trained on
 the history before it, beside the same models on the paper's rolling windows. Avg against LGB, Avg against WM:
 comparisons (levels and windows) where the average is clearly more / less accurate (paired item bootstrap). Bold: lowest
-on the held-out windows. Favorita held nothing out. Planned 15 November 2026, after the other results.}
+on the held-out windows. Favorita held nothing out. Planned after the other results.}
 \label{tab:heldout}
 \footnotesize\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lccccccrr}

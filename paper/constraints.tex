@@ -27,7 +27,7 @@ Regular price & Highest price in the last 12 periods & Plan features \\
 Brand-switching share $\alpha$ & One per run, fitted on the last 8 training weeks & Dominick's world model \\
 Forecasts & Not below zero & Every model \\
 Average weights & One half each & \cpath{scripts/revision_analysis.py}{analysis code} (\texttt{ensemble\_2}) \\
-Three-model ensemble weights & One third each, fixed 13 October 2026 & \cpath{scripts/revision_analysis.py}{analysis code} \\
+Three-model ensemble weights & One third each, fixed before the results & \cpath{scripts/revision_analysis.py}{analysis code} \\
 Forecast by history & World model alone under 26 weeks (182 days) of sales & \cpath{scripts/revision_analysis.py}{analysis code} (\texttt{by\_history}) \\
 Seed copies & Five fits averaged (one on M5) & \cpath{src/rwm/seed_average.py}{model code} \\
 Interval pooling & Horizons pooled below 50 earlier errors per horizon & \cpath{src/rwm/evaluation/compare.py}{evaluation code} \\

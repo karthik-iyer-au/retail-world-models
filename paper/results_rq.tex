@@ -50,7 +50,9 @@ rather than the most accurate one: it is never the least accurate of the three,
 but it is the most accurate on only \hoAvgBest{} of \hoSets{} data sets.} Each
 final model was scored once more, after every other result, on the last 24 weeks
 of each Dominick's category and of Frat and the last 84 days of M5, which no
-search, setting or result had touched (Table~\ref{tab:heldout}). LightGBM is the
+search or setting of \thisrev{} used (Table~\ref{tab:heldout}). They are excluded from tuning, not unseen:
+the \fvpaper{} scored its earlier models once on the last 8 weeks of these periods (the last 28 days
+on M5), before the search of \thisrev{} began. LightGBM is the
 most accurate on \hoLgbBest{} data sets and the world model on \hoWmBest{}; the
 order of the three matches the rolling windows on \hoOrderSame{}. In paired
 comparisons the average is clearly more accurate than LightGBM more often than
@@ -261,7 +263,7 @@ the study does not cover, including year-ahead forecasts beyond the 52-week test
 
 \ifjournal
 \paragraph{Fifty-two weeks ahead}
-The rule holds a year ahead when each model forecasts the whole year at once. In
+A year ahead the evidence for the rule is mixed. In
 a test planned before it ran (six Dominick's categories and M5, two windows of 52
 weeks), the world model alone is not the most accurate on any data set; the
 average of the two models forecasting all 52 weeks at once is the most accurate

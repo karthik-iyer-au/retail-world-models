@@ -1,7 +1,7 @@
 \section{The earlier audit of the development versions}
 \label{sec:results}
 
-This section is the record of the audit made in October 2026, before the
+This section is the record of the earlier audit, made before the
 companion paper~\cite{rwm} tuned its models. It is separate from the audit of
 the final tuned models in \S\ref{sec:tuned} and is not the paper's main result.
 It read every saved world-model and lift-model fit of the companion paper at
@@ -12,7 +12,7 @@ once. No model was refitted or tuned. Table~\ref{tab:realpass} gives the pass
 counts and Figure~\ref{fig:realchecks} every score.
 
 \begin{table*}[t]\centering
-\caption{\textbf{Earlier audit (October 2026): no version passed every check on
+\caption{\textbf{Earlier audit: no version passed every check on
 M5 or Dominick's.} Pass counts by check and data set over version-windows,
 under the rules fixed in advance (a check counted only where it applies: C3
 needs two or more seeds, C6 a LightGBM run on the same window). C1 is scored
@@ -23,7 +23,7 @@ Table~\ref{tab:thresholds}.}\label{tab:realpass}
 
 \begin{figure*}[t]\centering
 \includegraphics[width=\textwidth]{figs/fig_real_checks.pdf}
-\caption{\textbf{Earlier audit (October 2026): the explanations agreed across
+\caption{\textbf{Earlier audit: the explanations agreed across
 seeds on Dominick's and Frat, failed the price-direction check on Dominick's
 and M5, and agreed with LightGBM only on Frat.} One point per version-window,
 coloured by data set; dashed lines: pass thresholds. \textbf{(a)} C1, the
@@ -120,7 +120,7 @@ the detected start, and so differs by one from the episode list
 
 \begin{figure*}[t]\centering
 \includegraphics[width=\textwidth]{figs/fig_real_c7.pdf}
-\caption{\textbf{Earlier audit (October 2026): the development world model and
+\caption{\textbf{Earlier audit: the development world model and
 LightGBM state about twice the measured response to a regular price change.}
 \textbf{(a)} For each scored Dominick's zone episode, the store's price against
 its zone peers and the change in its category units over the first eight weeks:
@@ -159,7 +159,7 @@ worse; the intervals exclude a strong relation in either direction, not a weak
 one. The same test on the tuned searches' versions is in \S\ref{sec:tuned}.
 
 \begin{table*}[t]\centering
-\caption{\textbf{Earlier audit (October 2026): across versions, the number of
+\caption{\textbf{Earlier audit: across versions, the number of
 checks passed was not clearly related to accuracy; the check that was, C5,
 shares information with accuracy.} Spearman correlation between each score and
 item-by-store WRMSSE (negative: higher scores go with lower error), within each
