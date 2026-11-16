@@ -112,3 +112,26 @@ after the first results:
 The test is unchanged: the link between forecast accuracy and intervention accuracy and decision loss, now also
 for these versions and in the new world, and whether any of the changes in 1 and 2 make the world model's
 intervention accuracy better.
+
+**Amendment 2, 17 November 2026, after the results of amendment 1 and before any of these runs.** Karthik, 00:46:
+"paper 3 should answer what can we do about the what if not state it does not work". Amendment 1 found that no change
+to the world model's training made its simulation of new plans better, and that the recorded regular price helped
+the log-linear model most. Two remedies a retailer can apply are added, labelled in the paper as added after the
+first results, and given to every model on the same data:
+
+1. Split the job. The forecaster (world model `wm_rr`, or LightGBM `lgb_rr`) forecasts the week as it would be at
+   the current regular price with nothing planned; the log-linear model with the recorded regular price
+   (`loglinear_rr`) supplies the change the plan makes, as the ratio of its forecast under the plan to its forecast
+   at the current regular price with nothing planned. The current regular price is the last recorded regular price
+   before the plan date. Versions `wm_ll` and `lgb_ll`, on every world of amendment 1.
+2. Test and learn. Retailers can run a few test plans that do not follow demand. New worlds in which 5% of the
+   training item-weeks of every series carry a random plan, drawn apart from demand: a cut with probability one half,
+   10% to 60% off; a promotion and a display each with probability one half. Everything else in the world is as
+   before (the test plans come from their own random stream). The held-out plans and the scoring are unchanged, so
+   the deeper cuts are now inside the range tested. Versions `wm_d32_s2000_h26`, `wm_rr`, `lgb_l31_r500_m20`,
+   `lgb_rr`, `loglinear`, `loglinear_rr`, `wm_ll` and `lgb_ll`; both world shapes, four planning strengths, three
+   seeds.
+
+Reading fixed now: a remedy works if it lowers the intervention error and the regular-price and promotion choice
+losses against the same model without it, in the same worlds, across seeds. Compute: about 240 fits on Modal CPU,
+about US$35 (Karthik, 23:42: "run what u need for paper3 if the charges are small").
