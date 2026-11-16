@@ -33,7 +33,15 @@ from rwm.forecaster import build_model  # noqa: E402
 
 ORIGIN = 253          # first forecast week (1-based); weeks 253 to 260 are scored
 HORIZON = 8
-WORLDS = {"clean": 0.0, "confounded": 1.0}
+WORLDS = {"clean": dict(confounding=0.0), "confounded": dict(confounding=1.0)}
+# sensitivity of the planned-into-demand world, one setting changed at a time (plan amendment of 16 November 2026)
+VARIANTS = {
+    "conf0.5": dict(confounding=0.5), "conf1.5": dict(confounding=1.5),
+    "rho0.4": dict(confounding=1.0, shock_rho=0.4), "rho0.9": dict(confounding=1.0, shock_rho=0.9),
+    "reg-0.25": dict(confounding=1.0, regular_elasticity=-0.25), "reg-1.0": dict(confounding=1.0, regular_elasticity=-1.0),
+    "cut-1.5": dict(confounding=1.0, cut_elasticity=-1.5), "cut-3.5": dict(confounding=1.0, cut_elasticity=-3.5),
+}
+WORLDS.update({f"sens_{k}": v for k, v in VARIANTS.items()})
 DATA = dict(n_zones=3, stores_per_zone=6, n_items=20, n_periods=260, seed=7, test_origin=ORIGIN)
 LEVERS = ["promo", "display"]
 
@@ -60,8 +68,8 @@ MODELS = {
 HIDDEN = ["true_level", "true_regular", "true_zone", "true_prev_planned"]
 
 
-def world(confounding: float):
-    panel = load_dataset("synthetic_levers", confounding=confounding, **DATA).panel
+def world(settings: dict):
+    panel = load_dataset("synthetic_levers", **settings, **DATA).panel
     dates = np.sort(panel[DATE].unique())
     train = panel[panel[DATE] < dates[ORIGIN - 1]].copy()
     test = panel[panel[DATE] >= dates[ORIGIN - 1]].copy()
@@ -207,7 +215,16 @@ def main(argv=None):
     p.add_argument("--out", required=True)
     p.add_argument("--worlds", nargs="*", default=list(WORLDS))
     p.add_argument("--steps", type=int)
+    p.add_argument("--variants", action="store_true", help="the eight sensitivity worlds, world model seed 1 and LightGBM")
+    p.add_argument("--models", nargs="*", help="only these models")
     a = p.parse_args(argv)
+    if a.variants:
+        a.worlds = [f"sens_{k}" for k in VARIANTS]
+        a.models = a.models or ["world_seed1", "lightgbm"]
+    if a.models:
+        for k in list(MODELS):
+            if k not in a.models:
+                MODELS.pop(k)
     if a.steps:
         WORLD_MODEL["steps"] = a.steps
         for k, (kind, params, s) in MODELS.items():
