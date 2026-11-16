@@ -196,24 +196,36 @@ dynamic inventory system, and they do not establish savings in a deployed retail
 \section{Conclusion}
 \label{sec:conclusion}
 
-A retailer makes decisions from the same demand at different grains, and on
-these data no single model was the most accurate at every grain. One forecast
-made item by store and summed upward, as the equal-weight average of a tuned
-world model and tuned gradient-boosted trees, was the most accurate of the two
-models and their average at store grain and above on \rqAvgBestCoarseWord{} of \rqNineWord{} data sets and at the item levels on all
-\rqAvgBestItemWord{}, on the fast lines and on the slow tail. On the periods every final run held out it was the most
-accurate on \hoAvgBest{} of \hoSets{} data sets and never the least accurate: the safe choice. The combination held across grains, but the choice of model changed for items
-absent from training: there the world model alone was more accurate than the
-average on every data set tested, because LightGBM with the item label
-under-forecast them; without the label LightGBM came closer but was still less
-accurate on \rqWmBeatsNoid{} of \rqNoidSets{}. In the one transfer between
-retailers tested, settings tuned on M5 were less accurate on Favorita than Favorita's own, and training on other data sets did not
-help. The rule that follows, the average everywhere and the world model alone
-for items not trained on, is a finding on these data for forecasts of 8 weeks and 28 days
-under price and promotion plans. The comparison behind it, run over several
-windows with paired tests and every losing model reported, is what we propose a
-retailer reruns on its own data, and over its own planning horizons, before
-adopting it.
+A retailer makes decisions from the same demand at different grains, and on these data no single
+model was the most accurate everywhere. The findings fall into four parts.
+
+\textbf{When to use the average.} One forecast made item by store and summed upward, as the
+equal-weight average of a tuned world model and tuned gradient-boosted trees, was the most accurate
+of the two models and their average at store grain and above on \rqAvgBestCoarseWord{} of
+\rqNineWord{} data sets and at the item levels on all \rqAvgBestItemWord{}. On the periods every
+final run held out it was the most accurate on only \hoAvgBest{} of \hoSets{} data sets but never the
+least accurate. It is the safe default, not the best choice everywhere.
+
+\textbf{When to use the world model.} For items absent from training the world model alone was more
+accurate than the average on every data set tested, because LightGBM with the item label
+under-forecast them; without the label LightGBM came closer but was still less accurate on
+\rqWmBeatsNoid{} of \rqNoidSets{}. On lines with short history the world model was clearly more
+accurate than LightGBM on \kWmBetterShortHistory{} of \rqNineWord{} data sets.
+
+\textbf{When to use LightGBM.} On heavily promoted lines, fast sellers and lines with long history
+LightGBM was clearly more accurate than the world model on most data sets, and on Dominick's in
+price-cut weeks, where the world model's gap also sits a year ahead.
+
+\textbf{Where the evidence is inconclusive.} Slow lines and lines never promoted were close to
+even. More training history helped the world model on one daily data set and hurt it on the
+other. Settings carried between retailers and training on other data sets did not help. A year
+ahead, the average was the most accurate on \lhLowestAvgDirect{} of \lhSets{} data sets and LightGBM
+on the rest.
+
+These are findings on these data, for forecasts of 8 weeks and 28 days and a test of 52 weeks,
+under price and promotion plans. The comparison behind them, run over several windows with paired
+tests and every losing model reported, is what we propose a retailer reruns on its own data, and
+over its own planning horizons, before adopting them.
 
 \ifjournal\else
 \input{moved_repro}

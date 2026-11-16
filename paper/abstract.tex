@@ -13,33 +13,35 @@ world model that carries each item's state forward under the price and
 promotion plan, on four public data sets (M5, six Dominick's categories,
 Breakfast at the Frat and Corporaci\'on Favorita), with the world model and
 LightGBM tuned by a common search procedure. Results are read by grain, by the nature of
-the line, on seen and unseen data, and across retailers. On lines and stores the
-models were trained on, the tuned world model and LightGBM are close, each ahead
-on different data sets and grains, and on the rolling test windows their average is
-the most accurate across grains: it has the lowest error in \rqAvgBestCells{} of \rqCells{} grain and data set
-cases, and in paired item tests it is clearly more accurate than the world model
-in \rqPAvgWmBetter{} of \rqPAvgWmN{} comparisons (clearly less in \rqPAvgWmWorse{}) and than LightGBM in
-\rqPAvgLgbBetter{} (clearly less in \rqPAvgLgbWorse{}). It is also the most accurate on the fast
-lines that carry most sales and on the slow tail on \rqAvgBestFast{} of the nine data sets. On
-the final periods every final run held out, scored last, the average is the most accurate on only
-\hoAvgBest{} of \hoSets{} data sets but never the least accurate: there it is the safe choice
-rather than the best one. On items kept out of training, the world model loses at most \rqCostWmItemHi{} in
-scaled error and forecasts within \rqWmFaItemOff\% of actual sales, while LightGBM loses up
-to \rqCostLgbItemHi{} and forecasts as little as \rqLgbFaItemLoFrac{} of actual sales, which pulls the
-average below the world model alone on all \rqKeptSets{} data sets tested. Fitted without the
-item label, LightGBM loses at most \rqNoidCostHi{}, but the world model stays clearly more
-accurate on \rqWmBeatsNoid{} of \rqNoidSets{} data sets. In the one
-transfer between retailers tested, settings tuned on M5 were less accurate on Favorita than Favorita's own, and training on other data sets
-improved neither model by more than \rqPoolGainMax{}. On these data, the rule that follows is
-one forecast for every item in every store, the average, as the choice that never loses badly, of the tuned world model
-and tuned trees summed to every grain, with the world model alone for items the
-models have not been trained on. The rule holds for the data sets studied; anyone
-adopting the framework should rerun every comparison, including those that lost
-here, on their own data. The study covers forecasts of 8 weeks and 28 days and
-the price and promotion levers; a test 52 weeks ahead on Dominick's and M5,
-added in \thisrev{}, gives mixed evidence: the average forecasting the whole year at once
-is the most accurate on \lhLowestAvgDirect{} of \lhSets{} data sets, and the world model alone beats
-LightGBM alone on \lhWmDirAheadN{} of \lhWmDirSets{}.
+the line, on seen and unseen data, across retailers and a year ahead, and fall into four parts.
+\emph{When to use the average.} On lines and stores the models were trained on, the tuned world
+model and LightGBM are close, and their average, summed to every grain, is the safe default: it
+has the lowest error in \rqAvgBestCells{} of \rqCells{} grain and data set cases; in paired item tests
+it is clearly more accurate than the world model in \rqPAvgWmBetter{} of \rqPAvgWmN{} comparisons
+(clearly less in \rqPAvgWmWorse{}) and than LightGBM in \rqPAvgLgbBetter{} (clearly less in
+\rqPAvgLgbWorse{}); and on the final periods every final run held out it is never the least
+accurate, though the most accurate on only \hoAvgBest{} of \hoSets{} data sets.
+\emph{When to use the world model.} On items kept out of training the world model loses at most
+\rqCostWmItemHi{} in scaled error and forecasts within \rqWmFaItemOff\% of actual sales, while
+LightGBM loses up to \rqCostLgbItemHi{} and forecasts as little as \rqLgbFaItemLoFrac{} of actual
+sales; fitted without the item label, LightGBM loses at most \rqNoidCostHi{} but is still less
+accurate on \rqWmBeatsNoid{} of \rqNoidSets{} data sets. On lines with short history the world model
+is clearly more accurate than LightGBM on \kWmBetterShortHistory{} of \rqNineWord{} data sets
+(less on \kWmWorseShortHistory{}).
+\emph{When to use LightGBM.} LightGBM is clearly more accurate than the world model on heavily
+promoted lines, fast sellers and lines with long history (on \kWmWorseHeavyPromotion{},
+\kWmWorseFast{} and \kWmWorseLongHistory{} of \rqNineWord{} data sets), and in price-cut weeks on
+every Dominick's category.
+\emph{Where the evidence is inconclusive.} Lines never promoted (\kWmBetterNoPromotion{} data
+sets to \kWmWorseNoPromotion{}) and slow lines (\kWmBetterSlow{} to \kWmWorseSlow{}) are close to
+even; more training history helped the world model on Favorita and hurt it on M5; settings
+carried from M5 to Favorita and training on other data sets improved neither model by more than
+\rqPoolGainMax{}; and in a test 52 weeks ahead on Dominick's and M5, added in \thisrev{}, the
+average forecasting the whole year at once is the most accurate on \lhLowestAvgDirect{} of
+\lhSets{} data sets and LightGBM on the rest, with the world model ahead of LightGBM head to head on
+\lhWmDirAheadN{} of \lhWmDirSets{}. The findings hold for the data sets studied and the price and
+promotion levers; anyone adopting them should rerun every comparison, including those that lost
+here, on their own data.
 % Numbers from results/analysis_tuned (nine data sets) and the transfer runs.
 
 \vspace{4pt}
