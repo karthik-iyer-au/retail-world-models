@@ -1,13 +1,14 @@
-% 52 weeks ahead (planned 13 November 2026, docs/PAPER1_REVISION_PLAN.md). A subsection of the results in the
-% arXiv version, a section of the supplement in the journal version. Every number from
+% 52 weeks ahead (docs/PAPER1_REVISION_PLAN.md). A subsection of the results in both versions (Karthik, 16 Nov:
+% core to the paper); the designs and models added after the planned test are in long_horizon_more.tex, in the
+% results of the arXiv version and in the supplement of the journal version. Every number from
 % scripts/make_long_horizon_tables.py (generated/lh_values.tex, lh_tab.tex, lh_tab_all.tex).
-\ifsupplement\section{Forecasting 52 weeks ahead}\else\subsection{Forecasting 52 weeks ahead}\fi
+\subsection{Forecasting 52 weeks ahead}
 \label{sec:long-horizon}
 
 \textbf{Over 52 weeks the world model alone is not the most accurate forecast on
 any data set. The average of the two models, each forecasting all 52 weeks at
 once, is the most accurate on \lhLowestAvgDirect{} of \lhSets{} data sets, and
-LightGBM on the others.} Grocery retailers plan the year ahead, so the test asks
+LightGBM on the others: a year ahead the evidence for the rule is mixed.} Grocery retailers plan the year ahead, so the test asks
 whether the rule of Section~\ref{sec:rq-broad} carries from 8 weeks to 52. It
 was written down before it ran: the six Dominick's categories and M5, two
 windows of 52 weeks each (364 days on M5), the final tuned settings with only the
@@ -36,56 +37,19 @@ on \lhDirectBeatsBlocksWm{} of \lhDirectSetsWm{} data sets, LightGBM on
 by store error changes by \lhGrowWmLo{} to \lhGrowWmHi{} from the first 13 weeks
 to the last, LightGBM's by \lhGrowLgbLo{} to \lhGrowLgbHi{}. The world model rolls
 its state forward from the sales it takes in; when those are its own forecasts,
-its errors are carried into the state and grow with each block.
+its errors are carried into the state and grow with each block. Forecasting directly, on Dominick's
+its gap to LightGBM at item by store sits in the price-cut weeks (\lhGapCutLo{} to \lhGapCutHi{} in RMSSE
+across the categories) and is near zero in regular weeks (\lhGapRegLo{} to \lhGapRegHi{}).
 
-\paragraph{The average stays the most accurate forecast at 52 weeks}
+\paragraph{The average loses to LightGBM in few comparisons}
 The average of the two models, each forecasting the whole year at once, is
 clearly more accurate than LightGBM forecasting directly in \lhPAvgDirBetter{} of
 \lhPAvgDirN{} paired comparisons and clearly less in \lhPAvgDirWorse{}; against
 the world model forecasting directly it is clearly more accurate in
 \lhPAvgDirWmBetter{} and clearly less in \lhPAvgDirWmWorse{}. These two
 comparisons were added after the planned ones.
-
-\paragraph{Added after the planned test: other designs and other models}
-After seeing the planned result we added two designs in which no model takes in
-its own forecasts, and ran the other models of the paper over 52 weeks
-(Table~\ref{tab:long-horizon-all}). In the first, the world model rolls its
-state forward 13 weeks at a time on the plan; in the second, LightGBM fits one
-model per block of 13 weeks. Rolling on helps on M5 and fails on Dominick's. On M5
-the world model rolled on scores \lhMfiveWmRollon{} against \lhMfiveWmBlocks{} in
-blocks, and its average with LightGBM, \lhMfiveAvgRollon, is the most accurate
-forecast on M5 and clearly more accurate than LightGBM forecasting directly
-(\lhMfiveLgbDirect) in \lhMfiveAvgRollonLgbBetter{} of
-\lhMfiveAvgRollonLgbN{} paired comparisons, clearly less in none. On the
-Dominick's categories the rolled-on state drifts: on cheese the forecast is
-\lhRollonCheeseFa{} times what sold and the WRMSSE \lhRollonCheese. LightGBM by
-block is close to LightGBM forecasting directly. Of all the forecasts in Table~\ref{tab:long-horizon-all}, the average of the
-two models forecasting directly is the most accurate on \lhAllLowestAvgDirect{}
-data sets, and the average with the world model rolled on on M5. On analgesics
-and soft drinks the most accurate is LightGBM fitted per block with settings
-searched again for 52 weeks, and on cheese the average of that LightGBM with the
-world model; both were added after the planned test. TFT, TimesFM, Chronos and the seasonal naive forecast are
-behind LightGBM and the average on every data set; TimesFM given the plan is
-ahead of the world model alone on analgesics. Timestral given the plan cannot
-forecast 52 weeks: its forecast is \lhTimestralFaOneLo{} to \lhTimestralFaOneHi{}
-times what sold in the first 13 weeks and \lhTimestralFaLo{} to
-\lhTimestralFaHi{} times over the year. On M5 the world model is scored rolled on and in
-blocks of 13 weeks.
-
-\paragraph{Settings searched again for 52 weeks (added after the planned test)}
-Each model's settings were searched again for 52 weeks on the six Dominick's
-categories, with the paper's search (Section~\ref{sec:loop}) on three 52-week
-windows 13 weeks apart. The world model's searches kept one change, on snacks;
-LightGBM's kept changes on five categories,
-none on cheese. Retuned, the world model is clearly less accurate than LightGBM
-in \lhPTunedWmLgbWorse{} of \lhPTunedWmLgbN{} paired comparisons and clearly more
-in \lhPTunedWmLgbBetter; the average of the two is clearly more accurate than
-LightGBM in \lhPTunedAvgLgbBetter{} and clearly less in \lhPTunedAvgLgbWorse.
-Retuning did not help LightGBM on balance: its retuned forecast is clearly more
-accurate than the first in \lhPTunedLgbBetter{} comparisons and clearly less in
-\lhPTunedLgbWorse.
-
-\input{generated/lh_tab_all}
+\ifjournal Designs and models added after the planned test are in
+Section~\ref{sec:long-horizon-more} of the supplement.\fi
 
 \input{generated/lh_tab}
 
@@ -98,3 +62,5 @@ weeks (91 days on M5), for the world model, LightGBM and their average
 forecasting in blocks.}
 \label{fig:long-horizon}
 \end{figure*}
+
+\ifjournal\else\input{long_horizon_more}\fi

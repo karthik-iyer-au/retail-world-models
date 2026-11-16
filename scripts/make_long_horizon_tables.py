@@ -121,6 +121,16 @@ Data set & WM & LGB & Avg & WM & LGB & Avg & WM vs LGB, blocks & Avg vs LGB, dir
         r = [fa.get((k, "all", m), np.nan) for k in keys]
         v[f"lhFa{tag}Lo"], v[f"lhFa{tag}Hi"] = f"{100 * np.nanmin(r):.0f}", f"{100 * np.nanmax(r):.0f}"
     v.update(every(s, pr, keys))
+    # where the world model's 52-week gap sits on Dominick's: item-by-store RMSSE minus LightGBM's, both forecasting
+    # directly, in price-cut weeks and in regular weeks (scripts/score_long_horizon_promo.py), mean over the windows
+    pw = ROOT / "results" / "long_horizon" / "promo_scores.csv"
+    if pw.exists():
+        q = pd.read_csv(pw)
+        q = q[(q.model == "world_model_direct") & q.key.str.startswith("dominicks")]
+        q = q.groupby(["key", "kind"]).diff_to_lgb.mean().unstack()
+        for kind, tag in (("price_cut", "Cut"), ("regular", "Reg")):
+            v[f"lhGap{tag}Lo"] = f"{q[kind].min():+.3f}".replace("-", "\u2212")
+            v[f"lhGap{tag}Hi"] = f"{q[kind].max():+.3f}".replace("-", "\u2212")
     (OUT / "generated" / "lh_values.tex").write_text("".join(f"\\newcommand{{\\{k}}}{{{x}}}\n" for k, x in v.items()))
 
     import matplotlib.pyplot as plt
