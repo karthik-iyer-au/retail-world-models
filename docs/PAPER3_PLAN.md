@@ -195,3 +195,30 @@ evidence; and the kinked-world result covers only the simpler models tested. Add
 
 Compute: about 300 world model fits and 600 cheaper fits, about US$40 (Karthik, 23:42 on 16 November: "run what u
 need for paper3 if the charges are small").
+
+**Amendment 5, 17 November 2026, 13:40, before any of these runs.** Karthik, 13:36: "yes in addition to syth we
+should do this" (a real-data check). Real data hold no answer for a plan never run, but some rare plans were run.
+Added, labelled in the paper as added after the first results:
+
+1. Breakfast at the Frat (77 stores, 55 items, 156 weeks; the data record each week's regular price as BASE_PRICE,
+   which is the recorded regular price). Origins at weeks 125, 133, 141 and 149, forecasting 8 weeks each. Every
+   item-week with a cut deeper than 30% off the regular price is removed from training, so no model sees a cut that
+   deep; 30% is near the 95th percentile of cuts. Scored on the held-out weeks in three groups: item-weeks with a
+   cut deeper than 30% (the unseen deep cuts), item-weeks whose regular price differs by 10% or more from the series'
+   last regular price before the origin (lasting regular-price moves), and the rest.
+2. M5, FOODS_3 in stores CA_1, TX_1 and WI_1, summed to weeks (no promotion records). The regular price is not
+   recorded, so it is constructed: a price that holds for four weeks or more becomes the regular price, and the
+   previous regular price holds otherwise. Origins 32, 24, 16 and 8 weeks before the end, forecasting 8 weeks.
+   Scored on item-weeks whose regular price differs by 5% or more from the last regular price before the origin,
+   and the rest.
+3. Models: the world model (`wm_d32_s2000_h26` settings), with the recorded regular price, and with the price rules;
+   LightGBM (`lgb_l31_r500_m20`), with the recorded regular price, and with the rules; the log-linear model, with the
+   recorded regular price, and with the rules.
+4. Measures, per group and origin: summed forecast over summed sales (1 is right) and its |log|, and summed absolute
+   error over summed sales. Comparisons between models: by origin, and the paired difference in absolute error with
+   a 95% interval from a bootstrap over series.
+
+Reading fixed now: if the models with the rules and the recorded regular price have lower error on the unseen deep
+cuts and the lasting regular-price moves than the same models without them, the synthetic finding carries to real
+data; if not, the paper says so. This is a check on sales that happened, not on counterfactual plans. Compute: about
+US$30 to 50.
