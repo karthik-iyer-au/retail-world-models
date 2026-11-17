@@ -1,0 +1,28 @@
+{
+ "strength": 1.0,
+ "seed": 103,
+ "version": "wm_d64_s500_h26",
+ "kind": "state_model",
+ "rmsse": 0.918840208495206,
+ "dose_50": {
+  "change_ratio": -1.3496599832805234,
+  "true_change": 1701.0264782238241
+ },
+ "dose_60": {
+  "change_ratio": -1.472395735642797,
+  "true_change": 2218.2262290689237
+ },
+ "steady_20": {
+  "change_ratio": -0.8266599508111452,
+  "true_change": 8182.1897638518685
+ },
+ "off_pattern": {
+  "change_ratio": 0.20834736543437393,
+  "true_change": 615.9383468761987
+ },
+ "no_dose": {
+  "change_ratio": -0.9496626378962381,
+  "true_change": -3689.092831482057
+ },
+ "seconds": 92.4
+}

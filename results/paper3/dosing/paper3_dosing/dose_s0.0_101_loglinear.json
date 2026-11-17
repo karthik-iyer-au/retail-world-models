@@ -1,0 +1,28 @@
+{
+ "strength": 0.0,
+ "seed": 101,
+ "version": "loglinear",
+ "kind": "loglinear",
+ "rmsse": 1.0569098454936634,
+ "dose_50": {
+  "change_ratio": 1.0893872010504067,
+  "true_change": 1918.667870542377
+ },
+ "dose_60": {
+  "change_ratio": 1.3939948587438016,
+  "true_change": 2456.777630884908
+ },
+ "steady_20": {
+  "change_ratio": 0.3704471142520983,
+  "true_change": 7432.84745202121
+ },
+ "off_pattern": {
+  "change_ratio": -0.4774733626805349,
+  "true_change": 379.23751198534933
+ },
+ "no_dose": {
+  "change_ratio": 0.5220370542877979,
+  "true_change": -3715.520649359064
+ },
+ "seconds": 5.1
+}

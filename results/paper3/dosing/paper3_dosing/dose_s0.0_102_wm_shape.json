@@ -1,0 +1,28 @@
+{
+ "strength": 0.0,
+ "seed": 102,
+ "version": "wm_shape",
+ "kind": "state_model",
+ "rmsse": 1.001310246311481,
+ "dose_50": {
+  "change_ratio": 0.3490065486124374,
+  "true_change": 2189.358180560175
+ },
+ "dose_60": {
+  "change_ratio": 0.36125759145039504,
+  "true_change": 2809.849158298465
+ },
+ "steady_20": {
+  "change_ratio": 0.4524430664557593,
+  "true_change": 7755.025157655105
+ },
+ "off_pattern": {
+  "change_ratio": 0.05125801060362217,
+  "true_change": 227.94192430694395
+ },
+ "no_dose": {
+  "change_ratio": 0.25769409612617544,
+  "true_change": -4256.423425700139
+ },
+ "seconds": 239.5
+}

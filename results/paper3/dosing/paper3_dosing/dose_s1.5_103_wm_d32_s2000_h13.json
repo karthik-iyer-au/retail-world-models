@@ -1,0 +1,28 @@
+{
+ "strength": 1.5,
+ "seed": 103,
+ "version": "wm_d32_s2000_h13",
+ "kind": "state_model",
+ "rmsse": 0.8720114779172923,
+ "dose_50": {
+  "change_ratio": -2.467489383585515,
+  "true_change": 1453.5818684814908
+ },
+ "dose_60": {
+  "change_ratio": -2.821118435808813,
+  "true_change": 1943.9412862446711
+ },
+ "steady_20": {
+  "change_ratio": -0.607045884322006,
+  "true_change": 7724.182631848036
+ },
+ "off_pattern": {
+  "change_ratio": 0.20587337123935787,
+  "true_change": 716.6196752474009
+ },
+ "no_dose": {
+  "change_ratio": -1.3430701149692321,
+  "true_change": -3755.7369501216126
+ },
+ "seconds": 135.0
+}

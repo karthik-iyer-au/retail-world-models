@@ -1,0 +1,28 @@
+{
+ "strength": 0.0,
+ "seed": 103,
+ "version": "lgb_l127_r500_m100",
+ "kind": "lightgbm_direct",
+ "rmsse": 1.0157964649766578,
+ "dose_50": {
+  "change_ratio": 0.052078414453913195,
+  "true_change": 2273.0126471944486
+ },
+ "dose_60": {
+  "change_ratio": 0.04018343724617449,
+  "true_change": 2910.569260492978
+ },
+ "steady_20": {
+  "change_ratio": 0.23056696801303506,
+  "true_change": 8226.016588331135
+ },
+ "off_pattern": {
+  "change_ratio": -0.6387129452589223,
+  "true_change": 217.72166162617722
+ },
+ "no_dose": {
+  "change_ratio": 0.43568007487791244,
+  "true_change": -4225.802639398517
+ },
+ "seconds": 6.0
+}
