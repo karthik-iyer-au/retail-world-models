@@ -123,6 +123,32 @@ def head_to_head(d: pd.DataFrame, out: Path, draws: int = 5000):
     pd.DataFrame(rows).to_csv(out / "head_to_head.csv", index=False)
 
 
+def nostate(d: pd.DataFrame, out: Path, draws: int = 5000):
+    """Amendment 10: the world model without its recurrent cell against the same model with it, with the world as
+    the unit, by world shape: worlds in which the version without the cell has the lower error on new plans, two-sided
+    sign test, median paired difference with a 95% interval from a bootstrap over worlds, and the median forecast
+    accuracy of each."""
+    plain = d[d.explore == 0].set_index(["shape", "confounding", "seed"])
+    rng = np.random.default_rng(0)
+    rows = []
+    for a_, b_ in (("wm_nostate", "wm_d32_s2000_h26"), ("wm_shape_nostate", "wm_shape")):
+        x, y = plain[plain.version == a_], plain[plain.version == b_]
+        both = x.index.intersection(y.index)
+        for shape in sorted(set(both.get_level_values("shape"))):
+            idx = [i for i in both if i[0] == shape]
+            diff = (x.loc[idx, "err_mean"] - y.loc[idx, "err_mean"]).to_numpy()
+            n, k = len(diff), int((diff < 0).sum())
+            boot = np.median(diff[rng.integers(0, n, size=(draws, n))], axis=1)
+            lo, hi = np.percentile(boot, [2.5, 97.5])
+            rows.append({"shape": shape, "a": a_, "b": b_, "worlds": n, "a_ahead": k, "sign_p": _sign_p(k, n),
+                         "median_diff": float(np.median(diff)), "lo": lo, "hi": hi,
+                         "a_median": float(x.loc[idx, "err_mean"].median()),
+                         "b_median": float(y.loc[idx, "err_mean"].median()),
+                         "a_rmsse": float(x.loc[idx, "rmsse"].median()), "b_rmsse": float(y.loc[idx, "rmsse"].median())})
+    pd.DataFrame(rows).to_csv(out / "nostate.csv", index=False)
+    print(pd.DataFrame(rows).round(3).to_string(index=False))
+
+
 def main(argv=None):
     p = argparse.ArgumentParser()
     p.add_argument("--bench", required=True)
@@ -153,7 +179,8 @@ def main(argv=None):
               ("loglinear_shape", "loglinear_rr"), ("wm_shape", "lgb_shape"), ("lgb_shape", "lgb_rr")]
     rows = []
     key = ["shape", "confounding", "seed"]
-    plain = d[d.explore == 0]
+    # the base world model on kinked seeds 104 to 110 belongs to amendment 10 and is read only there
+    plain = d[(d.explore == 0) & ~((d.version == "wm_d32_s2000_h26") & (d.seed >= 104))]
     for v, base in list(pairs.items()) + pairs2:
         a_, b_ = plain[plain.version == v].set_index(key), plain[plain.version == base].set_index(key)
         both = a_.index.intersection(b_.index)
@@ -176,6 +203,7 @@ def main(argv=None):
         pd.concat(rows).to_csv(out / "test_and_learn.csv", index=False)
         tl.groupby(["shape", "confounding", "version"])[cols].median().to_csv(out / "test_and_learn_levels.csv")
     head_to_head(d, out)
+    nostate(d, out)
     pd.set_option("display.width", 200)
     print(g.groupby(["shape", "confounding", "model"])[["rmsse", "err_mean", "stock_mean", "promo_loss", "regular_loss"]]
           .median().round(3))
