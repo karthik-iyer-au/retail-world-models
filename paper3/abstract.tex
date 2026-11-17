@@ -10,7 +10,7 @@ where merchants plan into high-demand weeks the link reverses, down to \linkBWmO
 Third, training the world model to learn the effect of actions (JEPA pretraining, a latent consistency check,
 adaptation at the plan date) leaves its error on new plans unchanged (\errLActLo{} to \errLActHi{} against
 \errLWm{}). Fourth, building the shape of the price response into the world model works: sales may not fall as a
-cut deepens, the gain from a deeper cut is bounded, and a lasting regular price acts through its own learned
+cut deepens, the gain from a deeper cut flattens or grows at a learned rate, and a lasting regular price acts through its own learned
 elasticity. With that structure the world model's error on new plans falls from \errBWm{} to \errBShape{} in a world
 whose price response bends, the lowest of every model in all \worldsB{} such worlds, while a log-linear model
 overstates a 60\% cut \cutsixBLlRr{} times. A small share of random test plans helps every model a little. We

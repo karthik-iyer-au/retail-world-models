@@ -111,8 +111,10 @@ log-linear model with the recorded regular price gives the change the plan makes
 \log m = a_1\bigl(1 - e^{-c/b}\bigr) - a_2 \log(1-c) - \gamma \log\frac{r}{\bar p},
 \end{equation}
 where $c$ is the cut (capped at 95\%), $r$ the recorded regular price, $\bar p$ the item's usual price, and
-$a_1, a_2, b, \gamma > 0$ are learned per item and store from their labels. Sales cannot fall as a cut deepens,
-the gain is bounded, and a lasting regular price acts through its own elasticity. The rest of the network sees
+$a_1, a_2, b, \gamma > 0$ are learned per item and store from their labels. Sales cannot fall as a cut deepens. The
+first term flattens at $a_1$; the second grows without limit as the cut nears 100\% and is held finite only by the
+cap on the cut, so the model learns from the data how far the gain keeps rising. A lasting regular price acts
+through its own elasticity. The rest of the network sees
 neither price, so it cannot learn a price effect that breaks these rules.
 \item \emph{Test and learn}: every model refitted on the worlds with random test plans.
 \end{enumerate}
@@ -210,7 +212,7 @@ gives the lowest error on new plans in the bent world, \errBShape{}, in all \wor
 for the split model and \errBLgb{} for LightGBM. It predicts \cutsixBShape{} times the true gain from a 60\% cut and
 \regdownBShape{} times that of a 10\% lower regular price, loses \priceBShape\% on the price choice, and forecasts
 the merchants' plans at least as well as any other model (\fcBShape{}). In the log-linear world it is second
-(\errLShape{}) to the models that share the world's form (\errLLlRr{}): its bounded curve understates the steep
+(\errLShape{}) to the models that share the world's form (\errLLlRr{}): it learns too small a logarithmic term and understates the steep
 gain of a 60\% cut there (\cutsixLShape{} of the truth). It is the only model with low error in both worlds.
 
 \paragraph{Test and learn} Random test plans inside the merchants' range help every model a little: the shape model
@@ -255,7 +257,7 @@ The world model fails on new plans for the reason any learner fails off its data
 shows a deep cut or a lasting price move labelled as one, and where plans follow demand it shows the wrong effect.
 No training objective recovers what the data do not contain. Two things do. The first is information the retailer
 already has: the recorded regular price. The second is knowledge of how price can act: more discount never loses
-sales, the gain is bounded, a regular price is not a cut. Given both, the world model learns the size of each effect
+sales, the gain from deeper cuts may flatten, a regular price is not a cut. Given both, the world model learns the size of each effect
 from the data and carries the shape to plans it has not seen, which is what transfer means here.
 
 For a retailer this gives three rules. Record the regular price and give it to the model. Build the shape of the
