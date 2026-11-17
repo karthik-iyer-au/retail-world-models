@@ -721,38 +721,50 @@ def vast_script(commit: str, script: str, jobs_file: str, out: str, cores: int =
     `jobs_file` (a file in the repository at `commit`),
     `par` at a time, sends /out to rwm-results/<out> every five minutes and at the end, then destroys the machine.
     For generated or public data only (never Woolworths data)."""
-    offers = json.loads(_vast("search", "offers", f"cpu_cores_effective>={cores} cpu_ram>=64 reliability>0.99 "
-                              "verified=true rentable=true disk_space>=60 inet_down>=200", "-o", "dph_total"))
-    if not offers:
-        raise RuntimeError("no machine matches")
-    o = offers[0]
     url = modal.Function.from_name(APP_NAME, "bridge").get_web_url()
     env = {"REPO_URL": REPO_URL, "COMMIT": commit, "TORCH": TORCH, "OUT": out, "SCRIPT": script, "PAR": str(par),
            "THREADS": str(threads), "BRIDGE_URL": url, "BRIDGE_TOKEN": os.environ["BRIDGE_TOKEN"],
-           "JOBS_FILE": jobs_file,
-           "WORKER_B64": base64.b64encode(SCRIPT_WORKER.encode()).decode()}
-    made = _first_json(_vast("create", "instance", str(o["id"]), "--image", "python:3.12-slim", "--disk", "60",
-                             "--label", f"rwm script {out}"[:60],
-                             "--env", " ".join(f"-e {k}={v}" for k, v in env.items()),
-                             "--entrypoint", "bash", "--args", "-c",
-                             "echo $WORKER_B64 | base64 -d > /worker.sh && bash /worker.sh"))
-    iid = made["new_contract"]
-    print(f"machine {iid}: {o.get('cpu_cores_effective')} cores, {o['geolocation']}, US${o['dph_total']:.3f}/h", flush=True)
+           "JOBS_FILE": jobs_file, "WORKER_B64": base64.b64encode(SCRIPT_WORKER.encode()).decode()}
     done = Path(RESULTS) / out / "_done.json"
     failed = Path(RESULTS) / "_vast_failed" / f"{out.replace('/', '__')}__script.log"
-    started = time.time()
-    try:
-        while time.time() - started < hours * 3600:
-            time.sleep(POLL_S)
-            results_volume.reload()
-            if done.exists():
-                return f"done on machine {iid}"
-            if failed.exists():
-                return f"failed on machine {iid}: see {failed}"
-            state = json.loads(_vast("show", "instance", str(iid)))
-            if state.get("actual_status") in ("exited", "offline"):
-                return f"machine {iid} {state.get('actual_status')}"
-        return f"stopped after {hours} hours"
-    finally:
-        _destroy(iid)
-        print(f"machine {iid} destroyed", flush=True)
+    tried: set = set()
+    for attempt in range(3):
+        offers = [o for o in json.loads(_vast("search", "offers", f"cpu_cores_effective>={cores} cpu_ram>=64 "
+                                              "reliability>0.99 verified=true rentable=true disk_space>=60 "
+                                              "inet_down>=200", "-o", "dph_total"))
+                  if o["machine_id"] not in tried | _bad()]
+        if not offers:
+            raise RuntimeError("no machine matches")
+        o = offers[0]
+        tried.add(o["machine_id"])
+        made = _first_json(_vast("create", "instance", str(o["id"]), "--image", "python:3.12-slim", "--disk", "60",
+                                 "--label", f"rwm script {out}"[:60],
+                                 "--env", " ".join(f"-e {k}={v}" for k, v in env.items()),
+                                 "--entrypoint", "bash", "--args", "-c",
+                                 "echo $WORKER_B64 | base64 -d > /worker.sh && bash /worker.sh"))
+        iid = made["new_contract"]
+        print(f"machine {iid}: {o.get('cpu_cores_effective')} cores, {o['geolocation']}, US${o['dph_total']:.3f}/h",
+              flush=True)
+        started = time.time()
+        try:
+            while time.time() - started < hours * 3600:
+                time.sleep(POLL_S)
+                results_volume.reload()
+                if done.exists():
+                    return f"done on machine {iid}"
+                if failed.exists():
+                    return f"failed on machine {iid}: see {failed}"
+                state = json.loads(_vast("show", "instance", str(iid)))
+                if state.get("actual_status") in ("exited", "offline"):
+                    print(f"machine {iid} {state.get('actual_status')}", flush=True)
+                    break
+                # a host that has not started the container after 15 minutes (17 November: "Secrets fetch
+                # failed" for half an hour) is given up for another
+                if state.get("actual_status") != "running" and time.time() - started > 15 * 60:
+                    print(f"machine {iid} still {state.get('actual_status')}: {state.get('status_msg')}", flush=True)
+                    _mark_bad(o["machine_id"])
+                    break
+        finally:
+            _destroy(iid)
+            print(f"machine {iid} destroyed", flush=True)
+    return "no machine finished"
