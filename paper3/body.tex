@@ -31,14 +31,17 @@ and LightGBM worse (\errBLgbShape{}). In a world whose curve neither rule set ca
 is ahead of the log-linear model with the rules in \hhBaseKWmLlWon{} of \hhBaseKWmLlN{} worlds and of LightGBM with
 the rules in \hhBaseKWmLgbWon{}, and ahead of the log-linear model with the rules in every one of twelve worlds when
 each model is tuned over its versions.
-\item \textbf{Real data do not yet confirm the gains.} On the rarest plans actually run in Breakfast at the Frat and
-M5, the rules and the recorded regular price do not lower error; the log-linear model is again the least accurate on
-the deepest real cuts (\reFDeepLlShape{} against \reFDeepWmShape{} for the world model with the rules).
+\item \textbf{On real data the rules help the world model with deep cuts it has not seen, not with lasting price
+moves.} On pure price cuts (no circular, no display) deeper than any in training, the rules lower the world model's
+error on Breakfast at the Frat (\reFPureWm{} to \reFPureWmShape{}, lower at \rpFPureWmShapeVWmWon{} of
+\rpFPureWmShapeVWmOf{} origins) and on The Complete Journey, where it is the most accurate model (\reCPureWmShape{}
+against \reCPureLgb{} for LightGBM); on the Frat LightGBM stays slightly ahead (\reFPureLgb{}). On lasting
+regular-price moves neither the rules nor the recorded regular price help.
 \end{itemize}
 
 The rest of the paper sets out the stores (\S\ref{sec:data}), the models and remedies (\S\ref{sec:method}), the
 setup (\S\ref{sec:setup}) and the results (\S\ref{sec:results}). The plan for this study was fixed before any run,
-and each of the five amendments was written before the runs it added (Appendix~\ref{app:plan}).
+and each of the seven amendments was written before the runs it added (Appendix~\ref{app:plan}).
 
 \section{Related work}\label{sec:related}
 
@@ -95,7 +98,10 @@ inside the range merchants use, so the deeper cuts held out below remain unseen.
 
 \paragraph{Real data (added)} Breakfast at the Frat~\cite{frat}: 77 stores, 55 items, 156 weeks, with each week's
 regular price recorded; and M5~\cite{m5accuracy}, the FOODS\_3 department in three stores, summed to weeks, with a
-regular price constructed from the prices (a price held for four weeks or more becomes the regular price). Both are
+regular price constructed from the prices (a price held for four weeks or more becomes the regular price); and The
+Complete Journey~\cite{completejourney}: purchases by 2,500 households summed to product by week over all stores
+(102 weeks, the 756 food and household products bought in at least 95 weeks), with the shelf price before the
+loyalty discount as the recorded regular price and the weeks each product was in the mailer or on display. All are
 scored on the rarest plans that were run (\S\ref{sec:setup}).
 
 \section{Models and remedies}\label{sec:method}
@@ -145,10 +151,13 @@ seen, so LightGBM's gain flattens by itself.
 Models are fitted on weeks 1 to 252 and forecast weeks 253 to 260 from the same origin, under the merchants' own
 plan and under eight held-out plans: every planned cut deepened to 50\% and to 60\% (training cuts run from 10\% to
 40\%); the regular price moved 10\% and 5\% down and up for the whole horizon; promotions and displays moved to each
-series' lowest-demand weeks; and no plan. On the real data, models are fitted before each of four origins and forecast the 8 weeks after it; on
-the Frat every item-week with a cut deeper than 30\% off the regular price (about the 95th percentile) is removed
-from training, and the held-out weeks are scored in three groups: cuts deeper than 30\%, regular prices that moved
-by 10\% or more (5\% on M5), and the rest.
+series' lowest-demand weeks; and no plan. On the real data, models are fitted before each of several origins (eight on the Frat, five on The
+Complete Journey, four on M5) and forecast the 8 weeks after each. On the Frat and The Complete Journey every
+item-week with a cut deeper than 30\% off the regular price (about the 95th and 90th percentiles) is removed from
+training; on the Frat we repeat this at 20\%. The held-out weeks are scored on cuts deeper than the threshold, on
+the pure price cuts among them (no circular and no display, so price is the only lever that changed), on lasting
+regular-price moves (on the Frat, 10\% or more, steady for four weeks before the origin and through every held-out
+week; on M5, 5\% or more), and on the rest.
 
 \paragraph{Measures} \emph{Forecast accuracy}: item-by-store RMSSE on the merchants' own plan. \emph{Error on new
 plans}: for each held-out plan, the predicted change in sales (held-out plan minus own plan, summed) over the true
@@ -290,23 +299,34 @@ the shape of the price response is known, and the world model with the rules whe
 \subsection{Real data}
 
 The generated worlds score plans never run; real data cannot. The nearest real test is the rarest plans that were
-run (Table~\ref{tab:real}). On Breakfast at the Frat, with every cut deeper than 30\% removed from training, the
-held-out weeks hold \reFDeepRows{} item-weeks with such a cut over four origins. On them the price rules leave the
-world model's error where it was (\reFDeepWmShape{} against \reFDeepWm{}; difference \rpFDeepwmshapeVwm{}, interval
-\rpFDeepwmshapeVwmCi{} from a bootstrap over series), lower LightGBM's slightly (\rpFDeeplgbshapeVlgb{},
-\rpFDeeplgbshapeVlgbCi{}) and raise the log-linear model's (\reFDeepLl{} to \reFDeepLlShape{}). LightGBM is the most
-accurate on these weeks (\reFDeepLgb{}), with the world model with the rules close behind; the log-linear model,
-with or without the rules, is the least accurate and overstates sales on the deep cuts
-(\rbFDeepLlShape{} times). On lasting regular-price moves the recorded regular price and the rules do not help on
-either data set: on the Frat they raise the world model's error by \rpFMovewmshapeVwm{} (\rpFMovewmshapeVwmCi{}),
-and on M5 every model lies between \reMMoveLlShape{} and \reMMoveWm{}.
+run (Table~\ref{tab:real}), and the cleanest of these are pure price cuts deeper than any the models saw, where
+price is the only lever that changed.
 
-The gains from the rules and the recorded regular price measured in the generated worlds are not seen in these real
-data. Two findings do carry over: the model with a fixed price curve is the least reliable on the deepest real cuts,
-as in the bent and kinked worlds, and among the models with the rules the world model is far ahead of the log-linear
-model there (\rpFDeepwmshapeVloglinearshape{}, \rpFDeepwmshapeVloglinearshapeCi{}). Real deep cuts mostly run with a
-circular or display, which every model sees in training, and the Frat's recorded regular price moves often, so a
-real test of lasting price moves needs cleaner records than these public data give.
+\paragraph{Pure price cuts} The rules lower the world model's error in all three tests of pure price cuts. On the Frat with cuts over
+30\% held out (\rnFPure{} item-weeks over \roFPure{} origins) it falls from \reFPureWm{} to \reFPureWmShape{}
+(difference pooled over origins \rpFPureWmShapeVWm{}, interval \rpFPureWmShapeVWmCi{} from a bootstrap over series; lower at
+\rpFPureWmShapeVWmWon{} of \rpFPureWmShapeVWmOf{} origins); with cuts over 20\% held out, from \reTPureWm{} to
+\reTPureWmShape{} (\rpTPureWmShapeVWm{}, \rpTPureWmShapeVWmCi{}; \rpTPureWmShapeVWmWon{} of
+\rpTPureWmShapeVWmOf{}); on The Complete Journey (\rnCPure{} item-weeks), from \reCPureWm{} to \reCPureWmShape{}
+(\rpCPureWmShapeVWm{}, \rpCPureWmShapeVWmCi{}), where the world model with the rules is the most accurate of the
+nine models, ahead of LightGBM (difference \rpCPureWmShapeVLgb{}, \rpCPureWmShapeVLgbCi{}; \rpCPureWmShapeVLgbWon{} of
+\rpCPureWmShapeVLgbOf{} origins). On the Frat, plain LightGBM stays slightly ahead (\reFPureLgb{} and
+\reTPureLgb{}). The log-linear model with the rules is the least reliable on the Frat's deepest pure cuts
+(\reFPureLlShape{}): its curve, fitted to cuts up to 30\%, runs on past the data, as in the bent and kinked worlds,
+and the world model with the rules is far ahead of it (difference \rpFPureWmShapeVLlShape{},
+\rpFPureWmShapeVLlShapeCi{}).
+
+\paragraph{Deep cuts with a circular or display} When every deep cut is counted, most come with a circular or a
+display, which every model has seen in training, and the rules do not help: the world model's error rises (Frat:
+\reFDeepWm{} without, \reFDeepWmShape{} with; LightGBM \reFDeepLgb{}).
+
+\paragraph{Lasting regular-price moves} Neither the rules nor the recorded regular price help. On the Frat's clean
+moves (\rnFMove{} item-weeks) they raise the world model's error by \rpFMoveWmShapeVWm{}
+(\rpFMoveWmShapeVWmCi{}); on M5 every model lies between \reMMoveLl{} and \reMMoveWm{}. These moves are few, and the
+regular prices are recorded loosely on the Frat and constructed on M5.
+
+So the real data confirm one half of the generated result: rules about how price can act help a world model on deep
+cuts it has not seen. They do not yet confirm the other half, the recorded regular price for lasting moves.
 
 \input{generated/tab_real}
 
@@ -345,8 +365,8 @@ of a shape nobody wrote down: its rules fix only the direction and the split bet
 its network learns the rest. We show this against the simpler models we tested, in one such world; it suggests,
 and does not prove, that world models hold this advantage whenever the shape of the response is unknown.
 
-In the generated worlds this gives four rules for a retailer; the real-data check has not yet confirmed the
-gains from the first two. Record the regular price and give it to the model. Give the model price rules
+In the generated worlds this gives four rules for a retailer; the real data confirm the second for deep price cuts
+and do not yet confirm the first. Record the regular price and give it to the model. Give the model price rules
 rather than leaving a free model to find them. Use a simple model with the rules when the shape of the price response
 is known, and consider a world model with the rules when it is not. Choose between versions on held-out plans, generated or
 tested, and not on forecast accuracy, which can pick the worst simulator where plans follow demand.
@@ -354,8 +374,8 @@ tested, and not on forecast accuracy, which can pick the worst simulator where p
 \section{Limitations and threats to validity}\label{sec:limits}
 
 All three worlds are generated, with price responses of our choosing. That is what lets us score plans never run,
-since the answer is known. The real-data check scores sales that happened, not plans never run, and it did not
-confirm the gains from the rules; a real response can
+since the answer is known. The real-data check scores sales that happened, not plans never run; it confirms the gain
+from the rules on pure price cuts and not on lasting regular-price moves, which are few in public data; a real response can
 differ from all three shapes, and real data have problems the worlds leave out (stock-outs, competitors, store
 changes). The rules in Equation~\eqref{eq:shape} assume
 sales never fall as a cut deepens; a response that falls at deep cuts (a quality signal) would break them. The
@@ -372,16 +392,17 @@ versions of one world model where plans follow demand. Training a world model to
 right about plans outside its history. The recorded regular price and three price rules do. With the rules, a simple
 model is best when the shape of the price response is known (error \errBLlShape{} in the bent world), and in a world
 whose shape the rules do not match the world model is better than the simpler models we tested (ahead in
-\hhBaseKWmLlWon{} of \hhBaseKWmLlN{} worlds). On real data the rules and the recorded
-regular price did not lower error on the rarest plans that were run, while the log-linear model was again the least
-reliable on the deepest cuts; the gains shown in generated worlds remain to be shown in real stores.
+\hhBaseKWmLlWon{} of \hhBaseKWmLlN{} worlds). On real data the rules lower the
+world model's error on pure price cuts deeper than any it saw, on two data sets (\reFPureWm{} to \reFPureWmShape{}
+and \reCPureWm{} to \reCPureWmShape{}), while the recorded regular price has not yet been shown to help with
+lasting price moves.
 
 \section{Reproducibility and compute}\label{sec:repro}
 
 Every number, table and figure is rebuilt from the run records by \texttt{make} in the paper folder, and every run
 by \texttt{scripts/paper3\_benchmark.py} for a world and version. The \nFits{} fits ran on CPU containers on Modal;
-the bill for the days they ran was about US\$106 (an estimate from the account's daily bills, which include small
-amounts of other work). The plan and its five amendments are in the repository's documents folder.
+the bill for the days they ran was about US\$120 (an estimate from the account's daily bills, which include small
+amounts of other work). The plan and its seven amendments are in the repository's documents folder.
 
 \section{Data and code availability}\label{sec:avail}
 
@@ -409,7 +430,9 @@ LightGBM and the kinked world, and corrected the description of Equation~\eqref{
 the same reviewer noted that the controls used one version of each model and that versions are not independent
 replications, added equal tuning for the three models with the rules, 28 more kinked worlds for the head-to-head,
 and the statistics with the world as the unit. \emph{Amendment 5}, written before its runs at the author's request
-for a real-data check, added the tests on Breakfast at the Frat and M5 of \S\ref{sec:results}. The correlation within each model class and the cap on the error of new plans were added in the
+for a real-data check, added the tests on Breakfast at the Frat and M5; \emph{amendment 6}, after its summary
+results, added pure price cuts, clean lasting moves, the 20\% threshold and more origins; \emph{amendment 7} added The
+Complete Journey. Each was written before the analyses it added, and every result is reported. The correlation within each model class and the cap on the error of new plans were added in the
 analysis; the cap counts a wrong sign as a twentyfold miss so the measure does not move as versions are added.
 
 \section{The price rules and their constraints}\label{app:shape}

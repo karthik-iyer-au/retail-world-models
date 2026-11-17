@@ -286,34 +286,35 @@ REAL = [("wm_d32_s2000_h26", "World model"), ("wm_rr", "\\quad + recorded regula
 
 
 def table_real():
-    s = pd.read_csv(RES / "real_summary.csv")
+    s = pd.read_csv(RES / "real_groups.csv")
     pr = pd.read_csv(RES / "real_pairs.csv")
-    cols = [("frat", "deep"), ("frat", "regular_move"), ("frat", "all"), ("m5", "regular_move"), ("m5", "all")]
+    cols = [("frat", "deep"), ("frat", "deep_pure"), ("frat_d20", "deep_pure"), ("cj", "deep_pure"),
+            ("frat", "clean_move"), ("m5", "regular_move")]
+    get = lambda data, g, v: s[(s.data == data) & (s.group == g) & (s.version == v)].iloc[0]
     lines = []
     for v, lab in REAL:
-        cells = []
-        for data, g in cols:
-            r = s[(s.data == data) & (s.group == g) & (s.version == v)].iloc[0]
-            cells.append(f"{r.abs_error:.3f}" + (f" ({r.bias:.2f})" if g != "all" else ""))
-        lines.append(lab + " & " + " & ".join(cells) + r" \\")
-    n = lambda data, g: int(s[(s.data == data) & (s.group == g)].rows.max())
+        lines.append(lab + " & " + " & ".join(f"{get(data, g, v).abs_error:.3f}" for data, g in cols) + r" \\")
+    n = lambda data, g: f"{int(s[(s.data == data) & (s.group == g)].rows.max()):,}"
+    o = lambda data, g: int(s[(s.data == data) & (s.group == g)].origins.max())
+    head = " & ".join(f"{n(data, g)} / {o(data, g)}" for data, g in cols)
     tab = r"""\begin{table*}[t]
 \centering
 \caption{\textbf{Real data: error on the rarest plans that were actually run} (added after the first results;
-Appendix~\ref{app:plan}). Summed absolute error over summed sales, median over four forecast origins; in brackets,
-summed forecast over summed sales (1 is right). Breakfast at the Frat: every cut deeper than 30\% was removed from
-training; X with such a cut; regular-price moves are
-item-weeks whose recorded regular price differs by 10\% or more from its last value before the origin. M5 (FOODS\_3
-in three stores, weekly): regular-price moves of 5\% or more on a constructed regular price. These are sales that
-happened, not plans never run.}
+Appendix~\ref{app:plan}). Summed absolute error over summed sales, median over the forecast origins; lower is
+better. Deep cuts: every cut deeper than the threshold (30\% or 20\%) was removed from training and the held-out
+weeks with such a cut are scored; pure: with no circular or display, so price is the only lever that changed.
+Lasting moves: on the Frat, a recorded regular price 10\% or more from its last value, steady for four weeks before
+the origin and through every held-out week; on M5, a move of 5\% or more in a constructed regular price. These are
+sales that happened, not plans never run.}
 \label{tab:real}
 \footnotesize\setlength{\tabcolsep}{4pt}
 \begin{adjustbox}{max width=\textwidth}
-\begin{tabular}{lrrrrr}
+\begin{tabular}{lrrrrrr}
 \toprule
- & \multicolumn{3}{c}{Breakfast at the Frat} & \multicolumn{2}{c}{M5} \\
-\cmidrule(lr){2-4}\cmidrule(lr){5-6}
-Model & Deep cuts & Regular moves & All & Regular moves & All \\
+ & \multicolumn{4}{c}{Deep cuts never seen in training} & \multicolumn{2}{c}{Lasting regular-price moves} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-7}
+ & Frat $>$30\% & Frat $>$30\%, pure & Frat $>$20\%, pure & Complete Journey $>$30\%, pure & Frat & M5 \\
+Item-weeks / origins & """ + head + r""" \\
 \midrule
 """ + "\n".join(lines) + r"""
 \bottomrule
@@ -323,22 +324,25 @@ Model & Deep cuts & Regular moves & All & Regular moves & All \\
 """
     (GEN / "tab_real.tex").write_text(tab)
     X = {}
+    dtag = {"frat": "F", "frat_d20": "T", "cj": "C", "m5": "M"}
+    gtag = {"deep": "Deep", "deep_pure": "Pure", "clean_move": "Move", "regular_move": "Move", "all": "All",
+            "rest": "Rest"}
+    vtag = {"wm_d32_s2000_h26": "Wm", "wm_rr": "WmRr", "wm_shape": "WmShape", "lgb_l31_r500_m20": "Lgb",
+            "lgb_rr": "LgbRr", "lgb_shape": "LgbShape", "loglinear": "Ll", "loglinear_rr": "LlRr",
+            "loglinear_shape": "LlShape"}
+    for _, r in s.iterrows():
+        if r.group in gtag and not (r.data == "frat" and r.group == "regular_move"):
+            X[f"re{dtag[r.data]}{gtag[r.group]}{vtag[r.version]}"] = f"{r.abs_error:.2f}"
     for data, g in cols:
-        for v, _ in REAL:
-            r = s[(s.data == data) & (s.group == g) & (s.version == v)].iloc[0]
-            tag = {"frat": "F", "m5": "M"}[data] + {"deep": "Deep", "regular_move": "Move", "all": "All"}[g] + \
-                {"wm_d32_s2000_h26": "Wm", "wm_rr": "WmRr", "wm_shape": "WmShape", "lgb_l31_r500_m20": "Lgb",
-                 "lgb_rr": "LgbRr", "lgb_shape": "LgbShape", "loglinear": "Ll", "loglinear_rr": "LlRr",
-                 "loglinear_shape": "LlShape"}[v]
-            X[f"re{tag}"], X[f"rb{tag}"] = f"{r.abs_error:.2f}", f"{r.bias:.2f}"
-    X["reFDeepRows"] = f"{n('frat', 'deep'):,}"
+        X[f"rn{dtag[data]}{gtag[g]}"], X[f"ro{dtag[data]}{gtag[g]}"] = n(data, g), WORDS[o(data, g)]
     for _, r in pr.iterrows():
-        tag = {"frat": "F", "m5": "M"}[r.data] + {"deep": "Deep", "regular_move": "Move"}[r.group] + \
-            r.a.replace("_", "").replace("d32s2000h26", "").replace("l31r500m20", "") + "V" + \
-            r.b.replace("_", "").replace("d32s2000h26", "").replace("l31r500m20", "")
+        if r.group not in ("deep", "deep_pure", "clean_move", "regular_move") or \
+                (r.data == "frat" and r.group == "regular_move"):
+            continue
+        tag = dtag[r.data] + gtag[r.group] + vtag[r.a] + "V" + vtag[r.b]
         X[f"rp{tag}"] = f"{r['diff']:.3f}"
         X[f"rp{tag}Ci"] = f"{r.lo:.3f} to {r.hi:.3f}"
-        X[f"rp{tag}Won"] = WORDS[int(r.origins_a_ahead)]
+        X[f"rp{tag}Won"], X[f"rp{tag}Of"] = WORDS[int(r.origins_a_ahead)], WORDS[int(r.origins)]
     return X
 
 

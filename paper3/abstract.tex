@@ -15,10 +15,10 @@ against \errBShape{} for the world model with the rules and \errBLgbShape{} for 
 whose curve lies outside the rules, the world model with the rules is better than the simpler models we tested
 (ahead of the log-linear model with the rules in \hhBaseKWmLlWon{} of \hhBaseKWmLlN{} worlds, sign test $p$
 \hhBaseKWmLlP{}, and in \hhMedKWmLlWon{} of \hhMedKWmLlN{} when every model is tuned over its versions). On real data
-(Breakfast at the Frat and M5), where only the rarest plans that were run can be scored, the rules and the recorded
-regular price did not lower error, and the log-linear model, with or without them, was the least accurate on the
-deepest real cuts (\reFDeepLlShape{} against \reFDeepWmShape{} for the world model with the rules); the gains measured
-in generated worlds remain to be shown in real stores. Fourth, a small share of random
+(Breakfast at the Frat, The Complete Journey and M5), where only the rarest plans that were run can be scored, the
+rules lower the world model's error on pure price cuts deeper than any it saw (\reFPureWm{} to \reFPureWmShape{} and
+\reCPureWm{} to \reCPureWmShape{}), making it the most accurate model on one data set and close to LightGBM on the
+other, while neither the rules nor the recorded regular price help with lasting price moves. Fourth, a small share of random
 test plans helps every model a little. In the generated worlds this points retailers to the following: give the model the recorded regular price and sensible price
 rules, use a simple model when the shape of the price response is known, consider a world model when it is not, and
 choose versions on held-out plans rather than on forecast accuracy.
