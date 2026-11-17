@@ -278,6 +278,70 @@ World & Comparison & Base version & Median version & Best version \\
     return X
 
 
+REAL = [("wm_d32_s2000_h26", "World model"), ("wm_rr", "\\quad + recorded regular price"),
+        ("wm_shape", "\\quad + price rules"), ("lgb_l31_r500_m20", "LightGBM"),
+        ("lgb_rr", "\\quad + recorded regular price"), ("lgb_shape", "\\quad + price rules"),
+        ("loglinear", "Log-linear"), ("loglinear_rr", "\\quad + recorded regular price"),
+        ("loglinear_shape", "\\quad + price rules")]
+
+
+def table_real():
+    s = pd.read_csv(RES / "real_summary.csv")
+    pr = pd.read_csv(RES / "real_pairs.csv")
+    cols = [("frat", "deep"), ("frat", "regular_move"), ("frat", "all"), ("m5", "regular_move"), ("m5", "all")]
+    lines = []
+    for v, lab in REAL:
+        cells = []
+        for data, g in cols:
+            r = s[(s.data == data) & (s.group == g) & (s.version == v)].iloc[0]
+            cells.append(f"{r.abs_error:.3f}" + (f" ({r.bias:.2f})" if g != "all" else ""))
+        lines.append(lab + " & " + " & ".join(cells) + r" \\")
+    n = lambda data, g: int(s[(s.data == data) & (s.group == g)].rows.max())
+    tab = r"""\begin{table*}[t]
+\centering
+\caption{\textbf{Real data: error on the rarest plans that were actually run} (added after the first results;
+Appendix~\ref{app:plan}). Summed absolute error over summed sales, median over four forecast origins; in brackets,
+summed forecast over summed sales (1 is right). Breakfast at the Frat: every cut deeper than 30\% was removed from
+training; X with such a cut; regular-price moves are
+item-weeks whose recorded regular price differs by 10\% or more from its last value before the origin. M5 (FOODS\_3
+in three stores, weekly): regular-price moves of 5\% or more on a constructed regular price. These are sales that
+happened, not plans never run.}
+\label{tab:real}
+\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrrr}
+\toprule
+ & \multicolumn{3}{c}{Breakfast at the Frat} & \multicolumn{2}{c}{M5} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-6}
+Model & Deep cuts & Regular moves & All & Regular moves & All \\
+\midrule
+""" + "\n".join(lines) + r"""
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table*}
+"""
+    (GEN / "tab_real.tex").write_text(tab)
+    X = {}
+    for data, g in cols:
+        for v, _ in REAL:
+            r = s[(s.data == data) & (s.group == g) & (s.version == v)].iloc[0]
+            tag = {"frat": "F", "m5": "M"}[data] + {"deep": "Deep", "regular_move": "Move", "all": "All"}[g] + \
+                {"wm_d32_s2000_h26": "Wm", "wm_rr": "WmRr", "wm_shape": "WmShape", "lgb_l31_r500_m20": "Lgb",
+                 "lgb_rr": "LgbRr", "lgb_shape": "LgbShape", "loglinear": "Ll", "loglinear_rr": "LlRr",
+                 "loglinear_shape": "LlShape"}[v]
+            X[f"re{tag}"], X[f"rb{tag}"] = f"{r.abs_error:.2f}", f"{r.bias:.2f}"
+    X["reFDeepRows"] = f"{n('frat', 'deep'):,}"
+    for _, r in pr.iterrows():
+        tag = {"frat": "F", "m5": "M"}[r.data] + {"deep": "Deep", "regular_move": "Move"}[r.group] + \
+            r.a.replace("_", "").replace("d32s2000h26", "").replace("l31r500m20", "") + "V" + \
+            r.b.replace("_", "").replace("d32s2000h26", "").replace("l31r500m20", "")
+        X[f"rp{tag}"] = f"{r['diff']:.3f}"
+        X[f"rp{tag}Ci"] = f"{r.lo:.3f} to {r.hi:.3f}"
+        X[f"rp{tag}Won"] = WORDS[int(r.origins_a_ahead)]
+    return X
+
+
 def macros(d, L):
     plain, tl = d[d.explore == 0], d[d.explore > 0]
     t = med(plain, ["rmsse", "err_mean", "regular_loss", "stock_mean", "promo_loss"] +
@@ -317,14 +381,20 @@ def macros(d, L):
                 X[f"link{k}{tag}{ct}Ci"] = f"{r.loc[c, 'lo']:.2f} to {r.loc[c, 'hi']:.2f}"
     a = L[(L.measure == "err_mean") & (L.versions_of == "all")]
     X["linkAllMin"], X["linkAllMax"] = f"{a.spearman.min():.2f}", f"{a.spearman.max():.2f}"
-    X["nFits"] = f"{len(d):,}"
+    full = pd.read_csv(RES / "versions.csv")
+    real = len(list((RES / "real").rglob("*.json")))
+    X["nFits"] = f"{len(full) + real:,}"
     jepa_like = ["wm_jepa", "wm_latent", "wm_overshoot", "wm_adajepa"]
     X["errLActLo"] = f"{t.loc[[('loglinear', v) for v in jepa_like], 'err_mean'].min():.2f}"
     X["errLActHi"] = f"{t.loc[[('loglinear', v) for v in jepa_like], 'err_mean'].max():.2f}"
     X["errBActLo"] = f"{t.loc[[('bent', v) for v in jepa_like], 'err_mean'].min():.2f}"
     X["errBActHi"] = f"{t.loc[[('bent', v) for v in jepa_like], 'err_mean'].max():.2f}"
     X.update(table_h2h())
-    (GEN / "p3_macros.tex").write_text("".join(f"\\newcommand{{\\{k}}}{{{v}}}\n" for k, v in X.items()))
+    X.update(table_real())
+    import re
+    num = re.compile(r"-(?=\d)")  # a typeset minus sign in every number
+    (GEN / "p3_macros.tex").write_text("".join(
+        f"\\newcommand{{\\{k}}}{{{num.sub(lambda m: chr(0x2212), str(v))}}}\n" for k, v in X.items()))
     return X
 
 
