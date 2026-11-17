@@ -23,14 +23,19 @@ from paper3_analysis import _sign_p, _spearman_rows  # noqa: E402
 
 PLANS = ["dose_50", "dose_60", "steady_20", "off_pattern", "no_dose"]
 PAIRS = [("wm_shape", "wm_d32_s2000_h26"), ("lgb_shape", "lgb_l31_r500_m20"), ("loglinear_shape", "loglinear"),
-         ("wm_shape", "loglinear_shape"), ("wm_shape", "lgb_shape")]
+         ("wm_shape", "loglinear_shape"), ("wm_shape", "lgb_shape"),
+         # amendment 9: the built-up drug level in place of the day's dose
+         ("wm_shape_exp", "wm_shape"), ("wm_shape_exp", "wm_d32_s2000_h26_exp"), ("wm_shape_exp", "loglinear_shape_exp"),
+         ("wm_shape_exp", "lgb_shape_exp"), ("lgb_shape_exp", "lgb_l31_r500_m20_exp"),
+         ("loglinear_shape_exp", "loglinear_exp")]
 
 
 def load(bench: str) -> pd.DataFrame:
     rows = []
-    for f in glob.glob(f"{bench}/**/dose_*.json", recursive=True):
+    for f in glob.glob(f"{bench}/**/dose*.json", recursive=True):
         r = json.loads(Path(f).read_text())
-        row = {"strength": r["strength"], "seed": r["seed"], "version": r["version"], "rmsse": r["rmsse"],
+        version = r["version"] + ("_exp" if r.get("exposure") else "")
+        row = {"strength": r["strength"], "seed": r["seed"], "version": version, "rmsse": r["rmsse"],
                "model": "world model" if r["version"].startswith("wm") else
                "LightGBM" if r["version"].startswith("lgb") else "log-linear"}
         for p in PLANS:

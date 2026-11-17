@@ -1,0 +1,29 @@
+{
+ "strength": 1.5,
+ "seed": 101,
+ "version": "wm_d32_s2000_h26",
+ "kind": "state_model",
+ "exposure": true,
+ "rmsse": 0.8808226736742959,
+ "dose_50": {
+  "change_ratio": -1.4700022294516366,
+  "true_change": 1349.1389476043855
+ },
+ "dose_60": {
+  "change_ratio": -1.5998719961264458,
+  "true_change": 1799.574549565774
+ },
+ "steady_20": {
+  "change_ratio": -0.839682035648663,
+  "true_change": 7086.20111494871
+ },
+ "off_pattern": {
+  "change_ratio": 0.278494811252109,
+  "true_change": 890.6030889137057
+ },
+ "no_dose": {
+  "change_ratio": -1.1951901617728864,
+  "true_change": -3546.7081057560613
+ },
+ "seconds": 241.2
+}

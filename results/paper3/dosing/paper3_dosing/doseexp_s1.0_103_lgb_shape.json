@@ -1,0 +1,29 @@
+{
+ "strength": 1.0,
+ "seed": 103,
+ "version": "lgb_shape",
+ "kind": "lightgbm_direct",
+ "exposure": true,
+ "rmsse": 0.9841978109703422,
+ "dose_50": {
+  "change_ratio": -0.33502532786754596,
+  "true_change": 1701.0264782238241
+ },
+ "dose_60": {
+  "change_ratio": -0.38004153266763896,
+  "true_change": 2218.2262290689237
+ },
+ "steady_20": {
+  "change_ratio": 0.07662146044258439,
+  "true_change": 8182.1897638518685
+ },
+ "off_pattern": {
+  "change_ratio": 0.11933424440839728,
+  "true_change": 615.9383468761987
+ },
+ "no_dose": {
+  "change_ratio": -0.038201831374189324,
+  "true_change": -3689.092831482057
+ },
+ "seconds": 3.1
+}
