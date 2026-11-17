@@ -74,6 +74,7 @@ class LightGBMDirect(Forecaster):
         seed: int = 0,
         threads: int = 2,
         params: dict | None = None,
+        monotone_price: bool | list = False,
         cold_start: bool = False,
     ):
         # forecast a series with no history from its labels, price and plan
@@ -88,6 +89,7 @@ class LightGBMDirect(Forecaster):
         self.lags = tuple(lags)  # added to the horizon: sales this many periods before the earliest usable one
         self.windows = tuple(windows)  # lengths of the trailing sales averages
         self.spread_window = spread_window  # length of the trailing window for the spread of sales
+        self.monotone_price = monotone_price  # True, or a list of extra columns that also may not raise sales
         self.price_window = price_window  # look-back for the item's highest recent price
         self.price_lag = price_lag  # price is compared with the price this many periods earlier
         self.rounds = rounds
@@ -208,7 +210,12 @@ class LightGBMDirect(Forecaster):
                 categorical_feature=list(self.categorical),
                 free_raw_data=True,
             )
-            booster = lgb.train(self.params, data, num_boost_round=self.rounds)
+            params = self.params
+            if self.monotone_price:  # predicted sales may not rise with any price feature (paper 3, amendment 3)
+                down = set(self.monotone_price) if not isinstance(self.monotone_price, bool) else set()
+                params = {**params, "monotone_constraints_method": "advanced", "monotone_constraints": [
+                    -1 if n == "price" or n.startswith("price_vs") or n in down else 0 for n in names_f]}
+            booster = lgb.train(params, data, num_boost_round=self.rounds)
             booster.free_dataset()  # the fitted model does not need its training table
             self.feature_names = names_f
             del x, y, data, part

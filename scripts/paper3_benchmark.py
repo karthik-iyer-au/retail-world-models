@@ -55,6 +55,7 @@ def versions() -> dict:
     out["lgb_rr"] = ("lightgbm_direct", {**lgb, "extra": list(lgb["extra"]) + [RR]})
     out["loglinear_rr"] = ("loglinear", {"recorded_regular": True})
     out["loglinear_shape"] = ("loglinear", {"price_shape": True})  # amendment 3
+    out["lgb_shape"] = (out["lgb_rr"][0], {**out["lgb_rr"][1], "monotone_price": [RR]})  # amendment 3, addition
     # amendment 2 (17 November 2026): the forecaster for the week at the current regular price with nothing planned,
     # the log-linear model with the recorded regular price for the change the plan makes
     out["wm_ll"] = ("split", {"forecaster": out["wm_rr"]})

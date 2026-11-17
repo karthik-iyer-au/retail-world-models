@@ -169,3 +169,8 @@ controls are added, labelled in the paper as added after the first results:
 
 The text is corrected: the price shape keeps sales from falling as a cut deepens; the saturating part is bounded,
 the logarithmic part is not and is held finite only by the cap on the cut. Compute: about 130 fits, about US$20.
+
+**Amendment 3, addition, 17 November 2026, 12:45, before any of its runs.** Karthik passed on the same reviewer's
+second suggestion: give LightGBM the same rules too. Added `lgb_shape`: `lgb_rr` with every price feature and the
+recorded regular price constrained so that predicted sales cannot rise with price (LightGBM monotone constraints);
+trees already stay flat beyond the deepest cut seen. Run on every world of amendment 3.

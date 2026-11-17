@@ -40,7 +40,7 @@ def load(bench: str) -> pd.DataFrame:
             row[f"stock_{p}"] = r[p]["stock"]
         rows.append(row)
     d = pd.DataFrame(rows).drop_duplicates(["shape", "explore", "confounding", "seed", "version"])
-    amended = ("wm_jepa", "wm_latent", "wm_overshoot", "wm_adajepa", "wm_rr", "lgb_rr", "loglinear_rr", "wm_ll", "lgb_ll", "wm_shape", "loglinear_shape")
+    amended = ("wm_jepa", "wm_latent", "wm_overshoot", "wm_adajepa", "wm_rr", "lgb_rr", "loglinear_rr", "wm_ll", "lgb_ll", "wm_shape", "loglinear_shape", "lgb_shape")
     d["grid"] = ~d["version"].isin(amended) & (d["explore"] == 0)  # the 25 versions of the fixed plan
     for p in PLANS:
         ratio = d[f"ratio_{p}"]
@@ -108,7 +108,7 @@ def main(argv=None):
     # amendment 2: the split model against the forecaster alone (with and without the recorded regular price)
     pairs2 = [("wm_ll", "wm_rr"), ("wm_ll", "wm_d32_s2000_h26"), ("lgb_ll", "lgb_rr"), ("lgb_ll", "lgb_l31_r500_m20"),
               ("wm_shape", "wm_rr"), ("wm_shape", "wm_d32_s2000_h26"), ("wm_shape", "loglinear_shape"),
-              ("loglinear_shape", "loglinear_rr")]
+              ("loglinear_shape", "loglinear_rr"), ("wm_shape", "lgb_shape"), ("lgb_shape", "lgb_rr")]
     rows = []
     key = ["shape", "confounding", "seed"]
     plain = d[d.explore == 0]
