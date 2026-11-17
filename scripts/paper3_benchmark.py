@@ -56,6 +56,16 @@ def versions() -> dict:
     out["loglinear_rr"] = ("loglinear", {"recorded_regular": True})
     out["loglinear_shape"] = ("loglinear", {"price_shape": True})  # amendment 3
     out["lgb_shape"] = (out["lgb_rr"][0], {**out["lgb_rr"][1], "monotone_price": [RR]})  # amendment 3, addition
+    # amendment 4 (17 November 2026): the three models with the price rules at equal tuning
+    for d, steps, hist in itertools.product((16, 32, 64), (500, 2000), (13, 26)):
+        out[f"wm_shape_d{d}_s{steps}_h{hist}"] = ("state_model", {**out[f"wm_d{d}_s{steps}_h{hist}"][1],
+                                                                  "regular_column": RR, "price_shape": True})
+    for leaves, rounds, mdl in itertools.product((7, 31, 127), (100, 500), (20, 100)):
+        g = out[f"lgb_l{leaves}_r{rounds}_m{mdl}"][1]
+        out[f"lgb_shape_l{leaves}_r{rounds}_m{mdl}"] = ("lightgbm_direct", {
+            **g, "extra": list(g["extra"]) + [RR], "monotone_price": [RR]})
+    for alpha, grid in itertools.product((1e-4, 1e-3, 1e-2), ("coarse", "fine")):
+        out[f"ll_shape_a{alpha:g}_b{grid}"] = ("loglinear", {"price_shape": True, "alpha": alpha, "grid": grid})
     # amendment 2 (17 November 2026): the forecaster for the week at the current regular price with nothing planned,
     # the log-linear model with the recorded regular price for the change the plan makes
     out["wm_ll"] = ("split", {"forecaster": out["wm_rr"]})
@@ -127,13 +137,17 @@ class LogLinear:
     price over the series' mean regular price, promotion, display, both, and the week after a planned week."""
 
     SHAPE_B = (0.05, 0.1, 0.2, 0.4)
+    FINE_B = (0.03, 0.05, 0.1, 0.15, 0.2, 0.3, 0.5)
 
-    def __init__(self, recorded_regular: bool = False, price_shape: bool = False):
+    def __init__(self, recorded_regular: bool = False, price_shape: bool = False, alpha: float = 1e-4,
+                 grid: str = "coarse"):
         """`price_shape` (amendment 3): log price replaced by the world model's price shape, the cut c (capped at 95%)
         through 1 - exp(-c / b) for b in SHAPE_B and through -log(1 - c), coefficients at or above zero; the
         regular-price coefficient at or below zero. Poisson maximum likelihood with those bounds."""
         self.recorded = recorded_regular or price_shape
         self.shape = price_shape
+        self.alpha = alpha
+        self.b_grid = self.FINE_B if grid == "fine" else self.SHAPE_B
 
     def fit(self, train: pd.DataFrame):
         self.hist = train.sort_values([SERIES, DATE]).reset_index(drop=True)
@@ -145,7 +159,7 @@ class LogLinear:
             return self
         from scipy.optimize import minimize
         n, k = X.shape
-        alpha = 1e-4
+        alpha = self.alpha
 
         def f(w):
             eta = np.clip(X @ w[:k] + w[k], -30, 30)
@@ -186,7 +200,7 @@ class LogLinear:
         if self.shape:
             cut = np.clip(1 - ratio, 0, 0.95)
             num = num.drop(columns="lp")
-            for b in self.SHAPE_B:
+            for b in self.b_grid:
                 num[f"cut_exp{b}"] = 1 - np.exp(-cut / b)
             num["cut_log"] = -np.log1p(-cut)
         dummies = pd.get_dummies(pd.Categorical(rows[SERIES], categories=self.series), dtype=float)
@@ -301,7 +315,7 @@ def main(argv=None):
         if a.steps and kind == "state_model":
             settings["steps"] = a.steps
         t0 = time.time()
-        keep_rr = name.endswith("_rr") or kind == "split" or name.endswith("_shape")
+        keep_rr = name.endswith("_rr") or kind == "split" or "_shape" in name
         fit_on = train.drop(columns=HIDDEN + ([] if keep_rr else [RR]))
         if kind == "split" and a.steps and settings["forecaster"][0] == "state_model":
             settings["forecaster"] = (settings["forecaster"][0], {**settings["forecaster"][1], "steps": a.steps})

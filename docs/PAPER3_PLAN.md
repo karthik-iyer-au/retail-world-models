@@ -174,3 +174,24 @@ the logarithmic part is not and is held finite only by the cap on the cut. Compu
 second suggestion: give LightGBM the same rules too. Added `lgb_shape`: `lgb_rr` with every price feature and the
 recorded regular price constrained so that predicted sales cannot rise with price (LightGBM monotone constraints);
 trees already stay flat beyond the deepest cut seen. Run on every world of amendment 3.
+
+**Amendment 4, 17 November 2026, 13:15, after the results of amendment 3 and before any of these runs.** Karthik
+passed on a reviewer's points (13:12): the controls of amendment 3 used one version of each model, while the
+original models had twelve; the bootstrap resamples versions that share data, so its intervals overstate the
+evidence; and the kinked-world result covers only the simpler models tested. Added, labelled in the paper as added:
+
+1. Equal tuning for the three models with the price rules, in the bent and kinked worlds (four planning strengths,
+   seeds 101 to 103): the world model with the rules at the 12 settings of the world model's search
+   (`wm_shape_d*_s*_h*`), LightGBM with the rules at the 12 settings of its search (`lgb_shape_l*_r*_m*`), and the
+   log-linear model with the rules at six settings (penalty 1e-4, 1e-3, 1e-2; the grid of b values 0.05, 0.1, 0.2,
+   0.4 or the finer grid 0.03, 0.05, 0.1, 0.15, 0.2, 0.3, 0.5) (`ll_shape_a*_b*`). Each model is reported at the median
+   over its versions and at its best version chosen on the held-out plans, so each gets the same chance.
+2. More independent worlds for the head-to-head in the kinked world: seeds 104 to 110 at each planning strength
+   (28 more worlds), for the three models with the rules at their base settings.
+3. Statistics with the world as the unit: for each head-to-head, the number of worlds in which one model is ahead,
+   with a two-sided sign test, and a 95% interval for the median paired difference from a bootstrap over worlds.
+   The rank-correlation intervals over versions are kept and described as variation over versions within fixed
+   data, not over independent replications.
+
+Compute: about 300 world model fits and 600 cheaper fits, about US$40 (Karthik, 23:42 on 16 November: "run what u
+need for paper3 if the charges are small").
