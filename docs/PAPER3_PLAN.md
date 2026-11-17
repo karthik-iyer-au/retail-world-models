@@ -246,7 +246,10 @@ and the loyalty discount taken, so the regular shelf price is known exactly, and
 week whether the product was on display or in the mailer. Added, labelled as added:
 
 1. Data: purchases by the 2,500 households summed to product by week over all stores (102 weeks), for the 767
-   products bought in at least 95 weeks. Price: amount paid over units; recorded regular price: shelf price before
+   products bought in at least 95 weeks. (Clarified before any run, after a smoke test on one origin showed fuel
+   and fees among them: only food and household departments are kept (grocery, drug and general merchandise,
+   produce, meat, packaged meat, deli, pastry, nutrition, seafood, frozen), and product-weeks paid at less than 5% of
+   the shelf price are dropped as recording errors; the product count is reported.) Price: amount paid over units; recorded regular price: shelf price before
    the loyalty and coupon-match discounts over units; promotion: in the mailer in any store that week; display: on
    display in any store that week.
 2. Test: origins at weeks 63, 71, 79, 87 and 95, forecasting 8 weeks; every product-week with a cut deeper than 30%

@@ -27,7 +27,8 @@ from rwm.utils.paths import DATA_RAW  # noqa: E402
 
 HORIZON = 8
 DEEP = 0.30
-MOVE = {"frat": 0.10, "m5": 0.05}
+MOVE = {"frat": 0.10, "m5": 0.05, "cj": 0.10}
+PURE = "_pure"  # cj only: no mailer and no display in any store (not given to the models)
 MODELS = ["wm_d32_s2000_h26", "wm_rr", "wm_shape", "lgb_l31_r500_m20", "lgb_rr", "lgb_shape", "loglinear",
           "loglinear_rr", "loglinear_shape"]
 
@@ -81,6 +82,42 @@ def m5() -> pd.DataFrame:
     return out.sort_values([SERIES, DATE]).reset_index(drop=True)
 
 
+def complete_journey() -> pd.DataFrame:
+    """Amendment 7: The Complete Journey, purchases summed to product by week over all stores."""
+    import zipfile
+    z = zipfile.ZipFile(DATA_RAW / "complete_journey" / "dunnhumby_The-Complete-Journey.zip")
+    base = "dunnhumby_The-Complete-Journey/dunnhumby_The-Complete-Journey CSV/"
+    t = pd.read_csv(z.open(base + "transaction_data.csv"),
+                    usecols=["PRODUCT_ID", "WEEK_NO", "QUANTITY", "SALES_VALUE", "RETAIL_DISC", "COUPON_MATCH_DISC"])
+    t = t[t["QUANTITY"] > 0]
+    g = t.groupby(["PRODUCT_ID", "WEEK_NO"]).agg(q=("QUANTITY", "sum"), sv=("SALES_VALUE", "sum"),
+                                                 rd=("RETAIL_DISC", "sum"), cm=("COUPON_MATCH_DISC", "sum")).reset_index()
+    prod = pd.read_csv(z.open(base + "product.csv"), usecols=["PRODUCT_ID", "DEPARTMENT"])
+    food = {"GROCERY", "DRUG GM", "PRODUCE", "MEAT", "MEAT-PCKGD", "DELI", "PASTRY", "NUTRITION", "SEAFOOD",
+            "SEAFOOD-PCKGD", "FROZEN GROCERY"}
+    g = g[g["PRODUCT_ID"].isin(prod.loc[prod["DEPARTMENT"].isin(food), "PRODUCT_ID"])]
+    weeks = g.groupby("PRODUCT_ID")["WEEK_NO"].nunique()
+    g = g[g["PRODUCT_ID"].isin(weeks[weeks >= 95].index)]
+    g["shelf"] = (g["sv"] - g["rd"] - g["cm"]) / g["q"]
+    g["paid"] = (g["sv"] / g["q"]).clip(upper=g["shelf"])
+    keep = set(g["PRODUCT_ID"])
+    flags = []
+    for c in pd.read_csv(z.open(base + "causal_data.csv"), dtype=str, chunksize=2_000_000):
+        c = c[c["PRODUCT_ID"].astype(int).isin(keep)]
+        flags.append(pd.DataFrame({"PRODUCT_ID": c["PRODUCT_ID"].astype(int), "WEEK_NO": c["WEEK_NO"].astype(int),
+                                   "display": (c["display"] != "0").astype(int),
+                                   "mailer": (c["mailer"] != "0").astype(int)}))
+    f = pd.concat(flags).groupby(["PRODUCT_ID", "WEEK_NO"])[["display", "mailer"]].max().reset_index()
+    g = g.merge(f, on=["PRODUCT_ID", "WEEK_NO"], how="left").fillna({"display": 0, "mailer": 0})
+    g = g[(g["shelf"] > 0) & (g["paid"] >= 0.05 * g["shelf"])]  # below 5% of shelf: a recording error
+    date = pd.Timestamp("2010-01-03") + pd.to_timedelta(7 * (g["WEEK_NO"] - 1), unit="D")  # weeks are relative
+    out = pd.DataFrame({SERIES: "all_" + g["PRODUCT_ID"].astype(str), STORE: "all", ITEM: g["PRODUCT_ID"].astype(str),
+                        DATE: date, UNITS: g["q"].astype(float), PRICE: g["paid"].astype(float),
+                        "promo": g["mailer"].astype(int), "display": g["display"].astype(int),
+                        RR: g["shelf"].astype(float), PURE: ((g["mailer"] == 0) & (g["display"] == 0)).astype(int)})
+    return out.sort_values([SERIES, DATE]).reset_index(drop=True)
+
+
 def split(panel: pd.DataFrame, data: str, origin: int, deep: float = DEEP):
     dates = np.sort(panel[DATE].unique())
     start = origin - 1 if origin > 0 else len(dates) + origin  # m5 origins count back from the end
@@ -89,13 +126,15 @@ def split(panel: pd.DataFrame, data: str, origin: int, deep: float = DEEP):
     test = panel[panel[DATE].isin(window)].copy()
     test = test[test[SERIES].isin(train[SERIES].unique())]
     depth = 1 - train[PRICE] / train[RR]
-    if data == "frat":
+    if data in ("frat", "cj"):
         train = train[depth <= deep]  # no model sees a cut deeper than this (30%; 20% in amendment 6)
     last_reg = train.groupby(SERIES)[RR].last()
     move = (test[RR] / test[SERIES].map(last_reg) - 1).abs()
     tdepth = 1 - test[PRICE] / test[RR]
-    test["group"] = np.where((tdepth > deep) & (data == "frat"), "deep",
+    test["group"] = np.where((tdepth > deep) & (data in ("frat", "cj")),
+                             np.where(test.get(PURE, 0) == 1, "deep_pure", "deep"),
                              np.where(move >= MOVE[data], "regular_move", "rest"))
+    train = train.drop(columns=[PURE], errors="ignore")
     return train, test
 
 
@@ -113,7 +152,7 @@ def measures(test: pd.DataFrame, pred: np.ndarray) -> dict:
 def main(argv=None):
     p = argparse.ArgumentParser()
     p.add_argument("--out", required=True)
-    p.add_argument("--data", required=True, choices=["frat", "m5"])
+    p.add_argument("--data", required=True, choices=["frat", "m5", "cj"])
     p.add_argument("--origin", type=int, required=True)
     p.add_argument("--versions", nargs="*")
     p.add_argument("--steps", type=int, help="override training steps (smoke test only)")
@@ -121,7 +160,7 @@ def main(argv=None):
     a = p.parse_args(argv)
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
-    panel = frat() if a.data == "frat" else m5()
+    panel = frat() if a.data == "frat" else m5() if a.data == "m5" else complete_journey()
     train, test = split(panel, a.data, a.origin, a.deep)
     tag = "" if a.deep == DEEP else f"d{round(100 * a.deep)}_"
     V = versions()
@@ -140,7 +179,8 @@ def main(argv=None):
         model = (LogLinear(**settings).fit(fit_on) if kind == "loglinear"
                  else Split(**settings).fit(fit_on) if kind == "split"
                  else build_model(kind, **settings).fit(fit_on))
-        plan = test.drop(columns=[UNITS, "group"] + ([] if keep_rr else [RR]))
+        plan = test.drop(columns=[UNITS, "group"] + ([] if keep_rr else [RR]), errors="ignore") \
+            .drop(columns=[PURE], errors="ignore")
         pred = np.clip(np.asarray(model.predict(plan), dtype=float), 0, None)
         rec = {"data": a.data, "origin": a.origin, "deep_threshold": a.deep, "version": name, "kind": kind, **measures(test, pred),
                "seconds": round(time.time() - t0, 1)}

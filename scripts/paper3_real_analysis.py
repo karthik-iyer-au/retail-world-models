@@ -62,7 +62,7 @@ def main(argv=None):
     rows = []
     for f in glob.glob(f"{a.real}/**/*.json", recursive=True):
         r = json.loads(Path(f).read_text())
-        for g in ("deep", "regular_move", "rest", "all"):
+        for g in ("deep", "deep_pure", "regular_move", "rest", "all"):
             if g in r:
                 tag = Path(f).name.split("_")[2]  # real_<data>_[d20_]o<origin>_<version>.json
                 data = f"{r['data']}_{tag}" if tag.startswith("d") else r["data"]
