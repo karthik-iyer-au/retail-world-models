@@ -79,7 +79,7 @@ def main(argv=None):
         thr = parts[2] if parts[2].startswith("d") else "d30"
         origin = next(x for x in parts[2:4] if x.startswith("o"))
         version = "_".join(parts[parts.index(origin) + 1:])
-        frames.append(pd.read_csv(f).assign(data=data if data == "m5" else f"frat_{thr}", origin=origin,
+        frames.append(pd.read_csv(f).assign(data=data if data != "frat" else f"frat_{thr}", origin=origin,
                                             version=version))
     d = pd.concat(frames)
     d["data"] = d["data"].replace({"frat_d30": "frat"})
