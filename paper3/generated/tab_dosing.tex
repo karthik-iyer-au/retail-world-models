@@ -1,7 +1,8 @@
 \begin{table}[t]
 \centering
 \caption{\textbf{The dosing world} (added; Appendix~\ref{app:plan}). Medians over three seeds at each dosing strength
-(how closely doses follow severity). Error on new doses as in the retail study (capped at 3.00, a twentyfold miss or a
+(how closely doses follow severity). Rows marked drug level are given the level built up from recent doses in
+place of the day's dose (amendment 9). Error on new doses as in the retail study (capped at 3.00, a twentyfold miss or a
 wrong sign); predicted change over true change for every planned dose raised to 60\% of the maximum.}
 \label{tab:dosing}
 \footnotesize\setlength{\tabcolsep}{3pt}
@@ -17,6 +18,12 @@ LightGBM & 1.74 & 2.41 & 2.28 & 2.20 & 0.13 & $-$2.32 & $-$2.96 & $-$3.60 \\
 \quad + dose rules & 1.71 & 2.58 & 2.62 & 2.68 & 0.15 & $-$0.64 & $-$0.73 & $-$0.59 \\
 Log-linear & 1.01 & 2.91 & 2.67 & 2.69 & 1.39 & $-$0.67 & $-$1.43 & $-$1.89 \\
 \quad + dose rules & 1.31 & 3.00 & 2.90 & 2.96 & 0.34 & 0.00 & 0.00 & 0.00 \\
+World model, drug level & 0.80 & 2.55 & 2.53 & 2.65 & 2.62 & $-$0.30 & $-$1.14 & $-$1.53 \\
+\quad + dose rules & 0.73 & 1.66 & 2.55 & 2.54 & 1.27 & 0.32 & 0.12 & 0.12 \\
+LightGBM, drug level & 0.63 & 2.64 & 2.50 & 2.52 & 0.97 & $-$2.22 & $-$2.76 & $-$2.94 \\
+\quad + dose rules & 0.64 & 2.59 & 2.88 & 3.00 & 0.95 & $-$0.40 & $-$0.38 & $-$0.17 \\
+Log-linear, drug level & 0.93 & 3.00 & 3.00 & 2.96 & 2.75 & $-$1.04 & $-$2.00 & $-$2.30 \\
+\quad + dose rules & 0.65 & 3.00 & 3.00 & 3.00 & 1.03 & 0.00 & 0.00 & 0.00 \\
 \bottomrule
 \end{tabular}
 \end{table}

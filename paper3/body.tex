@@ -46,7 +46,7 @@ regular-price moves neither the rules nor the recorded regular price help.
 
 The rest of the paper sets out the stores (\S\ref{sec:data}), the models and remedies (\S\ref{sec:method}), the
 setup (\S\ref{sec:setup}) and the results (\S\ref{sec:results}). The plan for this study was fixed before any run,
-and each of the eight amendments was written before the runs it added (Appendix~\ref{app:plan}).
+and each of the nine amendments was written before the runs it added (Appendix~\ref{app:plan}).
 
 \section{Related work}\label{sec:related}
 
@@ -347,10 +347,12 @@ held out. The first finding repeats: across all versions, better forecasters sim
 (\dsWmLinkHigh{}, \dsWmLinkHighCi{}). The second finding does not: where doses follow severity every model without
 the rules gets the sign of a higher dose wrong (the world model predicts \dsWmRatio{} times the true change for a
 60\% dose, LightGBM \dsLgbRatio{}), and the rules fix the sign but not the size for the world model and the log-linear model (\dsShapeRatio{} and
-\dsLlShapeRatio{}), while LightGBM with the rules still gets the sign wrong (\dsLgbShapeRatio{}). Confounding by indication is stronger here than planning into demand in
-the stores, and the drug acts through accumulated concentration, which the rules do not describe; with doses placed
-at random the world model is the most accurate (\dsWmZero{}, against \dsLgbZero{} for LightGBM and \dsLlZero{} for the
-log-linear model).
+\dsLlShapeRatio{}), while LightGBM with the rules still gets the sign wrong (\dsLgbShapeRatio{}). The drug acts through the level built up over days, which the rules do not
+describe. Given that level in place of the day's dose (added), as the retail models were given the recorded regular
+price, the world model with the rules lowers its error from \dsShapeErr{} to \dsExpShapeErr{}, in all twelve worlds,
+and is ahead of the log-linear and LightGBM models with the rules in \dsExpVsLlWon{} and \dsExpVsLgbWon{} of twelve
+($p$ \dsExpVsLlP{}); where doses follow severity it still predicts only \dsExpRatioLo{} to \dsExpRatioHi{} of the
+true gain from a 60\% dose. With doses at random every model is close (\dsWmZero{} for the plain world model).
 
 \subsection{Decisions}
 
@@ -413,7 +415,7 @@ lasting price moves.
 
 \texttt{make} in the paper folder rebuilds every number, table and figure from the run records, identically from a
 fresh copy of the repository; runs are \texttt{scripts/paper3\_*.py}. The \nFits{} fits cost about US\$135 on Modal
-CPU. The plan and its eight amendments are in the documents folder.
+CPU. The plan and its nine amendments are in the documents folder.
 
 \section{Data and code availability}\label{sec:avail}
 
@@ -443,7 +445,8 @@ replications, added equal tuning for the three models with the rules, 28 more ki
 and the statistics with the world as the unit. \emph{Amendment 5}, written before its runs at the author's request
 for a real-data check, added the tests on Breakfast at the Frat and M5; \emph{amendment 6}, after its summary
 results, added pure price cuts, clean lasting moves, the 20\% threshold and more origins; \emph{amendment 7} added The
-Complete Journey; \emph{amendment 8}, at the author's request for a second domain, added the dosing world.
+Complete Journey; \emph{amendment 8}, at the author's request for a second domain, added the dosing world, and \emph{amendment 9}
+the drug level built up from recent doses.
 Each was written before the analyses it added, and every result is reported. The correlation within each model class and the cap on the error of new plans were added in the
 analysis; the cap counts a wrong sign as a twentyfold miss so the measure does not move as versions are added.
 

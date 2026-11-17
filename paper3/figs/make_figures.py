@@ -346,11 +346,25 @@ Item-weeks / origins & """ + head + r""" \\
     return X
 
 
+def pairs_dosing():
+    pr = pd.read_csv(RES / "dosing_pairs.csv").set_index(["a", "b"])
+    out = {}
+    for (a, b), tag in ((("wm_shape_exp", "wm_shape"), "VsShape"), (("wm_shape_exp", "loglinear_shape_exp"), "VsLl"),
+                        (("wm_shape_exp", "lgb_shape_exp"), "VsLgb")):
+        r = pr.loc[(a, b)]
+        out[f"dsExp{tag}Won"] = WORDS[int(r.a_ahead)]
+        out[f"dsExp{tag}P"] = "below 0.001" if r.sign_p < 0.001 else f"{r.sign_p:.3f}"
+    return out
+
+
 def table_dosing():
     v = pd.read_csv(RES / "dosing_versions.csv")
     L = pd.read_csv(RES / "dosing_link.csv")
     show = [("wm_d32_s2000_h26", "World model"), ("wm_shape", "\\quad + dose rules"), ("lgb_l31_r500_m20", "LightGBM"),
-            ("lgb_shape", "\\quad + dose rules"), ("loglinear", "Log-linear"), ("loglinear_shape", "\\quad + dose rules")]
+            ("lgb_shape", "\\quad + dose rules"), ("loglinear", "Log-linear"), ("loglinear_shape", "\\quad + dose rules"),
+            ("wm_d32_s2000_h26_exp", "World model, drug level"), ("wm_shape_exp", "\\quad + dose rules"),
+            ("lgb_l31_r500_m20_exp", "LightGBM, drug level"), ("lgb_shape_exp", "\\quad + dose rules"),
+            ("loglinear_exp", "Log-linear, drug level"), ("loglinear_shape_exp", "\\quad + dose rules")]
     lines = []
     for ver, lab in show:
         x = v[v.version == ver].groupby("strength")[["err_mean", "ratio_dose_60"]].median()
@@ -360,7 +374,8 @@ def table_dosing():
     tab = r"""\begin{table}[t]
 \centering
 \caption{\textbf{The dosing world} (added; Appendix~\ref{app:plan}). Medians over three seeds at each dosing strength
-(how closely doses follow severity). Error on new doses as in the retail study (capped at 3.00, a twentyfold miss or a
+(how closely doses follow severity). Rows marked drug level are given the level built up from recent doses in
+place of the day's dose (amendment 9). Error on new doses as in the retail study (capped at 3.00, a twentyfold miss or a
 wrong sign); predicted change over true change for every planned dose raised to 60\% of the maximum.}
 \label{tab:dosing}
 \footnotesize\setlength{\tabcolsep}{3pt}
@@ -390,7 +405,12 @@ Strength & 0 & 0.5 & 1 & 1.5 & 0 & 0.5 & 1 & 1.5 \\
             "dsShapeRatio": f"{med('wm_shape', 'ratio_dose_60'):.2f}",
             "dsLlShapeRatio": f"{med('loglinear_shape', 'ratio_dose_60'):.2f}",
             "dsLgbShapeRatio": f"{med('lgb_shape', 'ratio_dose_60'):.2f}",
-            "dsFits": f"{len(v):,}"}
+            "dsFits": f"{len(v):,}",
+            "dsExpShapeErr": f"{v[v.version == 'wm_shape_exp'].err_mean.median():.2f}",
+            "dsShapeErr": f"{v[v.version == 'wm_shape'].err_mean.median():.2f}",
+            "dsExpRatioLo": f"{conf[conf.version == 'wm_shape_exp'].groupby('strength').ratio_dose_60.median().min():.2f}",
+            "dsExpRatioHi": f"{conf[conf.version == 'wm_shape_exp'].groupby('strength').ratio_dose_60.median().max():.2f}",
+            **pairs_dosing()}
 
 
 def macros(d, L):
