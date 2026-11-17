@@ -3,29 +3,30 @@
 \fi
 Forecasting models that read the price and promotion plan explain each forecast
 as a baseline, what would sell with nothing planned, plus the lift the plan
-adds. We test such explanations with eight checks, six with a pass rule fixed
-before any result, and find that passing them does not make an explanation
-right. In generated store data with known effects, a world model passes the
-checks of construction, stability, price direction and agreement with sales
-and with LightGBM, yet its lifts are \kaCoWmBiasLo{} to \kaCoWmBiasHi{} times
-the truth when merchants plan into high-demand weeks, and \ksWmBiasLo{} to \ksWmBiasHi{} times in
-\ksN{} variants of that world; it still picks the right weeks to promote, but stock ordered to its lift
-is off by \kdCoWmStockLo{} to \kdCoWmStockHi{} of the true lift. Its stated response to a
-lasting regular-price change is \kaClWmTimesLo{} to \kaCoWmTimesHi{} times the
-true $-0.5$, and only a measured cause finds this. On Dominick's, \zScored{}
-episodes in which a store's regular prices sat apart from its zone peers give a
-noisy benchmark: a pooled 8-week response of $\zSlope$ (95\% interval
-$\zSlopeLo$ to $\zSlopeHi$), close to a placebo ($\zPlaceboSlope$). For the
-final tuned world models of \ourcompanion{} on \tSets{} data sets,
-baseline and lift add up under each model's own plan on every window, but a
-deeper price cut lowers the forecast in \tCFourDomLo\% to \tCFourDomHi\% of
-item-week steps on Dominick's, and in \cfoObsDomLo\% to \cfoObsDomHi\% within prices seen in training, and the world model and LightGBM both state
-about twice the measured response (exploratory pooled slopes $\tSlopeWm$ and
-$\tSlopeLgb$ against $\tSlopeMeas$). Across \tConfigsAll{} configurations from
-the settings searches, in a test designed after an earlier audit's results,
+adds, and merchants order stock and plan promotions on that lift. We show that
+an explanation can pass the checks used to trust it and still be wrong enough
+to cost money. We define eight checks for any forecaster that states a plan
+lift, six with a pass rule fixed before any result, and run them on a world
+model and on LightGBM. In generated store data with known effects, the world
+model passes the checks of construction, stability, price direction and
+agreement with sales and with LightGBM, yet when merchants plan into
+high-demand weeks it states \kaCoWmBiasLo{} to \kaCoWmBiasHi{} times the true
+lift, and \ksWmBiasLo{} to \ksWmBiasHi{} times in \ksN{} variants of that
+world; LightGBM overstates it too (\kaCoLgbBias{}, and \ksLgbBiasLo{} to
+\ksLgbBiasHi{}). Both still pick the right weeks to promote, but stock ordered
+to the world model's lift is off by \kdCoWmStockLo{} to \kdCoWmStockHi{} of the
+true lift. The world model's stated response to a lasting regular-price change
+is \kaClWmTimesLo{} to \kaCoWmTimesHi{} times the true $-0.5$, an error in kind
+that only a measured cause finds. Sanity checks for explanations test whether an
+explanation depends on the model; a decision needs to know whether it is right
+about the world, and these results show the first does not give the second. For
+the final tuned world models of \ourcompanion{} on \tSets{} data sets, baseline
+and lift add up under each model's own plan on every window, but a deeper price
+cut lowers the forecast in \tCFourDomLo\% to \tCFourDomHi\% of item-week steps on
+Dominick's. Across \tConfigsAll{} configurations from the settings searches,
 checks passed were not related to accuracy (Spearman $\tRhoAll$, 95\% interval
-$\tRhoAllLo$ to $\tRhoAllHi$); these versions have no known answer, so this concerns accuracy, while whether an
-explanation is right is measured only in the generated data.
+$\tRhoAllLo$ to $\tRhoAllHi$). A noisy benchmark of price episodes in
+Dominick's data is reported as a check of direction only.
 
 \iftmlr\end{abstract}\else\vspace{4pt}\fi
 \textbf{Keywords:} retail forecasting; explanation; faithfulness; promotions;

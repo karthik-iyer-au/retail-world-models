@@ -33,7 +33,8 @@ whose explanations pass more checks also forecast better?
 \paragraph{Contributions}
 \begin{enumerate}\setlength{\itemsep}{1pt}
 \item A definition of the plan-lift explanation of a forecast that applies to
-any model that reads the plan, and eight checks on it
+any model that reads the plan, whatever its architecture, and eight checks on
+it, run here on a world model and on LightGBM
 (Figure~\ref{fig:audit}), six of them (C1 to C6) with a pass rule fixed before
 any result.
 \item A known-answer study: generated store data in which the effect of every
@@ -54,9 +55,12 @@ earlier audit of the \companion{} 's development versions, made in October
 \end{enumerate}
 
 \paragraph{Findings}
-In generated data with known effects, explanations that pass the checks against
+The finding that matters for practice is that the checks commonly used to
+trust an explanation, that it depends on the model, adds up and points the
+right way, do not show that it is right about the world, and a merchant acts on
+the world. In generated data with known effects, explanations that pass the checks against
 the model, the data and another model can still be wrong in size, when
-merchants plan into strong weeks, and wrong in kind, when a model answers a
+merchants plan into strong weeks (for the world model and for LightGBM alike), and wrong in kind, when a model answers a
 question about the regular price with a response close to what it learned from
 temporary cuts. The price-direction check and a lever-by-lever comparison with
 a second model catch the cruder failures; the randomisation check does not test
