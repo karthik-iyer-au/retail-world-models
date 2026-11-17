@@ -288,8 +288,8 @@ direction and whose network learns the rest, overstates it \cutsixKShape{} times
 \paragraph{Equal tuning} Tuned over its own versions (12 for the world model and LightGBM, six for the log-linear
 model), each model keeps its place: in the kinked world the world model with the rules is ahead of the log-linear
 model with the rules in \hhMedKWmLlWon{} of \hhMedKWmLlN{} worlds at the median version and \hhBestKWmLlWon{} of
-\hhBestKWmLlN{} at the best; in the bent world the log-linear model is ahead in all but \hhBestBWmLlWon{} at the best
-version (errors \hhBestBWmLlB{} against \hhBestBWmLlA{}).
+\hhBestKWmLlN{} at the best; in the bent world the world model with the rules is ahead of the log-linear model in only
+\hhBestBWmLlWon{} of \hhBestBWmLlN{} worlds at the best version (errors \hhBestBWmLlA{} against \hhBestBWmLlB{}).
 
 The rules do most of the work. Among the models we tested, a simple model with the rules is the better choice when
 the shape of the price response is known, and the world model with the rules when it is not.
@@ -302,7 +302,8 @@ The generated worlds score plans never run; real data cannot. The nearest real t
 run (Table~\ref{tab:real}), and the cleanest of these are pure price cuts deeper than any the models saw, where
 price is the only lever that changed.
 
-\paragraph{Pure price cuts} The rules lower the world model's error in all three tests of pure price cuts. On the Frat with cuts over
+\paragraph{Pure price cuts} The rules lower the world model's error in all three tests of pure price cuts, clearly on
+the Frat and by a margin within chance on The Complete Journey. On the Frat with cuts over
 30\% held out (\rnFPure{} item-weeks over \roFPure{} origins) it falls from \reFPureWm{} to \reFPureWmShape{}
 (difference pooled over origins \rpFPureWmShapeVWm{}, interval \rpFPureWmShapeVWmCi{} from a bootstrap over series; lower at
 \rpFPureWmShapeVWmWon{} of \rpFPureWmShapeVWmOf{} origins); with cuts over 20\% held out, from \reTPureWm{} to
@@ -393,8 +394,8 @@ right about plans outside its history. The recorded regular price and three pric
 model is best when the shape of the price response is known (error \errBLlShape{} in the bent world), and in a world
 whose shape the rules do not match the world model is better than the simpler models we tested (ahead in
 \hhBaseKWmLlWon{} of \hhBaseKWmLlN{} worlds). On real data the rules lower the
-world model's error on pure price cuts deeper than any it saw, on two data sets (\reFPureWm{} to \reFPureWmShape{}
-and \reCPureWm{} to \reCPureWmShape{}), while the recorded regular price has not yet been shown to help with
+world model's error on pure price cuts deeper than any it saw, clearly on the Frat (\reFPureWm{} to
+\reFPureWmShape{}) and by a smaller margin on The Complete Journey (\reCPureWm{} to \reCPureWmShape{}), while the recorded regular price has not yet been shown to help with
 lasting price moves.
 
 \section{Reproducibility and compute}\label{sec:repro}
@@ -402,7 +403,10 @@ lasting price moves.
 Every number, table and figure is rebuilt from the run records by \texttt{make} in the paper folder, and every run
 by \texttt{scripts/paper3\_benchmark.py} for a world and version. The \nFits{} fits ran on CPU containers on Modal;
 the bill for the days they ran was about US\$120 (an estimate from the account's daily bills, which include small
-amounts of other work). The plan and its seven amendments are in the repository's documents folder.
+amounts of other work). The real-data runs are \texttt{scripts/paper3\_real.py} and need the public data
+sets downloaded from their owners. From a fresh copy of the repository, the two analyses rebuild every result table in
+under two minutes and \texttt{make} rebuilds the paper in seconds, with outputs identical to those reported. The plan
+and its seven amendments are in the repository's documents folder.
 
 \section{Data and code availability}\label{sec:avail}
 

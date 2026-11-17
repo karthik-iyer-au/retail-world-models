@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023/Debian) (preloaded format=xelatex 2026.10.23)  17 NOV 2026 16:37
+This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023/Debian) (preloaded format=xelatex 2026.10.23)  17 NOV 2026 17:53
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -3865,25 +3865,25 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [6]
 (./generated/tab_h2h.tex) (./generated/tab_real.tex) [7]
-Underfull \vbox (badness 2409) has occurred while \output is active []
-
-
-Underfull \hbox (badness 6204) in paragraph at lines 351--353
+Underfull \hbox (badness 6204) in paragraph at lines 352--354
 [] []\TU/TeXGyrePagella(0)/b/n/10 Training for actions.[] \TU/TeXGyrePagella(0)
 /m/n/10 JEPA pretraining, the latent
  []
 
-[8]
+
+Underfull \vbox (badness 5119) has occurred while \output is active []
+
+ [8]
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `lmtt' (encoding: TU).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 
-Underfull \hbox (badness 10000) in paragraph at lines 409--411
+Underfull \hbox (badness 10000) in paragraph at lines 413--415
 \TU/TeXGyrePagella(0)/m/n/10 released with the companion forecasting study’s
  []
 
-(./references.tex
+(./references.tex [9]
 Package microtype Info: Character `‥' is missing
 (microtype)             in font `\TU/TeXGyrePagella(0)/m/it/8'.
 (microtype)             Ignoring protrusion settings for this character.
@@ -3998,8 +3998,8 @@ Package microtype Info: Character `⁺' is missing
 Package microtype Info: Character `⁻' is missing
 (microtype)             in font `\TU/TeXGyrePagella(0)/m/it/8'.
 (microtype)             Ignoring protrusion settings for this character.
- [9]
-Underfull \vbox (badness 10000) has occurred while \output is active []
+
+Underfull \vbox (badness 2409) has occurred while \output is active []
 
 ) [10])
 [11

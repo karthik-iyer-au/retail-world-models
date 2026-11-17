@@ -33,12 +33,12 @@ REMEDY = [  # (version, label, group)
     ("wm_overshoot", "+ latent check 7 ahead", "World model"),
     ("wm_adajepa", "+ adaptation at the plan date", "World model"),
     ("wm_rr", "+ recorded regular price", "World model"),
-    ("wm_ll", "Split: world model + log-linear", "Split"),
     ("wm_shape", "+ price rules", "Shape"),
+    ("wm_ll", "Split: world model + log-linear", "Split"),
     ("lgb_l31_r500_m20", "LightGBM", "LightGBM"),
     ("lgb_rr", "+ recorded regular price", "LightGBM"),
-    ("lgb_ll", "Split: LightGBM + log-linear", "Split"),
     ("lgb_shape", "+ price rules", "Shape"),
+    ("lgb_ll", "Split: LightGBM + log-linear", "Split"),
     ("loglinear", "Log-linear", "Log-linear"),
     ("loglinear_rr", "+ recorded regular price", "Log-linear"),
     ("loglinear_shape", "+ price rules", "Shape"),
@@ -194,7 +194,7 @@ Model & Forecast & New plans & Price & Stock & Forecast & New plans & Price & St
             for who in ("all", "world model", "LightGBM"):
                 for m in ("err_mean", "regular_loss", "stock_mean"):
                     r = L[(L["shape"] == shape) & (L.confounding == c) & (L.versions_of == who) & (L.measure == m)].iloc[0]
-                    s = f"{r.spearman:.2f}" if pd.notna(r.spearman) else "--"
+                    s = f"{r.spearman:.2f}".replace("-", "$-$") if pd.notna(r.spearman) else "--"
                     if pd.notna(r.spearman) and (r.lo > 0 or r.hi < 0):
                         s = r"\textbf{" + s + "}"
                     cells.append(s)
