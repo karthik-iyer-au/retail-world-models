@@ -239,3 +239,20 @@ so a 10% difference is not always a lasting move; and four origins give few repl
 
 Reading fixed now: the same as amendment 5. Whatever these show is reported, including no gain.
 Compute: about US$30.
+
+**Amendment 7, 17 November 2026, 14:30, before any of these runs.** Karthik, 14:19: "we already downloaded the
+complete journey for the paper 1 work". The Complete Journey (dunnhumby) records for every purchase the shelf price
+and the loyalty discount taken, so the regular shelf price is known exactly, and it records by product, store and
+week whether the product was on display or in the mailer. Added, labelled as added:
+
+1. Data: purchases by the 2,500 households summed to product by week over all stores (102 weeks), for the 767
+   products bought in at least 95 weeks. Price: amount paid over units; recorded regular price: shelf price before
+   the loyalty and coupon-match discounts over units; promotion: in the mailer in any store that week; display: on
+   display in any store that week.
+2. Test: origins at weeks 63, 71, 79, 87 and 95, forecasting 8 weeks; every product-week with a cut deeper than 30%
+   (about the 90th percentile) removed from training. Scored on cuts deeper than 30%, on those with no mailer and no
+   display (pure price cuts), on product-weeks whose regular shelf price is 10% or more from its last value before
+   the origin, and the rest.
+3. The same nine models and measures as amendment 5.
+
+Reading fixed now: as in amendments 5 and 6; every result is reported. Compute: about US$20.
