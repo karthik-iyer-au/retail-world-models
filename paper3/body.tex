@@ -20,18 +20,19 @@ model.} Across all 25 versions in each world, better forecasters simulate new pl
 reverses (\linkBWmOne{}, \linkBWmOneCi{}).
 \item \textbf{Training the world model to learn actions does not fix it.} JEPA pretraining, a latent consistency
 check, a check seven weeks ahead and adaptation at the plan date move its error on new plans by at most 0.05.
-\item \textbf{A world model with the shape of the price response built in does.} Its error on new plans is
-\errBShape{} in the world whose response bends, against \errBWm{} for the plain world model, \errBLgb{} for LightGBM
-and \errBLlRr{} for a log-linear model given the recorded regular price, and it forecasts the merchants' own plans
-at least as well (\fcBShape{} against \fcBWm{}).
-\item \textbf{The recorded regular price is the input that matters most.} Without it every model reads a lasting
-price move as a temporary cut; with it the log-linear model's error falls from \errLLl{} to \errLLlRr{} in the world
-that matches its form.
+\item \textbf{The recorded regular price and three price rules fix it.} Without the regular price every model reads
+a lasting price move as a temporary cut. With it, and with rules that keep sales from falling as a cut deepens, let
+the gain from deeper cuts flatten and give a lasting regular price its own elasticity, the world model's error falls
+from \errBWm{} to \errBShape{} in a world whose response bends.
+\item \textbf{The rules do most of the work; the world model adds when the truth lies outside them.} Given the same
+rules, a log-linear model does better still where its curve can match the truth (\errBLlShape{} in the bent world),
+and LightGBM worse (\errBLgbShape{}). In a world whose curve neither rule set can draw, the world model with the rules
+is best (\errKShape{} against \errKLlShape{} and \errKLgbShape{}).
 \end{itemize}
 
 The rest of the paper sets out the stores (\S\ref{sec:data}), the models and remedies (\S\ref{sec:method}), the
 setup (\S\ref{sec:setup}) and the results (\S\ref{sec:results}). The plan for this study was fixed before any run,
-and both amendments were written before the runs they added (Appendix~\ref{app:plan}).
+and each of the three amendments was written before the runs it added (Appendix~\ref{app:plan}).
 
 \section{Related work}\label{sec:related}
 
@@ -41,7 +42,7 @@ predicting in a latent space rather than in the raw signal~\cite{lecun2022,ijepa
 separates the effect of the action from the drift of the world~\cite{dwm} and trains the model to tell actions
 apart~\cite{adwm}. Our molecular work found that predictive pretraining transfers to scaffolds not seen in
 training~\cite{mjepa}. We test whether these training choices make a retail world model right about plans outside
-its history, and find they do not on their own.
+its history. They do not; structure in the price response does, and then mostly through the structure itself.
 
 \paragraph{Retail promotion and price models} Log-linear models of sales on price, promotion and display have long
 been the retailer's tool for promotion planning~\cite{promocast,vanheerde2000,vanheerde2003}, with well-studied
@@ -53,11 +54,12 @@ its fixed form fails.
 policy rarely took~\cite{levine2020,pearl2009}, and models with equal held-out accuracy can behave very differently
 off the data~\cite{damour2022}. Monotone networks~\cite{sill1998,you2017} and physics-informed models~\cite{
 karniadakis2021} build known structure into a learned model so it extrapolates sensibly. We bring that idea to the
-price response of a retail world model.
+price response of a retail world model, and give the same structure to the simpler models so its value can be
+separated from the world model's.
 
 \paragraph{Our own studies} The forecasting study~\cite{rwm} measures accuracy on observed plans on four public data
 sets; the explanation audit~\cite{paper2} tests whether a model's stated lift is right. This paper reuses no result
-of either: its worlds use new seeds, two new world shapes and new held-out plans, and its measures are new.
+of either: its worlds use new seeds, three new world shapes and new held-out plans, and its measures are new.
 
 \section{Generated stores with known answers}\label{sec:data}
 
@@ -71,14 +73,16 @@ exactly.
 planning strength of 0 places plans at random; strengths 0.5, 1 and 1.5 tie them more closely to the demand shock,
 so a model that reads the plan as the cause of high sales overstates its effect.
 
-\paragraph{Two shapes of world} In the \emph{log-linear world} a cut of depth $c$ multiplies sales by
+\paragraph{Three shapes of world} In the \emph{log-linear world} a cut of depth $c$ multiplies sales by
 $(1-c)^{-2.5}$ and the regular price acts with elasticity $-0.5$; this is the form of the log-linear model, which
 therefore matches the truth by construction. In the \emph{bent world} the gain from a cut flattens,
 $1 + 1.015\,(1 - e^{-c/0.15})$ (equal to the log-linear world at a 20\% cut), the regular-price response is linear
-in the price ratio, and a promotion with a display adds less than both alone. Each shape is generated at four
-planning strengths and three seeds: 24 worlds.
+in the price ratio, and a promotion with a display adds less than both alone. In the \emph{kinked world} a cut adds
+nothing up to 10\%, then sales rise in a straight line to 1.6 times at 40\% and stay there; the rest is as in the bent
+world. Neither the log-linear form nor the price rules below can draw this curve, so no model has its shape built in.
+Each shape is generated at four planning strengths and three seeds: 36 worlds.
 
-\paragraph{Test and learn} A further 24 worlds add random test plans: 5\% of training item-weeks get a cut of 10\%
+\paragraph{Test and learn} A further 24 worlds (log-linear and bent) add random test plans: 5\% of training item-weeks get a cut of 10\%
 to 40\% (the merchants' own range), a promotion and a display, each with probability one half, placed apart from
 demand. The tests come from their own random stream, so everything else in the world is unchanged. The cuts stay
 inside the range merchants use, so the deeper cuts held out below remain unseen.
@@ -106,7 +110,7 @@ the check seven weeks ahead, and adaptation at the plan date.
 model is given it (versions marked ``+ recorded regular price'').
 \item \emph{Split the job}: the forecaster gives the week at the current regular price with nothing planned; the
 log-linear model with the recorded regular price gives the change the plan makes.
-\item \emph{World model with a price shape}: the plan's price reaches the world model only through
+\item \emph{Price rules in the world model}: the plan's price reaches the world model only through
 \begin{equation}\label{eq:shape}
 \log m = a_1\bigl(1 - e^{-c/b}\bigr) - a_2 \log(1-c) - \gamma \log\frac{r}{\bar p},
 \end{equation}
@@ -116,6 +120,12 @@ first term flattens at $a_1$; the second grows without limit as the cut nears 10
 cap on the cut, so the model learns from the data how far the gain keeps rising. A lasting regular price acts
 through its own elasticity. The rest of the network sees
 neither price, so it cannot learn a price effect that breaks these rules.
+\item \emph{The same rules in the simpler models}, so their value can be told apart from the world model's: the
+log-linear model with the recorded regular price and Equation~\eqref{eq:shape} in place of log price ($b$ on a grid of
+0.05, 0.1, 0.2 and 0.4; coefficients of the cut at or above zero, of the regular price at or below zero; Poisson
+maximum likelihood with those bounds); and LightGBM with the recorded regular price and monotone constraints, so
+predicted sales cannot rise with any price feature or with the regular price. Trees stay flat beyond the deepest cut
+seen, so LightGBM's gain flattens by itself.
 \item \emph{Test and learn}: every model refitted on the worlds with random test plans.
 \end{enumerate}
 
@@ -207,16 +217,16 @@ lowers the error to \errLSplit{} in the log-linear world, as good as the log-lin
 in the bent world. It inherits the log-linear model's form, so in the bent world it overstates a 60\% cut
 \cutsixBSplit{} times.
 
-\paragraph{A world model with a price shape} Building the shape of Equation~\eqref{eq:shape} into the world model
-gives the lowest error on new plans in the bent world, \errBShape{}, in all \worldsB{} worlds, against \errBSplit{}
-for the split model and \errBLgb{} for LightGBM. It predicts \cutsixBShape{} times the true gain from a 60\% cut and
-\regdownBShape{} times that of a 10\% lower regular price, loses \priceBShape\% on the price choice, and forecasts
-the merchants' plans at least as well as any other model (\fcBShape{}). In the log-linear world it is second
-(\errLShape{}) to the models that share the world's form (\errLLlRr{}): it learns too small a logarithmic term and understates the steep
-gain of a 60\% cut there (\cutsixLShape{} of the truth). It is the only model with low error in both worlds.
+\paragraph{Price rules in the world model} Building the rules of Equation~\eqref{eq:shape} into the world model
+lowers its error on new plans from \errBWm{} to \errBShape{} in the bent world and from \errKWm{} to \errKShape{} in
+the kinked world. It predicts \cutsixBShape{} times the true gain from a 60\% cut in the bent world and
+\regdownBShape{} times that of a 10\% lower regular price, loses \priceBShape\% on the price choice, and forecasts the
+merchants' plans as well as before (\fcBShape{} against \fcBWm{}). In the log-linear world it learns too small a
+logarithmic term and understates the steep gain of a 60\% cut (\cutsixLShape{} of the truth; error \errLShape{}).
 
-\paragraph{Test and learn} Random test plans inside the merchants' range help every model a little: the shape model
-from \errBShape{} to \tlShapeB{} and LightGBM from \errBLgb{} to \tlLgbB{} in the bent world; the plain world model
+\paragraph{Test and learn} Random test plans inside the merchants' range help every model a little: the world model
+with the rules from \errBShape{} to \tlShapeB{}, the log-linear model with the rules from \errBLlShape{} to
+\tlLlShapeB{} and LightGBM from \errBLgb{} to \tlLgbB{} in the bent world; the plain world model
 barely moves (\errBWm{} to \tlWmB{}). Tests break the link between plan and demand but cannot show a cut deeper
 than the deepest tested; a model still needs a sensible shape to go beyond it.
 
@@ -231,13 +241,33 @@ plans. Rows after the first in each block, and the split and shape rows, were ad
 
 \input{generated/tab_remedies}
 
+\subsection{The rules or the world model?}
+
+The world model with the rules might win only because its rules match the worlds. Giving the same rules to the
+simpler models separates the two (Table~\ref{tab:remedies}, Figure~\ref{fig:remedies}). Where the rules' curve can
+match the truth, the log-linear model with the rules is best: \errLLlShape{} in the log-linear world and
+\errBLlShape{} in the bent world, against \errLShape{} and \errBShape{} for the world model with the rules, which is ahead in
+only \shapeBeatsLlB{} of the twelve bent worlds and \shapeBeatsLlL{} of the log-linear ones. LightGBM with the rules gets deep cuts right in the bent world (\cutsixBLgbShape{} times the truth
+at 60\%) but still cannot carry a lasting regular-price move beyond the prices it saw (\regdownBLgbShape{} times the
+truth at $-10\%$), and its error is \errBLgbShape{}.
+
+In the kinked world, whose curve neither rule set can draw, the order turns: the world model with the rules is best
+(\errKShape{}), ahead of the log-linear model with the rules (\errKLlShape{}) in \shapeBeatsLlK{} of twelve worlds and
+of LightGBM with the rules (\errKLgbShape{}) in \shapeBeatsLgbK{}. The log-linear model has to bend its fixed curve to
+the kink and overstates a 60\% cut \cutsixKLlShape{} times; the world model, whose rules set only the direction and
+whose network learns the rest, overstates it \cutsixKShape{} times.
+
+The rules do most of the work. With them, a simple model is the better choice when the shape of the price response
+is known, and the world model is the better choice when it is not.
+
 \subsection{Decisions}
 
 The decision losses follow the errors on new plans (Table~\ref{tab:remedies}). The regular-price choice is where
 models differ most: up to \priceBWm\% of revenue given up without the recorded regular price, and under 1\% for the
-log-linear, split and shape models that use it; LightGBM still gives up \priceLLgbRr\% with it. The
+log-linear, split and rule models that use it; LightGBM still gives up \priceLLgbRr\% with it. The
 promotion choice costs every model 2\% or less, because choosing which weeks to promote needs only the ranking of
-lifts, which every model gets roughly right. The shape model has the lowest stock error in the bent world.
+lifts, which every model gets roughly right. Stock error is lowest for the log-linear model with the rules in the log-linear and bent worlds and for the world
+model with the rules in the kinked world.
 
 \section{What was tried and dropped}\label{sec:dropped}
 
@@ -257,37 +287,42 @@ The world model fails on new plans for the reason any learner fails off its data
 shows a deep cut or a lasting price move labelled as one, and where plans follow demand it shows the wrong effect.
 No training objective recovers what the data do not contain. Two things do. The first is information the retailer
 already has: the recorded regular price. The second is knowledge of how price can act: more discount never loses
-sales, the gain from deeper cuts may flatten, a regular price is not a cut. Given both, the world model learns the size of each effect
-from the data and carries the shape to plans it has not seen, which is what transfer means here.
+sales, the gain from deeper cuts may flatten, a regular price is not a cut.
 
-For a retailer this gives three rules. Record the regular price and give it to the model. Build the shape of the
-price response into the model rather than leaving a free network to find it. Choose between model versions on
-held-out plans, generated or tested, and not on forecast accuracy, which can pick the worst simulator where plans
-follow demand. Random test plans help, and they help most when the model has the structure to use them.
+The controls show where the gain comes from. The rules do most of the work, and a log-linear model given them is
+the best simulator when its curve can match the truth. The world model's own learning adds when the true curve is
+of a shape nobody wrote down: its rules fix only the direction and the split between cuts and regular prices, and
+its network learns the rest. That is the case a retailer faces with a new category or a depth of cut never tried,
+and it is where a world model earns its place.
+
+For a retailer this gives four rules. Record the regular price and give it to the model. Give the model price rules
+rather than leaving a free model to find them. Use a simple model with the rules when the shape of the price response
+is known, and a world model with the rules when it is not. Choose between versions on held-out plans, generated or
+tested, and not on forecast accuracy, which can pick the worst simulator where plans follow demand.
 
 \section{Limitations and threats to validity}\label{sec:limits}
 
-The worlds are generated. They hold a known answer, which real data cannot, but their price responses are two shapes
-of our choosing; a real response can differ from both. The shape in Equation~\eqref{eq:shape} covers responses that
-rise and flatten; a response that falls at deep cuts (a quality signal) would break it. The held-out plans move one
-lever at a time. Each world has 360 series and eight forecast weeks; the versions of each model vary three settings
-each. Real price episodes exist in the public data sets, but they are few and confounded, so we use none of them as
-evidence here.
+The worlds are generated. They hold a known answer, which real data cannot, but their price responses are three
+shapes of our choosing; a real response can differ from all of them. The rules in Equation~\eqref{eq:shape} assume
+sales never fall as a cut deepens; a response that falls at deep cuts (a quality signal) would break them. The
+held-out plans move one lever at a time. Each world has 360 series and eight forecast weeks; the versions of each
+model vary three settings each, and the controls of amendment 3 were run on one version of each model. Real price
+episodes exist in the public data sets, but they are few and confounded, so we use none of them as evidence here.
 
 \section{Conclusion}\label{sec:conclusion}
 
 Forecast accuracy is a fair guide when choosing between kinds of model and a poor guide when choosing between
 versions of one world model where plans follow demand. Training a world model to learn actions does not make it
-right about plans outside its history. Giving it the recorded regular price and a price response with a sensible
-shape does: its error on new plans falls from \errBWm{} to \errBShape{} in a world whose response bends, the lowest
-of every model, without losing forecast accuracy.
+right about plans outside its history. The recorded regular price and three price rules do. With the rules, a simple
+model is best when the shape of the price response is known (error \errBLlShape{} in the bent world), and the world
+model is best when it is not (\errKShape{} in the kinked world against \errKLlShape{}).
 
 \section{Reproducibility and compute}\label{sec:repro}
 
 Every number, table and figure is rebuilt from the run records by \texttt{make} in the paper folder, and every run
 by \texttt{scripts/paper3\_benchmark.py} for a world and version. The \nFits{} fits ran on CPU containers on Modal;
-the bill for the days they ran was about US\$77 (an estimate from the account's daily bill, which includes small
-amounts of other work). The plan and both amendments are in the repository's documents folder.
+the bill for the days they ran was about US\$84 (an estimate from the account's daily bills, which include small
+amounts of other work). The plan and its three amendments are in the repository's documents folder.
 
 \section{Data and code availability}\label{sec:avail}
 
@@ -308,11 +343,13 @@ The plan was fixed on 16 November 2026 before any run: the worlds, the 25 versio
 the measures and the test of \S\ref{sec:setup}. \emph{Amendment 1}, written after the first results and before its
 runs, added the action-learning versions, the recorded regular price for every model and the bent world.
 \emph{Amendment 2}, written before its runs, added the split model and test and learn; it was revised before any
-test-and-learn result was read, to keep test cuts inside the merchants' range and to add the world model with a
-price shape. The correlation within each model class and the cap on the error of new plans were added in the
+test-and-learn result was read, to keep test cuts inside the merchants' range and to add the world model with the
+price rules. \emph{Amendment 3}, written before its runs after a reviewer's challenge that the world model with the
+rules might win only because its rules match the worlds, added the same rules to the log-linear model and to
+LightGBM and the kinked world, and corrected the description of Equation~\eqref{eq:shape}. The correlation within each model class and the cap on the error of new plans were added in the
 analysis; the cap counts a wrong sign as a twentyfold miss so the measure does not move as versions are added.
 
-\section{The price shape and its constraints}\label{app:shape}
+\section{The price rules and their constraints}\label{app:shape}
 
 In Equation~\eqref{eq:shape} the four parameters are a learned bias plus a linear map of the item and store
 embeddings, each passed through a softplus ($b$ adds 0.02), so each is positive. The cut is $1 - p/r$ for planned

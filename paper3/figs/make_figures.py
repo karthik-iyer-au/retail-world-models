@@ -17,14 +17,15 @@ WORDS = "none one two three four five six seven eight nine ten eleven twelve".sp
 # the models shown, in order, with one colour each (Okabe-Ito)
 M = {
     "wm_d32_s2000_h26": ("World model", "#0072B2", "o"),
-    "lgb_l31_r500_m20": ("LightGBM", "#D55E00", "s"),
-    "loglinear": ("Log-linear", "#009E73", "D"),
-    "wm_shape": ("World model with price shape", "#CC79A7", "^"),
+    "wm_shape": ("World model with price rules", "#CC79A7", "^"),
+    "loglinear_shape": ("Log-linear with price rules", "#009E73", "D"),
+    "lgb_shape": ("LightGBM with price rules", "#D55E00", "s"),
 }
 PLAN_LABEL = {"deeper_50": "Cut 50%", "deeper_60": "Cut 60%", "regular_-10": "Regular $-$10%",
               "regular_-5": "Regular $-$5%", "regular_+5": "Regular +5%", "regular_+10": "Regular +10%",
               "off_pattern": "Off-pattern", "no_plan": "No plan"}
-SHAPE = {"loglinear": "log-linear world", "bent": "bent world"}
+SHAPE = {"loglinear": "log-linear world", "bent": "bent world", "kinked": "kinked world"}
+SHAPES = ("loglinear", "bent", "kinked")
 REMEDY = [  # (version, label, group)
     ("wm_d32_s2000_h26", "World model", "World model"),
     ("wm_jepa", "+ JEPA pretraining", "World model"),
@@ -33,12 +34,14 @@ REMEDY = [  # (version, label, group)
     ("wm_adajepa", "+ adaptation at the plan date", "World model"),
     ("wm_rr", "+ recorded regular price", "World model"),
     ("wm_ll", "Split: world model + log-linear", "Split"),
-    ("wm_shape", "World model with price shape", "Shape"),
+    ("wm_shape", "+ price rules", "Shape"),
     ("lgb_l31_r500_m20", "LightGBM", "LightGBM"),
     ("lgb_rr", "+ recorded regular price", "LightGBM"),
     ("lgb_ll", "Split: LightGBM + log-linear", "Split"),
+    ("lgb_shape", "+ price rules", "Shape"),
     ("loglinear", "Log-linear", "Log-linear"),
     ("loglinear_rr", "+ recorded regular price", "Log-linear"),
+    ("loglinear_shape", "+ price rules", "Shape"),
 ]
 
 
@@ -48,9 +51,9 @@ def med(d, cols, by=("shape", "version")):
 
 def fig_ratio(d):
     plans = list(PLAN_LABEL)
-    fig, axes = plt.subplots(1, 2, figsize=(FULL, 2.85), sharey=True)
+    fig, axes = plt.subplots(1, 3, figsize=(FULL, 2.9), sharey=True)
     x = np.arange(len(plans))
-    for ax, shape, letter in zip(axes, ("loglinear", "bent"), "ab"):
+    for ax, shape, letter in zip(axes, SHAPES, "abc"):
         g = med(d[d["shape"] == shape], [f"ratio_{p}" for p in plans], by=("version",))
         ax.axhline(1, color=INK, lw=0.7)
         ax.axhspan(0.8, 1.25, color=GRID, alpha=0.5, lw=0)
@@ -113,22 +116,24 @@ def fig_link(d, L):
 
 def fig_remedies(d):
     plain, tl = d[d.explore == 0], d[d.explore > 0]
-    fig, axes = plt.subplots(1, 2, figsize=(FULL, 3.3), sharey=True)
+    fig, axes = plt.subplots(1, 3, figsize=(FULL, 3.6), sharey=True)
     y = np.arange(len(REMEDY))[::-1]
-    for ax, shape, letter in zip(axes, ("loglinear", "bent"), "ab"):
+    for ax, shape, letter in zip(axes, SHAPES, "abc"):
         a = med(plain[plain["shape"] == shape], ["err_mean"], by=("version",))["err_mean"]
         b = med(tl[tl["shape"] == shape], ["err_mean"], by=("version",))["err_mean"]
         for yy, (v, lab, grp) in zip(y, REMEDY):
             col = {"World model": "#0072B2", "Split": "#E69F00", "Shape": "#CC79A7", "LightGBM": "#D55E00",
                    "Log-linear": "#009E73"}[grp]
+            if v not in a.index:
+                continue
             ax.plot(a[v], yy, "o", color=col, ms=4.4, mec="white", mew=0.5)
             if v in b.index:
                 ax.plot(b[v], yy, "o", mfc="white", mec=col, ms=4.4, mew=0.9)
-            ax.text(min(a[v], 3.1) + 0.06, yy, f"{a[v]:.2f}", va="center", fontsize=6.4, color=MUTED)
-        ax.set_xlim(0, 3.4)
+            ax.text(min(a[v], 2.5) + 0.06, yy, f"{a[v]:.2f}", va="center", fontsize=6.2, color=MUTED)
+        ax.set_xlim(0, 2.8)
         ax.set_yticks(y)
         ax.set_yticklabels([lab for _, lab, _ in REMEDY])
-        ax.set_xlabel("Error on new plans (0 = right size of change)")
+        ax.set_xlabel("Error on new plans")
         ax.set_title(f"In the {SHAPE[shape]}", fontweight="normal")
         ax.grid(axis="x")
         despine(ax)
@@ -149,28 +154,30 @@ def tables(d, L):
     lines = []
     for v, lab, _ in REMEDY:
         cells = []
-        for shape in ("loglinear", "bent"):
-            r = t.loc[(shape, v)]
-            cells += [f"{r.rmsse:.3f}", f"{r.err_mean:.2f}", f"{100 * r.regular_loss:.1f}",
-                      f"{100 * r.promo_loss:.1f}", f"{r.stock_mean:.2f}"]
+        for shape in SHAPES:
+            if (shape, v) in t.index:
+                r = t.loc[(shape, v)]
+                cells += [f"{r.rmsse:.3f}", f"{r.err_mean:.2f}", f"{100 * r.regular_loss:.1f}", f"{r.stock_mean:.2f}"]
+            else:
+                cells += ["", "", "", ""]
         lines.append(lab.replace("+ ", "\\quad + ") + " & " + " & ".join(cells) + r" \\")
     tab = r"""\begin{table*}[t]
 \centering
-\caption{\textbf{Every model and remedy in both worlds.} Medians over the 12 worlds of each kind (four planning
+\caption{\textbf{Every model and remedy in the three worlds.} Medians over the 12 worlds of each kind (four planning
 strengths, three seeds). Forecast: item-by-store RMSSE on the merchants' own plan in the held-out weeks. New plans:
 mean over the eight held-out plans of $|\log(\text{predicted change}/\text{true change})|$. Price choice: revenue
-given up by the regular-price move the model picks, \% of the best. Promotion choice: true lift missed by the
-promotions the model picks, \% of the best. Stock: summed absolute error of ordering to the forecast, over expected
-sales. Rows marked + change one thing in the row above them; all rows after the first in each model, and the split
-and shape rows, were added after the first results (Appendix~\ref{app:plan}).}
+given up by the regular-price move the model picks, \% of the best. Stock: summed absolute error of ordering to the
+forecast, over expected sales. Rows marked + change one thing in the row above; all rows after the first of each
+model, and the split rows, were added after the first results (Appendix~\ref{app:plan}). The kinked world was run
+for the versions shown.}
 \label{tab:remedies}
-\footnotesize\setlength{\tabcolsep}{3.6pt}
+\footnotesize\setlength{\tabcolsep}{3.2pt}
 \begin{adjustbox}{max width=\textwidth}
-\begin{tabular}{lrrrrrrrrrr}
+\begin{tabular}{lrrrrrrrrrrrr}
 \toprule
- & \multicolumn{5}{c}{Log-linear world} & \multicolumn{5}{c}{Bent world} \\
-\cmidrule(lr){2-6}\cmidrule(lr){7-11}
-Model & Forecast & New plans & Price choice & Promotion & Stock & Forecast & New plans & Price choice & Promotion & Stock \\
+ & \multicolumn{4}{c}{Log-linear world} & \multicolumn{4}{c}{Bent world} & \multicolumn{4}{c}{Kinked world} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}\cmidrule(lr){10-13}
+Model & Forecast & New plans & Price & Stock & Forecast & New plans & Price & Stock & Forecast & New plans & Price & Stock \\
 \midrule
 """ + "\n".join(lines) + r"""
 \bottomrule
@@ -223,11 +230,13 @@ def macros(d, L):
             [f"ratio_{p}" for p in PLAN_LABEL])
     e = lambda s, v, c="err_mean", f="{:.2f}": f.format(t.loc[(s, v), c])
     X = {}
-    for s, k in (("loglinear", "L"), ("bent", "B")):
-        for v, tag in (("wm_d32_s2000_h26", "Wm"), ("lgb_l31_r500_m20", "Lgb"), ("loglinear", "Ll"),
+    for s, k in (("loglinear", "L"), ("bent", "B"), ("kinked", "K")):
+        for v, tag in (("loglinear_shape", "LlShape"), ("lgb_shape", "LgbShape"),("wm_d32_s2000_h26", "Wm"), ("lgb_l31_r500_m20", "Lgb"), ("loglinear", "Ll"),
                        ("loglinear_rr", "LlRr"), ("wm_rr", "WmRr"), ("lgb_rr", "LgbRr"), ("wm_ll", "Split"),
                        ("lgb_ll", "LgbSplit"), ("wm_shape", "Shape"), ("wm_jepa", "Jepa"), ("wm_latent", "Latent"),
                        ("wm_overshoot", "Over"), ("wm_adajepa", "Adapt")):
+            if (s, v) not in t.index:
+                continue
             X[f"err{k}{tag}"] = e(s, v)
             X[f"fc{k}{tag}"] = e(s, v, "rmsse", "{:.3f}")
             X[f"cutsix{k}{tag}"] = e(s, v, "ratio_deeper_60", "{:.1f}")
@@ -236,8 +245,13 @@ def macros(d, L):
             X[f"price{k}{tag}"] = f"{100 * t.loc[(s, v), 'regular_loss']:.1f}"
         w = plain[plain["shape"] == s].pivot_table(index=["confounding", "seed"], columns="version", values="err_mean")
         X[f"shapeWins{k}"] = WORDS[int((w["wm_shape"] < w.drop(columns="wm_shape").min(axis=1)).sum())]
+        X[f"shapeBeatsLl{k}"] = WORDS[int((w["wm_shape"] < w["loglinear_shape"]).sum())]
+        X[f"shapeBeatsLgb{k}"] = WORDS[int((w["wm_shape"] < w["lgb_shape"]).sum())]
         X[f"worlds{k}"] = WORDS[len(w)]
+        if s == "kinked":
+            continue
         tt = tl[tl["shape"] == s].groupby("version")["err_mean"].median()
+        X[f"tlLlShape{k}"] = f"{tt['loglinear_shape']:.2f}"
         X[f"tlShape{k}"], X[f"tlLgb{k}"], X[f"tlWm{k}"] = (f"{tt['wm_shape']:.2f}", f"{tt['lgb_l31_r500_m20']:.2f}",
                                                          f"{tt['wm_d32_s2000_h26']:.2f}")
         a = L[(L["shape"] == s) & (L.measure == "err_mean")]
