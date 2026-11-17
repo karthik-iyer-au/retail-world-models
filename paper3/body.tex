@@ -3,15 +3,20 @@
 
 \section{Introduction}\label{sec:intro}
 
-A world model for retail earns its keep on the plans a merchant has not yet run. Forecasting next week under the
-plan already agreed is something gradient-boosted trees do well; the reason to carry each item's state under the
-plan, as a world model does, is to ask what a different plan would bring: a deeper cut, a new regular price, a
-promotion in a quiet week. Our forecasting study~\cite{rwm} compared world models with trees and foundation models
-on the plans merchants made. That comparison cannot say whether the model is right about plans nobody made, because
-real data hold no answer for them.
+A world model earns its keep on actions not yet taken: a robot's next grasp, a route not yet driven, a price not yet
+set. Its accuracy on the data it was fitted to says little about this, because logged actions follow a policy, and
+the actions that matter for planning are the ones the policy rarely took~\cite{levine2020}. We give a test of a world
+model on actions it has never seen, in three parts that apply to any action-conditioned world model: (1) actions held
+out of training by design and scored against a known answer; (2) whether forecast accuracy, the usual way to choose
+a model, predicts accuracy on those actions; (3) the same structure given to simpler models, so that what the
+structure does is separated from what the world model learns.
 
-This paper measures it. In generated stores where the expected sales of any plan are known~\cite{paper2}, we train
-models on the plans merchants make and ask them to forecast plans held out by design. We find:
+We run the test in retail, where the action is a price and promotion plan and the stakes are concrete: a merchant
+asks what a deeper cut, a new regular price or a promotion in a quiet week would bring. Our forecasting
+study~\cite{rwm} compared world models with trees and foundation models on the plans merchants made; it cannot say
+whether a model is right about plans nobody made. In generated stores where the expected sales of any plan are
+known~\cite{paper2}, we train models on the plans merchants make and ask them to forecast plans held out by design,
+then check the result on the rarest plans in three real data sets. We find:
 
 \begin{itemize}\setlength{\itemsep}{1pt}
 \item \textbf{Forecast accuracy is a fair guide between kinds of model, and a poor one between versions of a world
@@ -346,11 +351,10 @@ model with the rules in the kinked world.
 held-out cuts inside the training range and tests memory, not transfer, so those runs were cancelled before any
 result was read and the tests kept to the merchants' range (Appendix~\ref{app:plan}).
 
-\paragraph{The world model given the regular price alone} Worth revisiting only with a structure that tells the
-model how the regular price may act; on its own it made the model worse on new plans.
+\paragraph{The world model given the regular price alone, and training for actions} Each left the error on new plans
+no lower (\S\ref{sec:results}); both are worth revisiting with the price rules, or with histories that hold varied
+actions, such as many retailers' data pooled.
 
-\paragraph{Training for actions} JEPA pretraining, the latent checks and adaptation did not change the error on new
-plans. They become worth revisiting when the history holds varied actions, for example many retailers' data pooled.
 
 \section{Discussion}\label{sec:discussion}
 
@@ -390,8 +394,10 @@ episodes are not used, because our explanation audit reports results on them.
 \section{Conclusion}\label{sec:conclusion}
 
 
-Forecast accuracy is a fair guide when choosing between kinds of model and a poor guide when choosing between
-versions of one world model where plans follow demand. Training a world model to learn actions does not make it
+A world model can be tested on actions it has never seen by holding them out by design, scoring them against a known
+answer and giving its structure to simpler models; the test applies wherever a world model is used to plan. In
+retail it shows that forecast accuracy is a fair guide when choosing between kinds of model and a poor guide when
+choosing between versions of one world model where plans follow demand. Training a world model to learn actions does not make it
 right about plans outside its history. In the generated worlds the recorded regular price and three price rules do. With the rules, a simple
 model is best when the shape of the price response is known (error \errBLlShape{} in the bent world), and in a world
 whose shape the rules do not match the world model is better than the simpler models we tested (ahead in
@@ -402,13 +408,11 @@ lasting price moves.
 
 \section{Reproducibility and compute}\label{sec:repro}
 
-Every number, table and figure is rebuilt from the run records by \texttt{make} in the paper folder, and every run
-by \texttt{scripts/paper3\_benchmark.py} for a world and version. The \nFits{} fits ran on CPU containers on Modal;
-the bill for the days they ran was about US\$120 (an estimate from the account's daily bills, which include small
-amounts of other work). The real-data runs are \texttt{scripts/paper3\_real.py} and need the public data
-sets downloaded from their owners. From a fresh copy of the repository, the two analyses rebuild every result table in
-under two minutes and \texttt{make} rebuilds the paper in seconds, with outputs identical to those reported. The plan
-and its seven amendments are in the repository's documents folder.
+\texttt{make} in the paper folder rebuilds every number, table and figure from the run records; every run is
+\texttt{scripts/paper3\_benchmark.py} or, for real data (downloaded from their owners), \texttt{scripts/paper3\_real.py}.
+From a fresh copy of the repository the result tables and the paper rebuild identically in under two minutes. The
+\nFits{} fits ran on Modal CPU for about US\$120 (estimated from daily bills that include small amounts of other
+work). The plan and its seven amendments are in the documents folder.
 
 \section{Data and code availability}\label{sec:avail}
 

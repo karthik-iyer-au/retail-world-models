@@ -1,8 +1,10 @@
 {\small
-\textbf{Abstract.} A retail world model is meant to answer ``what if'': what sales a plan the merchants have never
-run would bring. We test whether it does, in generated stores where the true effect of every plan is known, and
-what improves it when it does not. Models are trained on the plans merchants make and asked to forecast plans held out
-by design: deeper cuts than any in training, lasting regular-price moves, promotions moved to quiet weeks and no
+\textbf{Abstract.} A world model is trusted to answer ``what if'': how its world responds to an action it has never
+seen. We give a test of that trust for any action-conditioned world model, in three parts: actions held out of
+training by design and scored against a known answer; whether forecast accuracy predicts accuracy on those actions;
+and the same structure given to simpler models, to separate what the structure does from what the world model
+learns. We run it in retail, where the action is a price and promotion plan: models are trained on the plans
+merchants make and asked to forecast plans held out by design: deeper cuts than any in training, lasting regular-price moves, promotions moved to quiet weeks and no
 plan at all. Across \nFits{} fitted models we find four things. First, forecast accuracy is a fair guide between
 kinds of model (rank correlation with error on new plans \linkAllMin{} to \linkAllMax{}) and a poor guide between
 versions of one world model: where merchants plan into high-demand weeks the link reverses, down to \linkBWmOne{}
@@ -19,7 +21,5 @@ whose curve lies outside the rules, the world model with the rules is better tha
 rules lower the world model's error on pure price cuts deeper than any it saw (\reFPureWm{} to \reFPureWmShape{} on
 the Frat; \reCPureWm{} to \reCPureWmShape{}, within chance, on The Complete Journey), making it the most accurate model on one data set and close to LightGBM on the
 other, while neither the rules nor the recorded regular price help with lasting price moves. Fourth, a small share of random
-test plans helps every model a little. In the generated worlds this points retailers to the following: give the model the recorded regular price and sensible price
-rules, use a simple model when the shape of the price response is known, consider a world model when it is not, and
-choose versions on held-out plans rather than on forecast accuracy.
+test plans helps every model a little. The test carries to any domain where a world model is asked about actions outside its history.
 \par}
