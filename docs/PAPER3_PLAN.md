@@ -259,3 +259,27 @@ week whether the product was on display or in the mailer. Added, labelled as add
 3. The same nine models and measures as amendment 5.
 
 Reading fixed now: as in amendments 5 and 6; every result is reported. Compute: about US$20.
+
+**Amendment 8, 17 November 2026, 18:15, before any of these runs.** Karthik, 18:06 to 18:09: a second domain to
+show the test is not specific to retail ("any other one u can think of?"), run on Vast ("where cost is cheap").
+Added, labelled in the paper as added:
+
+1. A dosing world, generated (no real patient data; allowed on Vast). 360 patients in 18 clinics, 260 days. A
+   persistent severity state (AR(1), persistence 0.8) lowers each patient's daily response count. The drug
+   accumulates: concentration C_t = C_(t-1) exp(-ln 2 / 3) + dose_t (half-life 3 days). The expected response is
+   base x exp(-0.5 severity) x (1 + C / (C + 0.5)) x weekly pattern, and the count is Poisson. Doctors dose by
+   indication: a dose is given with probability sigmoid(-1.4 + strength x severity), sized 10% to 40% of the maximum
+   dose and larger when severity is high. Strengths 0, 0.5, 1, 1.5; seeds 101 to 103.
+2. The action reaches the models through the price columns, so every model and rule applies unchanged: price =
+   1 - 0.95 x dose (dose as a fraction of the maximum), regular price 1. The price rules then say that response
+   never falls as a dose rises and that the gain may flatten. Accumulation over days is not in the rules; models
+   must learn it from the data.
+3. Held-out plans from the same origin (fit on days 1 to 252, forecast days 253 to 260): every planned dose raised
+   to 50% and to 60% of the maximum; a steady daily dose of 20% every day; doses moved to the days of lowest
+   severity; no dose. Measures: forecast accuracy and the error on new plans of the main study.
+4. Models: the 25 versions of the main study (the link test), plus the world model, LightGBM and the log-linear model
+   with the rules (the rules control). Statistics with the world as the unit.
+
+Reading fixed now: if the dosing world repeats the retail pattern (accuracy guides kinds of model but not versions
+where dosing follows severity; the rules improve the error on new doses), the test is shown in a second domain; if
+not, the paper reports what differs. Compute: one rented Vast machine, about US$5 to 15, destroyed after the runs.
