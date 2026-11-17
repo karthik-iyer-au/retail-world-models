@@ -254,3 +254,5 @@ any new promise, decision or finished item. The research record behind it is doc
 | Date | Item | Owner | Status |
 |---|---|---|---|
 | 4 Nov | Saturday reminder about the NUC's 96 GB RAM | Claude | Closed: memory fitted and the NUC is in use by ww (Karthik 7 Nov); the stale reminder fired once on 7 Nov and will not repeat |
+
+| 17 Nov | Karthik 20:00 (arXiv emails: paper 2 is 2611.20811; paper 1 v2 public) "sould update paper 2 now as well fix the refence in paper 3" | Claude | Done: paper 3 reference to paper 2 now arXiv:2611.20811 (paper3 06b2ba6). Paper 2 v2 source archive (new abstract and introduction, release v1.1.0) and PDF sent for arXiv replace and SSRN revise; Karthik to upload |
