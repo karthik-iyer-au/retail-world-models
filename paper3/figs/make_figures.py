@@ -346,6 +346,53 @@ Item-weeks / origins & """ + head + r""" \\
     return X
 
 
+def table_dosing():
+    v = pd.read_csv(RES / "dosing_versions.csv")
+    L = pd.read_csv(RES / "dosing_link.csv")
+    show = [("wm_d32_s2000_h26", "World model"), ("wm_shape", "\\quad + dose rules"), ("lgb_l31_r500_m20", "LightGBM"),
+            ("lgb_shape", "\\quad + dose rules"), ("loglinear", "Log-linear"), ("loglinear_shape", "\\quad + dose rules")]
+    lines = []
+    for ver, lab in show:
+        x = v[v.version == ver].groupby("strength")[["err_mean", "ratio_dose_60"]].median()
+        cells = [f"{x.loc[s_, 'err_mean']:.2f}" for s_ in (0.0, 0.5, 1.0, 1.5)] + \
+                [f"{x.loc[s_, 'ratio_dose_60']:.2f}".replace("-", "$-$") for s_ in (0.0, 0.5, 1.0, 1.5)]
+        lines.append(lab + " & " + " & ".join(cells) + r" \\")
+    tab = r"""\begin{table}[t]
+\centering
+\caption{\textbf{The dosing world} (added; Appendix~\ref{app:plan}). Medians over three seeds at each dosing strength
+(how closely doses follow severity). Error on new doses as in the retail study (capped at 3.00, a twentyfold miss or a
+wrong sign); predicted change over true change for every planned dose raised to 60\% of the maximum.}
+\label{tab:dosing}
+\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+ & \multicolumn{4}{c}{Error on new doses} & \multicolumn{4}{c}{Change ratio, 60\% dose} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+Strength & 0 & 0.5 & 1 & 1.5 & 0 & 0.5 & 1 & 1.5 \\
+\midrule
+""" + "\n".join(lines) + r"""
+\bottomrule
+\end{tabular}
+\end{table}
+"""
+    (GEN / "tab_dosing.tex").write_text(tab)
+    a = L[L.versions_of == "all"]
+    w = L[L.versions_of == "world model"].set_index("strength")
+    conf = v[v.strength > 0]
+    med = lambda ver, col: conf[conf.version == ver][col].median()
+    zero = v[v.strength == 0].groupby("version")["err_mean"].median()
+    return {"dsLinkLo": f"{a.spearman.min():.2f}", "dsLinkHi": f"{a.spearman.max():.2f}",
+            "dsWmLinkHigh": f"{w.loc[1.5, 'spearman']:.2f}", "dsWmLinkHighCi": f"{w.loc[1.5, 'lo']:.2f} to {w.loc[1.5, 'hi']:.2f}",
+            "dsWmZero": f"{zero['wm_d32_s2000_h26']:.2f}", "dsLgbZero": f"{zero['lgb_l31_r500_m20']:.2f}",
+            "dsLlZero": f"{zero['loglinear']:.2f}",
+            "dsWmRatio": f"{med('wm_d32_s2000_h26', 'ratio_dose_60'):.2f}",
+            "dsLgbRatio": f"{med('lgb_l31_r500_m20', 'ratio_dose_60'):.2f}",
+            "dsShapeRatio": f"{med('wm_shape', 'ratio_dose_60'):.2f}",
+            "dsLlShapeRatio": f"{med('loglinear_shape', 'ratio_dose_60'):.2f}",
+            "dsLgbShapeRatio": f"{med('lgb_shape', 'ratio_dose_60'):.2f}",
+            "dsFits": f"{len(v):,}"}
+
+
 def macros(d, L):
     plain, tl = d[d.explore == 0], d[d.explore > 0]
     t = med(plain, ["rmsse", "err_mean", "regular_loss", "stock_mean", "promo_loss"] +
@@ -387,7 +434,7 @@ def macros(d, L):
     X["linkAllMin"], X["linkAllMax"] = f"{a.spearman.min():.2f}", f"{a.spearman.max():.2f}"
     full = pd.read_csv(RES / "versions.csv")
     real = len(list((RES / "real").rglob("*.json")))
-    X["nFits"] = f"{len(full) + real:,}"
+    X["nFits"] = f"{len(full) + real + len(pd.read_csv(RES / 'dosing_versions.csv')):,}"
     jepa_like = ["wm_jepa", "wm_latent", "wm_overshoot", "wm_adajepa"]
     X["errLActLo"] = f"{t.loc[[('loglinear', v) for v in jepa_like], 'err_mean'].min():.2f}"
     X["errLActHi"] = f"{t.loc[[('loglinear', v) for v in jepa_like], 'err_mean'].max():.2f}"
@@ -395,6 +442,7 @@ def macros(d, L):
     X["errBActHi"] = f"{t.loc[[('bent', v) for v in jepa_like], 'err_mean'].max():.2f}"
     X.update(table_h2h())
     X.update(table_real())
+    X.update(table_dosing())
     import re
     num = re.compile(r"-(?=\d)")  # a typeset minus sign in every number
     (GEN / "p3_macros.tex").write_text("".join(

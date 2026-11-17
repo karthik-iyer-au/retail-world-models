@@ -59,8 +59,8 @@
 \@writefile{toc}{\contentsline {paragraph}{Log-linear model}{3}{paragraph*.11}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Remedies added after the first results}{3}{paragraph*.12}\protected@file@percent }
 \newlabel{eq:shape}{{1}{3}{Remedies added after the first results}{equation.4.1}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Experimental setup}{3}{section.5}\protected@file@percent }
-\newlabel{sec:setup}{{5}{3}{Experimental setup}{section.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Experimental setup}{4}{section.5}\protected@file@percent }
+\newlabel{sec:setup}{{5}{4}{Experimental setup}{section.5}{}}
 \@writefile{toc}{\contentsline {paragraph}{Measures}{4}{paragraph*.13}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{The test}{4}{paragraph*.14}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {6}Results}{4}{section.6}\protected@file@percent }
@@ -78,36 +78,31 @@
 \@writefile{toc}{\contentsline {paragraph}{Split the job}{5}{paragraph*.19}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Price rules in the world model}{5}{paragraph*.20}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Test and learn}{5}{paragraph*.21}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}The rules or the world model?}{5}{subsection.6.5}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces \textbf  {Predicted change in sales over the true change, for each held-out plan.} Medians over the 12 worlds of each shape (planning strengths and seeds). 1 is right; the band marks 0.8 to 1.25. Log scale.}}{6}{figure.caption.17}\protected@file@percent }
 \newlabel{fig:ratio}{{2}{6}{\textbf {Predicted change in sales over the true change, for each held-out plan.} Medians over the 12 worlds of each shape (planning strengths and seeds). 1 is right; the band marks 0.8 to 1.25. Log scale}{figure.caption.17}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces \textbf  {Error on new plans for every model and remedy} (0 means the predicted change in sales is right). Medians over the 12 worlds of each shape. Filled: trained on the merchants' history; open: with 5\% random test plans. Rows after the first in each block, and the split rows, were added after the first results.}}{6}{figure.caption.22}\protected@file@percent }
 \newlabel{fig:remedies}{{3}{6}{\textbf {Error on new plans for every model and remedy} (0 means the predicted change in sales is right). Medians over the 12 worlds of each shape. Filled: trained on the merchants' history; open: with 5\% random test plans. Rows after the first in each block, and the split rows, were added after the first results}{figure.caption.22}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}The rules or the world model?}{6}{subsection.6.5}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces \textbf  {Every model and remedy in the three worlds.} Medians over the 12 worlds of each kind (four planning strengths, three seeds). Forecast: item-by-store RMSSE on the merchants' own plan in the held-out weeks. New plans: mean over the eight held-out plans of $|\log (\text  {predicted change}/\text  {true change})|$. Price choice: revenue given up by the regular-price move the model picks, \% of the best. Stock: summed absolute error of ordering to the forecast, over expected sales. Rows marked + change one thing in the row above; all rows after the first of each model, and the split rows, were added after the first results (Appendix~\ref {app:plan}). The kinked world was run for the versions shown.}}{7}{table.caption.23}\protected@file@percent }
 \newlabel{tab:remedies}{{2}{7}{\textbf {Every model and remedy in the three worlds.} Medians over the 12 worlds of each kind (four planning strengths, three seeds). Forecast: item-by-store RMSSE on the merchants' own plan in the held-out weeks. New plans: mean over the eight held-out plans of $|\log (\text {predicted change}/\text {true change})|$. Price choice: revenue given up by the regular-price move the model picks, \% of the best. Stock: summed absolute error of ordering to the forecast, over expected sales. Rows marked + change one thing in the row above; all rows after the first of each model, and the split rows, were added after the first results (Appendix~\ref {app:plan}). The kinked world was run for the versions shown}{table.caption.23}{}}
 \@writefile{toc}{\contentsline {paragraph}{Equal tuning}{7}{paragraph*.24}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {6.6}Real data}{7}{subsection.6.6}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Pure price cuts}{7}{paragraph*.26}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Deep cuts with a circular or display}{7}{paragraph*.27}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Lasting regular-price moves}{7}{paragraph*.28}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces \textbf  {The three models with the price rules, head to head, with the world as the unit} (added after the first results). Each cell: worlds in which the first model has the lower error on new plans, of all worlds (two-sided sign test), then the median paired difference in error (negative favours the first model) with a 95\% interval from a bootstrap over worlds. Base: one version of each model. Median and best: each model's median and best version on the held-out plans over 12 world model, 12 LightGBM and 6 log-linear versions. The kinked base comparison has 40 worlds (seeds 101 to 110); the tuned comparisons have 12.}}{8}{table.caption.25}\protected@file@percent }
 \newlabel{tab:h2h}{{3}{8}{\textbf {The three models with the price rules, head to head, with the world as the unit} (added after the first results). Each cell: worlds in which the first model has the lower error on new plans, of all worlds (two-sided sign test), then the median paired difference in error (negative favours the first model) with a 95\% interval from a bootstrap over worlds. Base: one version of each model. Median and best: each model's median and best version on the held-out plans over 12 world model, 12 LightGBM and 6 log-linear versions. The kinked base comparison has 40 worlds (seeds 101 to 110); the tuned comparisons have 12}{table.caption.25}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.7}Decisions}{8}{subsection.6.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {7}What was tried and dropped}{8}{section.7}\protected@file@percent }
-\newlabel{sec:dropped}{{7}{8}{What was tried and dropped}{section.7}{}}
-\@writefile{toc}{\contentsline {paragraph}{Test plans as deep as 60\%}{8}{paragraph*.30}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{The world model given the regular price alone, and training for actions}{8}{paragraph*.31}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {8}Discussion}{8}{section.8}\protected@file@percent }
-\newlabel{sec:discussion}{{8}{8}{Discussion}{section.8}{}}
-\citation{rwm}
+\@writefile{toc}{\contentsline {paragraph}{Lasting regular-price moves}{8}{paragraph*.28}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.7}A second domain: dosing}{8}{subsection.6.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.8}Decisions}{8}{subsection.6.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Discussion}{8}{section.7}\protected@file@percent }
+\newlabel{sec:discussion}{{7}{8}{Discussion}{section.7}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces \textbf  {Real data: error on the rarest plans that were actually run} (added after the first results; Appendix~\ref {app:plan}). Summed absolute error over summed sales, median over the forecast origins; lower is better. Deep cuts: every cut deeper than the threshold (30\% or 20\%) was removed from training and the held-out weeks with such a cut are scored; pure: with no circular or display, so price is the only lever that changed. Lasting moves: on the Frat, a recorded regular price 10\% or more from its last value, steady for four weeks before the origin and through every held-out week; on M5, a move of 5\% or more in a constructed regular price. These are sales that happened, not plans never run.}}{9}{table.caption.29}\protected@file@percent }
 \newlabel{tab:real}{{4}{9}{\textbf {Real data: error on the rarest plans that were actually run} (added after the first results; Appendix~\ref {app:plan}). Summed absolute error over summed sales, median over the forecast origins; lower is better. Deep cuts: every cut deeper than the threshold (30\% or 20\%) was removed from training and the held-out weeks with such a cut are scored; pure: with no circular or display, so price is the only lever that changed. Lasting moves: on the Frat, a recorded regular price 10\% or more from its last value, steady for four weeks before the origin and through every held-out week; on M5, a move of 5\% or more in a constructed regular price. These are sales that happened, not plans never run}{table.caption.29}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {9}Limitations and threats to validity}{9}{section.9}\protected@file@percent }
-\newlabel{sec:limits}{{9}{9}{Limitations and threats to validity}{section.9}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {10}Conclusion}{9}{section.10}\protected@file@percent }
-\newlabel{sec:conclusion}{{10}{9}{Conclusion}{section.10}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {11}Reproducibility and compute}{9}{section.11}\protected@file@percent }
-\newlabel{sec:repro}{{11}{9}{Reproducibility and compute}{section.11}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Limitations and threats to validity}{9}{section.8}\protected@file@percent }
+\newlabel{sec:limits}{{8}{9}{Limitations and threats to validity}{section.8}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {9}Conclusion}{9}{section.9}\protected@file@percent }
+\newlabel{sec:conclusion}{{9}{9}{Conclusion}{section.9}{}}
+\citation{rwm}
 \bibcite{rwm}{1}
 \bibcite{worldmodels}{2}
 \bibcite{planet}{3}
@@ -139,10 +134,20 @@
 \bibcite{pearl2009}{29}
 \bibcite{frat}{30}
 \bibcite{completejourney}{31}
-\@writefile{toc}{\contentsline {section}{\numberline {12}Data and code availability}{10}{section.12}\protected@file@percent }
-\newlabel{sec:avail}{{12}{10}{Data and code availability}{section.12}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {A}Plan and amendments}{10}{appendix.A}\protected@file@percent }
-\newlabel{app:plan}{{A}{10}{Plan and amendments}{appendix.A}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {B}The price rules and their constraints}{11}{appendix.B}\protected@file@percent }
-\newlabel{app:shape}{{B}{11}{The price rules and their constraints}{appendix.B}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {10}Reproducibility and compute}{10}{section.10}\protected@file@percent }
+\newlabel{sec:repro}{{10}{10}{Reproducibility and compute}{section.10}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {11}Data and code availability}{10}{section.11}\protected@file@percent }
+\newlabel{sec:avail}{{11}{10}{Data and code availability}{section.11}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {A}Plan and amendments}{11}{appendix.A}\protected@file@percent }
+\newlabel{app:plan}{{A}{11}{Plan and amendments}{appendix.A}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {B}What was tried and dropped}{11}{appendix.B}\protected@file@percent }
+\newlabel{sec:dropped}{{B}{11}{What was tried and dropped}{appendix.B}{}}
+\@writefile{toc}{\contentsline {paragraph}{Test plans as deep as 60\%}{11}{paragraph*.30}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{The world model given the regular price alone, and training for actions}{11}{paragraph*.31}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces \textbf  {The dosing world} (added; Appendix~\ref {app:plan}). Medians over three seeds at each dosing strength (how closely doses follow severity). Error on new doses as in the retail study (capped at 3.00, a twentyfold miss or a wrong sign); predicted change over true change for every planned dose raised to 60\% of the maximum.}}{11}{table.caption.32}\protected@file@percent }
+\newlabel{tab:dosing}{{5}{11}{\textbf {The dosing world} (added; Appendix~\ref {app:plan}). Medians over three seeds at each dosing strength (how closely doses follow severity). Error on new doses as in the retail study (capped at 3.00, a twentyfold miss or a wrong sign); predicted change over true change for every planned dose raised to 60\% of the maximum}{table.caption.32}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {C}The dosing world}{11}{appendix.C}\protected@file@percent }
+\newlabel{app:dosing}{{C}{11}{The dosing world}{appendix.C}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {D}The price rules and their constraints}{11}{appendix.D}\protected@file@percent }
+\newlabel{app:shape}{{D}{11}{The price rules and their constraints}{appendix.D}{}}
 \gdef \@abspage@last{11}
