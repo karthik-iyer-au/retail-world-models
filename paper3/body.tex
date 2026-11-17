@@ -9,7 +9,8 @@ the actions that matter for planning are the ones the policy rarely took~\cite{l
 model on actions it has never seen, in three parts that apply to any action-conditioned world model: (1) actions held
 out of training by design and scored against a known answer; (2) whether forecast accuracy, the usual way to choose
 a model, predicts accuracy on those actions; (3) the same structure given to simpler models, so that what the
-structure does is separated from what the world model learns.
+structure does is separated from what the world model learns. Each part is an established idea (held-out actions, evaluation off the
+logging policy, structured baselines); what is new is their combination into one test and what it finds.
 
 We run the test in retail, where the action is a price and promotion plan and the stakes are concrete: a merchant
 asks what a deeper cut, a new regular price or a promotion in a quiet week would bring. Our forecasting
@@ -338,8 +339,8 @@ cuts it has not seen. They do not yet confirm the other half, the recorded regul
 
 \subsection{A second domain: dosing}
 
-To see whether the test carries outside retail we ran it on a generated dosing world (\dsFits{} fits; data and
-table in Appendix~\ref{app:dosing}): patients whose severity lowers a daily response, a drug that accumulates and
+As a stress test of the evaluation in a second domain, not a clinical model, we ran it on a generated dosing world,
+reusing the retail models with the dose in the price columns (\dsFits{} fits; Appendix~\ref{app:dosing}): patients whose severity lowers a daily response, a drug that accumulates and
 raises it along a saturating curve, and doctors who dose more when a patient is sicker, the clinical form of
 planning into demand. Higher doses than any given, a steady daily dose, doses on the mildest days and no dose are
 held out. The first finding repeats: across all versions, better forecasters simulate new doses better
@@ -396,7 +397,9 @@ winning in 36 of them shows an advantage within that design, not across kinds of
 held-out plans move one lever at a time. Each world has 360 series and eight forecast weeks; the versions of each
 model vary three settings
 each. Equal tuning of the models with the rules covers the bent and kinked worlds, not the log-linear one. The Dominick's price
-episodes are not used, because our explanation audit reports results on them.
+episodes are not used, because our explanation audit reports results on them. The same network without its recurrent state is not
+compared, so the state's share of the result is not separated. In robotics or driving the test needs a simulator or
+logged interventions for the known answer; we have not run it there.
 
 \section{Conclusion}\label{sec:conclusion}
 
@@ -404,12 +407,10 @@ episodes are not used, because our explanation audit reports results on them.
 A world model can be tested on actions it has never seen by holding them out by design, scoring them against a known
 answer and giving its structure to simpler models; the test applies wherever a world model is used to plan. In
 retail, and again in a dosing world, it shows that forecast accuracy is a fair guide when choosing between kinds of
-model and a poor guide when choosing between versions of one world model where actions follow need. Training a world model to learn actions does not make it
-right about plans outside its history. In the generated worlds the recorded regular price and three price rules do. With the rules, a simple
-model is best when the shape of the price response is known, and the world model when it is not. On real data the rules lower the
-world model's error on pure price cuts deeper than any it saw, clearly on the Frat (\reFPureWm{} to
-\reFPureWmShape{}) and by a smaller margin on The Complete Journey (\reCPureWm{} to \reCPureWmShape{}), while the recorded regular price has not yet been shown to help with
-lasting price moves.
+model and a poor guide when choosing between versions of one world model where actions follow need. Training it to learn actions does not make it
+right about new plans; in the generated worlds the recorded regular price and three price rules do. With the rules, a simple
+model is best when the shape of the price response is known, and the world model when it is not. On real data the rules lower its
+error on pure price cuts deeper than any it saw, not on lasting moves.
 
 \section{Reproducibility and compute}\label{sec:repro}
 
@@ -469,6 +470,17 @@ $C_t = C_{t-1} e^{-\ln 2/3} + d_t$ (half-life 3 days) and multiplies it by $1 + 
 Doctors give a dose with probability $\sigma(-1.4 + k s)$, sized 10\% to 40\% of the maximum and larger when severity
 is high, for dosing strength $k$. The dose reaches every model through the price columns (price $1 - 0.95d$, regular
 price 1), so the models and rules of the retail study apply unchanged. Fit on days 1 to 252, forecast days 253 to 260.
+
+The confounding mirrors the retail worlds. There, merchants plan cuts into weeks of high demand, so a model that
+reads sales against price sees the planning as well as the response. Here, doctors dose patients who are sicker, so
+a model that reads the response against the dose sees larger doses with lower responses and can learn that a higher
+dose lowers the response; the dosing strength $k$ plays the part of planning strength. The five held-out plans
+are a dose of 50\% or 60\% on the days doses were given (deeper than any given), a steady 20\% every day (a lasting
+change), the same doses moved to each patient's days of lowest severity (doses off their usual pattern) and no dose.
+Each is scored against the known expected response, as in retail. In amendment 9 the price column carries the drug
+level built up from recent doses, $\min(C, 3)/3$, in place of the day's dose, which gives the models the state the
+response depends on but not the severity behind the doctors' choices. The world is a test of the evaluation in a
+second domain, not a model of any drug or disease.
 
 \input{generated/tab_dosing}
 

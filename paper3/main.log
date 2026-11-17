@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023/Debian) (preloaded format=xelatex 2026.10.23)  17 NOV 2026 20:00
+This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023/Debian) (preloaded format=xelatex 2026.10.23)  17 NOV 2026 20:35
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -2361,9 +2361,6 @@ Package microtype Info: Character `⁺' is missing
 Package microtype Info: Character `⁻' is missing
 (microtype)             in font `\TU/TeXGyrePagella(0)/b/n/12'.
 (microtype)             Ignoring protrusion settings for this character.
-
-Underfull \vbox (badness 1997) has occurred while \output is active []
-
 Package microtype Info: Character `ﬆ' is missing
 (microtype)             in font `\TU/TeXGyrePagella(0)/b/n/10'.
 (microtype)             Ignoring protrusion settings for this character.
@@ -2605,9 +2602,8 @@ Package microtype Info: Character `⁺' is missing
 Package microtype Info: Character `⁻' is missing
 (microtype)             in font `\TU/TeXGyrePagella(0)/m/it/10'.
 (microtype)             Ignoring protrusion settings for this character.
-
-[2]
-Underfull \hbox (badness 4647) in paragraph at lines 114--118
+ [2]
+Underfull \hbox (badness 4647) in paragraph at lines 115--119
 [] []\TU/TeXGyrePagella(0)/b/n/10 World model.[] \TU/TeXGyrePagella(0)/m/n/10 T
 he state model of our forecasting
  []
@@ -2982,7 +2978,7 @@ Package microtype Info: Character `⁻' is missing
 (microtype)             in font `\TU/TeXGyrePagella(1)/m/n/5.5'.
 (microtype)             Ignoring protrusion settings for this character.
 
-Underfull \hbox (badness 7576) in paragraph at lines 138--145
+Underfull \hbox (badness 7576) in paragraph at lines 139--146
 \TU/TeXGyrePagella(0)/m/n/10 regular price, $[]$ the item’s usual price, and
  []
 
@@ -3872,13 +3868,13 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [7]
-(./generated/tab_real.tex) [8]
+(./generated/tab_real.tex) [8] [9]
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `lmtt' (encoding: TU).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
- [9]
-Underfull \hbox (badness 10000) in paragraph at lines 422--424
+
+Underfull \hbox (badness 10000) in paragraph at lines 423--425
 \TU/TeXGyrePagella(0)/m/n/10 released with the companion forecasting study’s
  []
 
@@ -4001,7 +3997,7 @@ Package microtype Info: Character `⁻' is missing
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [10]
-Overfull \hbox (55.4481pt too wide) in paragraph at lines 466--472
+Overfull \hbox (55.4481pt too wide) in paragraph at lines 467--473
 \TU/TeXGyrePagella(0)/m/n/10 360 patients in 18 clinics over 260 days (\TU/lmtt
 /m/n/10 scripts/paper3_dosing.py\TU/TeXGyrePagella(0)/m/n/10 ).
  []
@@ -4011,7 +4007,9 @@ Overfull \hbox (25.50888pt too wide) in paragraph at lines 9--29
  [][] 
  []
 
-)) [11] (./main.aux)
+)) [11] [12
+
+] (./main.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -4028,4 +4026,4 @@ Here is how much of TeX's memory you used:
  14 hyphenation exceptions out of 8191
  86i,13n,117p,1001b,663s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on main.pdf (11 pages).
+Output written on main.pdf (12 pages).
