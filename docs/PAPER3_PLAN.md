@@ -222,3 +222,20 @@ Reading fixed now: if the models with the rules and the recorded regular price h
 cuts and the lasting regular-price moves than the same models without them, the synthetic finding carries to real
 data; if not, the paper says so. This is a check on sales that happened, not on counterfactual plans. Compute: about
 US$30 to 50.
+
+**Amendment 6, 17 November 2026, 14:15, after the summary results of amendment 5 and before any of the analyses
+below.** Karthik, 14:12: "how do we fix the weak?" The real-data check of amendment 5 was weak in three ways: deep
+cuts mostly ran with a circular or display, which the models had seen; the Frat's recorded regular price moves often,
+so a 10% difference is not always a lasting move; and four origins give few replications. Added, labelled as added:
+
+1. Pure price cuts: the Frat deep cuts split into those with no circular and no display (TPR_ONLY) and the rest,
+   scored from the saved forecasts.
+2. Clean lasting moves: Frat item-weeks whose recorded regular price is 10% or more from its last value before the
+   origin and the same in every held-out week of the series, after holding at least four weeks before the origin;
+   scored from the saved forecasts.
+3. A harder and larger test: every cut deeper than 20% removed from training, scored on cuts deeper than 20% (and
+   pure price cuts deeper than 20%), and eight origins (weeks 101 to 149, every 8 weeks) for both thresholds; the
+   same nine models.
+
+Reading fixed now: the same as amendment 5. Whatever these show is reported, including no gain.
+Compute: about US$30.
