@@ -51,6 +51,9 @@ class Truth:
 
 def cut_factor(depth_ratio, t: "Truth"):
     """Sales multiplier of a price at `depth_ratio` = price / regular."""
+    if t.shape == "kinked":  # paper 3, amendment 3: nothing up to 10% off, straight to 1.6x at 40%, flat beyond
+        cut = 1 - np.asarray(depth_ratio, dtype=float)
+        return 1 + 2.0 * np.clip(cut - 0.10, 0.0, 0.30)
     if t.shape == "bent":
         return 1 + 1.015 * (1 - np.exp(-(1 - np.asarray(depth_ratio, dtype=float)) / 0.15))
     return np.asarray(depth_ratio, dtype=float) ** t.cut_elasticity
@@ -58,7 +61,7 @@ def cut_factor(depth_ratio, t: "Truth"):
 
 def regular_factor(ratio, t: "Truth"):
     """Level multiplier of a regular price at `ratio` times the list price."""
-    if t.shape == "bent":
+    if t.shape in ("bent", "kinked"):
         return 1 + t.regular_elasticity * (np.asarray(ratio, dtype=float) - 1)
     return np.asarray(ratio, dtype=float) ** t.regular_elasticity
 

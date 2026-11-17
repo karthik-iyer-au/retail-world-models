@@ -54,6 +54,7 @@ def versions() -> dict:
     lgb = out["lgb_l31_r500_m20"][1]
     out["lgb_rr"] = ("lightgbm_direct", {**lgb, "extra": list(lgb["extra"]) + [RR]})
     out["loglinear_rr"] = ("loglinear", {"recorded_regular": True})
+    out["loglinear_shape"] = ("loglinear", {"price_shape": True})  # amendment 3
     # amendment 2 (17 November 2026): the forecaster for the week at the current regular price with nothing planned,
     # the log-linear model with the recorded regular price for the change the plan makes
     out["wm_ll"] = ("split", {"forecaster": out["wm_rr"]})
@@ -66,7 +67,7 @@ def versions() -> dict:
 # ---------- the world ----------
 
 def world(confounding: float, seed: int, shape: str = "loglinear", explore: float = 0.0):
-    bent = dict(shape="bent", both_effect=-0.10) if shape == "bent" else {}
+    bent = dict(shape=shape, both_effect=-0.10) if shape in ("bent", "kinked") else {}
     more = dict(explore=explore) if explore else {}
     panel = load_dataset("synthetic_levers", confounding=confounding, seed=seed, **bent, **more, **DATA).panel
     panel[RR] = panel["true_regular"]
@@ -86,7 +87,7 @@ def truth(plan: pd.DataFrame, hidden: pd.DataFrame, t: Truth, regular_move: floa
     if regular_move:
         h["true_regular"] = h["true_regular"] * (1 + regular_move)
         # the level's response to a lasting move of the regular price, about the current regular price
-        f = (1 + t.regular_elasticity * regular_move) if t.shape == "bent" else (1 + regular_move) ** t.regular_elasticity
+        f = (1 + t.regular_elasticity * regular_move) if t.shape in ("bent", "kinked") else (1 + regular_move) ** t.regular_elasticity
         h["true_level"] = h["true_level"] * f
     return expected_units(pd.concat([plan.reset_index(drop=True), h.reset_index(drop=True)], axis=1), t)
 
@@ -124,14 +125,38 @@ class LogLinear:
     """Poisson regression of sales on the series, the season, log price over the 12-week highest price, log regular
     price over the series' mean regular price, promotion, display, both, and the week after a planned week."""
 
-    def __init__(self, recorded_regular: bool = False):
-        self.recorded = recorded_regular
+    SHAPE_B = (0.05, 0.1, 0.2, 0.4)
+
+    def __init__(self, recorded_regular: bool = False, price_shape: bool = False):
+        """`price_shape` (amendment 3): log price replaced by the world model's price shape, the cut c (capped at 95%)
+        through 1 - exp(-c / b) for b in SHAPE_B and through -log(1 - c), coefficients at or above zero; the
+        regular-price coefficient at or below zero. Poisson maximum likelihood with those bounds."""
+        self.recorded = recorded_regular or price_shape
+        self.shape = price_shape
 
     def fit(self, train: pd.DataFrame):
-        from sklearn.linear_model import PoissonRegressor
         self.hist = train.sort_values([SERIES, DATE]).reset_index(drop=True)
         X, self.cols = self._features(self.hist, self.hist, fit=True)
-        self.m = PoissonRegressor(alpha=1e-4, max_iter=3000).fit(X, self.hist[UNITS].to_numpy())
+        y = self.hist[UNITS].to_numpy()
+        if not self.shape:
+            from sklearn.linear_model import PoissonRegressor
+            self.m = PoissonRegressor(alpha=1e-4, max_iter=3000).fit(X, y)
+            return self
+        from scipy.optimize import minimize
+        n, k = X.shape
+        alpha = 1e-4
+
+        def f(w):
+            eta = np.clip(X @ w[:k] + w[k], -30, 30)
+            mu = np.exp(eta)
+            g = X.T @ (mu - y) / n + alpha * w[:k]
+            return (mu - y * eta).mean() + 0.5 * alpha * (w[:k] ** 2).sum(), np.append(g, (mu - y).mean())
+
+        bounds = [(0, None) if c.startswith("cut") else (None, 0) if c == "lr" else (None, None) for c in self.cols]
+        w0 = np.zeros(k + 1)
+        w0[k] = np.log(max(y.mean(), 1e-3))
+        r = minimize(f, w0, jac=True, method="L-BFGS-B", bounds=bounds + [(None, None)], options={"maxiter": 5000})
+        self.w = r.x
         return self
 
     def _features(self, rows: pd.DataFrame, hist: pd.DataFrame, fit=False):
@@ -150,12 +175,19 @@ class LogLinear:
             self.series = sorted(rows[SERIES].unique())
             self.t0 = rows[DATE].min()
         week = ((pd.to_datetime(rows[DATE]) - pd.Timestamp(self.t0)).dt.days / 7).to_numpy()
+        ratio = rows[PRICE].to_numpy() / f["reg"].to_numpy()
         num = pd.DataFrame({
-            "lp": np.log(rows[PRICE].to_numpy() / f["reg"].to_numpy()),
+            "lp": np.log(ratio),
             "lr": np.log(f["reg"].to_numpy() / rows[SERIES].map(self.mean_reg).to_numpy()),
             "promo": rows["promo"].to_numpy(), "display": rows["display"].to_numpy(),
             "both": rows["promo"].to_numpy() * rows["display"].to_numpy(), "after": f["after"].to_numpy(),
         })
+        if self.shape:
+            cut = np.clip(1 - ratio, 0, 0.95)
+            num = num.drop(columns="lp")
+            for b in self.SHAPE_B:
+                num[f"cut_exp{b}"] = 1 - np.exp(-cut / b)
+            num["cut_log"] = -np.log1p(-cut)
         dummies = pd.get_dummies(pd.Categorical(rows[SERIES], categories=self.series), dtype=float)
         season = pd.DataFrame(index=range(len(rows)))
         # season per item (sine and cosine of the year, one pair per item)
@@ -171,6 +203,8 @@ class LogLinear:
 
     def predict(self, plan: pd.DataFrame) -> np.ndarray:
         X, _ = self._features(plan.reset_index(drop=True), self.hist)
+        if self.shape:
+            return np.exp(np.clip(X @ self.w[:-1] + self.w[-1], -30, 30))
         return self.m.predict(X)
 
 
@@ -249,13 +283,13 @@ def main(argv=None):
     p.add_argument("--seed", type=int, required=True)
     p.add_argument("--versions", nargs="*")
     p.add_argument("--steps", type=int, help="override training steps (smoke test only)")
-    p.add_argument("--shape", default="loglinear", choices=["loglinear", "bent"])
+    p.add_argument("--shape", default="loglinear", choices=["loglinear", "bent", "kinked"])
     p.add_argument("--explore", type=float, default=0.0, help="amendment 2: share of training weeks with test plans")
     a = p.parse_args(argv)
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     panel, train, test = world(a.confounding, a.seed, a.shape, a.explore)
-    tag = ("" if a.shape == "loglinear" else "bent_") + (f"tl{a.explore}_" if a.explore else "")
+    tag = ("" if a.shape == "loglinear" else f"{a.shape}_") + (f"tl{a.explore}_" if a.explore else "")
     t = Truth(**panel.attrs["truth"])
     V = versions()
     for name in a.versions or list(V):
@@ -266,7 +300,7 @@ def main(argv=None):
         if a.steps and kind == "state_model":
             settings["steps"] = a.steps
         t0 = time.time()
-        keep_rr = name.endswith("_rr") or kind == "split" or name == "wm_shape"
+        keep_rr = name.endswith("_rr") or kind == "split" or name.endswith("_shape")
         fit_on = train.drop(columns=HIDDEN + ([] if keep_rr else [RR]))
         if kind == "split" and a.steps and settings["forecaster"][0] == "state_model":
             settings["forecaster"] = (settings["forecaster"][0], {**settings["forecaster"][1], "steps": a.steps})
