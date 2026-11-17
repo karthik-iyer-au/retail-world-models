@@ -149,3 +149,23 @@ runs launched at 00:50 were cancelled before any result was read:
    plan's price enters only through a curve whose shape is fixed and whose size is learned per item and store, so
    sales never fall as a cut deepens and the gain is bounded; and a lasting regular price lowers sales through a
    learned elasticity. The rest of the network does not see the price. Run in the worlds with and without tests.
+
+**Amendment 3, 17 November 2026, 12:45, after the results of amendment 2 and before any of these runs.** Karthik
+passed on a reviewer's challenge: the world model with a price shape may win only because its shape matches the
+worlds' shapes, and the term $-a_2\log(1-c)$ is not bounded (only the 95% cap on the cut keeps it finite). Two
+controls are added, labelled in the paper as added after the first results:
+
+1. The same price shape in the simple model (`loglinear_shape`): the log-linear model with the recorded regular
+   price, its log-price term replaced by the shape of the world model (the cut through $1-e^{-c/b}$ for
+   $b \in \{0.05, 0.1, 0.2, 0.4\}$ and $-\log(1-c)$, cut capped at 95%, all coefficients non-negative) and its
+   regular-price coefficient kept at or below zero. Fitted by Poisson maximum likelihood with those bounds. Run on
+   every world. If the world model with the price shape beats it, its learned state adds to the shape; if not, the
+   gain is the shape's.
+2. A third world shape that neither model's shape contains (`kinked`): a cut adds nothing up to 10%, then sales rise
+   in a straight line to 1.6 times at 40% and stay there for deeper cuts; the regular-price response and the
+   promotion-with-display effect are those of the bent world. Four planning strengths, three seeds; versions
+   `wm_d32_s2000_h26`, `wm_rr`, `wm_shape`, `wm_ll`, `lgb_l31_r500_m20`, `lgb_rr`, `lgb_ll`, `loglinear`,
+   `loglinear_rr`, `loglinear_shape`.
+
+The text is corrected: the price shape keeps sales from falling as a cut deepens; the saturating part is bounded,
+the logarithmic part is not and is held finite only by the cap on the cut. Compute: about 130 fits, about US$20.
