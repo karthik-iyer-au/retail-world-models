@@ -59,15 +59,24 @@ class World:
             c[:, t] = (c[:, t - 1] * k if t else 0) + dose[:, t]
         return self.base[:, None] * np.exp(-SEV_EFFECT * self.sev) * (1 + EMAX * c / (c + EC50)) * self.week
 
-    def frame(self, dose: np.ndarray | None = None) -> pd.DataFrame:
+    def level(self, dose: np.ndarray) -> np.ndarray:
+        """The built-up drug level from the doses (amendment 9)."""
+        k = np.exp(-np.log(2) / HALF_LIFE)
+        c = np.zeros_like(dose)
+        for t in range(dose.shape[1]):
+            c[:, t] = (c[:, t - 1] * k if t else 0) + dose[:, t]
+        return c
+
+    def frame(self, dose: np.ndarray | None = None, exposure: bool = False) -> pd.DataFrame:
         dose = self.dose if dose is None else dose
+        signal = np.minimum(self.level(dose), 3.0) / 3.0 if exposure else dose
         dates = pd.date_range("2020-01-01", periods=DAYS, freq="D")
         clinic = np.repeat(np.arange(CLINICS), PER_CLINIC)
         sid = [f"c{c}_p{i}" for i, c in enumerate(clinic)]
         return pd.DataFrame({
             SERIES: np.repeat(sid, DAYS), STORE: np.repeat([f"c{c}" for c in clinic], DAYS),
             ITEM: np.repeat([f"p{i}" for i in range(self.n)], DAYS), DATE: np.tile(dates, self.n),
-            UNITS: self.units.ravel(), PRICE: (1 - 0.95 * dose).ravel(), "promo": 0, "display": 0, RR: 1.0})
+            UNITS: self.units.ravel(), PRICE: (1 - 0.95 * signal).ravel(), "promo": 0, "display": 0, RR: 1.0})
 
     def plan(self, kind: str) -> np.ndarray:
         d = self.dose.copy()
@@ -97,11 +106,12 @@ def main(argv=None):
     p.add_argument("--seed", type=int, required=True)
     p.add_argument("--versions", nargs="*")
     p.add_argument("--steps", type=int)
+    p.add_argument("--exposure", action="store_true", help="amendment 9: the built-up level in place of the dose")
     a = p.parse_args(argv)
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     w = World(a.strength, a.seed)
-    full = w.frame()
+    full = w.frame(exposure=a.exposure)
     dates = np.sort(full[DATE].unique())
     train = full[full[DATE] < dates[ORIGIN - 1]]
     window = dates[ORIGIN - 1:ORIGIN - 1 + HORIZON]
@@ -112,7 +122,7 @@ def main(argv=None):
     y_tr = w.units[:, :ORIGIN - 1]
     scale = np.mean(np.diff(y_tr, axis=1) ** 2, axis=1)
     for name in a.versions or GRID + RULES:
-        f = out / f"dose_s{a.strength}_{a.seed}_{name}.json"
+        f = out / f"dose{'exp' if a.exposure else ''}_s{a.strength}_{a.seed}_{name}.json"
         if f.exists():
             continue
         kind, settings = V[name][0], dict(V[name][1])
@@ -124,13 +134,13 @@ def main(argv=None):
         model = LogLinear(**settings).fit(fit_on) if kind == "loglinear" else build_model(kind, **settings).fit(fit_on)
 
         def predict(dose: np.ndarray) -> np.ndarray:
-            fr = w.frame(dose)
+            fr = w.frame(dose, exposure=a.exposure)
             fr = fr[fr[DATE].isin(window)].drop(columns=[UNITS] + ([] if keep_rr else [RR]))
             return np.clip(np.asarray(model.predict(fr), dtype=float), 0, None).reshape(w.n, HORIZON)
 
         p_obs = predict(w.dose)
         y_te = w.units[:, ORIGIN - 1:ORIGIN - 1 + HORIZON]
-        rec = {"strength": a.strength, "seed": a.seed, "version": name, "kind": kind,
+        rec = {"strength": a.strength, "seed": a.seed, "version": name, "kind": kind, "exposure": a.exposure,
                "rmsse": float(np.mean(np.sqrt(np.mean((y_te - p_obs) ** 2, axis=1) / np.maximum(scale, 1e-9))))}
         for k in PLANS:
             p_k = predict(plans[k])
