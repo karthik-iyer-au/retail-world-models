@@ -90,7 +90,7 @@ def main(argv=None):
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     d.sort_values(["shape", "explore", "confounding", "seed", "version"]).to_csv(out / "versions.csv", index=False)
-    g = d[d["grid"]]
+    g = d[d["grid"] & (d["shape"] != "kinked")]  # the kinked world (amendment 3) runs only some versions
     cols = ["rmsse", "stock_observed", "err_mean", "stock_mean", "promo_loss", "regular_loss"] + \
         [f"err_{p}" for p in PLANS] + [f"ratio_{p}" for p in PLANS]
     g.groupby(["shape", "confounding", "model"])[cols].median().to_csv(out / "by_model.csv")
