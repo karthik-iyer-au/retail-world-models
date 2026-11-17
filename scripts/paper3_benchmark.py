@@ -203,7 +203,10 @@ class LogLinear:
             for b in self.b_grid:
                 num[f"cut_exp{b}"] = 1 - np.exp(-cut / b)
             num["cut_log"] = -np.log1p(-cut)
-        dummies = pd.get_dummies(pd.Categorical(rows[SERIES], categories=self.series), dtype=float)
+        from scipy import sparse
+        codes = pd.Categorical(rows[SERIES], categories=self.series).codes
+        dummies = sparse.csr_matrix((np.ones(len(rows)), (np.arange(len(rows)), codes)),
+                                    shape=(len(rows), len(self.series)))
         season = pd.DataFrame(index=range(len(rows)))
         # season per item (sine and cosine of the year, one pair per item)
         items = sorted({s.split("_")[1] for s in self.series})
@@ -213,8 +216,9 @@ class LogLinear:
             m = (it == i).astype(float)
             season[f"sin_{i}"] = m * np.sin(ang)
             season[f"cos_{i}"] = m * np.cos(ang)
-        X = pd.concat([num, dummies.reset_index(drop=True), season], axis=1)
-        return X.to_numpy(), list(X.columns)
+        X = sparse.hstack([sparse.csr_matrix(num.to_numpy(dtype=float)), dummies,
+                           sparse.csr_matrix(season.to_numpy(dtype=float))]).tocsr()
+        return X, list(num.columns) + [f"series_{c}" for c in self.series] + list(season.columns)
 
     def predict(self, plan: pd.DataFrame) -> np.ndarray:
         X, _ = self._features(plan.reset_index(drop=True), self.hist)
