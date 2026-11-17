@@ -283,3 +283,18 @@ Added, labelled in the paper as added:
 Reading fixed now: if the dosing world repeats the retail pattern (accuracy guides kinds of model but not versions
 where dosing follows severity; the rules improve the error on new doses), the test is shown in a second domain; if
 not, the paper reports what differs. Compute: one rented Vast machine, about US$5 to 15, destroyed after the runs.
+
+**Amendment 9, 17 November 2026, 19:25, after the dosing results and before any of these runs.** Karthik, 19:22:
+"Yes I agree with the built up from recent doses". In retail the fix was information the retailer already has (the
+recorded regular price). The dosing analogue is the drug level built up from recent doses, which a clinician works
+out from the dosing history and the drug's known half-life. Added, labelled as added:
+
+1. In versions marked `_exp`, every model is given the built-up level in place of the day's dose: the price column
+   carries 1 - 0.95 min(C, 3) / 3, where C is the level from the doses given or planned (half-life 3 days); the
+   scaling is linear, so no model is told the shape of the response.
+2. Models: the world model, LightGBM and the log-linear model, each without and with the rules, on the 12 dosing
+   worlds; the held-out plans and measures of amendment 8.
+
+Reading fixed now: if the rules with the built-up level recover the size of the effect of new doses where dosing
+follows severity, the retail lesson (give the model what the professional knows, plus rules) carries to dosing; if
+not, the paper reports the limit. Every result is reported. Compute: about US$5 on Modal.
