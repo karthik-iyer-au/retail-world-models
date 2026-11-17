@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023/Debian) (preloaded format=xelatex 2026.10.23)  17 NOV 2026 20:35
+This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023/Debian) (preloaded format=xelatex 2026.10.23)  17 NOV 2026 21:00
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -3865,7 +3865,10 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [6]
 (./generated/tab_h2h.tex)
-Underfull \vbox (badness 10000) has occurred while \output is active []
+Underfull \vbox (badness 1675) has occurred while \output is active []
+
+
+Underfull \vbox (badness 2368) has occurred while \output is active []
 
  [7]
 (./generated/tab_real.tex) [8] [9]
@@ -4018,10 +4021,10 @@ Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: 1DBAD42A304E86E1B81E6059F44E4B67;4056.
  ) 
 Here is how much of TeX's memory you used:
- 22246 strings out of 476872
- 405895 string characters out of 5804585
+ 22276 strings out of 476872
+ 406185 string characters out of 5804585
  1966627 words of memory out of 5000000
- 43827 multiletter control sequences out of 15000+600000
+ 43857 multiletter control sequences out of 15000+600000
  562872 words of font info for 105 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  86i,13n,117p,1001b,663s stack positions out of 10000i,1000n,20000p,200000b,200000s

@@ -297,8 +297,11 @@ model with the rules in \hhMedKWmLlWon{} of \hhMedKWmLlN{} worlds at the median 
 \hhBestKWmLlN{} at the best; in the bent world the world model with the rules is ahead of the log-linear model in only
 \hhBestBWmLlWon{} of \hhBestBWmLlN{} worlds at the best version (errors \hhBestBWmLlA{} against \hhBestBWmLlB{}).
 
-The rules do most of the work. Among the models we tested, a simple model with the rules is the better choice when
-the shape of the price response is known, and the world model with the rules when it is not.
+\paragraph{Without the recurrent cell (added)} With the cell that rolls the state forward under the plan removed, the
+world model with the rules scores \nsKShapeA{} against \nsKShapeB{} in the kinked world (ahead in \nsKShapeWon{} of
+\nsKShapeN{} worlds, $p$ \nsKShapeP{}) and \nsBShapeA{} against \nsBShapeB{} in the bent world, and is still ahead of
+the log-linear model with the rules in \nsKLlWon{} of \nsKLlN{} kinked worlds; without the rules, \nsKPlainA{} against
+\nsKPlainB{}. The advantage comes from the learned network with the rules, not from the recurrent state.
 
 \input{generated/tab_h2h}
 
@@ -397,20 +400,17 @@ winning in 36 of them shows an advantage within that design, not across kinds of
 held-out plans move one lever at a time. Each world has 360 series and eight forecast weeks; the versions of each
 model vary three settings
 each. Equal tuning of the models with the rules covers the bent and kinked worlds, not the log-linear one. The Dominick's price
-episodes are not used, because our explanation audit reports results on them. The same network without its recurrent state is not
-compared, so the state's share of the result is not separated. In robotics or driving the test needs a simulator or
+episodes are not used, because our explanation audit reports results on them. In robotics or driving the test needs a simulator or
 logged interventions for the known answer; we have not run it there.
 
 \section{Conclusion}\label{sec:conclusion}
 
-
 A world model can be tested on actions it has never seen by holding them out by design, scoring them against a known
-answer and giving its structure to simpler models; the test applies wherever a world model is used to plan. In
-retail, and again in a dosing world, it shows that forecast accuracy is a fair guide when choosing between kinds of
-model and a poor guide when choosing between versions of one world model where actions follow need. Training it to learn actions does not make it
-right about new plans; in the generated worlds the recorded regular price and three price rules do. With the rules, a simple
-model is best when the shape of the price response is known, and the world model when it is not. On real data the rules lower its
-error on pure price cuts deeper than any it saw, not on lasting moves.
+answer and giving its structure to simpler models. In retail and in a dosing world, forecast accuracy is a fair guide
+between kinds of model and a poor guide between versions of one world model where actions follow need. Training to
+learn actions does not help; the regular price and three price rules do, and with them a simple model is
+best when the shape of the response is known and the learned network when it is not. On real data they help on
+deep price cuts, not on lasting moves.
 
 \section{Reproducibility and compute}\label{sec:repro}
 

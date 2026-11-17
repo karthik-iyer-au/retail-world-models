@@ -413,6 +413,26 @@ Strength & 0 & 0.5 & 1 & 1.5 & 0 & 0.5 & 1 & 1.5 \\
             **pairs_dosing()}
 
 
+def nostate_macros():
+    """Amendment 10: the world model without its recurrent cell (nostate.csv), and, added after its results, the
+    version with the rules but without the cell against the log-linear model with the rules in the kinked world."""
+    n = pd.read_csv(RES / "nostate.csv").set_index(["shape", "a"])
+    X = {}
+    word = lambda k: WORDS[k] if k < len(WORDS) else str(k)
+    for (s, a), r in n.iterrows():
+        tag = ("B" if s == "bent" else "K") + ("Shape" if "shape" in a else "Plain")
+        X[f"ns{tag}Won"], X[f"ns{tag}N"] = word(int(r.a_ahead)), word(int(r.worlds))
+        X[f"ns{tag}P"] = f"{r.sign_p:.2f}"
+        X[f"ns{tag}Diff"], X[f"ns{tag}Ci"] = f"{r.median_diff:.3f}", f"{r.lo:.3f} to {r.hi:.3f}"
+        X[f"ns{tag}A"], X[f"ns{tag}B"] = f"{r.a_median:.2f}", f"{r.b_median:.2f}"
+    v = pd.read_csv(RES / "versions.csv")
+    v = v[(v.explore == 0) & (v["shape"] == "kinked")]
+    w = v.pivot_table(index=["confounding", "seed"], columns="version", values="err_mean")
+    x = (w["wm_shape_nostate"] - w["loglinear_shape"]).dropna()
+    X["nsKLlWon"], X["nsKLlN"] = word(int((x < 0).sum())), word(len(x))
+    return X
+
+
 def macros(d, L):
     plain, tl = d[d.explore == 0], d[d.explore > 0]
     t = med(plain, ["rmsse", "err_mean", "regular_loss", "stock_mean", "promo_loss"] +
@@ -463,6 +483,7 @@ def macros(d, L):
     X.update(table_h2h())
     X.update(table_real())
     X.update(table_dosing())
+    X.update(nostate_macros())
     import re
     num = re.compile(r"-(?=\d)")  # a typeset minus sign in every number
     (GEN / "p3_macros.tex").write_text("".join(
@@ -474,6 +495,7 @@ def main():
     use_style()
     d = pd.read_csv(RES / "versions.csv")
     d = d[d.seed <= 103]  # seeds 104 to 110 (amendment 4) enter only the head-to-head of tab_h2h
+    d = d[~d.version.str.endswith("_nostate")]  # amendment 10 enters only through nostate.csv
     L = pd.read_csv(RES / "link.csv")
     fig_ratio(d[d.explore == 0])
     fig_link(d[d.explore == 0], L)
