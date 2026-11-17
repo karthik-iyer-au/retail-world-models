@@ -683,3 +683,76 @@ def vast_loop(spec: str, commit: str, max_rounds: int, limit: int = 6, split: bo
 
     best = loop.search(s, evaluate, SavedLog(Path(RESULTS) / out / "log.jsonl"), max_rounds=max_rounds or None)
     return {k: best[k] for k in ("kept", "score", "held_out")}
+
+
+SCRIPT_WORKER = r"""#!/bin/bash
+# Runs a list of repository-script jobs in parallel on one rented many-core machine (vast_script).
+set -uo pipefail
+exec > >(tee -a /work.log) 2>&1
+AUTHH="Authorization: Bearer $BRIDGE_TOKEN"
+fail() { echo "FAILED: $1"; curl -fsS --retry 5 --retry-all-errors -X PUT -H "$AUTHH" --data-binary @/work.log "$BRIDGE_URL/failed/$OUT/script" || true; exit 1; }
+apt-get update -qq && apt-get install -y -qq git curl >/dev/null || fail "apt"
+mkdir -p /root/repo && cd /root/repo && git init -q
+for t in 1 2 3 4 5; do git fetch -q --depth 1 "$REPO_URL" "$COMMIT" && break; sleep 30; done
+git checkout -q FETCH_HEAD || fail "checkout"
+PIP="pip install -q --retries 10 --timeout 60"
+for t in 1 2 3; do $PIP "torch==$TORCH" --index-url https://download.pytorch.org/whl/cpu && $PIP -e ".[trees]" && break; [ $t = 3 ] && fail "install"; sleep 30; done
+mkdir -p /out /logs
+cp "$JOBS_FILE" /jobs.txt || fail "jobs file"
+echo "$(wc -l < /jobs.txt) jobs, $PAR at a time"
+( while sleep 300; do tar czf /up.tgz -C /out . && curl -fsS --retry 3 -X PUT -H "$AUTHH" --data-binary @/up.tgz "$BRIDGE_URL/results/$OUT" >/dev/null; done ) &
+SAVER=$!
+export OMP_NUM_THREADS=$THREADS MKL_NUM_THREADS=$THREADS OPENBLAS_NUM_THREADS=$THREADS
+nl -ba /jobs.txt | xargs -P "$PAR" -L 1 bash -c 'n=$0; shift; python "scripts/$SCRIPT" --out /out "$@" > "/logs/job$n.log" 2>&1 || echo "job $n failed: $*"'
+kill $SAVER 2>/dev/null
+cp /logs/*.log /out/ 2>/dev/null; echo "{\"finished\": $(date +%s)}" > /out/_done.json
+tar czf /up.tgz -C /out . || fail "tar"
+curl -fsS --retry 5 --retry-all-errors -X PUT -H "$AUTHH" --data-binary @/up.tgz "$BRIDGE_URL/results/$OUT" || fail "upload"
+echo "DONE"
+sleep infinity
+"""
+
+
+@app.function(image=image, volumes={RESULTS: results_volume}, secrets=[vast_secret, bridge_secret],
+              timeout=24 * 3600, cpu=0.25, memory=1024)
+def vast_script(commit: str, script: str, jobs_file: str, out: str, cores: int = 64, par: int = 32,
+                threads: int = 2, hours: float = 8) -> str:
+    """Rents one many-core processor machine, runs `python scripts/<script> --out /out <line>` for every line of
+    `jobs_file` (a file in the repository at `commit`),
+    `par` at a time, sends /out to rwm-results/<out> every five minutes and at the end, then destroys the machine.
+    For generated or public data only (never Woolworths data)."""
+    offers = json.loads(_vast("search", "offers", f"cpu_cores_effective>={cores} cpu_ram>=64 reliability>0.99 "
+                              "verified=true rentable=true disk_space>=60 inet_down>=200", "-o", "dph_total"))
+    if not offers:
+        raise RuntimeError("no machine matches")
+    o = offers[0]
+    url = modal.Function.from_name(APP_NAME, "bridge").get_web_url()
+    env = {"REPO_URL": REPO_URL, "COMMIT": commit, "TORCH": TORCH, "OUT": out, "SCRIPT": script, "PAR": str(par),
+           "THREADS": str(threads), "BRIDGE_URL": url, "BRIDGE_TOKEN": os.environ["BRIDGE_TOKEN"],
+           "JOBS_FILE": jobs_file,
+           "WORKER_B64": base64.b64encode(SCRIPT_WORKER.encode()).decode()}
+    made = _first_json(_vast("create", "instance", str(o["id"]), "--image", "python:3.12-slim", "--disk", "60",
+                             "--label", f"rwm script {out}"[:60],
+                             "--env", " ".join(f"-e {k}={v}" for k, v in env.items()),
+                             "--entrypoint", "bash", "--args", "-c",
+                             "echo $WORKER_B64 | base64 -d > /worker.sh && bash /worker.sh"))
+    iid = made["new_contract"]
+    print(f"machine {iid}: {o.get('cpu_cores_effective')} cores, {o['geolocation']}, US${o['dph_total']:.3f}/h", flush=True)
+    done = Path(RESULTS) / out / "_done.json"
+    failed = Path(RESULTS) / "_vast_failed" / f"{out.replace('/', '__')}__script.log"
+    started = time.time()
+    try:
+        while time.time() - started < hours * 3600:
+            time.sleep(POLL_S)
+            results_volume.reload()
+            if done.exists():
+                return f"done on machine {iid}"
+            if failed.exists():
+                return f"failed on machine {iid}: see {failed}"
+            state = json.loads(_vast("show", "instance", str(iid)))
+            if state.get("actual_status") in ("exited", "offline"):
+                return f"machine {iid} {state.get('actual_status')}"
+        return f"stopped after {hours} hours"
+    finally:
+        _destroy(iid)
+        print(f"machine {iid} destroyed", flush=True)
