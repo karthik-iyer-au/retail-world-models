@@ -20,7 +20,7 @@ model.} Across all 25 versions in each world, better forecasters simulate new pl
 reverses (\linkBWmOne{}, \linkBWmOneCi{}).
 \item \textbf{Training the world model to learn actions does not fix it.} JEPA pretraining, a latent consistency
 check, a check seven weeks ahead and adaptation at the plan date move its error on new plans by at most 0.05.
-\item \textbf{The recorded regular price and three price rules fix it.} Without the regular price every model reads
+\item \textbf{The recorded regular price and three price rules improve it.} Without the regular price every model reads
 a lasting price move as a temporary cut. With it, and with rules that keep sales from falling as a cut deepens, let
 the gain from deeper cuts flatten and give a lasting regular price its own elasticity, the world model's error falls
 from \errBWm{} to \errBShape{} in a world whose response bends.
@@ -356,7 +356,7 @@ plans. They become worth revisiting when the history holds varied actions, for e
 
 The world model fails on new plans for the reason any learner fails off its data: the merchants' history never
 shows a deep cut or a lasting price move labelled as one, and where plans follow demand it shows the wrong effect.
-No training objective recovers what the data do not contain. Two things do. The first is information the retailer
+No training objective recovers what the data do not contain. Two things help. The first is information the retailer
 already has: the recorded regular price. The second is knowledge of how price can act: more discount never loses
 sales, the gain from deeper cuts may flatten, a regular price is not a cut.
 
@@ -379,7 +379,9 @@ since the answer is known. The real-data check scores sales that happened, not p
 from the rules on pure price cuts and not on lasting regular-price moves, which are few in public data; a real response can
 differ from all three shapes, and real data have problems the worlds leave out (stock-outs, competitors, store
 changes). The rules in Equation~\eqref{eq:shape} assume
-sales never fall as a cut deepens; a response that falls at deep cuts (a quality signal) would break them. The
+sales never fall as a cut deepens; shoppers who read a very deep cut as a sign of poor quality, or shelves emptied
+by a deep cut, would break them. The 40 kinked worlds differ in seed and planning strength but share one design, so
+winning in 36 of them shows an advantage within that design, not across kinds of retail environment. The
 held-out plans move one lever at a time. Each world has 360 series and eight forecast weeks; the versions of each
 model vary three settings
 each. Equal tuning of the models with the rules covers the bent and kinked worlds, not the log-linear one. The Dominick's price
@@ -390,7 +392,7 @@ episodes are not used, because our explanation audit reports results on them.
 
 Forecast accuracy is a fair guide when choosing between kinds of model and a poor guide when choosing between
 versions of one world model where plans follow demand. Training a world model to learn actions does not make it
-right about plans outside its history. The recorded regular price and three price rules do. With the rules, a simple
+right about plans outside its history. In the generated worlds the recorded regular price and three price rules do. With the rules, a simple
 model is best when the shape of the price response is known (error \errBLlShape{} in the bent world), and in a world
 whose shape the rules do not match the world model is better than the simpler models we tested (ahead in
 \hhBaseKWmLlWon{} of \hhBaseKWmLlN{} worlds). On real data the rules lower the

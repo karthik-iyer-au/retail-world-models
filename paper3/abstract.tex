@@ -1,14 +1,14 @@
 {\small
 \textbf{Abstract.} A retail world model is meant to answer ``what if'': what sales a plan the merchants have never
 run would bring. We test whether it does, in generated stores where the true effect of every plan is known, and
-what fixes it when it does not. Models are trained on the plans merchants make and asked to forecast plans held out
+what improves it when it does not. Models are trained on the plans merchants make and asked to forecast plans held out
 by design: deeper cuts than any in training, lasting regular-price moves, promotions moved to quiet weeks and no
 plan at all. Across \nFits{} fitted models we find four things. First, forecast accuracy is a fair guide between
 kinds of model (rank correlation with error on new plans \linkAllMin{} to \linkAllMax{}) and a poor guide between
 versions of one world model: where merchants plan into high-demand weeks the link reverses, down to \linkBWmOne{}
 (interval \linkBWmOneCi{}). Second, training the world model to learn the effect of actions (JEPA pretraining, a
 latent consistency check, adaptation at the plan date) leaves its error on new plans unchanged (\errLActLo{} to
-\errLActHi{} against \errLWm{}). Third, what fixes it is the recorded regular price and three price rules: sales may
+\errLActHi{} against \errLWm{}). Third, in the generated worlds what improves it is the recorded regular price and three price rules: sales may
 not fall as a cut deepens, the gain from deeper cuts may flatten, and a lasting regular price acts through its own
 elasticity. Given the same rules, a log-linear model is best when its curve can match the truth (error \errBLlShape{}
 against \errBShape{} for the world model with the rules and \errBLgbShape{} for LightGBM with the rules); in a world
