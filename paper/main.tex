@@ -68,6 +68,10 @@
 \newif\ifsupplement\supplementfalse
 \ifdefined\journalmode\journaltrue\fi
 \ifdefined\supplementmode\journaltrue\supplementtrue\fi
+% Journal of Forecasting build (main_jof.tex sets \jofmode as well as \journalmode): the journal text with the
+% authors named, since that journal's review is single-blind, plus keywords and its statements
+\newif\ifjof\joffalse
+\ifdefined\jofmode\joftrue\fi
 \newcommand{\colfig}{\columnwidth}
 % Revision wording: the arXiv version is a revision of its first version; the journal submission is a new paper
 % under anonymised review, so there the same phases are named without reference to an earlier version.
@@ -255,7 +259,8 @@
      Trees, Foundation Models, Transformers and World Models\\[2pt]
      Compared on Four Public Data Sets\par}
     \vspace{10pt}
-    \ifjournal\else
+    \ifjournal\ifjof\def\shownames{}\fi\else\def\shownames{}\fi
+    \ifdefined\shownames
     {\large Karthik Iyer$^{1}$ \quad Madan Dabbeeru$^{2}$\par}
     \vspace{2pt}
     {\footnotesize $^{1}$La Trobe University, Bundoora, Australia \quad $^{2}$Eizen, Suwanee, Georgia, United States\par}

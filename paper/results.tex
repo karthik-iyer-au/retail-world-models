@@ -230,7 +230,39 @@ over its own planning horizons, before adopting them.
 \input{moved_repro}
 \fi
 
-\ifjournal
+\ifjof
+\section{Data availability}
+\label{sec:licence}
+M5 is available from the competition's Kaggle page~\cite{m5accuracy};
+Dominick's from the Kilts Center for Marketing, University of Chicago Booth
+School of Business~\cite{dominicks}; Breakfast at the Frat from
+dunnhumby~\cite{frat}; Corporaci\'on Favorita from its Kaggle
+competition~\cite{favorita}. Each is obtained from its provider under the
+provider's own terms. The code, configuration files and every result file behind
+the tables and figures are at
+\url{https://github.com/karthik-iyer-au/retail-world-models}, archived on Zenodo,
+\href{https://doi.org/10.5281/zenodo.24271672}{doi:10.5281/zenodo.24271672}; how
+they rebuild the paper is set out in Section~\ref{sec:repro} of the supporting
+information.
+
+\section{Author contributions}
+\label{sec:contributions}
+Karthik Iyer conceived and scoped the work, designed the study, wrote the code,
+ran the experiments and analyses, and wrote the paper, with AI assistance as
+declared in \S\ref{sec:ai}. Madan Dabbeeru widened the range of methods
+considered for each research question, and reviewed the work and the
+manuscript.
+
+\section{Funding and acknowledgments}
+This research did not receive any specific grant from funding agencies in the
+public, commercial or not-for-profit sectors. The authors funded the work
+themselves.
+
+\section{Conflict of interest}
+The authors declare no conflict of interest. Neither author brings data, methods
+or code from employment or client work; the study uses public data sets only.
+
+\else\ifjournal
 \section{Data availability}
 \label{sec:licence}
 M5 is available from the competition's Kaggle page~\cite{m5accuracy};
@@ -287,7 +319,7 @@ from practice is the set of questions retailers ask of a forecast, which shaped
 the research questions in Section~\ref{sec:framework}. The first author's
 research focus is world models; the second author widened the scientific
 options considered for answering each question.
-\fi
+\fi\fi
 
 \section{Declaration of generative AI and AI-assisted technologies}
 \label{sec:ai}

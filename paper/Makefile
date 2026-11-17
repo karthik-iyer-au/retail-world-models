@@ -61,6 +61,12 @@ clean:
 	rm -f main.aux main.log main.out main.toc main.pdf
 
 # Journal version: main text and online supplement, cross-referenced (two passes each).
+.PHONY: jof
+# Journal of Forecasting: the journal text with the authors named (single-blind review); supporting information is
+# supplement_ijpe.pdf, built by the journal target
+jof: journal
+	for i in 1 2 3; do $(XELATEX) -interaction=nonstopmode main_jof.tex >/dev/null; done
+
 .PHONY: journal
 journal: tables figures
 	for i in 1 2; do $(XELATEX) -interaction=nonstopmode main_ijpe.tex >/dev/null; $(XELATEX) -interaction=nonstopmode supplement_ijpe.tex >/dev/null; done
