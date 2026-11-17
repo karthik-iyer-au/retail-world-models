@@ -301,7 +301,7 @@ model with the rules in \hhMedKWmLlWon{} of \hhMedKWmLlN{} worlds at the median 
 world model with the rules scores \nsKShapeA{} against \nsKShapeB{} in the kinked world (ahead in \nsKShapeWon{} of
 \nsKShapeN{} worlds, $p$ \nsKShapeP{}) and \nsBShapeA{} against \nsBShapeB{} in the bent world, and is still ahead of
 the log-linear model with the rules in \nsKLlWon{} of \nsKLlN{} kinked worlds; without the rules, \nsKPlainA{} against
-\nsKPlainB{}. The advantage comes from the learned network with the rules, not from the recurrent state.
+\nsKPlainB{}. Removing the cell did not materially change performance here, so the advantage cannot be attributed to the recurrent state.
 
 \input{generated/tab_h2h}
 
@@ -384,7 +384,7 @@ prove the same for every unknown shape.
 In the generated worlds this gives four rules for a retailer; the real data confirm the second for deep price cuts
 and do not yet confirm the first. Record the regular price and give it to the model. Give the model price rules
 rather than leaving a free model to find them. Use a simple model with the rules when the shape of the price response
-is known, and consider a world model with the rules when it is not. Choose between versions on held-out plans, generated or
+is known, and test a flexible model with the rules against it when it is not. Choose between versions on held-out plans, generated or
 tested, and not on forecast accuracy, which can pick the worst simulator where plans follow demand.
 
 \section{Limitations and threats to validity}\label{sec:limits}
@@ -408,9 +408,9 @@ logged interventions for the known answer; we have not run it there.
 A world model can be tested on actions it has never seen by holding them out by design, scoring them against a known
 answer and giving its structure to simpler models. In retail and in a dosing world, forecast accuracy is a fair guide
 between kinds of model and a poor guide between versions of one world model where actions follow need. Training to
-learn actions does not help; the regular price and three price rules do, and with them a simple model is
-best when the shape of the response is known and the learned network when it is not. On real data they help on
-deep price cuts, not on lasting moves.
+learn actions does not help; the regular price and three price rules do. With them a simple model is best when its
+curve can match the response; in our kinked world the world model with the rules was ahead of the simpler models we
+tested. On real data the rules help on deep cuts, not lasting moves.
 
 \section{Reproducibility and compute}\label{sec:repro}
 

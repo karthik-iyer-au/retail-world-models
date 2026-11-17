@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023/Debian) (preloaded format=xelatex 2026.10.23)  17 NOV 2026 21:00
+This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023/Debian) (preloaded format=xelatex 2026.10.23)  17 NOV 2026 21:14
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -3865,7 +3865,7 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [6]
 (./generated/tab_h2h.tex)
-Underfull \vbox (badness 1675) has occurred while \output is active []
+Underfull \vbox (badness 1210) has occurred while \output is active []
 
 
 Underfull \vbox (badness 2368) has occurred while \output is active []
@@ -3996,10 +3996,10 @@ Package microtype Info: Character `⁺' is missing
 Package microtype Info: Character `⁻' is missing
 (microtype)             in font `\TU/TeXGyrePagella(0)/m/it/8'.
 (microtype)             Ignoring protrusion settings for this character.
-)
+
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [10]
+ [10])
 Overfull \hbox (55.4481pt too wide) in paragraph at lines 467--473
 \TU/TeXGyrePagella(0)/m/n/10 360 patients in 18 clinics over 260 days (\TU/lmtt
 /m/n/10 scripts/paper3_dosing.py\TU/TeXGyrePagella(0)/m/n/10 ).
