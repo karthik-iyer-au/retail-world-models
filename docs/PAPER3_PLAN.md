@@ -298,3 +298,24 @@ out from the dosing history and the drug's known half-life. Added, labelled as a
 Reading fixed now: if the rules with the built-up level recover the size of the effect of new doses where dosing
 follows severity, the retail lesson (give the model what the professional knows, plus rules) carries to dosing; if
 not, the paper reports the limit. Every result is reported. Compute: about US$5 on Modal.
+
+**Amendment 10, 17 November 2026, 20:45, before any of these runs.** A reviewer (passed on by Karthik, 20:2x) noted
+that the paper does not separate the recurrent state from a comparable network without it. Karthik, 20:37: "sure".
+Added, labelled in the paper as added:
+
+1. Two versions of the world model with the recurrent cell removed (`rollout: False`); everything else unchanged. The
+   encoder still reads the last weeks of sales and plan into one vector, and each forecast week is read from that
+   vector and that week's plan directly, so the state does not move under the plan: `wm_nostate` (the base world
+   model, `wm_d32_s2000_h26`, without the cell) and `wm_shape_nostate` (the world model with the rules, `wm_shape`,
+   without the cell).
+2. Worlds: the bent world (seeds 101 to 103) and the kinked world (seeds 101 to 110), each at the four planning
+   strengths: 52 worlds. The base world model is also fitted on the 28 kinked worlds with seeds 104 to 110, where it
+   was not run, so both pairs cover the same 52 worlds.
+3. Measures: error on new plans and forecast accuracy as in the main study. Pairs, with the world as the unit (worlds
+   ahead, two-sided sign test, median paired difference with a 95% bootstrap interval over worlds): `wm_nostate`
+   against `wm_d32_s2000_h26`, and `wm_shape_nostate` against `wm_shape`, by world shape.
+4. Reading: if the versions without the cell match those with it, the results credited to the world model come from
+   the network and the rules, not the recurrent state, and the paper says so.
+
+Compute: 132 world model fits on Modal, about US$18.
+

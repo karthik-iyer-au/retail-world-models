@@ -72,6 +72,10 @@ def versions() -> dict:
     # amendment 2 (revised 17 November 2026, 01:00): the world model with the price-response shape built in
     out["wm_shape"] = ("state_model", {**out["wm_rr"][1], "price_shape": True})
     out["lgb_ll"] = ("split", {"forecaster": out["lgb_rr"]})
+    # amendment 10 (17 November 2026, 20:45): the same network without the recurrent cell; each period is read from
+    # the encoded history and that period's plan directly
+    out["wm_nostate"] = ("state_model", {**base, "rollout": False})
+    out["wm_shape_nostate"] = ("state_model", {**out["wm_shape"][1], "rollout": False})
     return out
 
 
