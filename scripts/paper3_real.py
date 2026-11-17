@@ -142,7 +142,7 @@ def main(argv=None):
                  else build_model(kind, **settings).fit(fit_on))
         plan = test.drop(columns=[UNITS, "group"] + ([] if keep_rr else [RR]))
         pred = np.clip(np.asarray(model.predict(plan), dtype=float), 0, None)
-        rec = {"data": a.data, "origin": a.origin, "deep": a.deep, "version": name, "kind": kind, **measures(test, pred),
+        rec = {"data": a.data, "origin": a.origin, "deep_threshold": a.deep, "version": name, "kind": kind, **measures(test, pred),
                "seconds": round(time.time() - t0, 1)}
         f.write_text(json.dumps(rec, indent=1))
         test.assign(pred=pred)[[SERIES, DATE, UNITS, "group", "pred"]].to_csv(f.with_suffix(".csv.gz"), index=False)
