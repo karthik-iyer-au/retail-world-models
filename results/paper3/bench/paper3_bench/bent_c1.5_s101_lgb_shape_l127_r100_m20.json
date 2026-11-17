@@ -1,0 +1,67 @@
+{
+ "confounding": 1.5,
+ "seed": 101,
+ "shape": "bent",
+ "explore": 0.0,
+ "version": "lgb_shape_l127_r100_m20",
+ "kind": "lightgbm_direct",
+ "accuracy": {
+  "item_by_store_rmsse": 0.41099400824467297,
+  "store_rmsse": 0.40319264612561123
+ },
+ "observed": {
+  "stock": 0.17053345287924782,
+  "sum_pred_over_true": 0.9744753031992173
+ },
+ "deeper_50": {
+  "stock": 0.1746537771650848,
+  "sum_pred_over_true": 0.9570424428363964,
+  "change_ratio": 0.5804309008121487,
+  "change_rank": 0.6727044682490375
+ },
+ "deeper_60": {
+  "stock": 0.17556805580394685,
+  "sum_pred_over_true": 0.9545329061392943,
+  "change_ratio": 0.5614173607025791,
+  "change_rank": 0.7017797048953722
+ },
+ "regular_-10": {
+  "stock": 0.24746658132046542,
+  "sum_pred_over_true": 1.0966040566140254,
+  "change_ratio": 3.5391791249101776,
+  "change_rank": 0.5461671203314568
+ },
+ "regular_-5": {
+  "stock": 0.22704256430635472,
+  "sum_pred_over_true": 1.0558602044197933,
+  "change_ratio": 4.311256253242843,
+  "change_rank": 0.32526855602902177
+ },
+ "regular_+5": {
+  "stock": 0.17580146430982246,
+  "sum_pred_over_true": 0.9703649505667392,
+  "change_ratio": 1.1347790558658626,
+  "change_rank": 0.3992837911241807
+ },
+ "regular_+10": {
+  "stock": 0.17976456560684453,
+  "sum_pred_over_true": 0.972477286262996,
+  "change_ratio": 1.0124376249874205,
+  "change_rank": 0.5092528585664606
+ },
+ "off_pattern": {
+  "stock": 0.22877247567300907,
+  "sum_pred_over_true": 1.0186850407337635,
+  "change_ratio": 0.38041887163417126,
+  "change_rank": 0.9255493206817205
+ },
+ "no_plan": {
+  "stock": 0.22554202492297848,
+  "sum_pred_over_true": 0.8711835171547101,
+  "change_ratio": 1.2426769860457847,
+  "change_rank": 0.9083271769190954
+ },
+ "promo_choice": 0.9908464771786935,
+ "regular_choice_loss": 0.02697599737522966,
+ "seconds": 3.4
+}

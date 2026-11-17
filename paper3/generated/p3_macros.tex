@@ -210,7 +210,7 @@
 \newcommand{\regdownBAdapt}{5.4}
 \newcommand{\regupBAdapt}{4.37}
 \newcommand{\priceBAdapt}{9.6}
-\newcommand{\shapeWinsB}{one}
+\newcommand{\shapeWinsB}{none}
 \newcommand{\shapeBeatsLlB}{one}
 \newcommand{\shapeBeatsLgbB}{twelve}
 \newcommand{\worldsB}{twelve}
@@ -308,14 +308,161 @@
 \newcommand{\regdownKShape}{1.3}
 \newcommand{\regupKShape}{1.13}
 \newcommand{\priceKShape}{0.2}
-\newcommand{\shapeWinsK}{seven}
+\newcommand{\shapeWinsK}{none}
 \newcommand{\shapeBeatsLlK}{nine}
 \newcommand{\shapeBeatsLgbK}{ten}
 \newcommand{\worldsK}{twelve}
 \newcommand{\linkAllMin}{0.32}
 \newcommand{\linkAllMax}{0.66}
-\newcommand{\nFits}{1,284}
+\newcommand{\nFits}{2,004}
 \newcommand{\errLActLo}{1.05}
 \newcommand{\errLActHi}{1.06}
 \newcommand{\errBActLo}{1.34}
 \newcommand{\errBActHi}{1.39}
+\newcommand{\hhBaseBWmLlWon}{1}
+\newcommand{\hhBaseBWmLlN}{12}
+\newcommand{\hhBaseBWmLlP}{0.006}
+\newcommand{\hhBaseBWmLlDiff}{0.12}
+\newcommand{\hhBaseBWmLlCi}{0.09 to 0.13}
+\newcommand{\hhBaseBWmLlA}{0.27}
+\newcommand{\hhBaseBWmLlB}{0.17}
+\newcommand{\hhBaseBWmLgbWon}{12}
+\newcommand{\hhBaseBWmLgbN}{12}
+\newcommand{\hhBaseBWmLgbP}{below 0.001}
+\newcommand{\hhBaseBWmLgbDiff}{-0.30}
+\newcommand{\hhBaseBWmLgbCi}{-0.33 to -0.24}
+\newcommand{\hhBaseBWmLgbA}{0.27}
+\newcommand{\hhBaseBWmLgbB}{0.59}
+\newcommand{\hhBaseBLlLgbWon}{12}
+\newcommand{\hhBaseBLlLgbN}{12}
+\newcommand{\hhBaseBLlLgbP}{below 0.001}
+\newcommand{\hhBaseBLlLgbDiff}{-0.41}
+\newcommand{\hhBaseBLlLgbCi}{-0.47 to -0.38}
+\newcommand{\hhBaseBLlLgbA}{0.17}
+\newcommand{\hhBaseBLlLgbB}{0.59}
+\newcommand{\hhBaseKWmLlWon}{36}
+\newcommand{\hhBaseKWmLlN}{40}
+\newcommand{\hhBaseKWmLlP}{below 0.001}
+\newcommand{\hhBaseKWmLlDiff}{-0.12}
+\newcommand{\hhBaseKWmLlCi}{-0.18 to -0.09}
+\newcommand{\hhBaseKWmLlA}{0.28}
+\newcommand{\hhBaseKWmLlB}{0.41}
+\newcommand{\hhBaseKWmLgbWon}{38}
+\newcommand{\hhBaseKWmLgbN}{40}
+\newcommand{\hhBaseKWmLgbP}{below 0.001}
+\newcommand{\hhBaseKWmLgbDiff}{-0.21}
+\newcommand{\hhBaseKWmLgbCi}{-0.25 to -0.18}
+\newcommand{\hhBaseKWmLgbA}{0.28}
+\newcommand{\hhBaseKWmLgbB}{0.54}
+\newcommand{\hhBaseKLlLgbWon}{27}
+\newcommand{\hhBaseKLlLgbN}{40}
+\newcommand{\hhBaseKLlLgbP}{0.038}
+\newcommand{\hhBaseKLlLgbDiff}{-0.09}
+\newcommand{\hhBaseKLlLgbCi}{-0.18 to -0.01}
+\newcommand{\hhBaseKLlLgbA}{0.41}
+\newcommand{\hhBaseKLlLgbB}{0.54}
+\newcommand{\hhBaseLWmLlWon}{0}
+\newcommand{\hhBaseLWmLlN}{12}
+\newcommand{\hhBaseLWmLlP}{below 0.001}
+\newcommand{\hhBaseLWmLlDiff}{0.21}
+\newcommand{\hhBaseLWmLlCi}{0.15 to 0.32}
+\newcommand{\hhBaseLWmLlA}{0.39}
+\newcommand{\hhBaseLWmLlB}{0.13}
+\newcommand{\hhBaseLWmLgbWon}{12}
+\newcommand{\hhBaseLWmLgbN}{12}
+\newcommand{\hhBaseLWmLgbP}{below 0.001}
+\newcommand{\hhBaseLWmLgbDiff}{-0.46}
+\newcommand{\hhBaseLWmLgbCi}{-0.50 to -0.39}
+\newcommand{\hhBaseLWmLgbA}{0.39}
+\newcommand{\hhBaseLWmLgbB}{0.82}
+\newcommand{\hhBaseLLlLgbWon}{12}
+\newcommand{\hhBaseLLlLgbN}{12}
+\newcommand{\hhBaseLLlLgbP}{below 0.001}
+\newcommand{\hhBaseLLlLgbDiff}{-0.67}
+\newcommand{\hhBaseLLlLgbCi}{-0.76 to -0.59}
+\newcommand{\hhBaseLLlLgbA}{0.13}
+\newcommand{\hhBaseLLlLgbB}{0.82}
+\newcommand{\hhMedBWmLlWon}{0}
+\newcommand{\hhMedBWmLlN}{12}
+\newcommand{\hhMedBWmLlP}{below 0.001}
+\newcommand{\hhMedBWmLlDiff}{0.17}
+\newcommand{\hhMedBWmLlCi}{0.14 to 0.19}
+\newcommand{\hhMedBWmLlA}{0.32}
+\newcommand{\hhMedBWmLlB}{0.16}
+\newcommand{\hhMedBWmLgbWon}{12}
+\newcommand{\hhMedBWmLgbN}{12}
+\newcommand{\hhMedBWmLgbP}{below 0.001}
+\newcommand{\hhMedBWmLgbDiff}{-0.36}
+\newcommand{\hhMedBWmLgbCi}{-0.43 to -0.31}
+\newcommand{\hhMedBWmLgbA}{0.32}
+\newcommand{\hhMedBWmLgbB}{0.68}
+\newcommand{\hhMedBLlLgbWon}{12}
+\newcommand{\hhMedBLlLgbN}{12}
+\newcommand{\hhMedBLlLgbP}{below 0.001}
+\newcommand{\hhMedBLlLgbDiff}{-0.53}
+\newcommand{\hhMedBLlLgbCi}{-0.60 to -0.48}
+\newcommand{\hhMedBLlLgbA}{0.16}
+\newcommand{\hhMedBLlLgbB}{0.68}
+\newcommand{\hhMedKWmLlWon}{12}
+\newcommand{\hhMedKWmLlN}{12}
+\newcommand{\hhMedKWmLlP}{below 0.001}
+\newcommand{\hhMedKWmLlDiff}{-0.12}
+\newcommand{\hhMedKWmLlCi}{-0.18 to -0.09}
+\newcommand{\hhMedKWmLlA}{0.29}
+\newcommand{\hhMedKWmLlB}{0.40}
+\newcommand{\hhMedKWmLgbWon}{11}
+\newcommand{\hhMedKWmLgbN}{12}
+\newcommand{\hhMedKWmLgbP}{0.006}
+\newcommand{\hhMedKWmLgbDiff}{-0.27}
+\newcommand{\hhMedKWmLgbCi}{-0.34 to -0.16}
+\newcommand{\hhMedKWmLgbA}{0.29}
+\newcommand{\hhMedKWmLgbB}{0.57}
+\newcommand{\hhMedKLlLgbWon}{8}
+\newcommand{\hhMedKLlLgbN}{12}
+\newcommand{\hhMedKLlLgbP}{0.388}
+\newcommand{\hhMedKLlLgbDiff}{-0.13}
+\newcommand{\hhMedKLlLgbCi}{-0.23 to 0.08}
+\newcommand{\hhMedKLlLgbA}{0.40}
+\newcommand{\hhMedKLlLgbB}{0.57}
+\newcommand{\hhBestBWmLlWon}{1}
+\newcommand{\hhBestBWmLlN}{12}
+\newcommand{\hhBestBWmLlP}{0.006}
+\newcommand{\hhBestBWmLlDiff}{0.08}
+\newcommand{\hhBestBWmLlCi}{0.04 to 0.10}
+\newcommand{\hhBestBWmLlA}{0.20}
+\newcommand{\hhBestBWmLlB}{0.12}
+\newcommand{\hhBestBWmLgbWon}{12}
+\newcommand{\hhBestBWmLgbN}{12}
+\newcommand{\hhBestBWmLgbP}{below 0.001}
+\newcommand{\hhBestBWmLgbDiff}{-0.35}
+\newcommand{\hhBestBWmLgbCi}{-0.38 to -0.30}
+\newcommand{\hhBestBWmLgbA}{0.20}
+\newcommand{\hhBestBWmLgbB}{0.58}
+\newcommand{\hhBestBLlLgbWon}{12}
+\newcommand{\hhBestBLlLgbN}{12}
+\newcommand{\hhBestBLlLgbP}{below 0.001}
+\newcommand{\hhBestBLlLgbDiff}{-0.43}
+\newcommand{\hhBestBLlLgbCi}{-0.48 to -0.38}
+\newcommand{\hhBestBLlLgbA}{0.12}
+\newcommand{\hhBestBLlLgbB}{0.58}
+\newcommand{\hhBestKWmLlWon}{12}
+\newcommand{\hhBestKWmLlN}{12}
+\newcommand{\hhBestKWmLlP}{below 0.001}
+\newcommand{\hhBestKWmLlDiff}{-0.16}
+\newcommand{\hhBestKWmLlCi}{-0.21 to -0.12}
+\newcommand{\hhBestKWmLlA}{0.23}
+\newcommand{\hhBestKWmLlB}{0.40}
+\newcommand{\hhBestKWmLgbWon}{11}
+\newcommand{\hhBestKWmLgbN}{12}
+\newcommand{\hhBestKWmLgbP}{0.006}
+\newcommand{\hhBestKWmLgbDiff}{-0.22}
+\newcommand{\hhBestKWmLgbCi}{-0.27 to -0.12}
+\newcommand{\hhBestKWmLgbA}{0.23}
+\newcommand{\hhBestKWmLgbB}{0.45}
+\newcommand{\hhBestKLlLgbWon}{7}
+\newcommand{\hhBestKLlLgbN}{12}
+\newcommand{\hhBestKLlLgbP}{0.774}
+\newcommand{\hhBestKLlLgbDiff}{-0.04}
+\newcommand{\hhBestKLlLgbCi}{-0.13 to 0.16}
+\newcommand{\hhBestKLlLgbA}{0.40}
+\newcommand{\hhBestKLlLgbB}{0.45}

@@ -1,0 +1,28 @@
+\begin{table*}[t]
+\centering
+\caption{\textbf{The three models with the price rules, head to head, with the world as the unit} (added after the
+first results). Each cell: worlds in which the first model has the lower error on new plans, of all worlds (two-sided
+sign test), then the median paired difference in error (negative favours the first model) with a 95\% interval from
+a bootstrap over worlds. Base: one version of each model. Median and best: each model's median and best version on
+the held-out plans over 12 world model, 12 LightGBM and 6 log-linear versions. The kinked base comparison has 40
+worlds (seeds 101 to 110); the tuned comparisons have 12.}
+\label{tab:h2h}
+\footnotesize\setlength{\tabcolsep}{3.5pt}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lllll}
+\toprule
+World & Comparison & Base version & Median version & Best version \\
+\midrule
+Log-linear & World model vs Log-linear & 0/12 ($<$0.001); +0.21 [+0.15, +0.32] &  &  \\
+ & World model vs LightGBM & 12/12 ($<$0.001); $-$0.46 [$-$0.50, $-$0.39] &  &  \\
+ & Log-linear vs LightGBM & 12/12 ($<$0.001); $-$0.67 [$-$0.76, $-$0.59] &  &  \\
+Bent & World model vs Log-linear & 1/12 (0.006); +0.12 [+0.09, +0.13] & 0/12 ($<$0.001); +0.17 [+0.14, +0.19] & 1/12 (0.006); +0.08 [+0.04, +0.10] \\
+ & World model vs LightGBM & 12/12 ($<$0.001); $-$0.30 [$-$0.33, $-$0.24] & 12/12 ($<$0.001); $-$0.36 [$-$0.43, $-$0.31] & 12/12 ($<$0.001); $-$0.35 [$-$0.38, $-$0.30] \\
+ & Log-linear vs LightGBM & 12/12 ($<$0.001); $-$0.41 [$-$0.47, $-$0.38] & 12/12 ($<$0.001); $-$0.53 [$-$0.60, $-$0.48] & 12/12 ($<$0.001); $-$0.43 [$-$0.48, $-$0.38] \\
+Kinked & World model vs Log-linear & 36/40 ($<$0.001); $-$0.12 [$-$0.18, $-$0.09] & 12/12 ($<$0.001); $-$0.12 [$-$0.18, $-$0.09] & 12/12 ($<$0.001); $-$0.16 [$-$0.21, $-$0.12] \\
+ & World model vs LightGBM & 38/40 ($<$0.001); $-$0.21 [$-$0.25, $-$0.18] & 11/12 (0.006); $-$0.27 [$-$0.34, $-$0.16] & 11/12 (0.006); $-$0.22 [$-$0.27, $-$0.12] \\
+ & Log-linear vs LightGBM & 27/40 (0.038); $-$0.09 [$-$0.18, $-$0.01] & 8/12 (0.388); $-$0.13 [$-$0.23, +0.08] & 7/12 (0.774); $-$0.04 [$-$0.13, +0.16] \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table*}

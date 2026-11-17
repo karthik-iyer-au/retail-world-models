@@ -11,10 +11,12 @@ latent consistency check, adaptation at the plan date) leaves its error on new p
 \errLActHi{} against \errLWm{}). Third, what fixes it is the recorded regular price and three price rules: sales may
 not fall as a cut deepens, the gain from deeper cuts may flatten, and a lasting regular price acts through its own
 elasticity. Given the same rules, a log-linear model is best when its curve can match the truth (error \errBLlShape{}
-against \errBShape{} for the world model with the rules and \errBLgbShape{} for LightGBM with the rules); the world
-model with the rules is best when the true curve lies outside them (\errKShape{} against \errKLlShape{} and
-\errKLgbShape{}, ahead of the log-linear model in \shapeBeatsLlK{} of twelve worlds). Fourth, a small share of random
+against \errBShape{} for the world model with the rules and \errBLgbShape{} for LightGBM with the rules); in a world
+whose curve lies outside the rules, the world model with the rules is better than the simpler models we tested
+(ahead of the log-linear model with the rules in \hhBaseKWmLlWon{} of \hhBaseKWmLlN{} worlds, sign test $p$
+\hhBaseKWmLlP{}, and in \hhMedKWmLlWon{} of \hhMedKWmLlN{} when every model is tuned over its versions). All worlds
+are generated, so these are findings about known-answer simulations, not yet about real stores. Fourth, a small share of random
 test plans helps every model a little. For retailers: give the model the recorded regular price and sensible price
-rules, use a simple model when the shape of the price response is known and a world model when it is not, and
+rules, use a simple model when the shape of the price response is known, consider a world model when it is not, and
 choose versions on held-out plans rather than on forecast accuracy.
 \par}

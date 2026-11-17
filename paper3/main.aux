@@ -50,8 +50,8 @@
 \@writefile{toc}{\contentsline {section}{\numberline {4}Models and remedies}{2}{section.4}\protected@file@percent }
 \newlabel{sec:method}{{4}{2}{Models and remedies}{section.4}{}}
 \@writefile{toc}{\contentsline {paragraph}{World model}{2}{paragraph*.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{LightGBM}{2}{paragraph*.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Log-linear model}{2}{paragraph*.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{LightGBM}{3}{paragraph*.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Log-linear model}{3}{paragraph*.10}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Remedies added after the first results}{3}{paragraph*.11}\protected@file@percent }
 \newlabel{eq:shape}{{1}{3}{Remedies added after the first results}{equation.4.1}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {5}Experimental setup}{3}{section.5}\protected@file@percent }
@@ -61,42 +61,37 @@
 \@writefile{toc}{\contentsline {section}{\numberline {6}Results}{3}{section.6}\protected@file@percent }
 \newlabel{sec:results}{{6}{3}{Results}{section.6}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Better forecasting is a fair guide between kinds of model, not between versions}{3}{subsection.6.1}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces \textbf  {Does better forecasting go with better simulation?} Rank correlation, within each world, between forecast error on the merchants' plans and each measure (higher is worse for every measure, so a positive number means better forecasters are also better at it), averaged over three seeds. Bold: the 95\% bootstrap interval excludes zero. --: every version made the same choice, so there is nothing to rank. All versions: the test fixed in the plan (12 world model, 12 LightGBM and the log-linear model). Within a model class: added after the first results.}}{4}{table.caption.14}\protected@file@percent }
-\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{tab:link}{{1}{4}{\textbf {Does better forecasting go with better simulation?} Rank correlation, within each world, between forecast error on the merchants' plans and each measure (higher is worse for every measure, so a positive number means better forecasters are also better at it), averaged over three seeds. Bold: the 95\% bootstrap interval excludes zero. --: every version made the same choice, so there is nothing to rank. All versions: the test fixed in the plan (12 world model, 12 LightGBM and the log-linear model). Within a model class: added after the first results}{table.caption.14}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces \textbf  {Forecast accuracy and error on new plans.} (a) Every version in the three bent worlds at planning strength 1: forecast error on the merchants' plans against error on the held-out plans. (b, c) Rank correlation of the two within each world, averaged over three seeds, with 95\% bootstrap intervals; all versions (the planned test) and within each model class (added).}}{4}{figure.caption.15}\protected@file@percent }
-\newlabel{fig:link}{{1}{4}{\textbf {Forecast accuracy and error on new plans.} (a) Every version in the three bent worlds at planning strength 1: forecast error on the merchants' plans against error on the held-out plans. (b, c) Rank correlation of the two within each world, averaged over three seeds, with 95\% bootstrap intervals; all versions (the planned test) and within each model class (added)}{figure.caption.15}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Where the models go wrong}{4}{subsection.6.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Training the world model to learn actions does not help}{4}{subsection.6.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {6.4}What works}{4}{subsection.6.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{The recorded regular price}{4}{paragraph*.17}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces \textbf  {Predicted change in sales over the true change, for each held-out plan.} Medians over the 12 worlds of each shape (planning strengths and seeds). 1 is right; the band marks 0.8 to 1.25. Log scale.}}{5}{figure.caption.16}\protected@file@percent }
-\newlabel{fig:ratio}{{2}{5}{\textbf {Predicted change in sales over the true change, for each held-out plan.} Medians over the 12 worlds of each shape (planning strengths and seeds). 1 is right; the band marks 0.8 to 1.25. Log scale}{figure.caption.16}{}}
-\@writefile{toc}{\contentsline {paragraph}{Split the job}{5}{paragraph*.18}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Price rules in the world model}{5}{paragraph*.19}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Test and learn}{5}{paragraph*.20}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}The rules or the world model?}{5}{subsection.6.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Split the job}{4}{paragraph*.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Price rules in the world model}{4}{paragraph*.19}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Test and learn}{4}{paragraph*.20}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}The rules or the world model?}{4}{subsection.6.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces \textbf  {Does better forecasting go with better simulation?} Rank correlation, within each world, between forecast error on the merchants' plans and each measure (higher is worse for every measure, so a positive number means better forecasters are also better at it), averaged over three seeds. Bold: the 95\% bootstrap interval excludes zero. --: every version made the same choice, so there is nothing to rank. All versions: the test fixed in the plan (12 world model, 12 LightGBM and the log-linear model). Within a model class: added after the first results.}}{5}{table.caption.14}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{tab:link}{{1}{5}{\textbf {Does better forecasting go with better simulation?} Rank correlation, within each world, between forecast error on the merchants' plans and each measure (higher is worse for every measure, so a positive number means better forecasters are also better at it), averaged over three seeds. Bold: the 95\% bootstrap interval excludes zero. --: every version made the same choice, so there is nothing to rank. All versions: the test fixed in the plan (12 world model, 12 LightGBM and the log-linear model). Within a model class: added after the first results}{table.caption.14}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces \textbf  {Forecast accuracy and error on new plans.} (a) Every version in the three bent worlds at planning strength 1: forecast error on the merchants' plans against error on the held-out plans. (b, c) Rank correlation of the two within each world, averaged over three seeds, with 95\% bootstrap intervals; all versions (the planned test) and within each model class (added).}}{5}{figure.caption.15}\protected@file@percent }
+\newlabel{fig:link}{{1}{5}{\textbf {Forecast accuracy and error on new plans.} (a) Every version in the three bent worlds at planning strength 1: forecast error on the merchants' plans against error on the held-out plans. (b, c) Rank correlation of the two within each world, averaged over three seeds, with 95\% bootstrap intervals; all versions (the planned test) and within each model class (added)}{figure.caption.15}{}}
+\@writefile{toc}{\contentsline {paragraph}{Equal tuning}{5}{paragraph*.23}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {6.6}Decisions}{5}{subsection.6.6}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces \textbf  {Error on new plans for every model and remedy} (0 means the predicted change in sales is right). Medians over the 12 worlds of each shape. Filled: trained on the merchants' history; open: with 5\% random test plans. Rows after the first in each block, and the split and shape rows, were added after the first results.}}{6}{figure.caption.21}\protected@file@percent }
-\newlabel{fig:remedies}{{3}{6}{\textbf {Error on new plans for every model and remedy} (0 means the predicted change in sales is right). Medians over the 12 worlds of each shape. Filled: trained on the merchants' history; open: with 5\% random test plans. Rows after the first in each block, and the split and shape rows, were added after the first results}{figure.caption.21}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces \textbf  {Every model and remedy in the three worlds.} Medians over the 12 worlds of each kind (four planning strengths, three seeds). Forecast: item-by-store RMSSE on the merchants' own plan in the held-out weeks. New plans: mean over the eight held-out plans of $|\log (\text  {predicted change}/\text  {true change})|$. Price choice: revenue given up by the regular-price move the model picks, \% of the best. Stock: summed absolute error of ordering to the forecast, over expected sales. Rows marked + change one thing in the row above; all rows after the first of each model, and the split rows, were added after the first results (Appendix~\ref {app:plan}). The kinked world was run for the versions shown.}}{6}{table.caption.22}\protected@file@percent }
-\newlabel{tab:remedies}{{2}{6}{\textbf {Every model and remedy in the three worlds.} Medians over the 12 worlds of each kind (four planning strengths, three seeds). Forecast: item-by-store RMSSE on the merchants' own plan in the held-out weeks. New plans: mean over the eight held-out plans of $|\log (\text {predicted change}/\text {true change})|$. Price choice: revenue given up by the regular-price move the model picks, \% of the best. Stock: summed absolute error of ordering to the forecast, over expected sales. Rows marked + change one thing in the row above; all rows after the first of each model, and the split rows, were added after the first results (Appendix~\ref {app:plan}). The kinked world was run for the versions shown}{table.caption.22}{}}
-\citation{rwm}
-\@writefile{toc}{\contentsline {section}{\numberline {7}What was tried and dropped}{7}{section.7}\protected@file@percent }
-\newlabel{sec:dropped}{{7}{7}{What was tried and dropped}{section.7}{}}
-\@writefile{toc}{\contentsline {paragraph}{Test plans as deep as 60\%}{7}{paragraph*.23}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{The world model given the regular price alone}{7}{paragraph*.24}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Training for actions}{7}{paragraph*.25}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces \textbf  {Predicted change in sales over the true change, for each held-out plan.} Medians over the 12 worlds of each shape (planning strengths and seeds). 1 is right; the band marks 0.8 to 1.25. Log scale.}}{6}{figure.caption.16}\protected@file@percent }
+\newlabel{fig:ratio}{{2}{6}{\textbf {Predicted change in sales over the true change, for each held-out plan.} Medians over the 12 worlds of each shape (planning strengths and seeds). 1 is right; the band marks 0.8 to 1.25. Log scale}{figure.caption.16}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces \textbf  {Error on new plans for every model and remedy} (0 means the predicted change in sales is right). Medians over the 12 worlds of each shape. Filled: trained on the merchants' history; open: with 5\% random test plans. Rows after the first in each block, and the split rows, were added after the first results.}}{6}{figure.caption.21}\protected@file@percent }
+\newlabel{fig:remedies}{{3}{6}{\textbf {Error on new plans for every model and remedy} (0 means the predicted change in sales is right). Medians over the 12 worlds of each shape. Filled: trained on the merchants' history; open: with 5\% random test plans. Rows after the first in each block, and the split rows, were added after the first results}{figure.caption.21}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}What was tried and dropped}{6}{section.7}\protected@file@percent }
+\newlabel{sec:dropped}{{7}{6}{What was tried and dropped}{section.7}{}}
+\@writefile{toc}{\contentsline {paragraph}{Test plans as deep as 60\%}{6}{paragraph*.25}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{The world model given the regular price alone}{6}{paragraph*.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Training for actions}{6}{paragraph*.27}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces \textbf  {Every model and remedy in the three worlds.} Medians over the 12 worlds of each kind (four planning strengths, three seeds). Forecast: item-by-store RMSSE on the merchants' own plan in the held-out weeks. New plans: mean over the eight held-out plans of $|\log (\text  {predicted change}/\text  {true change})|$. Price choice: revenue given up by the regular-price move the model picks, \% of the best. Stock: summed absolute error of ordering to the forecast, over expected sales. Rows marked + change one thing in the row above; all rows after the first of each model, and the split rows, were added after the first results (Appendix~\ref {app:plan}). The kinked world was run for the versions shown.}}{7}{table.caption.22}\protected@file@percent }
+\newlabel{tab:remedies}{{2}{7}{\textbf {Every model and remedy in the three worlds.} Medians over the 12 worlds of each kind (four planning strengths, three seeds). Forecast: item-by-store RMSSE on the merchants' own plan in the held-out weeks. New plans: mean over the eight held-out plans of $|\log (\text {predicted change}/\text {true change})|$. Price choice: revenue given up by the regular-price move the model picks, \% of the best. Stock: summed absolute error of ordering to the forecast, over expected sales. Rows marked + change one thing in the row above; all rows after the first of each model, and the split rows, were added after the first results (Appendix~\ref {app:plan}). The kinked world was run for the versions shown}{table.caption.22}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces \textbf  {The three models with the price rules, head to head, with the world as the unit} (added after the first results). Each cell: worlds in which the first model has the lower error on new plans, of all worlds (two-sided sign test), then the median paired difference in error (negative favours the first model) with a 95\% interval from a bootstrap over worlds. Base: one version of each model. Median and best: each model's median and best version on the held-out plans over 12 world model, 12 LightGBM and 6 log-linear versions. The kinked base comparison has 40 worlds (seeds 101 to 110); the tuned comparisons have 12.}}{7}{table.caption.24}\protected@file@percent }
+\newlabel{tab:h2h}{{3}{7}{\textbf {The three models with the price rules, head to head, with the world as the unit} (added after the first results). Each cell: worlds in which the first model has the lower error on new plans, of all worlds (two-sided sign test), then the median paired difference in error (negative favours the first model) with a 95\% interval from a bootstrap over worlds. Base: one version of each model. Median and best: each model's median and best version on the held-out plans over 12 world model, 12 LightGBM and 6 log-linear versions. The kinked base comparison has 40 worlds (seeds 101 to 110); the tuned comparisons have 12}{table.caption.24}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {8}Discussion}{7}{section.8}\protected@file@percent }
 \newlabel{sec:discussion}{{8}{7}{Discussion}{section.8}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {9}Limitations and threats to validity}{7}{section.9}\protected@file@percent }
-\newlabel{sec:limits}{{9}{7}{Limitations and threats to validity}{section.9}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {10}Conclusion}{7}{section.10}\protected@file@percent }
-\newlabel{sec:conclusion}{{10}{7}{Conclusion}{section.10}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {11}Reproducibility and compute}{7}{section.11}\protected@file@percent }
-\newlabel{sec:repro}{{11}{7}{Reproducibility and compute}{section.11}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {12}Data and code availability}{7}{section.12}\protected@file@percent }
-\newlabel{sec:avail}{{12}{7}{Data and code availability}{section.12}{}}
+\citation{rwm}
 \bibcite{rwm}{1}
 \bibcite{worldmodels}{2}
 \bibcite{planet}{3}
@@ -109,6 +104,14 @@
 \bibcite{dwm}{10}
 \bibcite{adwm}{11}
 \bibcite{mjepa}{12}
+\@writefile{toc}{\contentsline {section}{\numberline {9}Limitations and threats to validity}{8}{section.9}\protected@file@percent }
+\newlabel{sec:limits}{{9}{8}{Limitations and threats to validity}{section.9}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {10}Conclusion}{8}{section.10}\protected@file@percent }
+\newlabel{sec:conclusion}{{10}{8}{Conclusion}{section.10}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {11}Reproducibility and compute}{8}{section.11}\protected@file@percent }
+\newlabel{sec:repro}{{11}{8}{Reproducibility and compute}{section.11}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {12}Data and code availability}{8}{section.12}\protected@file@percent }
+\newlabel{sec:avail}{{12}{8}{Data and code availability}{section.12}{}}
 \bibcite{m5accuracy}{13}
 \bibcite{fildes2022}{14}
 \bibcite{promocast}{15}
@@ -126,8 +129,8 @@
 \bibcite{damour2022}{27}
 \bibcite{levine2020}{28}
 \bibcite{pearl2009}{29}
-\@writefile{toc}{\contentsline {section}{\numberline {A}Plan and amendments}{8}{appendix.A}\protected@file@percent }
-\newlabel{app:plan}{{A}{8}{Plan and amendments}{appendix.A}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {B}The price rules and their constraints}{8}{appendix.B}\protected@file@percent }
-\newlabel{app:shape}{{B}{8}{The price rules and their constraints}{appendix.B}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {A}Plan and amendments}{9}{appendix.A}\protected@file@percent }
+\newlabel{app:plan}{{A}{9}{Plan and amendments}{appendix.A}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {B}The price rules and their constraints}{9}{appendix.B}\protected@file@percent }
+\newlabel{app:shape}{{B}{9}{The price rules and their constraints}{appendix.B}{}}
 \gdef \@abspage@last{9}

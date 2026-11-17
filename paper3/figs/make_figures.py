@@ -224,6 +224,60 @@ World & Planning & New plans & Price choice & Stock & New plans & Price choice &
     (GEN / "tab_link.tex").write_text(tab)
 
 
+def table_h2h():
+    h = pd.read_csv(RES / "head_to_head.csv")
+    name = {"world model": "World model", "log-linear": "Log-linear", "LightGBM": "LightGBM"}
+    rows = []
+    for shape in SHAPES:
+        for (a, b) in (("world model", "log-linear"), ("world model", "LightGBM"), ("log-linear", "LightGBM")):
+            cells = []
+            for how in ("base", "median", "best"):
+                r = h[(h["shape"] == shape) & (h.a == a) & (h.b == b) & (h.how == how)]
+                if not len(r):
+                    cells.append("")
+                    continue
+                r = r.iloc[0]
+                p = "$<$0.001" if r.sign_p < 0.001 else f"{r.sign_p:.3f}"
+                f = lambda x: f"{x:+.2f}".replace("-", "$-$")
+                cells.append(f"{int(r.a_ahead)}/{int(r.worlds)} ({p}); {f(r.median_diff)} [{f(r.lo)}, {f(r.hi)}]")
+            lab = SHAPE[shape].replace(" world", "").capitalize() if a == "world model" and b == "log-linear" else ""
+            rows.append(f"{lab} & {name[a]} vs {name[b]} & " + " & ".join(cells) + r" \\")
+    tab = r"""\begin{table*}[t]
+\centering
+\caption{\textbf{The three models with the price rules, head to head, with the world as the unit} (added after the
+first results). Each cell: worlds in which the first model has the lower error on new plans, of all worlds (two-sided
+sign test), then the median paired difference in error (negative favours the first model) with a 95\% interval from
+a bootstrap over worlds. Base: one version of each model. Median and best: each model's median and best version on
+the held-out plans over 12 world model, 12 LightGBM and 6 log-linear versions. The kinked base comparison has 40
+worlds (seeds 101 to 110); the tuned comparisons have 12.}
+\label{tab:h2h}
+\footnotesize\setlength{\tabcolsep}{3.5pt}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lllll}
+\toprule
+World & Comparison & Base version & Median version & Best version \\
+\midrule
+""" + "\n".join(rows) + r"""
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table*}
+"""
+    (GEN / "tab_h2h.tex").write_text(tab)
+    X = {}
+    for _, r in h.iterrows():
+        tag = {"base": "Base", "median": "Med", "best": "Best"}[r.how] + {"loglinear": "L", "bent": "B", "kinked": "K"}[
+            r["shape"]] + {("world model", "log-linear"): "WmLl", ("world model", "LightGBM"): "WmLgb",
+                           ("log-linear", "LightGBM"): "LlLgb"}[(r.a, r.b)]
+        X[f"hh{tag}Won"] = str(int(r.a_ahead))
+        X[f"hh{tag}N"] = str(int(r.worlds))
+        X[f"hh{tag}P"] = "below 0.001" if r.sign_p < 0.001 else f"{r.sign_p:.3f}"
+        X[f"hh{tag}Diff"] = f"{r.median_diff:.2f}"
+        X[f"hh{tag}Ci"] = f"{r.lo:.2f} to {r.hi:.2f}"
+        X[f"hh{tag}A"], X[f"hh{tag}B"] = f"{r.a_median:.2f}", f"{r.b_median:.2f}"
+    return X
+
+
 def macros(d, L):
     plain, tl = d[d.explore == 0], d[d.explore > 0]
     t = med(plain, ["rmsse", "err_mean", "regular_loss", "stock_mean", "promo_loss"] +
@@ -269,6 +323,7 @@ def macros(d, L):
     X["errLActHi"] = f"{t.loc[[('loglinear', v) for v in jepa_like], 'err_mean'].max():.2f}"
     X["errBActLo"] = f"{t.loc[[('bent', v) for v in jepa_like], 'err_mean'].min():.2f}"
     X["errBActHi"] = f"{t.loc[[('bent', v) for v in jepa_like], 'err_mean'].max():.2f}"
+    X.update(table_h2h())
     (GEN / "p3_macros.tex").write_text("".join(f"\\newcommand{{\\{k}}}{{{v}}}\n" for k, v in X.items()))
     return X
 
@@ -276,6 +331,7 @@ def macros(d, L):
 def main():
     use_style()
     d = pd.read_csv(RES / "versions.csv")
+    d = d[d.seed <= 103]  # seeds 104 to 110 (amendment 4) enter only the head-to-head of tab_h2h
     L = pd.read_csv(RES / "link.csv")
     fig_ratio(d[d.explore == 0])
     fig_link(d[d.explore == 0], L)

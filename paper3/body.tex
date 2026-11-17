@@ -24,15 +24,18 @@ check, a check seven weeks ahead and adaptation at the plan date move its error 
 a lasting price move as a temporary cut. With it, and with rules that keep sales from falling as a cut deepens, let
 the gain from deeper cuts flatten and give a lasting regular price its own elasticity, the world model's error falls
 from \errBWm{} to \errBShape{} in a world whose response bends.
-\item \textbf{The rules do most of the work; the world model adds when the truth lies outside them.} Given the same
+\item \textbf{The rules do most of the work; against the simpler models we tested, the world model adds when the
+truth lies outside them.} Given the same
 rules, a log-linear model does better still where its curve can match the truth (\errBLlShape{} in the bent world),
 and LightGBM worse (\errBLgbShape{}). In a world whose curve neither rule set can draw, the world model with the rules
-is best (\errKShape{} against \errKLlShape{} and \errKLgbShape{}).
+is ahead of the log-linear model with the rules in \hhBaseKWmLlWon{} of \hhBaseKWmLlN{} worlds and of LightGBM with
+the rules in \hhBaseKWmLgbWon{}, and ahead of the log-linear model with the rules in every one of twelve worlds when
+each model is tuned over its versions.
 \end{itemize}
 
 The rest of the paper sets out the stores (\S\ref{sec:data}), the models and remedies (\S\ref{sec:method}), the
 setup (\S\ref{sec:setup}) and the results (\S\ref{sec:results}). The plan for this study was fixed before any run,
-and each of the three amendments was written before the runs it added (Appendix~\ref{app:plan}).
+and each of the four amendments was written before the runs it added (Appendix~\ref{app:plan}).
 
 \section{Related work}\label{sec:related}
 
@@ -144,8 +147,12 @@ regular-price move (of $-10\%, -5\%, 0, +5\%, +10\%$) the model picks; the true 
 promotions with the largest predicted lift in half the item-weeks; and the error of ordering stock to the forecast.
 
 \paragraph{The test} Within each world, the rank correlation over the 25 versions between forecast error and each
-measure, averaged over three seeds, with a 95\% interval from 2{,}000 bootstrap draws of versions. The same
-correlation within each model class was added after the first results.
+measure, averaged over three seeds, with a 95\% interval from 2{,}000 bootstrap draws of versions. The versions share
+each world's data, so this interval shows how the correlation varies over versions on fixed data, not over
+independent replications; the three seeds at each planning strength are the replications. The same correlation
+within each model class was added after the first results. Comparisons between models (added) take the world as the
+unit: the number of worlds in which one model has the lower error, with a two-sided sign test, and the median paired
+difference with a 95\% interval from a bootstrap over worlds.
 
 \section{Results}\label{sec:results}
 
@@ -235,7 +242,7 @@ than the deepest tested; a model still needs a sensible shape to go beyond it.
 \includegraphics[width=\textwidth]{figs/fig_remedies.pdf}
 \caption{\textbf{Error on new plans for every model and remedy} (0 means the predicted change in sales is right).
 Medians over the 12 worlds of each shape. Filled: trained on the merchants' history; open: with 5\% random test
-plans. Rows after the first in each block, and the split and shape rows, were added after the first results.}
+plans. Rows after the first in each block, and the split rows, were added after the first results.}
 \label{fig:remedies}
 \end{figure*}
 
@@ -251,14 +258,23 @@ only \shapeBeatsLlB{} of the twelve bent worlds and \shapeBeatsLlL{} of the log-
 at 60\%) but still cannot carry a lasting regular-price move beyond the prices it saw (\regdownBLgbShape{} times the
 truth at $-10\%$), and its error is \errBLgbShape{}.
 
-In the kinked world, whose curve neither rule set can draw, the order turns: the world model with the rules is best
-(\errKShape{}), ahead of the log-linear model with the rules (\errKLlShape{}) in \shapeBeatsLlK{} of twelve worlds and
-of LightGBM with the rules (\errKLgbShape{}) in \shapeBeatsLgbK{}. The log-linear model has to bend its fixed curve to
-the kink and overstates a 60\% cut \cutsixKLlShape{} times; the world model, whose rules set only the direction and
-whose network learns the rest, overstates it \cutsixKShape{} times.
+In the kinked world, whose curve neither rule set can draw, the order turns. The world model with the rules is
+ahead of the log-linear model with the rules in \hhBaseKWmLlWon{} of \hhBaseKWmLlN{} worlds (sign test $p$
+\hhBaseKWmLlP{}; median difference in error \hhBaseKWmLlDiff{}, interval \hhBaseKWmLlCi{}) and of LightGBM with the
+rules in \hhBaseKWmLgbWon{} of \hhBaseKWmLgbN{} (Table~\ref{tab:h2h}). The log-linear model has to bend its fixed
+curve to the kink and overstates a 60\% cut \cutsixKLlShape{} times; the world model, whose rules set only the
+direction and whose network learns the rest, overstates it \cutsixKShape{} times.
 
-The rules do most of the work. With them, a simple model is the better choice when the shape of the price response
-is known, and the world model is the better choice when it is not.
+\paragraph{Equal tuning} Tuned over its own versions (12 for the world model and LightGBM, six for the log-linear
+model), each model keeps its place: in the kinked world the world model with the rules is ahead of the log-linear
+model with the rules in \hhMedKWmLlWon{} of \hhMedKWmLlN{} worlds at the median version and \hhBestKWmLlWon{} of
+\hhBestKWmLlN{} at the best; in the bent world the log-linear model is ahead in all but \hhBestBWmLlWon{} at the best
+version (errors \hhBestBWmLlB{} against \hhBestBWmLlA{}).
+
+The rules do most of the work. Among the models we tested, a simple model with the rules is the better choice when
+the shape of the price response is known, and the world model with the rules when it is not.
+
+\input{generated/tab_h2h}
 
 \subsection{Decisions}
 
@@ -292,21 +308,24 @@ sales, the gain from deeper cuts may flatten, a regular price is not a cut.
 The controls show where the gain comes from. The rules do most of the work, and a log-linear model given them is
 the best simulator when its curve can match the truth. The world model's own learning adds when the true curve is
 of a shape nobody wrote down: its rules fix only the direction and the split between cuts and regular prices, and
-its network learns the rest. That is the case a retailer faces with a new category or a depth of cut never tried,
-and it is where a world model earns its place.
+its network learns the rest. We show this against the simpler models we tested, in one such world; it suggests,
+and does not prove, that world models hold this advantage whenever the shape of the response is unknown.
 
 For a retailer this gives four rules. Record the regular price and give it to the model. Give the model price rules
 rather than leaving a free model to find them. Use a simple model with the rules when the shape of the price response
-is known, and a world model with the rules when it is not. Choose between versions on held-out plans, generated or
+is known, and consider a world model with the rules when it is not. Choose between versions on held-out plans, generated or
 tested, and not on forecast accuracy, which can pick the worst simulator where plans follow demand.
 
 \section{Limitations and threats to validity}\label{sec:limits}
 
-The worlds are generated. They hold a known answer, which real data cannot, but their price responses are three
-shapes of our choosing; a real response can differ from all of them. The rules in Equation~\eqref{eq:shape} assume
+All three worlds are generated, with price responses of our choosing. That is what lets us score plans never run,
+since the answer is known, but it does not show that the results hold in real supermarkets; a real response can
+differ from all three shapes, and real data have problems the worlds leave out (stock-outs, competitors, store
+changes). The rules in Equation~\eqref{eq:shape} assume
 sales never fall as a cut deepens; a response that falls at deep cuts (a quality signal) would break them. The
 held-out plans move one lever at a time. Each world has 360 series and eight forecast weeks; the versions of each
-model vary three settings each, and the controls of amendment 3 were run on one version of each model. Real price
+model vary three settings
+each. Equal tuning of the models with the rules covers the bent and kinked worlds, not the log-linear one. Real price
 episodes exist in the public data sets, but they are few and confounded, so we use none of them as evidence here.
 
 \section{Conclusion}\label{sec:conclusion}
@@ -314,15 +333,16 @@ episodes exist in the public data sets, but they are few and confounded, so we u
 Forecast accuracy is a fair guide when choosing between kinds of model and a poor guide when choosing between
 versions of one world model where plans follow demand. Training a world model to learn actions does not make it
 right about plans outside its history. The recorded regular price and three price rules do. With the rules, a simple
-model is best when the shape of the price response is known (error \errBLlShape{} in the bent world), and the world
-model is best when it is not (\errKShape{} in the kinked world against \errKLlShape{}).
+model is best when the shape of the price response is known (error \errBLlShape{} in the bent world), and in a world
+whose shape the rules do not match the world model is better than the simpler models we tested (ahead in
+\hhBaseKWmLlWon{} of \hhBaseKWmLlN{} worlds). These are results in generated worlds; real stores are the next test.
 
 \section{Reproducibility and compute}\label{sec:repro}
 
 Every number, table and figure is rebuilt from the run records by \texttt{make} in the paper folder, and every run
 by \texttt{scripts/paper3\_benchmark.py} for a world and version. The \nFits{} fits ran on CPU containers on Modal;
-the bill for the days they ran was about US\$84 (an estimate from the account's daily bills, which include small
-amounts of other work). The plan and its three amendments are in the repository's documents folder.
+the bill for the days they ran was about US\$106 (an estimate from the account's daily bills, which include small
+amounts of other work). The plan and its four amendments are in the repository's documents folder.
 
 \section{Data and code availability}\label{sec:avail}
 
@@ -346,7 +366,10 @@ runs, added the action-learning versions, the recorded regular price for every m
 test-and-learn result was read, to keep test cuts inside the merchants' range and to add the world model with the
 price rules. \emph{Amendment 3}, written before its runs after a reviewer's challenge that the world model with the
 rules might win only because its rules match the worlds, added the same rules to the log-linear model and to
-LightGBM and the kinked world, and corrected the description of Equation~\eqref{eq:shape}. The correlation within each model class and the cap on the error of new plans were added in the
+LightGBM and the kinked world, and corrected the description of Equation~\eqref{eq:shape}. \emph{Amendment 4}, written before its runs after
+the same reviewer noted that the controls used one version of each model and that versions are not independent
+replications, added equal tuning for the three models with the rules, 28 more kinked worlds for the head-to-head,
+and the statistics with the world as the unit. The correlation within each model class and the cap on the error of new plans were added in the
 analysis; the cap counts a wrong sign as a twentyfold miss so the measure does not move as versions are added.
 
 \section{The price rules and their constraints}\label{app:shape}

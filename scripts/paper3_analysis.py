@@ -41,7 +41,8 @@ def load(bench: str) -> pd.DataFrame:
         rows.append(row)
     d = pd.DataFrame(rows).drop_duplicates(["shape", "explore", "confounding", "seed", "version"])
     amended = ("wm_jepa", "wm_latent", "wm_overshoot", "wm_adajepa", "wm_rr", "lgb_rr", "loglinear_rr", "wm_ll", "lgb_ll", "wm_shape", "loglinear_shape", "lgb_shape")
-    d["grid"] = ~d["version"].isin(amended) & (d["explore"] == 0)  # the 25 versions of the fixed plan
+    grid = d["version"].str.fullmatch(r"wm_d\d+_s\d+_h\d+|lgb_l\d+_r\d+_m\d+|loglinear")
+    d["grid"] = grid & (d["explore"] == 0)  # the 25 versions of the fixed plan
     for p in PLANS:
         ratio = d[f"ratio_{p}"]
         # capped at a twentyfold miss, which a wrong sign also counts as, so the measure does not move as more
@@ -79,6 +80,47 @@ def link(d: pd.DataFrame, measures: list[str], draws: int = 2000) -> pd.DataFram
             out.append({"shape": shape, "confounding": conf, "measure": m, "spearman": est, "lo": lo, "hi": hi,
                         "versions": len(g)})
     return pd.DataFrame(out)
+
+
+RULES = {"world model": r"wm_shape_d\d+_s\d+_h\d+", "log-linear": r"ll_shape_a.*", "LightGBM": r"lgb_shape_l.*"}
+BASE = {"world model": "wm_shape", "log-linear": "loglinear_shape", "LightGBM": "lgb_shape"}
+
+
+def _sign_p(k: int, n: int) -> float:
+    from scipy.stats import binomtest
+    return float(binomtest(k, n, 0.5).pvalue) if n else float("nan")
+
+
+def head_to_head(d: pd.DataFrame, out: Path, draws: int = 5000):
+    """Amendment 4: the three models with the price rules, with the world (shape, planning strength, seed) as the
+    unit. Per world each model is scored three ways: its base version, the median over its versions, and its best
+    version on the held-out plans. For each pair: worlds won, two-sided sign test, and the median paired difference
+    in error on new plans with a 95% interval from a bootstrap over worlds."""
+    plain = d[d.explore == 0]
+    key = ["shape", "confounding", "seed"]
+    rows = []
+    for how in ("base", "median", "best"):
+        per = {}
+        for m in RULES:
+            if how == "base":
+                x = plain[plain.version == BASE[m]].set_index(key)["err_mean"]
+            else:
+                g = plain[plain.version.str.fullmatch(RULES[m])].groupby(key)["err_mean"]
+                x = g.median() if how == "median" else g.min()
+            per[m] = x
+        w = pd.DataFrame(per).dropna()
+        rng = np.random.default_rng(0)
+        for shape, ws in w.groupby(level="shape"):
+            n = len(ws)
+            for a_, b_ in (("world model", "log-linear"), ("world model", "LightGBM"), ("log-linear", "LightGBM")):
+                diff = (ws[a_] - ws[b_]).to_numpy()
+                k = int((diff < 0).sum())
+                boot = np.median(diff[rng.integers(0, n, size=(draws, n))], axis=1)
+                lo, hi = np.percentile(boot, [2.5, 97.5])
+                rows.append({"how": how, "shape": shape, "a": a_, "b": b_, "worlds": n, "a_ahead": k,
+                             "sign_p": _sign_p(k, n), "median_diff": float(np.median(diff)), "lo": lo, "hi": hi,
+                             "a_median": float(ws[a_].median()), "b_median": float(ws[b_].median())})
+    pd.DataFrame(rows).to_csv(out / "head_to_head.csv", index=False)
 
 
 def main(argv=None):
@@ -133,6 +175,7 @@ def main(argv=None):
     if rows:
         pd.concat(rows).to_csv(out / "test_and_learn.csv", index=False)
         tl.groupby(["shape", "confounding", "version"])[cols].median().to_csv(out / "test_and_learn_levels.csv")
+    head_to_head(d, out)
     pd.set_option("display.width", 200)
     print(g.groupby(["shape", "confounding", "model"])[["rmsse", "err_mean", "stock_mean", "promo_loss", "regular_loss"]]
           .median().round(3))
