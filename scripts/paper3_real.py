@@ -81,7 +81,7 @@ def m5() -> pd.DataFrame:
     return out.sort_values([SERIES, DATE]).reset_index(drop=True)
 
 
-def split(panel: pd.DataFrame, data: str, origin: int):
+def split(panel: pd.DataFrame, data: str, origin: int, deep: float = DEEP):
     dates = np.sort(panel[DATE].unique())
     start = origin - 1 if origin > 0 else len(dates) + origin  # m5 origins count back from the end
     window = dates[start:start + HORIZON]
@@ -90,11 +90,11 @@ def split(panel: pd.DataFrame, data: str, origin: int):
     test = test[test[SERIES].isin(train[SERIES].unique())]
     depth = 1 - train[PRICE] / train[RR]
     if data == "frat":
-        train = train[depth <= DEEP]  # no model sees a cut deeper than 30%
+        train = train[depth <= deep]  # no model sees a cut deeper than this (30%; 20% in amendment 6)
     last_reg = train.groupby(SERIES)[RR].last()
     move = (test[RR] / test[SERIES].map(last_reg) - 1).abs()
     tdepth = 1 - test[PRICE] / test[RR]
-    test["group"] = np.where((tdepth > DEEP) & (data == "frat"), "deep",
+    test["group"] = np.where((tdepth > deep) & (data == "frat"), "deep",
                              np.where(move >= MOVE[data], "regular_move", "rest"))
     return train, test
 
@@ -117,14 +117,16 @@ def main(argv=None):
     p.add_argument("--origin", type=int, required=True)
     p.add_argument("--versions", nargs="*")
     p.add_argument("--steps", type=int, help="override training steps (smoke test only)")
+    p.add_argument("--deep", type=float, default=DEEP, help="amendment 6: cuts deeper than this leave training")
     a = p.parse_args(argv)
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     panel = frat() if a.data == "frat" else m5()
-    train, test = split(panel, a.data, a.origin)
+    train, test = split(panel, a.data, a.origin, a.deep)
+    tag = "" if a.deep == DEEP else f"d{round(100 * a.deep)}_"
     V = versions()
     for name in a.versions or MODELS:
-        f = out / f"real_{a.data}_o{a.origin}_{name}.json"
+        f = out / f"real_{a.data}_{tag}o{a.origin}_{name}.json"
         if f.exists():
             continue
         kind, settings = V[name][0], dict(V[name][1])
@@ -140,7 +142,7 @@ def main(argv=None):
                  else build_model(kind, **settings).fit(fit_on))
         plan = test.drop(columns=[UNITS, "group"] + ([] if keep_rr else [RR]))
         pred = np.clip(np.asarray(model.predict(plan), dtype=float), 0, None)
-        rec = {"data": a.data, "origin": a.origin, "version": name, "kind": kind, **measures(test, pred),
+        rec = {"data": a.data, "origin": a.origin, "deep": a.deep, "version": name, "kind": kind, **measures(test, pred),
                "seconds": round(time.time() - t0, 1)}
         f.write_text(json.dumps(rec, indent=1))
         test.assign(pred=pred)[[SERIES, DATE, UNITS, "group", "pred"]].to_csv(f.with_suffix(".csv.gz"), index=False)
