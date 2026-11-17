@@ -703,7 +703,7 @@ echo "$(wc -l < /jobs.txt) jobs, $PAR at a time"
 ( while sleep 300; do tar czf /up.tgz -C /out . && curl -fsS --retry 3 -X PUT -H "$AUTHH" --data-binary @/up.tgz "$BRIDGE_URL/results/$OUT" >/dev/null; done ) &
 SAVER=$!
 export OMP_NUM_THREADS=$THREADS MKL_NUM_THREADS=$THREADS OPENBLAS_NUM_THREADS=$THREADS
-nl -ba /jobs.txt | xargs -P "$PAR" -L 1 bash -c 'n=$0; shift; python "scripts/$SCRIPT" --out /out "$@" > "/logs/job$n.log" 2>&1 || echo "job $n failed: $*"'
+nl -ba /jobs.txt | xargs -P "$PAR" -L 1 bash -c 'n=$0; python "scripts/$SCRIPT" --out /out "$@" > "/logs/job$n.log" 2>&1 || echo "job $n failed: $*"'
 kill $SAVER 2>/dev/null
 cp /logs/*.log /out/ 2>/dev/null; echo "{\"finished\": $(date +%s)}" > /out/_done.json
 tar czf /up.tgz -C /out . || fail "tar"
