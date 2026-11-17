@@ -1,0 +1,28 @@
+{
+ "data": "m5",
+ "origin": -8,
+ "version": "wm_d32_s2000_h26",
+ "kind": "state_model",
+ "regular_move": {
+  "rows": 279,
+  "series": 48,
+  "sales": 2519.0,
+  "bias": 0.7154890616653977,
+  "abs_error": 0.5970302071746213
+ },
+ "rest": {
+  "rows": 19473,
+  "series": 2461,
+  "sales": 287660.0,
+  "bias": 1.079272306483566,
+  "abs_error": 0.4255358041923353
+ },
+ "all": {
+  "rows": 19752,
+  "series": 2469,
+  "sales": 290179.0,
+  "bias": 1.0761143591693325,
+  "abs_error": 0.4270245211605252
+ },
+ "seconds": 258.9
+}

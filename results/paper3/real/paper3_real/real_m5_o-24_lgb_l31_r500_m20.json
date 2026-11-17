@@ -1,0 +1,28 @@
+{
+ "data": "m5",
+ "origin": -24,
+ "version": "lgb_l31_r500_m20",
+ "kind": "lightgbm_direct",
+ "regular_move": {
+  "rows": 421,
+  "series": 99,
+  "sales": 7041.0,
+  "bias": 0.8979258118065341,
+  "abs_error": 0.5307602178631802
+ },
+ "rest": {
+  "rows": 19315,
+  "series": 2467,
+  "sales": 248780.0,
+  "bias": 1.0141227636084527,
+  "abs_error": 0.47093853845492645
+ },
+ "all": {
+  "rows": 19736,
+  "series": 2467,
+  "sales": 255821.0,
+  "bias": 1.010924657363706,
+  "abs_error": 0.472585019567554
+ },
+ "seconds": 5.9
+}

@@ -1,0 +1,28 @@
+{
+ "data": "m5",
+ "origin": -16,
+ "version": "lgb_shape",
+ "kind": "lightgbm_direct",
+ "regular_move": {
+  "rows": 863,
+  "series": 190,
+  "sales": 13792.0,
+  "bias": 1.0179926340718581,
+  "abs_error": 0.5204055707991417
+ },
+ "rest": {
+  "rows": 18881,
+  "series": 2419,
+  "sales": 277499.0,
+  "bias": 0.9126262542379747,
+  "abs_error": 0.4345006642048976
+ },
+ "all": {
+  "rows": 19744,
+  "series": 2468,
+  "sales": 291291.0,
+  "bias": 0.9176151248541932,
+  "abs_error": 0.4385680760773819
+ },
+ "seconds": 11.6
+}

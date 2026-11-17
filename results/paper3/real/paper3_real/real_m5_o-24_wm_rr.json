@@ -1,0 +1,28 @@
+{
+ "data": "m5",
+ "origin": -24,
+ "version": "wm_rr",
+ "kind": "state_model",
+ "regular_move": {
+  "rows": 421,
+  "series": 99,
+  "sales": 7041.0,
+  "bias": 0.788802986493962,
+  "abs_error": 0.5384768613265871
+ },
+ "rest": {
+  "rows": 19315,
+  "series": 2467,
+  "sales": 248780.0,
+  "bias": 0.9849402682564776,
+  "abs_error": 0.4609389289260026
+ },
+ "all": {
+  "rows": 19736,
+  "series": 2467,
+  "sales": 255821.0,
+  "bias": 0.9795419522429765,
+  "abs_error": 0.4630730171440633
+ },
+ "seconds": 234.0
+}

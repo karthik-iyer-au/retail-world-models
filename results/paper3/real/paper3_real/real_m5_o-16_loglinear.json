@@ -1,0 +1,28 @@
+{
+ "data": "m5",
+ "origin": -16,
+ "version": "loglinear",
+ "kind": "loglinear",
+ "regular_move": {
+  "rows": 863,
+  "series": 190,
+  "sales": 13792.0,
+  "bias": 0.9588734514982893,
+  "abs_error": 0.51128354523719
+ },
+ "rest": {
+  "rows": 18881,
+  "series": 2419,
+  "sales": 277499.0,
+  "bias": 1.0031103158942687,
+  "abs_error": 0.4840607570464745
+ },
+ "all": {
+  "rows": 19744,
+  "series": 2468,
+  "sales": 291291.0,
+  "bias": 1.0010157958653307,
+  "abs_error": 0.4853496972977227
+ },
+ "seconds": 7.1
+}

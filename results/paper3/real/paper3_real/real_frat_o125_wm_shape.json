@@ -1,0 +1,35 @@
+{
+ "data": "frat",
+ "origin": 125,
+ "version": "wm_shape",
+ "kind": "state_model",
+ "deep": {
+  "rows": 1446,
+  "series": 688,
+  "sales": 48665.0,
+  "bias": 0.7217389836532293,
+  "abs_error": 0.4868112043304114
+ },
+ "regular_move": {
+  "rows": 3002,
+  "series": 881,
+  "sales": 51361.0,
+  "bias": 0.989410250989664,
+  "abs_error": 0.45466182476815836
+ },
+ "rest": {
+  "rows": 23397,
+  "series": 3694,
+  "sales": 422365.0,
+  "bias": 0.959628491799747,
+  "abs_error": 0.28683361679768216
+ },
+ "all": {
+  "rows": 27845,
+  "series": 3768,
+  "sales": 522391.0,
+  "bias": 0.9403952508361834,
+  "abs_error": 0.32196388107645396
+ },
+ "seconds": 223.5
+}
