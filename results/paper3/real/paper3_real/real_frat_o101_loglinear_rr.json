@@ -1,0 +1,35 @@
+{
+ "data": "frat",
+ "origin": 101,
+ "deep": {
+  "rows": 1868,
+  "series": 724,
+  "sales": 40424.0,
+  "bias": 1.4504052506953329,
+  "abs_error": 0.6784465524086704
+ },
+ "version": "loglinear_rr",
+ "kind": "loglinear",
+ "regular_move": {
+  "rows": 1903,
+  "series": 664,
+  "sales": 25101.0,
+  "bias": 1.121048231361661,
+  "abs_error": 0.3823781719023494
+ },
+ "rest": {
+  "rows": 24049,
+  "series": 3740,
+  "sales": 477973.0,
+  "bias": 1.01253204760001,
+  "abs_error": 0.33873035128168655
+ },
+ "all": {
+  "rows": 27820,
+  "series": 3781,
+  "sales": 543498.0,
+  "bias": 1.0501116727145947,
+  "abs_error": 0.3660134170146911
+ },
+ "seconds": 6.4
+}

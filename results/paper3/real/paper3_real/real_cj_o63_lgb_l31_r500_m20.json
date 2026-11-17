@@ -1,0 +1,43 @@
+{
+ "data": "cj",
+ "origin": 63,
+ "deep_threshold": 0.3,
+ "version": "lgb_l31_r500_m20",
+ "kind": "lightgbm_direct",
+ "deep": {
+  "rows": 676,
+  "series": 232,
+  "sales": 24111.0,
+  "bias": 0.5014731887069758,
+  "abs_error": 0.5744594830097414
+ },
+ "deep_pure": {
+  "rows": 44,
+  "series": 24,
+  "sales": 1238.0,
+  "bias": 0.4697504879483315,
+  "abs_error": 0.6258308492379462
+ },
+ "regular_move": {
+  "rows": 540,
+  "series": 141,
+  "sales": 7721.0,
+  "bias": 0.9232194602380531,
+  "abs_error": 0.3765625093276484
+ },
+ "rest": {
+  "rows": 4711,
+  "series": 710,
+  "sales": 61046.0,
+  "bias": 0.9811034085934675,
+  "abs_error": 0.3435811538510104
+ },
+ "all": {
+  "rows": 5971,
+  "series": 756,
+  "sales": 94116.0,
+  "bias": 0.8467549331727734,
+  "abs_error": 0.4091468553562837
+ },
+ "seconds": 3.6
+}

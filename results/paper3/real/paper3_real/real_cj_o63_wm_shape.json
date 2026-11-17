@@ -1,0 +1,43 @@
+{
+ "data": "cj",
+ "origin": 63,
+ "deep_threshold": 0.3,
+ "version": "wm_shape",
+ "kind": "state_model",
+ "deep": {
+  "rows": 676,
+  "series": 232,
+  "sales": 24111.0,
+  "bias": 0.6604436455854342,
+  "abs_error": 0.5335419392191209
+ },
+ "deep_pure": {
+  "rows": 44,
+  "series": 24,
+  "sales": 1238.0,
+  "bias": 0.6807071985451201,
+  "abs_error": 0.5066145175108039
+ },
+ "regular_move": {
+  "rows": 540,
+  "series": 141,
+  "sales": 7721.0,
+  "bias": 1.1609397961552659,
+  "abs_error": 0.4987105103512376
+ },
+ "rest": {
+  "rows": 4711,
+  "series": 710,
+  "sales": 61046.0,
+  "bias": 1.101814305806142,
+  "abs_error": 0.3753668698321569
+ },
+ "all": {
+  "rows": 5971,
+  "series": 756,
+  "sales": 94116.0,
+  "bias": 0.9880535140556953,
+  "abs_error": 0.427733948057571
+ },
+ "seconds": 145.8
+}

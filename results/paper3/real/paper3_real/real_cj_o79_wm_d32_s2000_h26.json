@@ -1,0 +1,43 @@
+{
+ "data": "cj",
+ "origin": 79,
+ "deep_threshold": 0.3,
+ "version": "wm_d32_s2000_h26",
+ "kind": "state_model",
+ "deep": {
+  "rows": 512,
+  "series": 197,
+  "sales": 16371.0,
+  "bias": 0.8452650749108487,
+  "abs_error": 0.4413774783753947
+ },
+ "deep_pure": {
+  "rows": 45,
+  "series": 22,
+  "sales": 708.0,
+  "bias": 0.8484353234538924,
+  "abs_error": 0.3460847910514659
+ },
+ "regular_move": {
+  "rows": 591,
+  "series": 157,
+  "sales": 7313.0,
+  "bias": 1.1371372560624726,
+  "abs_error": 0.4468146428908008
+ },
+ "rest": {
+  "rows": 4831,
+  "series": 720,
+  "sales": 61483.0,
+  "bias": 1.0811247902596826,
+  "abs_error": 0.3777169260181346
+ },
+ "all": {
+  "rows": 5979,
+  "series": 756,
+  "sales": 85875.0,
+  "bias": 1.0390125995166437,
+  "abs_error": 0.39547649463035134
+ },
+ "seconds": 97.3
+}

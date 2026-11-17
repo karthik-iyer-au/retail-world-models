@@ -1,0 +1,43 @@
+{
+ "data": "cj",
+ "origin": 79,
+ "deep_threshold": 0.3,
+ "version": "loglinear",
+ "kind": "loglinear",
+ "deep": {
+  "rows": 512,
+  "series": 197,
+  "sales": 16371.0,
+  "bias": 0.70790928793412,
+  "abs_error": 0.46563038669147616
+ },
+ "deep_pure": {
+  "rows": 45,
+  "series": 22,
+  "sales": 708.0,
+  "bias": 0.8858050996470345,
+  "abs_error": 0.4279499375212785
+ },
+ "regular_move": {
+  "rows": 591,
+  "series": 157,
+  "sales": 7313.0,
+  "bias": 1.0882734582545552,
+  "abs_error": 0.407972922983171
+ },
+ "rest": {
+  "rows": 4831,
+  "series": 720,
+  "sales": 61483.0,
+  "bias": 1.013695120036093,
+  "abs_error": 0.35728813642551915
+ },
+ "all": {
+  "rows": 5979,
+  "series": 756,
+  "sales": 85875.0,
+  "bias": 0.9606974536094818,
+  "abs_error": 0.38284106077341884
+ },
+ "seconds": 5.8
+}

@@ -1,0 +1,35 @@
+{
+ "data": "frat",
+ "origin": 117,
+ "deep": {
+  "rows": 2415,
+  "series": 1093,
+  "sales": 102501.0,
+  "bias": 0.7987153137492573,
+  "abs_error": 0.417217443943396
+ },
+ "version": "lgb_l31_r500_m20",
+ "kind": "lightgbm_direct",
+ "regular_move": {
+  "rows": 2175,
+  "series": 621,
+  "sales": 34565.0,
+  "bias": 1.016712219618956,
+  "abs_error": 0.30001216721633694
+ },
+ "rest": {
+  "rows": 23549,
+  "series": 3722,
+  "sales": 426397.0,
+  "bias": 1.0336181101304538,
+  "abs_error": 0.2983806707932527
+ },
+ "all": {
+  "rows": 28139,
+  "series": 3757,
+  "sales": 563463.0,
+  "bias": 0.9898492670344582,
+  "abs_error": 0.32009865539654825
+ },
+ "seconds": 10.2
+}

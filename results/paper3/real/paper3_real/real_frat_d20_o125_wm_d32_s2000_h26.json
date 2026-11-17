@@ -1,0 +1,35 @@
+{
+ "data": "frat",
+ "origin": 125,
+ "deep": {
+  "rows": 3935,
+  "series": 1413,
+  "sales": 119358.0,
+  "bias": 0.8385340805531435,
+  "abs_error": 0.41471910319181055
+ },
+ "version": "wm_d32_s2000_h26",
+ "kind": "state_model",
+ "regular_move": {
+  "rows": 2865,
+  "series": 881,
+  "sales": 47297.0,
+  "bias": 0.9749263836460028,
+  "abs_error": 0.391210969135565
+ },
+ "rest": {
+  "rows": 21045,
+  "series": 3579,
+  "sales": 355736.0,
+  "bias": 0.9833397442277626,
+  "abs_error": 0.2789717573164596
+ },
+ "all": {
+  "rows": 27845,
+  "series": 3768,
+  "sales": 522391.0,
+  "bias": 0.949492221739223,
+  "abs_error": 0.32014993555919036
+ },
+ "seconds": 271.8
+}
