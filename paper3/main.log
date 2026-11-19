@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023/Debian) (preloaded format=xelatex 2026.10.23)  20 NOV 2026 08:54
+This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023/Debian) (preloaded format=xelatex 2026.10.23)  20 NOV 2026 08:55
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -3995,7 +3995,7 @@ Package microtype Info: Character `⁻' is missing
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [10])
-Overfull \hbox (55.4481pt too wide) in paragraph at lines 470--476
+Overfull \hbox (55.4481pt too wide) in paragraph at lines 469--475
 \TU/TeXGyrePagella(0)/m/n/10 360 patients in 18 clinics over 260 days (\TU/lmtt
 /m/n/10 scripts/paper3_dosing.py\TU/TeXGyrePagella(0)/m/n/10 ).
  []

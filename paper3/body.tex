@@ -390,8 +390,8 @@ tested, and not on forecast accuracy, which can pick the worst simulator where p
 \section{Limitations and threats to validity}\label{sec:limits}
 
 All three worlds are generated, with price responses of our choosing. That is what lets us score plans never run,
-since the answer is known. The real-data check scores sales that happened, not plans never run; it confirms the gain
-from the rules on pure price cuts and not on lasting regular-price moves, which are few in public data; a real response can
+since the answer is known. The real-data check scores sales that happened, not plans never run, and lasting regular-price
+moves are few in public data; a real response can
 differ from all three shapes, and real data have problems the worlds leave out (stock-outs, competitors, store
 changes). The rules in Equation~\eqref{eq:shape} assume
 sales never fall as a cut deepens; shoppers who read a very deep cut as a sign of poor quality, or shelves emptied
@@ -407,10 +407,10 @@ logged interventions for the known answer; we have not run it there.
 
 A world model can be tested on actions it has never seen by holding them out by design, scoring them against a known
 answer and giving its structure to simpler models. In retail and in a dosing world, forecast accuracy is a fair guide
-between kinds of model and a poor guide between versions of one world model where actions follow need. Training to
-learn actions does not help; the regular price and three price rules do. With them a simple model is best when its
-curve can match the response; in our kinked world the world model with the rules was ahead of the simpler models we
-tested. On real data the rules help on deep cuts, not lasting moves.
+between kinds of model and a poor guide between versions of one world model where actions follow need. Training on
+actions does not help; the regular price and three price rules do. With them a simple model is best when its
+curve can match the response; in our kinked world the world model with the rules led the simpler models we tested.
+On real data the rules help on deep cuts, not lasting moves.
 
 \section{Reproducibility and compute}\label{sec:repro}
 
@@ -420,10 +420,9 @@ CPU. The plan and its ten amendments are in \texttt{docs/PAPER3\_PLAN.md}.
 
 \section{Data and code availability}\label{sec:avail}
 
-The generator, models, scripts (\texttt{scripts/paper3\_*.py}), run records (\texttt{results/paper3/}) and manuscript
-source (\texttt{paper3/}) are at commit \texttt{e8e021d} of
-\url{https://github.com/karthik-iyer-au/retail-world-models} (branch \texttt{paper3}); \texttt{make -C paper3} rebuilds
-the manuscript from the saved run records. The shared forecasting code is also archived with the companion study~\cite{rwm},
+The generator, models, scripts (\texttt{scripts/paper3\_*.py}) and run records (\texttt{results/paper3/}) are at commit
+\texttt{e8e021d} of \url{https://github.com/karthik-iyer-au/retail-world-models} (branch \texttt{paper3}); the manuscript
+source is in \texttt{paper3/} on the same branch, and \texttt{make -C paper3} rebuilds it from the saved run records. The shared forecasting code is also archived with the companion study~\cite{rwm},
 under the same licence.
 
 \section*{Use of generative AI}
