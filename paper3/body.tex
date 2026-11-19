@@ -416,11 +416,14 @@ tested. On real data the rules help on deep cuts, not lasting moves.
 
 \texttt{make} in the paper folder rebuilds every number, table and figure from the run records, identically from a
 fresh copy of the repository; runs are \texttt{scripts/paper3\_*.py}. The \nFits{} fits cost about US\$135 on Modal
-CPU. The plan and its nine amendments are in the documents folder.
+CPU. The plan and its ten amendments are in \texttt{docs/PAPER3\_PLAN.md}.
 
 \section{Data and code availability}\label{sec:avail}
 
-The generator, models, run records and scripts are released with the companion forecasting study's archive~\cite{rwm}
+The generator, models, scripts (\texttt{scripts/paper3\_*.py}), run records (\texttt{results/paper3/}) and manuscript
+source (\texttt{paper3/}) are at commit \texttt{e8e021d} of
+\url{https://github.com/karthik-iyer-au/retail-world-models} (branch \texttt{paper3}); \texttt{make -C paper3} rebuilds
+the manuscript from the saved run records. The shared forecasting code is also archived with the companion study~\cite{rwm},
 under the same licence.
 
 \section*{Use of generative AI}
