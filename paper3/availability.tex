@@ -1,0 +1,19 @@
+% Reproducibility, availability and AI use: after the conclusion in the preprint; in the ICWM build (main_icwm.tex)
+% the first appendix, since ICWM counts every page before the references as main text.
+\section{Reproducibility and compute}\label{sec:repro}
+
+\texttt{make} in the paper folder rebuilds every number, table and figure from the run records, identically from a
+fresh copy of the repository; runs are \texttt{scripts/paper3\_*.py}. The \nFits{} fits cost about US\$135 on Modal
+CPU. The plan and its ten amendments are in \texttt{docs/PAPER3\_PLAN.md}.
+
+\section{Data and code availability}\label{sec:avail}
+
+The generator, models, scripts (\texttt{scripts/paper3\_*.py}) and run records (\texttt{results/paper3/}) are at commit
+\texttt{e8e021d} of \url{https://github.com/karthik-iyer-au/retail-world-models} (branch \texttt{paper3}); the manuscript
+source is in \texttt{paper3/} on the same branch, and \texttt{make -C paper3} rebuilds it from the saved run records. The shared forecasting code is also archived with the companion study~\cite{rwm},
+under the same licence.
+
+\section*{Use of generative AI}
+Claude (Anthropic) was used to write code and draft text under the author's direction. The author designed the study,
+fixed the plan and its amendments, checked the results and takes responsibility for the paper.
+

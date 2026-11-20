@@ -6,7 +6,7 @@
 PY ?= python3
 XELATEX ?= xelatex
 
-.PHONY: all figures pdf clean
+.PHONY: all figures pdf icwm clean
 
 all: pdf
 
@@ -17,6 +17,11 @@ pdf: figures
 	$(XELATEX) -interaction=nonstopmode main.tex
 	$(XELATEX) -interaction=nonstopmode main.tex
 	$(XELATEX) -interaction=nonstopmode main.tex
+
+icwm: figures
+	$(XELATEX) -interaction=nonstopmode main_icwm.tex
+	$(XELATEX) -interaction=nonstopmode main_icwm.tex
+	$(XELATEX) -interaction=nonstopmode main_icwm.tex
 
 clean:
 	rm -f main.aux main.log main.out main.toc main.pdf

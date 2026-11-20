@@ -370,8 +370,7 @@ model with the rules in the kinked world.
 \section{Discussion}\label{sec:discussion}
 
 The world model fails on new plans for the reason any learner fails off its data: the merchants' history never
-shows a deep cut or a lasting price move labelled as one, and where plans follow demand it shows the wrong effect.
-No training objective recovers what the data do not contain. Two things help. The first is information the retailer
+shows a deep cut or a lasting price move labelled as one, and where plans follow demand it shows the wrong effect. Two things help. The first is information the retailer
 already has: the recorded regular price. The second is knowledge of how price can act: more discount never loses
 sales, the gain from deeper cuts may flatten, a regular price is not a cut.
 
@@ -410,28 +409,22 @@ answer and giving its structure to simpler models. In retail and in a dosing wor
 between kinds of model and a poor guide between versions of one world model where actions follow need. Training on
 actions does not help; the regular price and three price rules do. With them a simple model is best when its
 curve can match the response; in our kinked world the world model with the rules led the simpler models we tested.
-On real data the rules help on deep cuts, not lasting moves.
+On real data the rules help on deep cuts, not lasting moves.\ificwm{} Code and run records are pinned to
+commit \texttt{e8e021d} (Appendix~\ref{sec:repro}).\fi
 
-\section{Reproducibility and compute}\label{sec:repro}
-
-\texttt{make} in the paper folder rebuilds every number, table and figure from the run records, identically from a
-fresh copy of the repository; runs are \texttt{scripts/paper3\_*.py}. The \nFits{} fits cost about US\$135 on Modal
-CPU. The plan and its ten amendments are in \texttt{docs/PAPER3\_PLAN.md}.
-
-\section{Data and code availability}\label{sec:avail}
-
-The generator, models, scripts (\texttt{scripts/paper3\_*.py}) and run records (\texttt{results/paper3/}) are at commit
-\texttt{e8e021d} of \url{https://github.com/karthik-iyer-au/retail-world-models} (branch \texttt{paper3}); the manuscript
-source is in \texttt{paper3/} on the same branch, and \texttt{make -C paper3} rebuilds it from the saved run records. The shared forecasting code is also archived with the companion study~\cite{rwm},
-under the same licence.
-
-\section*{Use of generative AI}
-Claude (Anthropic) was used to write code and draft text under the author's direction. The author designed the study,
-fixed the plan and its amendments, checked the results and takes responsibility for the paper.
+\ificwm
 
 \input{references}
 
 \appendix
+\input{availability}
+\else
+\input{availability}
+\input{references}
+
+\appendix
+\fi
+
 
 \section{Plan and amendments}\label{app:plan}
 
