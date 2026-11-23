@@ -13,7 +13,11 @@ Figure~\ref{fig:looppath} shows every run in the order it was made.
 
 \subsection{The procedure}
 
-The procedure is a fixed loop, written down before it ran, that changes one setting at a time. It
+The procedure adapts the autoresearch loop of Karpathy~\cite{karpathy2026}, in which an agent changes a training
+setup, runs a short experiment and keeps the change only if the validation score improves. We keep its one change
+at a time and its keep-or-discard rule, and add three things: a menu of changes fixed in advance, a check on two more
+seeds before anything is kept, and a keep bar set by each model's own seed noise. The procedure is a fixed loop,
+written down before it ran, that changes one setting at a time. It
 starts from the settings the \fvpaper{} used. Each change on a menu fixed in
 advance is run once, on one seed, on top of the best settings so far. Every change that beats the
 best settings on that seed is run on two more seeds. The best of those is kept if its mean over

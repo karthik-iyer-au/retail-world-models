@@ -247,16 +247,19 @@ information.
 
 \section{Author contributions}
 \label{sec:contributions}
-Karthik Iyer conceived and scoped the work, designed the study, wrote the code,
-ran the experiments and analyses, and wrote the paper, with AI assistance as
-declared in \S\ref{sec:ai}. Madan Dabbeeru widened the range of methods
-considered for each research question, and reviewed the work and the
-manuscript.
+Karthik Iyer led the study design, defined the retail forecasting levels and
+evaluation metrics, and verified the results. Madan Dabbeeru introduced the use of
+Andrej Karpathy's autoresearch loop for model development, changing how the study
+iterated on models, and reviewed the manuscript.
 
 \section{Funding and acknowledgments}
 This research did not receive any specific grant from funding agencies in the
 public, commercial or not-for-profit sectors. The authors funded the work
 themselves.
+
+\paragraph{Writing assistance} Claude (Anthropic) assisted with drafting portions
+of the manuscript. The authors reviewed and revised the text and take
+responsibility for the final manuscript.
 
 \section{Conflict of interest}
 The authors declare no conflict of interest. Neither author brings data, methods
@@ -323,12 +326,18 @@ options considered for answering each question.
 
 \section{Declaration of generative AI and AI-assisted technologies}
 \label{sec:ai}
+\ifjof
+Claude (Anthropic) assisted with writing and testing code and with drafting
+portions of the manuscript, as described in Section~\ref{sec:setup} and the
+acknowledgments. The authors take responsibility for the final work.
+\else
 The research questions, scope, study design, choice of data and methods, and
 interpretation of results are the authors' own. Claude (Anthropic) was used as an
 assistant to write and test code, run analyses, produce figures and tables, and
 draft and edit text. The authors directed this work throughout, reviewed every
 result, and corrected and revised the code, analyses and text over many
 iterations, and take full responsibility for the content of the publication.
+\fi
 
 \FloatBarrier
 \input{references}
