@@ -180,6 +180,10 @@
 \newcommand{\ixs}{item by store}
 % TMLR build (main_tmlr.tex) sets \tmlrtrue before this file's macros are read: anonymised wording
 \ifdefined\tmlrtrue\else\expandafter\newif\csname iftmlr\endcsname\fi
+% Journal of Forecasting build (main_jof.tex sets \jofmode): named, single-blind, with keywords, the AI use stated in
+% the method section and the journal's statements
+\newif\ifjof\joffalse
+\ifdefined\jofmode\joftrue\fi
 \newcommand{\companion}{\iftmlr forecasting study\else companion paper\fi}
 \newcommand{\ourcompanion}{\iftmlr the forecasting study\else our companion paper\fi}
 
@@ -193,6 +197,7 @@
      Faithfulness, Accuracy and Price Response\par}
     \vspace{10pt}
     {\large Karthik Iyer\par}
+    \ifjof\vspace{3pt}{\small La Trobe University, Bundoora, Australia\par}\fi
     \vspace{3pt}
     {\footnotesize Correspondence:
      \href{mailto:karthik.iyer.au@gmail.com}{karthik.iyer.au@gmail.com}

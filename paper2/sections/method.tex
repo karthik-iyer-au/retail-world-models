@@ -1,6 +1,16 @@
 \section{The explanation and the checks}
 \label{sec:checks}
 
+\ifjof
+\paragraph{Use of AI tools} Karthik Iyer designed the audit. He chose the retail question, the explanation checks and
+their pass rules, the generated stores with known effects, and the measures of what a wrong lift costs in stock and
+promotion decisions. Claude (Anthropic) assisted with writing and testing code for data preparation, modelling,
+experiments and analysis. Iyer reviewed the results, identified implementation errors and directed corrections. He
+specified the figures and how the results should be presented, and reviewed successive versions. The figures and
+tables were produced from the experiment outputs using scripts developed with Claude's assistance. The author takes
+responsibility for the final work.
+\fi
+
 \subsection{Notation}
 
 A data set has series $i$ (an item in a store) observed in periods $t$. The

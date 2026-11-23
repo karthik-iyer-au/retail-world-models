@@ -9,7 +9,7 @@
 PY ?= python3
 XELATEX ?= xelatex
 
-.PHONY: all figures pdf tmlr clean
+.PHONY: all figures pdf tmlr jof clean
 
 all: pdf
 
@@ -26,6 +26,9 @@ pdf: figures
 # TMLR submission (anonymised, TMLR style file in tmlr/), pdflatex
 tmlr: figures
 	for i in 1 2 3; do pdflatex -interaction=nonstopmode main_tmlr.tex >/dev/null; done
+
+jof: figures
+	for i in 1 2 3; do $(XELATEX) -interaction=nonstopmode main_jof.tex >/dev/null; done
 
 clean:
 	rm -f main.aux main.log main.out main.toc main.pdf
