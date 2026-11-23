@@ -72,6 +72,9 @@
 % authors named, since that journal's review is single-blind, plus keywords and its statements
 \newif\ifjof\joffalse
 \ifdefined\jofmode\joftrue\fi
+% references to the authors' own work are anonymised only for a double-blind journal (not the Journal of Forecasting)
+\newif\ifanon\anonfalse
+\ifjournal\ifjof\else\anontrue\fi\fi
 \newcommand{\colfig}{\columnwidth}
 % Revision wording: the arXiv version is a revision of its first version; the journal submission is a new paper
 % under anonymised review, so there the same phases are named without reference to an earlier version.
@@ -243,7 +246,7 @@
 \input{generated/dom_cat_values}
 \newcommand{\ixs}{item by store}
 
-\ifsupplement\externaldocument{main_ijpe}\else\ifjournal\externaldocument{supplement_ijpe}\fi\fi
+\ifsupplement\ifjof\externaldocument{main_jof}\else\externaldocument{main_ijpe}\fi\else\ifjournal\ifjof\externaldocument{supplement_jof}\else\externaldocument{supplement_ijpe}\fi\fi\fi
 \begin{document}
 
 % ------------------------------------------------------------ title block -

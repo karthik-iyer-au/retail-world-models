@@ -65,7 +65,7 @@ clean:
 # Journal of Forecasting: the journal text with the authors named (single-blind review); supporting information is
 # supplement_ijpe.pdf, built by the journal target
 jof: journal
-	for i in 1 2 3; do $(XELATEX) -interaction=nonstopmode main_jof.tex >/dev/null; done
+	for i in 1 2 3; do $(XELATEX) -interaction=nonstopmode main_jof.tex >/dev/null; $(XELATEX) -interaction=nonstopmode supplement_jof.tex >/dev/null; done
 
 .PHONY: journal
 journal: tables figures
